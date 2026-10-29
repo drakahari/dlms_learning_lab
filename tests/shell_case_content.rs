@@ -110,7 +110,7 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

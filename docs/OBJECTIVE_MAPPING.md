@@ -4,12 +4,12 @@ Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://lea
 
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are175 narrowly evidenced Partial practice rows, one Supporting explanation
 row and1064 Open rows; no full-objective completion is asserted. Main source
-contains180 authored assignments/47 units (53CCNA,40LPIC-1,32LPIC-2,55Bash).
-Four one-off assignments strengthen107.2/K1 and add only narrow at/atq/atrm
-Partial evidence. All136 parents remain incomplete(94Open/42Partial). The latest
-full Main inclusive2,482 pass predates this append; current targeted/native and
-pending unified gates are separated in
-[CATALOG180_MILESTONE.md](CATALOG180_MILESTONE.md). Candidate065032d0a90b still
+contains182 authored assignments/48 units (53CCNA,40LPIC-1,32LPIC-2,57Bash).
+The loop-recovery unit strengthens only already Partial105.2/K3 evidence;
+no new source item or full-objective completion is promoted. All136 parents
+remain incomplete(94Open/42Partial). The current inclusive Rust suite passes
+2,683 tests with0fail/0ignored; static and actual native gates are separated in
+[CATALOG182_MILESTONE.md](CATALOG182_MILESTONE.md). Candidate065032d0a90b still
 contains171 assignments; its installed lifecycle, NFS cold reopening and ten
 serialized Wayland launches retain that exact ELF. See also
 [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
@@ -345,3 +345,13 @@ spool, systemd timers, overlap/locking, timezone/DST and full utility/shell
 behavior remain unimplemented. All other source fingerprints/statuses are
 retained; see ONE_OFF_LESSONS.md.175Partial/1Supporting/1064Open overlap and
 are not a completion percentage. No full parent objective becomes complete.
+
+
+The182 loop-recovery unit strengthens only current LPIC-1v5.0 105.2/K3:
+own-scope break/continue, exact unread-input handoff, bounded candidate selection,
+independent job preservation and aggregate status across22 authored cases.
+Reference and two alternatives, plausible wrong/partial/hardcoded work and
+actual native flows pass. No source fingerprint/status changes;175Partial/
+1Supporting/1064Open remain overlapping bookkeeping. General Bash control escape,
+regex, locking, clock/network retries and the wider scripting objective remain
+unimplemented. See SHELL_LOOP_RECOVERY_LESSONS.md and CATALOG182_MILESTONE.md.

@@ -2,6 +2,8 @@
 //! All mutation commands use the immutable goal-aware boundary, never host tools.
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/one_off_registration.rs"]
 mod one_off_registration;
 use dlms_learning_lab::{

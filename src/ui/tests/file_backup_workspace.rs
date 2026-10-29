@@ -64,9 +64,23 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         .chain(&one_off.scenarios)
         .collect::<Vec<_>>();
     assert_eq!(
-        serde_json::to_value(&a.scenarios).unwrap(),
+        serde_json::to_value(&a.scenarios[..180]).unwrap(),
         serde_json::to_value(&expected).unwrap(),
         "Entire180: exact original176 + canonicalOneOff4"
+    );
+    let loops: dlms_learning_lab::pack::Pack = serde_json::from_str(include_str!(
+        "../../../scenarios/shell-loop-recovery-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(loops.scenarios.len(), 2);
+    let expected = expected
+        .into_iter()
+        .chain(&loops.scenarios)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        serde_json::to_value(&a.scenarios).unwrap(),
+        serde_json::to_value(&expected).unwrap(),
+        "Entire182 old180 pluscanonicalLoop2"
     );
     let canonical: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
     assert_eq!(

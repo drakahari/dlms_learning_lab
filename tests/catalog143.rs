@@ -189,7 +189,7 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

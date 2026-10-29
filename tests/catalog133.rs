@@ -1,6 +1,8 @@
 //! Registration is append-only; new curriculum must not fabricate learner work.
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/one_off_registration.rs"]
 mod one_off_registration;
 use amendment_sha as digest;

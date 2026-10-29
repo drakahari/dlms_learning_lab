@@ -649,6 +649,10 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("private-office")
             {
                 72000
+            } else if let Some(stage) =
+                Self::loop_recovery_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
             } else if let Some(stage) = Self::numeric_validation_stage(
                 smoke,
                 std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),

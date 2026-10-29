@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main180 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main182 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -13,7 +13,7 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | CCNA | 53 | 14 | 65 | 46 | 0 |
 | LPIC-1 | 40 | 10 | 501 | 96 | 1 |
 | LPIC-2 | 32 | 8 | 498 | 33 | 0 |
-| Bash/Shell | 55 | 15 | Separate path below | — | — |
+| Bash/Shell | 57 | 16 | Separate path below | — | — |
 
 All136 current parent objectives remain incomplete (94 Open,42 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These47 units, and only their180 registered authored scenarios, count as
+These48 units, and only their182 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -254,17 +254,18 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 | CCNA | Private office planning (`private-office-planning`) | `ccna-private-office-plan` |
 
 | LPIC-1 | One-off jobs: capture, inspect and hand over (`linux-one-off-jobs`) | `lpic1-at-report`, `lpic1-at-capture-repair`, `lpic1-at-owner-queue`, `lpic1-at-handover` |
+| Bash/Shell | Loop control and local recovery (`shell-loop-recovery`) | `shell-loop-intake`, `shell-loop-fallback` |
 
 ## Bash/Shell remaining path
 
-The55 source-integrated scripts span15 units. The new numeric unit has passed
+The57 source-integrated scripts span16 units. The new numeric unit has passed
 private full/native and final Main full/static/coverage gates. Available171
 candidate065032d has installed numeric101 and NFS cold/startup acceptance; it
-does not contain the five newer networking assignments. They already cover bounded indexed arrays,
+does not contain the eleven newer assignments. The source-integrated scripting path covers bounded indexed arrays,
 command-output capture, getopts, case dispatch, command-list construction,
 read-only literal fallback/alternate expansion and optional-input projects,
 C-locale cut/sort/uniq work, explicit pipefail and bounded case-class numeric
-validation, malformed-record recovery and whole-plan publication. Older Stage4 wording calling
+validation, malformed-record recovery, whole-plan publication and own-scope loop recovery with unread-input handoff and independent first-ready file jobs. Older Stage4 wording calling
 command construction planned is stale; those three authored tasks are delivered.
 The original agreed scope still requires the following distinct capabilities
 and projects, with prerequisite teaching before assessment:
@@ -274,7 +275,7 @@ and projects, with prerequisite teaching before assessment:
 | Quoting and expansion | Read-only literal fallback/alternate forms and three optional-input policy/report/handover projects are implemented. Broader nested, assignment/error, substring/length/pattern operators remain unsupported; add only capabilities required by a reviewed substantive task with faithful expansion tests. |
 | Arguments and interfaces | Robust long-option/input validation projects beyond the bounded getopts subset; streamed row validation and meaningful handling of malformed inputs. |
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
-| Conditions and loop recovery | Meaningful recovery using conditional branches, break/continue and bounded retries where needed; teach every newly required control form before assessing it. |
+| Conditions and loop recovery | Two implemented assignments teach own-scope break/continue, unread-input handoff, first-success selection and independent job failures with22 graded cases. Broader conditional/regex forms and project-specific retry/lock behavior remain required where used; caller-loop and pipeline control escape remain unsupported. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
 | Text processing | Regex, deliberate sed/awk or equivalent documented utility capabilities; snapshot comparison, malformed-row recovery, log-analysis projects. Current literal filters and byte-field utilities do not cover these. |
 | Debugging and errors | Actual bounded tracing, useful error propagation, traps/cleanup and recovery; debugging and repair assignments, not only deliberately incorrect scripts. |
@@ -292,23 +293,24 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Retain source/candidate identities: numeric171/065032d and capture-tooling
-   b25b1f0 are committed/pushed; genuine evaluator12 baseline is independently
-   sealed before any loop-control advance. The four physical-link tasks and
-   private-office project are a distinct five-assignment integration. Their
-   evidence is not a full-objective or complete-curriculum claim.
-2. Compose the four one-off scheduling assignments after the typed/content gates:
-   source-reviewed native Stop/index/Next dispatch, exact176-predecessor
-   registration and current-consumer closures precede complete normal180
-   validation. Unregistered prototypes earn no catalog credit.
-3. Complete the fifth-backup directory-selection ArtifactSet/content/progress/
-   normal-native gates against the accepted shared index and Stop fixes. Do not
-   increase cache caps or replace prior fields/results to hide fairness issues.
-4. Compile/test bounded own-scope break/continue, compare fixed supported cases
-   with real Bash in disposable fixtures, and run genuine12-history migrations
-   before authoring two distinct recovery tasks. Source parsing/review earns no
-   evaluator13 runtime acceptance or authored credit.
-5. Continue every remaining network/Linux/scripting assignment and capability in
+1. The normal182/evaluator13 milestone passes inclusive2,683 Rust tests,
+   all-target Clippy,348 Python checks and actual Fedora82-capture native flows.
+   Preserve its original180 definitions,55 scripts/420 cases/55 examples and all
+   genuine evaluator9–12 evidence. Installed171 candidate acceptance is separate.
+2. Seal a genuine evaluator13 baseline before any evaluator14 advance. The
+   reviewed before14 collector still requires actual current-source/ELF approval
+   and observation; a source proposal or synthetic guard is not migration evidence.
+3. Integrate the reviewed four-task LVM unit after normal182 and the baseline
+   capture, then the four-task NTP unit, with current-catalog/source-aware progress,
+   runtime/alternative/negative checks and actual native flows. Their pure models
+   are tested; source-only units currently earn no catalog or objective credit.
+4. Validate controlled ERE reference comparisons and cooperative shell integration
+   before authoring meaningful regex/text-processing projects. Keep unsupported
+   syntax honest and all host reference work restricted to fixed disposable data.
+5. Complete the fifth-backup directory-selection ArtifactSet/content/progress/
+   normal-native gates against accepted shared controls. Test the independently
+   reviewed HSRP and inode/link foundations before dependent content.
+6. Continue every remaining network/Linux/scripting assignment and capability in
    the granular ledger. Current reference fingerprints and future CCNA separation
    remain as recorded; no arbitrary catalog quota or routine approval gate.
 

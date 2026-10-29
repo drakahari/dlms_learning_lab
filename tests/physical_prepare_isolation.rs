@@ -268,9 +268,42 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         172,
         "Every previous171 and the new private-office kind is tested"
     );
-    assert_eq!(old_indices.len(), 176);
-    assert_eq!(&old_indices[172..], &[176, 177, 178, 179]);
-    assert!(old_indices[172..].iter().all(|i| matches!(
+    let prior180 = one_off_boundary::loop_registration::before_scenarios(&all);
+    let previous_indices = prior180
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| {
+            !matches!(
+                s.initial,
+                dlms_learning_lab::engine::State::PhysicalLink { .. }
+            )
+        })
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+    assert_eq!(previous_indices.len(), 176);
+    assert_eq!(
+        &old_indices[..previous_indices.len()],
+        previous_indices.as_slice()
+    );
+    assert_eq!(old_indices.len(), 178);
+    assert_eq!(&old_indices[previous_indices.len()..], &[180, 181]);
+    assert_eq!(
+        old_indices[previous_indices.len()..]
+            .iter()
+            .map(|i| all[*i].id.as_str())
+            .collect::<Vec<_>>(),
+        ["shell-loop-intake", "shell-loop-fallback"]
+    );
+    assert!(
+        old_indices[previous_indices.len()..]
+            .iter()
+            .all(|i| matches!(
+                all[*i].initial,
+                dlms_learning_lab::engine::State::Script { .. }
+            ) && matches!(all[*i].goal, dlms_learning_lab::engine::Goal::Script { .. }))
+    );
+    assert_eq!(&previous_indices[172..], &[176, 177, 178, 179]);
+    assert!(previous_indices[172..].iter().all(|i| matches!(
         &all[*i].initial,
         dlms_learning_lab::engine::State::OneOff { .. }
     )));

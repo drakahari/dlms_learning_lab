@@ -66,7 +66,7 @@ fn original154_ether_three_and_optional_three_have_exact_normal_order_and_fresh_
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
@@ -83,7 +83,7 @@ fn original154_ether_three_and_optional_three_have_exact_normal_order_and_fresh_
             }
         })
         .collect::<Vec<_>>();
-    assert_eq!((scripts.len(), scripts.iter().sum::<usize>()), (55, 420));
+    assert_eq!((scripts.len(), scripts.iter().sum::<usize>()), (57, 442));
     for s in &all[157..160] {
         assert!(matches!(s.initial, State::Script { .. }));
         let a = Attempt::new(s, 1);

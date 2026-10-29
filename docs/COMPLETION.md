@@ -6,7 +6,7 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | --- | --- | --- |
 | C1 | Current official objective versions, dates and source links verified; announced future blueprints separate | Objective snapshot2026-10-22; official version boundaries rechecked2026-10-27; finer authoring references record their own dates; see CURRICULUM.md |
 | C2 | Every active objective and listed subobjective maps to practical coverage, supporting teaching, or a specific justified fidelity limitation; configure/troubleshoot requirements need actual modeled practice | Open; 165-row planning index plus1240-reference granular evidence/gap ledger; most required behavior remains absent, see OBJECTIVE_MAPPING.md |
-| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;180 source-integrated assignments/47units (53CCNA/40LPIC-1/32LPIC-2/55Bash). One-off scheduling evidence/pending unified checks are in CATALOG180_MILESTONE.md; physical/private history stays in CATALOG176_MILESTONE.md. New numeric3 has private full/native and final Main full/static/coverage acceptance in CATALOG171_MILESTONE.md. Matching171 candidate passes installed lifecycle, NFS cold reopening/ten starts and separately installed numeric101. All136 full parent objectives and novice acceptance remain incomplete |
+| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;182 integrated assignments/48units (53CCNA/40LPIC-1/32LPIC-2/57Bash). Current inclusive2,683 Rust, Clippy,348 Python and actual82-capture scripting flows pass; see CATALOG182_MILESTONE.md. Available171 candidate retains its installed lifecycle/NFS cold/startup/numeric evidence. All136 full parent objectives and novice acceptance remain incomplete |
 | S1 | Implement required networking/Linux/shell capabilities before dependent content; typed state and multiple deterministic behavior cases, alternate solutions and plausible negative tests | Open; subset and capability gaps remain |
 | S2 | Learner input stays inside bounded in-process simulation; test resource/path/malformed-input limits and responsive Stop; controlled disposable reference comparisons only | Existing boundary implemented; independent review and extension regression work open |
 | G1 | Examples cannot award assignment credit; edits invalidate success; objective expansion never fabricates learner answers/mastery | Implemented baseline; audit all extensions |
@@ -19,12 +19,12 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | R2 | Actual OS clean install/reopen/upgrade/uninstall acceptance, not just CI/cross-build | Fedora scoped installed-candidate lifecycle/flows verified; full-product acceptance remains open; Windows/macOS desktop environments unavailable here |
 | R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | MIT approved 2026-10-22; target notice/source bundle implemented; macOS dispatch notice, signing decisions and platform acceptance remain open |
 
-The current source batch adds four one-off scheduling tasks:47units
-(14CCNA,10LPIC-1,8LPIC-2,15Bash),180assignments. Targeted Main/model/UI and
-actual Fedora flows pass; the combined inclusive gate is tracked separately in
-CATALOG180_MILESTONE.md. The latest full Main2,482 result is still the preceding
-176-lab source. Available Fedora candidate171/065032d and its installed lifecycle/
-NFS cold/startup evidence are unchanged. All136 parent objectives remain
-incomplete. Work continues without an arbitrary lab-count target.
+The current source batch adds two substantive loop-recovery scripts:48units
+(14CCNA,10LPIC-1,8LPIC-2,16Bash),182assignments. Current inclusive/static and
+actual native evidence is in CATALOG182_MILESTONE.md. Available Fedora
+candidate171/065032d and its installed lifecycle/NFS cold/startup evidence are
+unchanged. All136 parent objectives remain incomplete. Reviewed LVM/NTP units,
+ERE integration and every other mapped gap remain work, with no arbitrary count
+target or completion inferred from packaging.
 
 A model can teach evidence interpretation without performing physical, kernel or cryptographic operations, but its exact limits must accompany coverage. A limitation is not a substitute for implementing a difficult supported configuration task. No incomplete objective becomes “covered” merely because a related command is recognized. No public release or deployment is authorized.

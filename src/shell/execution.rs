@@ -197,8 +197,19 @@ impl CommandTask {
                     self.last_status = words.last_status().or(self.last_status);
                     let head = args.first();
                     if pipeline
+                        && head.is_some_and(|head| matches!(head.as_str(), "break" | "continue"))
+                    {
+                        return Err(
+                            "Unsupported loop control in a pipeline; use a separate command".into(),
+                        );
+                    }
+                    if pipeline
                         && head.is_some_and(|head| {
-                            vm.functions.contains_key(head) || head == "return" || head == "local"
+                            vm.functions.contains_key(head)
+                                || matches!(
+                                    head.as_str(),
+                                    "return" | "local" | "break" | "continue"
+                                )
                         })
                     {
                         return Err(pipeline_context_error());
@@ -332,6 +343,10 @@ impl CommandTask {
                 }
             }
             CommandPhase::Execute => {
+                let control = self
+                    .args
+                    .first()
+                    .is_some_and(|head| matches!(head.as_str(), "break" | "continue"));
                 let (out, err, status) = if let Some(declarations) = self.declarations.take() {
                     vm.apply_local_declarations(declarations)?;
                     (String::new(), String::new(), 0)
@@ -356,10 +371,19 @@ impl CommandTask {
                                 .into(),
                         );
                     }
-                    vm.builtin(&self.args, self.read_mode)?
+                    if control {
+                        // Real transfer waits until this command's temporary input
+                        // binding is restored; deeper loop bindings may then unwind.
+                        (String::new(), String::new(), 0)
+                    } else {
+                        vm.builtin(&self.args, self.read_mode)?
+                    }
                 };
                 vm.rebase_pending(0, out.len() + err.len())?;
                 self.restore_input(vm)?;
+                if control {
+                    vm.loop_control(&self.args)?;
+                }
                 vm.outcome.status = status;
                 vm.emit(&self.stdout, &out)?;
                 vm.emit(&self.stderr, &err)?;

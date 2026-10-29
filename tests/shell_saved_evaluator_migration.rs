@@ -152,7 +152,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        55
+        57
     );
     let mut case_count = 0;
     for old in originals {
@@ -180,6 +180,12 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(case_count, 246);
     let mut p = progress::decode(ACTUAL8, &all).unwrap();
     assert_eq!(p.attempts.len(), 116);
+    for id in ["shell-loop-intake", "shell-loop-fallback"] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::Script { .. }));
+        assert!(!p.attempts.contains_key(id));
+        assert!(!p.favorites.contains(id));
+    }
     for id in [
         "lpic1-at-report",
         "lpic1-at-capture-repair",
@@ -199,6 +205,8 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "shell-loop-intake",
+            "shell-loop-fallback",
             "lpic1-at-report",
             "lpic1-at-capture-repair",
             "lpic1-at-owner-queue",

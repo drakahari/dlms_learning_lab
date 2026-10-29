@@ -4417,3 +4417,47 @@ M360Python348groups had2 current-consumer failures on the new47rawunits; strict
 keeping old44/43 assertions/collectors exact. M361all348PythonPASS. Current Main
 inclusive gate is not claimed; latestfull2482 remains176-source. Continue182
 without pausing, then reviewed LVM/NTP units and all mapped remaining work.
+
+
+### Normal182: owned-loop recovery and independent jobs
+
+The reviewed75-path normal append plus native8-path composition and current
+Python inverse preserve all180 predecessors,47raw units,55scripts/420cases/
+55examples and genuine evaluator9–12 evidence. Two meaningful scripts add22
+cases/two examples/one unit:182/48=53CCNA,40LPIC-1,32LPIC-2,57Bash. Evaluator13
+already passed fixed16Bash comparisons with8honest VM-only exclusions; no general
+Bash conformance is claimed.
+
+M362 totaled47PASS2catalog-helperFAIL: authored guides were wrongly assumed empty.
+Now every guide field compares exactly, with four tamper negatives; M3635PASS,
+M364nativephase10PASS. M365full2679PASS4current-consumerFAIL found prior-count/
+last-four-tail assumptions. The reviewed three-file remedy99fb6c76 preserves
+all predecessor assertions/full foreign matrices and absent newScript credit;
+M36619PASS. M367current full inclusive2683PASS0FAIL0ignored/208harnesses, all995
+source paths unchangedaa9bfbeb; receipt16da8340. No skipped historical groups.
+Minavailable23788412928B, PSI0, swapout/OOMdelta0.
+
+M368/M369Clippy exposed unused subsets of shared developer/test helper modules.
+Two narrow inner dead_code annotations follow the existing teaching-helper
+convention. All function bodies/assertions are byteexact; peer confirms scope.
+M370alltargetClippy-DwarningsPASS; M371348PythonPASS; M372coverage182registered/
+1240references/175Partial/1Supporting/1064OpenPASS. No status/source-fingerprint
+promotion: only already Partial105.2/K3 strengthen with22case behavior evidence.
+
+M373ordinary build retains209141160-byteELF4895101a and exact995-path source
+75d9b447 before laterCargo can overwrite the default target binary. M374restricted
+WaylandNoCompositor refusal occurred before rendering; approved desktop M375 uses
+that exact retained executable, with no backend/desktop change. M375all82native
+captures/twofulltasks/ref+2alts/wrongpartial/exampleexperimentrepair/RunStop/
+syntaxunsupportedlimits/keyboardUndo/reset/warmraw+portableContinue exit0;
+receipt62596115.20representative matrix settings plus actual capstone200% goal
+slices are observed. Root14originals and peer9originals46c13aa1 show no material
+finding in those selected views; not every82control/28theme or a novice study.
+Minavailable24101380096B, PSI0, swapout/OOMdelta0. All heavy work remains serialized
+through MAIN runner,2jobs/2threads, private disk data.
+
+Available installed candidate remains171/065032d with its own lifecycle/NFS cold/
+startup/numeric identity. New182cold/installed, Physicalsignal143 diagnosis,
+otherOS/reader/device/novice acceptance and full curriculum remain pending.
+Continue genuine13baseline, reviewed LVM186/NTP190 and every mapped gap; source-only
+proposals add no authored credit and there is no arbitrary catalog target.

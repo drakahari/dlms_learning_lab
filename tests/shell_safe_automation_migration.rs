@@ -52,7 +52,7 @@ fn history(profile: &Progress, include_main: bool) -> BTreeMap<String, Vec<shell
         .collect()
 }
 fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
-    assert_eq!(shell::EVALUATOR_REVISION, 12);
+    assert_eq!(shell::EVALUATOR_REVISION, 13);
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
@@ -75,6 +75,12 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert!(matches!(office.initial, State::Ipv4Routing { .. }));
     assert!(!original.attempts.contains_key(&office.id));
     assert!(!original.favorites.contains(&office.id));
+    for id in ["shell-loop-intake", "shell-loop-fallback"] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::Script { .. }));
+        assert!(!original.attempts.contains_key(id));
+        assert!(!original.favorites.contains(id));
+    }
     for id in [
         "lpic1-at-report",
         "lpic1-at-capture-repair",
@@ -94,6 +100,8 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "shell-loop-intake",
+            "shell-loop-fallback",
             "lpic1-at-report",
             "lpic1-at-capture-repair",
             "lpic1-at-owner-queue",
@@ -241,7 +249,7 @@ fn unchanged_except_execution_and_history(now: &Progress, old: &Progress) {
 }
 #[test]
 fn empty_legacy9_record_shape_is_explicitly_ungraded_not_a_fabricated_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 12);
+    assert_eq!(shell::EVALUATOR_REVISION, 13);
     let labs = pack::bundled().unwrap();
     let lab = labs.iter().find(|s| s.id == "shell-arguments").unwrap();
     let mut attempt = Attempt::new(lab, 1);

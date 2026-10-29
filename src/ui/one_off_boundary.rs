@@ -1,3 +1,6 @@
+#![allow(dead_code)] // Native QA and integration binaries use different helper subsets.
+#[path = "../../tests/support/loop_registration.rs"]
+pub mod loop_registration;
 // Developer/native-QA and test source-boundary helper. No progress or grading.
 // Keep old predecessor-count assertions while their loops still inspect all180.
 use dlms_learning_lab::{
@@ -22,7 +25,9 @@ fn expected() -> &'static Expected {
             "../../tests/fixtures/catalog180-registration.json"
         ))
         .unwrap();
-        let raw = include_str!("../../scenarios/units-v1.json");
+        let raw48 = include_bytes!("../../scenarios/units-v1.json");
+        let raw47 = loop_registration::before_units(raw48).unwrap();
+        let raw = std::str::from_utf8(&raw47).unwrap();
         assert_eq!(raw.len() as u64, r["after_units47_bytes"].as_u64().unwrap());
         let prefix = raw
             .strip_suffix(r["append_suffix_utf8"].as_str().unwrap())
@@ -97,7 +102,7 @@ pub fn before_len<T: Boundary + ?Sized>(items: &T) -> usize {
 }
 impl Boundary for [Scenario] {
     fn check(&self) -> usize {
-        let items = self;
+        let items = loop_registration::before_scenarios(self);
         let e = expected();
         assert_eq!(items.len(), 180);
         for (s, (id, version)) in items[..176].iter().zip(&e.ids) {
@@ -146,7 +151,7 @@ impl Boundary for [Scenario] {
 }
 impl Boundary for [Unit] {
     fn check(&self) -> usize {
-        let items = self;
+        let items = loop_registration::before_typed_units(self);
         let e = expected();
         assert_eq!(items.len(), 47);
         for (a, b) in items[..46].iter().zip(&e.units) {
@@ -158,7 +163,7 @@ impl Boundary for [Unit] {
 }
 impl Boundary for [Value] {
     fn check(&self) -> usize {
-        let items = self;
+        let items = loop_registration::before_values(self);
         let e = expected();
         assert_eq!(items.len(), 47);
         assert_eq!(&items[..46], &e.units_value);
@@ -177,7 +182,13 @@ where
 }
 impl Boundary for std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt> {
     fn check(&self) -> usize {
-        assert_eq!(self.len(), 180);
+        assert_eq!(self.len(), 182);
+        for id in loop_registration::IDS {
+            let a = &self[id];
+            assert_eq!(a.scenario_version, 1);
+            assert!(matches!(a.state, State::Script { .. }));
+        }
+        assert_eq!(self.len() - loop_registration::IDS.len(), 180);
         for id in [
             "lpic1-at-report",
             "lpic1-at-capture-repair",

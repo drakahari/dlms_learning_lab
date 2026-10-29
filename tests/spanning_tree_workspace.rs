@@ -929,6 +929,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         .copied()
         .chain(new_ids)
         .chain(numeric_ids)
+        .chain(["shell-loop-intake", "shell-loop-fallback"])
         .collect::<BTreeSet<_>>();
     assert_eq!(
         all.iter()
@@ -937,7 +938,11 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
             .collect::<BTreeSet<_>>(),
         expected_scripts
     );
-    for id in new_ids.into_iter().chain(numeric_ids) {
+    for id in new_ids
+        .into_iter()
+        .chain(numeric_ids)
+        .chain(["shell-loop-intake", "shell-loop-fallback"])
+    {
         let s = all.iter().find(|s| s.id == id).unwrap();
         let a = &p.attempts[id];
         let (
@@ -966,9 +971,15 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         original52_current, 51,
         "Original52 retain51 actual current runs and the same unfinished assignment"
     );
+    let original55_current=p.attempts.iter().filter(|(id,_)|expected_scripts.contains(id.as_str()) && !["shell-loop-intake","shell-loop-fallback"].contains(&id.as_str()))
+        .filter(|(_,a)|matches!(&a.state,State::Script{run:Some(r),..}if r.engine_revision==shell::EVALUATOR_REVISION)).count();
     assert_eq!(
-        current, 54,
-        "55 current scripts with the same one retained unfinished assignment"
+        original55_current, 54,
+        "Original55 keep54 actual current runs and same unfinished draft"
+    );
+    assert_eq!(
+        current, 56,
+        "57 current scripts with the same one retained unfinished assignment"
     );
     let prior = prior(&p, &original);
     let mut a = prepared(&s);

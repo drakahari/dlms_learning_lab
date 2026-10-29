@@ -1,6 +1,8 @@
 //! Private backend fixture; not bundled/countable curriculum or native UI acceptance.
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/one_off_registration.rs"]
 mod one_off_registration;
 use dlms_learning_lab::{
@@ -603,7 +605,9 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     ];
     assert_eq!(
         old.iter()
-            .filter(|s| !numeric_ids.contains(&s.id.as_str()) && s.id != "ccna-private-office-plan")
+            .filter(|s| !numeric_ids.contains(&s.id.as_str())
+                && s.id != "ccna-private-office-plan"
+                && !["shell-loop-intake", "shell-loop-fallback"].contains(&s.id.as_str()))
             .count(),
         119,
         "Every original119 context-free assignment remains in the loop"
@@ -624,8 +628,8 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     );
     assert_eq!(
         old.len(),
-        123,
-        "all original122 plus private-office1 context-free assignment kinds remain exercised"
+        125,
+        "all original123 plus two loop assignments are exercised by the same real wrapper loop"
     );
     assert_eq!(
         old[113..116]
@@ -667,6 +671,22 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     assert_eq!(
         old[122].id, "ccna-private-office-plan",
         "All previous122 entries stay ahead of the one new existing-kind project"
+    );
+    assert_eq!(
+        old[..123].len(),
+        123,
+        "All original123 context-free entries retained"
+    );
+    assert_eq!(
+        old[123..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        ["shell-loop-intake", "shell-loop-fallback"]
+    );
+    assert!(
+        old[123..]
+            .iter()
+            .all(|s| matches!(s.initial, State::Script { .. })
+                && matches!(s.goal, Goal::Script { .. })
+                && s.teaching.is_some())
     );
     for s in old {
         let mut raw = s.initial.clone();

@@ -282,11 +282,11 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147(
             }
         })
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 55);
-    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 420);
+    assert_eq!(scripts.len(), 57);
+    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 442);
     assert_eq!(
         scripts.iter().filter(|(s, _)| s.teaching.is_some()).count(),
-        55
+        57
     );
 }
 #[test]

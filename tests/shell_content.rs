@@ -94,6 +94,22 @@ fn reviews() -> Vec<Review> {
             misconception: bad["reason"].as_str().unwrap().into(),
         });
     }
+    let loops: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-loop-recovery-review.json")).unwrap();
+    let additions = loops["labs"].as_array().unwrap();
+    assert_eq!(
+        additions
+            .iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        ["shell-loop-intake", "shell-loop-fallback"]
+    );
+    rows.extend(additions.iter().map(|r| Review {
+        id: r["id"].as_str().unwrap().into(),
+        alternate: r["alternates"][0].as_str().unwrap().into(),
+        incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
+        misconception: r["wrong"][0]["misconception"].as_str().unwrap().into(),
+    }));
     rows
 }
 fn quoted(value: &str) -> String {

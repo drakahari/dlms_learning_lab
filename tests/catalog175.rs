@@ -97,7 +97,7 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
         .iter()
         .filter(|s| matches!(s.goal, Goal::Script { .. }))
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 55);
+    assert_eq!(scripts.len(), 57);
     assert_eq!(
         scripts
             .iter()
@@ -107,14 +107,14 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
                 0
             })
             .sum::<usize>(),
-        420
+        442
     );
-    assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 55);
-    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 12);
+    assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 57);
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 13);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

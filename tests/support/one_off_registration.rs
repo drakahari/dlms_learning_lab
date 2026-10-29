@@ -1,4 +1,5 @@
-//! Closed OneOff47→46 test-only inverse; no runtime loader or history changes.
+use super::one_off_boundary::loop_registration;
+// Closed OneOff47→46 test-only inverse; no runtime loader or history changes.
 use super::digest;
 use dlms_learning_lab::{engine::State, pack};
 use serde_json::Value;
@@ -17,6 +18,8 @@ fn recipe() -> Value {
     serde_json::from_slice(raw).unwrap()
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let loop_prefix = loop_registration::prefix_units(raw)?;
+    let raw = loop_prefix.as_deref().unwrap_or(raw);
     let r = recipe();
     if digest::hash(raw) != r["after_units47_sha256"].as_str().ok_or("47pin")?
         || raw.len() as u64 != r["after_units47_bytes"].as_u64().ok_or("47bytes")?
@@ -50,6 +53,7 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn original_catalog(all: &[pack::Scenario]) -> Vec<pack::Scenario> {
+    let all = loop_registration::before_scenarios(all);
     let r = recipe();
     assert_eq!(all.len(), 180);
     assert_eq!(

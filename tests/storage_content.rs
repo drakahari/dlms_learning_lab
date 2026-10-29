@@ -73,7 +73,7 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

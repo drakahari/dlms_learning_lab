@@ -74,7 +74,7 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         ("CCNA", 53),
         ("LPIC-1", 40),
         ("LPIC-2", 32),
-        ("Bash/Shell", 55),
+        ("Bash/Shell", 57),
     ] {
         assert_eq!(all.iter().filter(|s| s.track == track).count(), count);
     }

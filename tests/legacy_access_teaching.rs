@@ -385,6 +385,9 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
         serde_json::from_str(include_str!("fixtures/catalog176-registration.json")).unwrap();
     let one_off: Value =
         serde_json::from_str(include_str!("fixtures/catalog180-registration.json")).unwrap();
+    let loop_recipe: Value =
+        serde_json::from_str(include_str!("fixtures/catalog182-registration.json")).unwrap();
+    assert_eq!(units.pop().unwrap(), loop_recipe["loop_unit"]);
     assert_eq!(units.pop().unwrap(), one_off["one_off_unit"]);
     assert_eq!(units.pop().unwrap(), private["private_unit"]);
     assert_eq!(units.pop().unwrap(), physical["physical_unit"]);

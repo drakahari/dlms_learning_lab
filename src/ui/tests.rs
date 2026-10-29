@@ -16,6 +16,7 @@ mod file_backup_lessons_native;
 mod file_backup_workspace;
 mod getopts_history;
 mod getopts_lessons;
+mod loop_recovery;
 mod mac_learning;
 mod nat;
 mod nat_lessons;

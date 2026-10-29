@@ -88,9 +88,12 @@ fn sources() -> &'static Vec<Scenario> {
     static SOURCES: std::sync::OnceLock<Vec<Scenario>> = std::sync::OnceLock::new();
     SOURCES.get_or_init(|| {
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 180);
+        assert_eq!(all.len(), 182);
         assert_eq!(
-            all[176..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+            all[176..180]
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
             IDS
         );
         all.into_iter()
@@ -933,15 +936,16 @@ impl LabApp {
     fn oo_scope(&self) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (180, 47));
+        assert_eq!((self.scenarios.len(), self.units.len()), (182, 48));
         assert_eq!(
-            self.scenarios[176..]
+            self.scenarios[176..180]
                 .iter()
                 .map(|s| s.id.as_str())
                 .collect::<Vec<_>>(),
             IDS
         );
-        assert_eq!(self.units.last().unwrap().id, UNIT);
+        assert_eq!(self.units[46].id, UNIT);
+        assert_eq!(self.units[47].id, "shell-loop-recovery");
         assert!(
             self.progress.attempts.len() <= 4
                 && self

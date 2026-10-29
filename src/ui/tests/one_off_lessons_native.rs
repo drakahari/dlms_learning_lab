@@ -217,7 +217,7 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
     a.smoke = true;
     a.smoke_stage = 73000;
     assert!(!a.developer && !a.synthetic);
-    assert_eq!((a.scenarios.len(), a.units.len()), (180, 47));
+    assert_eq!((a.scenarios.len(), a.units.len()), (182, 48));
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();
     let mut physical = egui::vec2(1920., 1080.);

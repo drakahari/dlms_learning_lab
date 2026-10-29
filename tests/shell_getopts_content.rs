@@ -430,7 +430,7 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     assert_eq!(one_off_boundary::before_len(&old), 176);
     assert_eq!(
         old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
-        180
+        182
     );
     assert_eq!(
         old[..176]

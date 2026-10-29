@@ -68,7 +68,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
@@ -85,8 +85,8 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
             }
         })
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 55);
-    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 420);
+    assert_eq!(scripts.len(), 57);
+    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 442);
 }
 #[test]
 fn exact_closed_unit_append_reconstructs_the_complete_original37_unit_bytes() {

@@ -266,9 +266,38 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         172,
         "Every original171 and private-office1 remains in the foreign-kind matrix"
     );
-    assert_eq!(old.len(), 176);
+    let prior180 = one_off_boundary::loop_registration::before_scenarios(&all);
+    let previous = prior180
+        .iter()
+        .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(previous.len(), 176);
+    assert_eq!(old.len(), 178);
     assert_eq!(
-        old[172..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        old[..previous.len()]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        previous.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
+    );
+    assert_eq!(
+        old[previous.len()..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        ["shell-loop-intake", "shell-loop-fallback"]
+    );
+    assert!(
+        old[previous.len()..]
+            .iter()
+            .all(|s| matches!(s.initial, State::Script { .. })
+                && matches!(s.goal, engine::Goal::Script { .. }))
+    );
+    assert_eq!(
+        previous[172..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         [
             "lpic1-at-report",
             "lpic1-at-capture-repair",
@@ -277,7 +306,7 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         ]
     );
     assert!(
-        old[172..]
+        previous[172..]
             .iter()
             .all(|s| matches!(&s.initial, State::OneOff { .. }))
     );

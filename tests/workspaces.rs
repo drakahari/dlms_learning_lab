@@ -254,12 +254,17 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         }
         p.attempts.insert(s.id.clone(), a);
     }
-    assert_eq!((original_drafts, backup_drafts), (167, 4));
+    assert_eq!((original_drafts, backup_drafts), (169, 4));
+    assert_eq!(
+        (original_drafts - 2, backup_drafts),
+        (167, 4),
+        "All original167generic and4backup drafts retained"
+    );
     assert_eq!(physical_drafts, 4);
     assert_eq!(private_drafts, 1);
     assert_eq!(one_off_drafts, 4);
     assert_eq!(
-        labs[176..]
+        labs[176..180]
             .iter()
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
@@ -289,7 +294,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         serde_json::to_value(&q).unwrap()
     );
     let valid_raw = std::fs::read(&path).unwrap();
-    for s in &labs[176..] {
+    for s in &labs[176..180] {
         let a = &q.attempts[&s.id];
         let w = a.workspace.as_ref().unwrap();
         let own = w.one_off_session.as_ref().unwrap();

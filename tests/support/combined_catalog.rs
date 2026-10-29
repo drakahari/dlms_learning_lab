@@ -1,4 +1,5 @@
-//! Test-only closed composition of reviewed Bash/NFS/LACP unit appends. No runtime loader change.
+use super::one_off_boundary::loop_registration;
+// Test-only closed composition of reviewed Bash/NFS/LACP unit appends. No runtime loader change.
 use super::digest;
 use serde_json::Value;
 const NFS_INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
@@ -583,6 +584,8 @@ pub fn old_unit_bytes(raw: &[u8]) -> Result<Vec<u8>, String> {
 
 // Exact OneOff47 predecessor; older helpers keep their original closed recipes.
 fn one_off_prefix(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let loop_prefix = loop_registration::prefix_units(raw)?;
+    let raw = loop_prefix.as_deref().unwrap_or(raw);
     if digest::hash(raw) != "4fd98d5b9290bdd7e79e5c848ba37d4d1c2fb59641ac0a4412f78c4953e338c0" {
         return Ok(None);
     }

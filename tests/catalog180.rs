@@ -20,17 +20,17 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
     let all = pack::bundled().unwrap();
     let old = registration::original_catalog(&all);
     assert_eq!(old.len(), 176);
-    assert_eq!(all.len(), 180);
+    assert_eq!(all.len(), 182);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 55]
+        [53, 40, 32, 57]
     );
     let scripts = all
         .iter()
         .filter(|s| matches!(s.goal, Goal::Script { .. }))
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 55);
+    assert_eq!(scripts.len(), 57);
     assert_eq!(
         scripts
             .iter()
@@ -40,11 +40,11 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
                 0
             })
             .sum::<usize>(),
-        420
+        442
     );
-    assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 55);
-    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 12);
-    for s in &all[176..] {
+    assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 57);
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 13);
+    for s in &all[176..180] {
         assert_eq!(s.version, 1);
         assert_eq!(s.unit, "linux-one-off-jobs");
         assert!(
@@ -68,7 +68,7 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
     let before = registration::before_units(raw).unwrap();
     let units = course::bundled(&all).unwrap();
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
-    assert_eq!((units.len(), old_units.len()), (47, 46));
+    assert_eq!((units.len(), old_units.len()), (48, 46));
     assert_eq!(value(&units[..46]), value(&old_units));
     assert_eq!(units[46].id, "linux-one-off-jobs");
     assert_eq!(units[46].labs, registration::IDS.map(str::to_owned));
@@ -76,10 +76,16 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
         units[46].prerequisites,
         ["linux-file-foundations", "shell-foundations"]
     );
+    let checked47 = one_off_boundary::loop_registration::before_typed_units(&units);
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| checked47.iter().filter(|u| u.track == t).count()),
+        [14, 10, 8, 15]
+    );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| units.iter().filter(|u| u.track == t).count()),
-        [14, 10, 8, 15]
+        [14, 10, 8, 16]
     );
     let before44 = combined::before_physical_units(&before).unwrap();
     let before37 = combined::old_unit_bytes(&before).unwrap();
@@ -130,7 +136,7 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
         clock: 91,
         ..Default::default()
     };
-    for (n, s) in all[176..].iter().enumerate() {
+    for (n, s) in all[176..180].iter().enumerate() {
         let mut a = Attempt::new(s, (n + 1) as u64);
         work::budget::prepare(&mut a, s).unwrap();
         let Goal::OneOff { definition } = &s.goal else {
@@ -178,11 +184,31 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
     assert_eq!(value(&restored.migration_receipts), receipts);
     assert_eq!(restored.attempts[&s.id].visited, visited);
     assert_eq!(restored.attempts[&s.id].state, s.initial);
-    for source in &all[177..] {
+    for source in &all[177..180] {
         assert_eq!(
             value(&restored.attempts[&source.id]),
             before["attempts"][&source.id]
         );
+    }
+    // The newly registered Loop tasks were absent from this retained old profile
+    // and from the four edited OneOff attempts. Never fabricate their state.
+    assert_eq!(
+        all[180..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        ["shell-loop-intake", "shell-loop-fallback"]
+    );
+    for source in &all[180..] {
+        assert!(
+            matches!(source.initial, State::Script { run: None, .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(
+            !decoded.attempts.contains_key(&source.id) && !decoded.favorites.contains(&source.id)
+        );
+        assert!(!p.attempts.contains_key(&source.id) && !p.favorites.contains(&source.id));
+        assert!(
+            !restored.attempts.contains_key(&source.id) && !restored.favorites.contains(&source.id)
+        );
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
     assert!(matches!(
         restored.attempts[&s.id].state,

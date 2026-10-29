@@ -2,6 +2,8 @@
 mod combined_catalog;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/one_off_registration.rs"]
 mod one_off_registration;
 use dlms_learning_lab::{
@@ -223,11 +225,12 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 180);
+    assert_eq!(p.attempts.len(), 182);
     assert_eq!(
         p.attempts
             .keys()
-            .filter(|id| !one_off_registration::IDS.contains(&id.as_str()))
+            .filter(|id| !one_off_registration::IDS.contains(&id.as_str())
+                && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str()))
             .count(),
         176
     );

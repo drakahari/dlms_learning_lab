@@ -1,0 +1,1757 @@
+{
+  "status": "UNREGISTERED SOURCE PROPOSAL; authored literal expectations only; all loader/VM/content/reference/native gates UNRUN",
+  "required_evaluator": 13,
+  "capability_manifest": "af2221bc99164944d791f33107919cb3b3e023e634e4c697c5b3df6218bea4c4",
+  "references_checked": "2026-10-29",
+  "unit_proposal": {
+    "id": "shell-loop-recovery",
+    "track": "Bash/Shell",
+    "title": "Loop control and independent recovery",
+    "summary": "Skip and stop deliberately, preserve unread records and recover each bounded job without hiding failures.",
+    "prerequisites": [
+      "shell-safe-automation",
+      "shell-case-dispatch",
+      "shell-numeric-validation",
+      "shell-scope"
+    ],
+    "labs": [
+      "shell-loop-intake",
+      "shell-loop-fallback"
+    ]
+  },
+  "labs": [
+    {
+      "id": "shell-loop-intake",
+      "alternates": [
+        "count=0\nstatus=0\nfinished=no\nfound=no\nwhile test \"$finished\" = no; do\n  line=''\n  if IFS= read -r line || test -n \"$line\"; then\n    case \"$line\" in\n      END) finished=yes; found=yes ;;\n      ''|'#'*|off:*) true ;;\n      on:?*) printf 'Accepted: %s\\n' \"$line\"; count=$((count + 1)) ;;\n      *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1 ;;\n    esac\n  else\n    finished=yes\n  fi\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+        "count=0\nstatus=0\nintake() {\n  while IFS= read -r line || test -n \"$line\"; do\n    case \"$line\" in\n      END) return \"$status\" ;;\n      ''|'#'*|off:*) true ;;\n      on:?*) printf 'Accepted: %s\\n' \"$line\"; count=$((count + 1)) ;;\n      *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1 ;;\n    esac\n  done\n  printf 'Missing END marker.\\n' >&2\n  return 2\n}\nintake\nstatus=$?\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n"
+      ],
+      "wrong": [
+        {
+          "name": "Exit instead of leaving the intake loop",
+          "source": "count=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; exit 0 ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+          "expected_rows": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            true,
+            false,
+            false,
+            false
+          ],
+          "misconception": "exit ends the script before summary and handoff; break only leaves this loop."
+        },
+        {
+          "name": "Count ignored records",
+          "source": "count=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) true ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+          "expected_rows": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true
+          ],
+          "misconception": "Without continue, ignored records reach the common accepted-record printer."
+        },
+        {
+          "name": "Drop the final unterminated record",
+          "source": "count=0\nstatus=0\nfound=no\nwhile IFS= read -r line; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+          "expected_rows": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "misconception": "read can store the final line while reporting EOF; inspect its retained text too."
+        }
+      ],
+      "partial": {
+        "source": "count=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\n# Tail handoff is not implemented yet.\nexit \"$status\"\n",
+        "expected_rows": [
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      },
+      "first_case_hardcode": {
+        "source": "printf '%s' 'Accepted: on:Alpha\nAccepted: on:Beta\nAccepted count: 2\nRemaining input:\nfuture row\n'\nexit 0\n",
+        "expected_rows": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "file_damage": {
+        "source": "printf 'damaged' > source.txt\ncount=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+        "expected_rows": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "try_change": {
+        "source": "for exhibit in stop lamp skip frame vase; do\n  case \"$exhibit\" in\n    skip) continue ;;\n    stop) break ;;\n  esac\n  printf 'Kept: %s\\n' \"$exhibit\"\ndone\n",
+        "expected": {
+          "name": "Gallery selection example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/gallery-notes.txt": "Practice notes stay unchanged.\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/gallery-notes.txt": "Practice notes stay unchanged.\n"
+          }
+        },
+        "repair": "for exhibit in lamp skip frame stop vase; do\n  case \"$exhibit\" in\n    skip) continue ;;\n    stop) break ;;\n  esac\n  printf 'Kept: %s\\n' \"$exhibit\"\ndone\n"
+      },
+      "guard_cases": [
+        {
+          "name": "Literal END inside accepted and disabled records",
+          "args": [],
+          "stdin": "on:END\noff:END\nEND\nEND tail",
+          "env": {},
+          "files": {
+            "/work/source.txt": "on:END\noff:END\nEND\nEND tail",
+            "/work/keep.txt": "Guard notes.\n"
+          },
+          "stdout": "Accepted: on:END\nAccepted count: 1\nRemaining input:\nEND tail",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/source.txt": "on:END\noff:END\nEND\nEND tail",
+            "/work/keep.txt": "Guard notes.\n"
+          }
+        },
+        {
+          "name": "Only LF is a line separator",
+          "args": [],
+          "stdin": "on:first\u000bsecond\nEND\ntail\r\n",
+          "env": {},
+          "files": {
+            "/work/source.txt": "on:first\u000bsecond\nEND\ntail\r\n",
+            "/work/keep.txt": "Guard notes.\n"
+          },
+          "stdout": "Accepted: on:first\u000bsecond\nAccepted count: 1\nRemaining input:\ntail\r\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/source.txt": "on:first\u000bsecond\nEND\ntail\r\n",
+            "/work/keep.txt": "Guard notes.\n"
+          }
+        }
+      ],
+      "reference_expected_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "alternate_expected_rows": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "id": "shell-loop-fallback",
+      "alternates": [
+        "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  cp_job=\"$1\"\n  cp_limit=\"$2\"\n  cp_attempt=0\n  cp_source=''\n  cp_header=''\n  cp_found=1\n  for side in primary backup; do\n    cp_attempt=$((cp_attempt + 1))\n    if test \"$cp_attempt\" -gt \"$cp_limit\"; then break; fi\n    cp_source=\"$cp_job.$side\"\n    if test -f \"$cp_source\"; then\n      cp_header=''\n      IFS= read -r cp_header < \"$cp_source\"\n      if test \"$cp_header\" = READY; then\n        cat -- \"$cp_source\" > \"$cp_job.result\"\n        printf 'Copied %s from %s.\\n' \"$cp_job\" \"$side\"\n        cp_found=0\n        break\n      fi\n    fi\n  done\n  return \"$cp_found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+        "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -le \"$limit\" && test \"$found\" -eq 1; then\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n      fi\n    fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n  fi\ndone\nexit \"$failed\"\n"
+      ],
+      "wrong": [
+        {
+          "name": "Continue copying after the first success",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+          "expected_rows": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "misconception": "A later ready backup overwrites a ready primary and produces a second success message."
+        },
+        {
+          "name": "Abandon the batch after one unavailable job",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n      exit 1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+          "expected_rows": [
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "misconception": "A failed independent job must not prevent a later valid job from completing."
+        },
+        {
+          "name": "Truncate before knowing a candidate is usable",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  : > \"$job.result\"\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+          "expected_rows": [
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            false
+          ],
+          "misconception": "Opening the result before checking a header damages failed jobs."
+        },
+        {
+          "name": "Erase job failures at the final exit",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit 0\n",
+          "expected_rows": [
+            true,
+            false,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            true,
+            false
+          ],
+          "misconception": "The final success status must reflect all jobs, not just the last command."
+        },
+        {
+          "name": "UNAVAILABLE-CREATES-ABSENT-RESULT",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  if test \"$found\" -eq 1; then\n    if test -f \"$job.result\"; then\n      true\n    else\n      : > \"$job.result\"\n    fi\n  fi\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+          "source_sha256": "d712629d95b3ee3875fab8fb428dd262a4b92804da94f76205d1d7e8ffc9882e",
+          "expected_rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          "misconception": "All current unavailable valid jobs already have result files. New branch only creates an empty file for unavailable jobs whose result was absent, so no current case observes it."
+        },
+        {
+          "name": "VALID-ID-DOMAIN-REJECTED",
+          "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+          "source_sha256": "3a557b180abad99ca464346940ebb699647808a7612d30feef45f9ce692d3584",
+          "expected_rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "misconception": "All current successful valid IDs are alphabetic length2..5. Wrong ASCII-only-letter validator still rejects all sampled invalid IDs and wrongly rejects allowed digits/hyphens. One-character and8-character successes are also missing."
+        }
+      ],
+      "partial": {
+        "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+        "expected_rows": [
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      },
+      "first_case_hardcode": {
+        "source": "printf '%s' 'Copied alpha from primary.\nCopied beta from backup.\n'\nprintf '%s' 'READY\nAlpha preferred\n' > '/work/alpha.result'\nprintf '%s' 'READY\nBeta recovery\n' > '/work/beta.result'\nexit 0\n",
+        "expected_rows": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "file_damage": {
+        "source": "printf 'damaged' > keep.txt\nvalid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+        "expected_rows": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      },
+      "try_change": {
+        "source": "choose_card() {\n  local candidate='' header='' found=1\n  for candidate in front-card reserve-card; do\n    header=''\n    IFS= read -r header < \"$candidate\"\n    if test \"$header\" = AVAILABLE; then\n      cat -- \"$candidate\" > gallery-card.txt\n      printf 'Chosen: %s\\n' \"$candidate\"\n      found=0\n    fi\n  done\n  return \"$found\"\n}\nchoose_card\n",
+        "expected": {
+          "name": "Gallery card example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/front-card": "AVAILABLE\nMain gallery\n",
+            "/work/reserve-card": "AVAILABLE\nReserve gallery\n",
+            "/work/gallery-card.txt": "Old display\n",
+            "/work/gallery-notes.txt": "Practice only.\n"
+          },
+          "stdout": "Chosen: front-card\nChosen: reserve-card\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/front-card": "AVAILABLE\nMain gallery\n",
+            "/work/reserve-card": "AVAILABLE\nReserve gallery\n",
+            "/work/gallery-card.txt": "AVAILABLE\nReserve gallery\n",
+            "/work/gallery-notes.txt": "Practice only.\n"
+          }
+        },
+        "repair": "choose_card() {\n  local candidate='' header='' found=1\n  for candidate in front-card reserve-card; do\n    header=''\n    IFS= read -r header < \"$candidate\"\n    if test \"$header\" = AVAILABLE; then\n      cat -- \"$candidate\" > gallery-card.txt\n      printf 'Chosen: %s\\n' \"$candidate\"\n      found=0\n      break\n    fi\n  done\n  return \"$found\"\n}\nchoose_card\n"
+      },
+      "guard_cases": [
+        {
+          "name": "No job arguments",
+          "args": [
+            "1"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: fallback LIMIT JOB...\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Too many jobs before limit validation",
+          "args": [
+            "bad",
+            "a",
+            "b",
+            "c",
+            "d",
+            "e"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: fallback LIMIT JOB...\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Overflow-sized limit",
+          "args": [
+            "99999999999999999999999999",
+            "alpha"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "",
+          "stderr": "Limit must be 1 or 2.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Signed limit",
+          "args": [
+            "+1",
+            "alpha"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "",
+          "stderr": "Limit must be 1 or 2.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Newline in ID",
+          "args": [
+            "2",
+            "alpha\nbeta",
+            "ok"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "Copied ok from primary.\n",
+          "stderr": "Invalid job: alpha\nbeta\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n",
+            "/work/ok.result": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Parent traversal ID",
+          "args": [
+            "2",
+            "../escape",
+            "ok"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n"
+          },
+          "stdout": "Copied ok from primary.\n",
+          "stderr": "Invalid job: ../escape\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nGuard source\n",
+            "/work/alpha.result": "old\n",
+            "/work/ok.primary": "READY\nOK\n",
+            "/work/ok.result": "READY\nOK\n"
+          }
+        },
+        {
+          "name": "Leading-zero budget is not canonical",
+          "args": [
+            "02",
+            "alpha"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nNo write\n",
+            "/work/alpha.result": "retain\n"
+          },
+          "stdout": "",
+          "stderr": "Limit must be 1 or 2.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nNo write\n",
+            "/work/alpha.result": "retain\n"
+          }
+        },
+        {
+          "name": "No arguments gives useful usage",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nNo write\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: fallback LIMIT JOB...\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated delivery notes.\n",
+            "/work/alpha.primary": "READY\nNo write\n"
+          }
+        }
+      ],
+      "reference_expected_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "alternate_expected_rows": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "retained_R1_coverage": {
+        "cases": [
+          {
+            "name": "First ready candidate wins; another job needs backup",
+            "args": [
+              "2",
+              "alpha",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nAlpha preferred\n",
+              "/work/alpha.backup": "READY\nAlpha alternate\n",
+              "/work/beta.primary": "STALE\nDo not publish\n",
+              "/work/beta.backup": "READY\nBeta recovery\n",
+              "/work/alpha.result": "old alpha\n",
+              "/work/beta.result": "old beta\n"
+            },
+            "stdout": "Copied alpha from primary.\nCopied beta from backup.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nAlpha preferred\n",
+              "/work/alpha.backup": "READY\nAlpha alternate\n",
+              "/work/beta.primary": "STALE\nDo not publish\n",
+              "/work/beta.backup": "READY\nBeta recovery\n",
+              "/work/alpha.result": "READY\nAlpha preferred\n",
+              "/work/beta.result": "READY\nBeta recovery\n"
+            }
+          },
+          {
+            "name": "One-attempt budget cannot borrow the backup",
+            "args": [
+              "1",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.backup": "READY\nAvailable but outside budget\n",
+              "/work/alpha.result": "keep failed alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Unavailable: alpha\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.backup": "READY\nAvailable but outside budget\n",
+              "/work/alpha.result": "keep failed alpha\n"
+            }
+          },
+          {
+            "name": "A failed first job does not cancel the next job",
+            "args": [
+              "2",
+              "alpha",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "STALE\n",
+              "/work/alpha.result": "keep failed alpha\n",
+              "/work/beta.primary": "READY\nBeta completes\n",
+              "/work/beta.result": "old beta\n"
+            },
+            "stdout": "Copied beta from primary.\n",
+            "stderr": "Unavailable: alpha\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "STALE\n",
+              "/work/alpha.result": "keep failed alpha\n",
+              "/work/beta.primary": "READY\nBeta completes\n",
+              "/work/beta.result": "READY\nBeta completes\n"
+            }
+          },
+          {
+            "name": "Reject a slash in one ID and keep working",
+            "args": [
+              "2",
+              "bad/name",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/beta.primary": "READY\nUseful work\n"
+            },
+            "stdout": "Copied beta from primary.\n",
+            "stderr": "Invalid job: bad/name\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/beta.primary": "READY\nUseful work\n",
+              "/work/beta.result": "READY\nUseful work\n"
+            }
+          },
+          {
+            "name": "Empty and CR headers reject; a final READY needs no newline",
+            "args": [
+              "2",
+              "empty",
+              "cr",
+              "last"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/empty.primary": "",
+              "/work/empty.backup": "READY\nEmpty recovered\n",
+              "/work/cr.primary": "READY\r\nWrong header\n",
+              "/work/cr.backup": "READY\nCR recovered\n",
+              "/work/last.primary": "READY",
+              "/work/last.result": "old final\n"
+            },
+            "stdout": "Copied empty from backup.\nCopied cr from backup.\nCopied last from primary.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/empty.primary": "",
+              "/work/empty.backup": "READY\nEmpty recovered\n",
+              "/work/cr.primary": "READY\r\nWrong header\n",
+              "/work/cr.backup": "READY\nCR recovered\n",
+              "/work/last.primary": "READY",
+              "/work/last.result": "READY",
+              "/work/empty.result": "READY\nEmpty recovered\n",
+              "/work/cr.result": "READY\nCR recovered\n"
+            }
+          },
+          {
+            "name": "Repeated jobs remain separate requests",
+            "args": [
+              "2",
+              "alpha",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nFirst choice\n",
+              "/work/alpha.backup": "READY\nSecond choice\n"
+            },
+            "stdout": "Copied alpha from primary.\nCopied alpha from primary.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nFirst choice\n",
+              "/work/alpha.backup": "READY\nSecond choice\n",
+              "/work/alpha.result": "READY\nFirst choice\n"
+            }
+          },
+          {
+            "name": "ASCII validation rejects a Unicode lookalike ID",
+            "args": [
+              "2",
+              "équipe",
+              "gamma"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/gamma.primary": "READY\nGamma\n"
+            },
+            "stdout": "Copied gamma from primary.\n",
+            "stderr": "Invalid job: équipe\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/gamma.primary": "READY\nGamma\n",
+              "/work/gamma.result": "READY\nGamma\n"
+            }
+          },
+          {
+            "name": "Leading-zero budget is not canonical",
+            "args": [
+              "02",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            }
+          },
+          {
+            "name": "No arguments gives useful usage",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: fallback LIMIT JOB...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n"
+            }
+          },
+          {
+            "name": "Overlong ID is a per-job failure",
+            "args": [
+              "2",
+              "ninechars",
+              "ok"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/ok.primary": "READY\nShort ID\n"
+            },
+            "stdout": "Copied ok from primary.\n",
+            "stderr": "Invalid job: ninechars\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/ok.primary": "READY\nShort ID\n",
+              "/work/ok.result": "READY\nShort ID\n"
+            }
+          },
+          {
+            "name": "Zero budget is rejected before any job",
+            "args": [
+              "0",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            }
+          },
+          {
+            "name": "Only exact READY header is eligible",
+            "args": [
+              "1",
+              "dash"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/dash.primary": " READY\nNot exact\n",
+              "/work/dash.backup": "READY\nOutside budget\n",
+              "/work/dash.result": "preserve previous\n"
+            },
+            "stdout": "",
+            "stderr": "Unavailable: dash\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/dash.primary": " READY\nNot exact\n",
+              "/work/dash.backup": "READY\nOutside budget\n",
+              "/work/dash.result": "preserve previous\n"
+            }
+          }
+        ],
+        "guard_cases": [
+          {
+            "name": "No job arguments",
+            "args": [
+              "1"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: fallback LIMIT JOB...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            }
+          },
+          {
+            "name": "Too many jobs before limit validation",
+            "args": [
+              "bad",
+              "a",
+              "b",
+              "c",
+              "d",
+              "e"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: fallback LIMIT JOB...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            }
+          },
+          {
+            "name": "Overflow-sized limit",
+            "args": [
+              "99999999999999999999999999",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            }
+          },
+          {
+            "name": "Signed limit",
+            "args": [
+              "+1",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            }
+          },
+          {
+            "name": "Newline in ID",
+            "args": [
+              "2",
+              "alpha\nbeta",
+              "ok"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "Copied ok from primary.\n",
+            "stderr": "Invalid job: alpha\nbeta\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n",
+              "/work/ok.result": "READY\nOK\n"
+            }
+          },
+          {
+            "name": "Parent traversal ID",
+            "args": [
+              "2",
+              "../escape",
+              "ok"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n"
+            },
+            "stdout": "Copied ok from primary.\n",
+            "stderr": "Invalid job: ../escape\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nGuard source\n",
+              "/work/alpha.result": "old\n",
+              "/work/ok.primary": "READY\nOK\n",
+              "/work/ok.result": "READY\nOK\n"
+            }
+          }
+        ],
+        "programs": [
+          {
+            "name": "R1 reference",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "R1 alternate1",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  cp_job=\"$1\"\n  cp_limit=\"$2\"\n  cp_attempt=0\n  cp_source=''\n  cp_header=''\n  cp_found=1\n  for side in primary backup; do\n    cp_attempt=$((cp_attempt + 1))\n    if test \"$cp_attempt\" -gt \"$cp_limit\"; then break; fi\n    cp_source=\"$cp_job.$side\"\n    if test -f \"$cp_source\"; then\n      cp_header=''\n      IFS= read -r cp_header < \"$cp_source\"\n      if test \"$cp_header\" = READY; then\n        cat -- \"$cp_source\" > \"$cp_job.result\"\n        printf 'Copied %s from %s.\\n' \"$cp_job\" \"$side\"\n        cp_found=0\n        break\n      fi\n    fi\n  done\n  return \"$cp_found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "R1 alternate2",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -le \"$limit\" && test \"$found\" -eq 1; then\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n      fi\n    fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "Continue copying after the first success",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              false,
+              true,
+              true,
+              true,
+              true,
+              false,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "Abandon the batch after one unavailable job",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n      exit 1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              false,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "Truncate before knowing a candidate is usable",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  : > \"$job.result\"\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              false,
+              false,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              false
+            ]
+          },
+          {
+            "name": "Erase job failures at the final exit",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit 0\n",
+            "expected_rows": [
+              true,
+              false,
+              false,
+              false,
+              true,
+              true,
+              false,
+              true,
+              true,
+              false,
+              true,
+              false
+            ]
+          },
+          {
+            "name": "R1 partial",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              false,
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              true,
+              true,
+              false,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "R1 first_case_hardcode",
+            "source": "printf '%s' 'Copied alpha from primary.\nCopied beta from backup.\n'\nprintf '%s' 'READY\nAlpha preferred\n' > '/work/alpha.result'\nprintf '%s' 'READY\nBeta recovery\n' > '/work/beta.result'\nexit 0\n",
+            "expected_rows": [
+              true,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ]
+          },
+          {
+            "name": "R1 file_damage",
+            "source": "printf 'damaged' > keep.txt\nvalid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false
+            ]
+          },
+          {
+            "name": "UNAVAILABLE-CREATES-ABSENT-RESULT",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  if test \"$found\" -eq 1; then\n    if test -f \"$job.result\"; then\n      true\n    else\n      : > \"$job.result\"\n    fi\n  fi\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "VALID-ID-DOMAIN-REJECTED",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        ],
+        "moved_indices": [
+          7,
+          8
+        ],
+        "moved_cases": [
+          {
+            "name": "Leading-zero budget is not canonical",
+            "args": [
+              "02",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            }
+          },
+          {
+            "name": "No arguments gives useful usage",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: fallback LIMIT JOB...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n"
+            }
+          }
+        ],
+        "counterexamples_original_guard_checks": [
+          {
+            "name": "UNAVAILABLE-CREATES-ABSENT-RESULT",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  if test \"$found\" -eq 1; then\n    if test -f \"$job.result\"; then\n      true\n    else\n      : > \"$job.result\"\n    fi\n  fi\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          },
+          {
+            "name": "VALID-ID-DOMAIN-REJECTED",
+            "source": "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+            "expected_rows": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "actual_loader_or_VM_observations": null,
+  "actual_host_reference_observations": null,
+  "existing_scripts": [
+    {
+      "id": "shell-array-intake",
+      "source_path": "scenarios/shell-arrays-v1.json",
+      "whole_scenario_sha256": "7fddb7a055bc495e62112a0d71405841398207802a3adf851050f60a8df47941"
+    },
+    {
+      "id": "shell-array-priority",
+      "source_path": "scenarios/shell-arrays-v1.json",
+      "whole_scenario_sha256": "99dab98a1e32c5eff4f9652901a8e4474828b065a4d5ad367e3ef19c4c1866e3"
+    },
+    {
+      "id": "shell-array-package",
+      "source_path": "scenarios/shell-arrays-v1.json",
+      "whole_scenario_sha256": "e137674c4dc3192683c6b8b7a57fc5d6b244bea9299374aed19b36b1c7579b6f"
+    },
+    {
+      "id": "shell-array-handover",
+      "source_path": "scenarios/shell-arrays-v1.json",
+      "whole_scenario_sha256": "ede61bf23aca7cb0064fe3c6cee33dbe541987447c48ca2463a8a70b1cd7347b"
+    },
+    {
+      "id": "shell-capture-preview",
+      "source_path": "scenarios/shell-capture-v1.json",
+      "whole_scenario_sha256": "c638e15ad75449d57808dc02cad18ee982212affda30fe868bd008a684a14bd0"
+    },
+    {
+      "id": "shell-capture-evidence",
+      "source_path": "scenarios/shell-capture-v1.json",
+      "whole_scenario_sha256": "54f5a77e824f1d3b265008d2d4b71be9654a45fef597bd0f0243e7162d27957a"
+    },
+    {
+      "id": "shell-capture-decision",
+      "source_path": "scenarios/shell-capture-v1.json",
+      "whole_scenario_sha256": "4d1f898e2966dd9498a6b3480b8071caf1cf70bb9db6f89faba1724b701c346d"
+    },
+    {
+      "id": "shell-capture-handover",
+      "source_path": "scenarios/shell-capture-v1.json",
+      "whole_scenario_sha256": "ed8ced94827a74ba6c9c1f01342b974d91d68ef3d5c97aad3d316e65f891e7d3"
+    },
+    {
+      "id": "shell-case-interface",
+      "source_path": "scenarios/shell-case-v1.json",
+      "whole_scenario_sha256": "b7ef9447c27546116917f10e03f1e0c4fc896e09d82dd289b423fa74b9417917"
+    },
+    {
+      "id": "shell-case-routing",
+      "source_path": "scenarios/shell-case-v1.json",
+      "whole_scenario_sha256": "65014c956dc429e850bf22c8baa1d9f571ec4187641700263162bb912f233067"
+    },
+    {
+      "id": "shell-case-publication",
+      "source_path": "scenarios/shell-case-v1.json",
+      "whole_scenario_sha256": "a23c1b04bd4724bf650fb94223f8a097d12bea633c2af0cc8d95e50535181cfb"
+    },
+    {
+      "id": "shell-command-options",
+      "source_path": "scenarios/shell-command-vectors-v1.json",
+      "whole_scenario_sha256": "0bdddd456ce48e7b26dc1dac2d5fd8bbb057c4000c07a4a281da188c778021a9"
+    },
+    {
+      "id": "shell-command-dispatch",
+      "source_path": "scenarios/shell-command-vectors-v1.json",
+      "whole_scenario_sha256": "eeb86c79b380602b6c18a2628e3e5305d3bd83aaed9373c5e8a7e8577cbcd3c2"
+    },
+    {
+      "id": "shell-command-plan",
+      "source_path": "scenarios/shell-command-vectors-v1.json",
+      "whole_scenario_sha256": "f3b52ca7ce67bea407386d52eb3fd10f5f72276edb028ad9ab2f6214cc2aaaf9"
+    },
+    {
+      "id": "shell-streams",
+      "source_path": "scenarios/shell-composition-v1.json",
+      "whole_scenario_sha256": "127a66a5e59aaae3e2618d1ac5a43504c66b48a0df7d1bd04abaa9a07553fe59"
+    },
+    {
+      "id": "shell-pipelines",
+      "source_path": "scenarios/shell-composition-v1.json",
+      "whole_scenario_sha256": "178657f0f78ba8b7291946ad02f4ffe71a3ca8814aa6570683fa12b096101fae"
+    },
+    {
+      "id": "shell-eof",
+      "source_path": "scenarios/shell-composition-v1.json",
+      "whole_scenario_sha256": "b9753eb28fe3915d67b19dde77792d588c222e5604a97a54cd8d3f22b38f4897"
+    },
+    {
+      "id": "shell-batch-audit",
+      "source_path": "scenarios/shell-composition-v1.json",
+      "whole_scenario_sha256": "53714478d07849db108fdcdaa59e9168fe43709f56494dc9cc89945fbd1de5ed"
+    },
+    {
+      "id": "shell-number-records",
+      "source_path": "scenarios/shell-counts-v1.json",
+      "whole_scenario_sha256": "99fb988a46d0179e02ff6482717b33adfa57a67f2eb84d85953906be8ec43ea6"
+    },
+    {
+      "id": "shell-order-total",
+      "source_path": "scenarios/shell-counts-v1.json",
+      "whole_scenario_sha256": "d8c2f349f1927d27f6b379c3838a81516cc1de55deb9270a7bf5d50d3cc5dc99"
+    },
+    {
+      "id": "shell-pack-items",
+      "source_path": "scenarios/shell-counts-v1.json",
+      "whole_scenario_sha256": "ca0307ce38d273ac43ca6b15d048246cd9a903e74809882fc02e82c9485d671d"
+    },
+    {
+      "id": "shell-count-capstone",
+      "source_path": "scenarios/shell-counts-v1.json",
+      "whole_scenario_sha256": "74c37f78a2d4405bb10f24ae68ee7cfaf09500bdc2936d69759de0d75f5cf232"
+    },
+    {
+      "id": "shell-file-manifest",
+      "source_path": "scenarios/shell-file-batches-v1.json",
+      "whole_scenario_sha256": "c2347ab53da451633bb5ec8d54b3748463d87144b5ca1da236b4693995948de6"
+    },
+    {
+      "id": "shell-collect-errors",
+      "source_path": "scenarios/shell-file-batches-v1.json",
+      "whole_scenario_sha256": "8a6f6f708ffee3063f05cdcb21704169cda63f9919a0a8b468734f0ae4ff0f31"
+    },
+    {
+      "id": "shell-file-batch-capstone",
+      "source_path": "scenarios/shell-file-batches-v1.json",
+      "whole_scenario_sha256": "6ada13b2e2f93625b8e58d038fbb10135e8319420a804330ede09755b31ef001"
+    },
+    {
+      "id": "shell-options-report",
+      "source_path": "scenarios/shell-getopts-v1.json",
+      "whole_scenario_sha256": "f60bbe81d260442dc5eebf71ec343af471cc86451d18a63e48edd38ca05afddd"
+    },
+    {
+      "id": "shell-options-jobs",
+      "source_path": "scenarios/shell-getopts-v1.json",
+      "whole_scenario_sha256": "dfb7feb728a7bb14a55371d5a5a0d35b1a84b18dde1ab0cca6f7267f78a69cf0"
+    },
+    {
+      "id": "shell-options-publication",
+      "source_path": "scenarios/shell-getopts-v1.json",
+      "whole_scenario_sha256": "ff95798f8d379384455dcc7a31d577607cf31c87c453bf14eb13d9e01e689f59"
+    },
+    {
+      "id": "shell-numeric-retry",
+      "source_path": "scenarios/shell-numeric-validation-v1.json",
+      "whole_scenario_sha256": "7120388e0d57a7f183eebf5fee4f5bb55cea0ce2186b48162b043081e7b82394"
+    },
+    {
+      "id": "shell-numeric-intake",
+      "source_path": "scenarios/shell-numeric-validation-v1.json",
+      "whole_scenario_sha256": "39ed487eb9e8099c71ff0089f5bba2b9b0f7ba9fd0c3b1caf7771d1394c8dcca"
+    },
+    {
+      "id": "shell-numeric-publication",
+      "source_path": "scenarios/shell-numeric-validation-v1.json",
+      "whole_scenario_sha256": "8c65a419d847f5bd3f964252ac25a6669903236e53e60b91aa675f53cd746cf5"
+    },
+    {
+      "id": "shell-optional-policy",
+      "source_path": "scenarios/shell-optional-inputs-v1.json",
+      "whole_scenario_sha256": "4eda531c8c133cecf970597aa871decb4ec62eec90fcd9e0403f6eb433a855ec"
+    },
+    {
+      "id": "shell-optional-report",
+      "source_path": "scenarios/shell-optional-inputs-v1.json",
+      "whole_scenario_sha256": "b8526c8bc6427b2ff3a93bf8eeeb71175e4d456b086d08271f6e028fb25dd778"
+    },
+    {
+      "id": "shell-optional-handover",
+      "source_path": "scenarios/shell-optional-inputs-v1.json",
+      "whole_scenario_sha256": "3bb8569c804cc96dcabf67d29e4a774f76c23fbd11bb91c750544825e4d7f334"
+    },
+    {
+      "id": "shell-functions",
+      "source_path": "scenarios/shell-reusable-v1.json",
+      "whole_scenario_sha256": "90ebbce85d4ff0039a9da188eaca336659a752d7a8b58c69494a71983bc67f1e"
+    },
+    {
+      "id": "shell-return",
+      "source_path": "scenarios/shell-reusable-v1.json",
+      "whole_scenario_sha256": "16366012380e9aaaeefab04f469619abca7b47441935ae0c75c222c113d34afa"
+    },
+    {
+      "id": "shell-shift",
+      "source_path": "scenarios/shell-reusable-v1.json",
+      "whole_scenario_sha256": "ad2d1a8698785df589f0824997d983ab310e36f816af95a0899c528f6fab1200"
+    },
+    {
+      "id": "shell-bundle",
+      "source_path": "scenarios/shell-reusable-v1.json",
+      "whole_scenario_sha256": "5d8425a02f16aec3ba7fc108f170d03ccf069b6f82a8397fb87dd8e0b7cdab29"
+    },
+    {
+      "id": "shell-preserve-lines",
+      "source_path": "scenarios/shell-safe-automation-v1.json",
+      "whole_scenario_sha256": "8cf729cf769255f425f58c72b9d0f567dc78b1dcc842c66744ae8058f5b87a7f"
+    },
+    {
+      "id": "shell-pipeline-status",
+      "source_path": "scenarios/shell-safe-automation-v1.json",
+      "whole_scenario_sha256": "33159add848c7b8ab5b43da82bd030fb2aebb3a2b3ed365b59b6f4a7d7d5d495"
+    },
+    {
+      "id": "shell-safe-handover",
+      "source_path": "scenarios/shell-safe-automation-v1.json",
+      "whole_scenario_sha256": "0874f58f20c95b9bd4d73861b91d87b866e0c53e2139f163fc07c5d1c7fb2f0c"
+    },
+    {
+      "id": "shell-local-heading",
+      "source_path": "scenarios/shell-scope-v1.json",
+      "whole_scenario_sha256": "c5699ebad507545c13456a04f2de42d0edfdb44fa3e585fb335d28fb39d6ab95"
+    },
+    {
+      "id": "shell-scope-review",
+      "source_path": "scenarios/shell-scope-v1.json",
+      "whole_scenario_sha256": "11b5b582db72c91d939757fe8c4e77ceb9dffaa0f812b8b9e8b5aa6a03796042"
+    },
+    {
+      "id": "shell-scope-capstone",
+      "source_path": "scenarios/shell-scope-v1.json",
+      "whole_scenario_sha256": "a0f07c7370c1ae00ce0b5e4299d851f136b8674d66de67998f248cbd8226fc71"
+    },
+    {
+      "id": "shell-cut-inventory",
+      "source_path": "scenarios/shell-text-v1.json",
+      "whole_scenario_sha256": "1e28b5e83ea115e245317bd2570ded55e44df07005a7674e7a4ab7ac8089958a"
+    },
+    {
+      "id": "shell-sort-manifest",
+      "source_path": "scenarios/shell-text-v1.json",
+      "whole_scenario_sha256": "cddaafe5d2af287a6e101820e36243f757bc7c1971eb76884827fbfe2ccc136d"
+    },
+    {
+      "id": "shell-uniq-counts",
+      "source_path": "scenarios/shell-text-v1.json",
+      "whole_scenario_sha256": "5f02531b0220fb806377828cfab64f8a9af00c5988f50fd9249bee3935f85c4d"
+    },
+    {
+      "id": "shell-text-capstone",
+      "source_path": "scenarios/shell-text-v1.json",
+      "whole_scenario_sha256": "5f4ce39c107397363ea8b98f1abe6afc3f8c286f0f77e452ac68e7c28a8a68c4"
+    },
+    {
+      "id": "shell-handover",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "37b54b0e81e693ee9ff9a53e315ea2fc4f786e3af139b6fa282ca1b177e5f212"
+    },
+    {
+      "id": "shell-arguments",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "71b357f76fbc92e28fae6c6709403abe47d8cafc07eb0160a58d96a9dde44c51"
+    },
+    {
+      "id": "shell-input",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "14863d85aaa02702eb7275da0e9b619c0ef9fe76bb60233746abbf9a0f848380"
+    },
+    {
+      "id": "shell-validation",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "b438f772b126617d1c7fa950807e165f8276d89a5504531891d4b0ad5614b1b7"
+    },
+    {
+      "id": "shell-report",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "bb89d1bb8d7fb7babd93a7451c414e1a75d41ca28b593d93e8f84a27449fd786"
+    },
+    {
+      "id": "shell-loop",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "9e40f2c8729a74f5e10db84d4952d9f2bb700d9b2aca8bbf4f1250f36d8acc65"
+    },
+    {
+      "id": "shell-capstone",
+      "source_path": "scenarios/shell-unit-v1.json",
+      "whole_scenario_sha256": "d51f2ea28e3787817b1142d31e63b3768439bd9f4096ade3008c72a67d4ae87d"
+    }
+  ],
+  "existing_script_count": 55,
+  "existing_case_count": 420,
+  "existing_example_count": 55,
+  "original_pack_pins": [
+    {
+      "path": "scenarios/shell-arrays-v1.json",
+      "sha256": "43bae8b5651f8b63de711396034fe74b763485e4baf95d9b13e75ec989a66ff6"
+    },
+    {
+      "path": "scenarios/shell-capture-v1.json",
+      "sha256": "cd22ad53457785ef648b5423c0400502d6b09bb2f265d75ca8813ad589d6da25"
+    },
+    {
+      "path": "scenarios/shell-case-v1.json",
+      "sha256": "ecbe8e382b00cf0e02e650d3f819715f66b6838fa61b115f071777ffd29f9184"
+    },
+    {
+      "path": "scenarios/shell-command-vectors-v1.json",
+      "sha256": "8852a3609ce90da2b1607a698edc86db9112d7168a79f6f6cd9eac3f4773c4cc"
+    },
+    {
+      "path": "scenarios/shell-composition-v1.json",
+      "sha256": "f452a4c0d4a17a7b4e17f13d1740922ea0ffedc29f111f00b756e6de5e9dfb98"
+    },
+    {
+      "path": "scenarios/shell-counts-v1.json",
+      "sha256": "f87220e67cfa547135befd9952716174cbd7aee652cbed4bd2a20ab5fe3e36b9"
+    },
+    {
+      "path": "scenarios/shell-file-batches-v1.json",
+      "sha256": "782886fbc19e32323d666f801c467e59d53cbde6e3eaf984f531f828cc460a9b"
+    },
+    {
+      "path": "scenarios/shell-getopts-v1.json",
+      "sha256": "62e46d2f1a2f4b81e53b97998b4b121eae2e808484099dfa21210f8ed4e342b5"
+    },
+    {
+      "path": "scenarios/shell-numeric-validation-v1.json",
+      "sha256": "f27c3ba1cb8a03297f294522377b0e341bf921a13d9bf41bc39057a91e7939cb"
+    },
+    {
+      "path": "scenarios/shell-optional-inputs-v1.json",
+      "sha256": "30d72ae7cb0bbeabcc9c4a1e0268103c50ce58355198f69afe7cd6e5a61d5678"
+    },
+    {
+      "path": "scenarios/shell-reusable-v1.json",
+      "sha256": "cbb8df4b6b83bfbb83d29af01fac55942a9a97e0ce101b5cc58cf1ac49aa4caf"
+    },
+    {
+      "path": "scenarios/shell-safe-automation-v1.json",
+      "sha256": "675a81721bdf3225e31c1074c799292236ee7012e73e3e1b133d28f95848c147"
+    },
+    {
+      "path": "scenarios/shell-scope-v1.json",
+      "sha256": "c5804a45bc660089f67448bb043c998c9ff72d216aaaada7d06fe7bed5fb9d1d"
+    },
+    {
+      "path": "scenarios/shell-text-v1.json",
+      "sha256": "b1e9e087124102161bd6ae53552afb850c0b39bac4893c75eb2ba94251679bfb"
+    },
+    {
+      "path": "scenarios/shell-unit-v1.json",
+      "sha256": "a211d4717fd091f571f11cbecfdeb4c5a5a24f378afdd8de4ef95e613bee8d75"
+    }
+  ],
+  "host_reference_limits": "No reference collector/source execution in this proposal. Later independently curate reference/alternate/example sources only; raw slash/parent/newline/unsafe-ID guards and every wrong script remain VM-only. The fixed16 capability oracle is separate and does not establish these content scripts.",
+  "R2_coverage_amendment": {
+    "peer_counterexamples_sha256": "d74137c1e55eb22ba9e6a2198390a0b8e8137318ddcc4445719fa578493e5b22",
+    "graded_replacements": [
+      {
+        "index": 7,
+        "name": "Unavailable job keeps an absent result absent",
+        "old_case_preserved_in_guards": "Leading-zero budget is not canonical"
+      },
+      {
+        "index": 8,
+        "name": "Valid one-character, digit-hyphen and eight-character IDs",
+        "old_case_preserved_in_guards": "No arguments gives useful usage"
+      }
+    ],
+    "reference_and_two_alternative_sources_unchanged": true,
+    "all_R1_cases_and_program_expectations_retained_for_actual_replay": true,
+    "actual_VM_loader_reference_results": null
+  }
+}

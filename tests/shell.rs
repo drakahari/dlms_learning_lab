@@ -26,7 +26,7 @@ fn all_authored_scripts_grade_behavior_and_break_after_edit() {
     let labs = pack::bundled().unwrap();
     assert_eq!(one_off_boundary::before_len(&labs), 176);
     let scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
-    assert_eq!(scripts.len(), 55);
+    assert_eq!(scripts.len(), 57);
     for s in scripts {
         let Goal::Script { cases } = &s.goal else {
             panic!()

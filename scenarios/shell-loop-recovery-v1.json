@@ -1,0 +1,711 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-loop-intake",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Loop control and local recovery",
+      "title": "Stop intake without losing the tail",
+      "summary": "Skip individual records, finish at a marker and pass unread data to the next stage.",
+      "objective": "Read the supplied standard-input stream one whole line at a time. Skip empty lines, lines starting with #, and any line starting off:. END alone ends intake. Accept on: followed by at least one character; print “Accepted: LINE” for each accepted whole line, preserving all text. Other pre-END lines print “Skipped invalid record: LINE” on stderr; keep processing. After intake print “Accepted count: N” and “Remaining input:” on separate lines, then copy the unread tail exactly. If END is found with no earlier invalid rows, return 0; otherwise return 1. If END is missing, add “Missing END marker.” on stderr and return 2, overriding 1. Messages end in a newline; only the forwarded tail keeps its original endings. source.txt is an audit copy of the supplied stream: preserve it and every other file.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Keep the complete assignment visible. Learn mode has a skippable introduction and separate practice example.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Control changes where execution continues. It must preserve the data and status required by the assignment.",
+          "action": "Write the complete script in the assignment editor and Run. Inspect the first failing case and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "Correct output, error status and unchanged files matter together.",
+          "action": "Use optional hints or a worked explanation when needed. Challenge keeps the full independent assignment.",
+          "commands": []
+        }
+      ],
+      "explanation": "Follow the assignment’s policy at each boundary, then report the combined result. The reference below is one supported solution; equivalent behavior is accepted.\n\nOne supported solution, available on request:\ncount=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n",
+      "hints": [
+        "Handle ignored rows with continue before the common accepted-record printer. Handle END with break, not exit.",
+        "Read with IFS= read -r line || test -n \"$line\". Only the marker consumes END; following data must remain unread until cat.",
+        "Track accepted count, a found-marker flag and an overall status separately. Missing END has the stated error priority."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/break.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/continue.html"
+      ],
+      "simplifications": "All files, standard input and execution are simulated offline. No host commands/files/network or real timing. break/continue are portable shell concepts; this simulator supports only own-scope for/while loops, optional canonical ASCII counts 1–24, and no loop transfer through pipeline stages or caller functions/captures. Unimplemented syntax is an honest diagnostic. Flat UTF-8 virtual files only, bounded instructions/output/memory. No real locks, atomic rename, concurrent writers or crash recovery.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the full assignment here. Run supplies each test’s input.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary intake and handed-off tail",
+            "args": [],
+            "stdin": "# review\non:Alpha\noff:paused\non:Beta\nEND\nfuture row\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": "# review\non:Alpha\noff:paused\non:Beta\nEND\nfuture row\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:Alpha\nAccepted: on:Beta\nAccepted count: 2\nRemaining input:\nfuture row\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "# review\non:Alpha\noff:paused\non:Beta\nEND\nfuture row\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Empty labels are invalid but disabled rows skip",
+            "args": [],
+            "stdin": "\n# note\noff:\non:\nEND\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": "\n# note\noff:\non:\nEND\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted count: 0\nRemaining input:\n",
+            "stderr": "Skipped invalid record: on:\n",
+            "status": 1,
+            "after": {
+              "/work/source.txt": "\n# note\noff:\non:\nEND\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Literal spaces backslashes percent and shell-looking labels",
+            "args": [],
+            "stdin": "on:  two spaces  \non:95%\\route\non:$(touch hidden)\nEND\nlast tail without newline",
+            "env": {},
+            "files": {
+              "/work/source.txt": "on:  two spaces  \non:95%\\route\non:$(touch hidden)\nEND\nlast tail without newline",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:  two spaces  \nAccepted: on:95%\\route\nAccepted: on:$(touch hidden)\nAccepted count: 3\nRemaining input:\nlast tail without newline",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "on:  two spaces  \non:95%\\route\non:$(touch hidden)\nEND\nlast tail without newline",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Sentinel first leaves following records alone",
+            "args": [],
+            "stdin": "END\non:later\nwrong later\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": "END\non:later\nwrong later\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted count: 0\nRemaining input:\non:later\nwrong later\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "END\non:later\nwrong later\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Missing sentinel after final nonterminated accepted record",
+            "args": [],
+            "stdin": "on:One\nbad\non:Final",
+            "env": {},
+            "files": {
+              "/work/source.txt": "on:One\nbad\non:Final",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:One\nAccepted: on:Final\nAccepted count: 2\nRemaining input:\n",
+            "stderr": "Skipped invalid record: bad\nMissing END marker.\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "on:One\nbad\non:Final",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Nonterminated sentinel still ends intake",
+            "args": [],
+            "stdin": "on:One\nEND",
+            "env": {},
+            "files": {
+              "/work/source.txt": "on:One\nEND",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:One\nAccepted count: 1\nRemaining input:\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "on:One\nEND",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Empty stream needs a missing-marker message",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted count: 0\nRemaining input:\n",
+            "stderr": "Missing END marker.\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Multiple warnings do not end the batch",
+            "args": [],
+            "stdin": "bad\non:Good\n?\noff:END\nEND\nbad after marker\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": "bad\non:Good\n?\noff:END\nEND\nbad after marker\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:Good\nAccepted count: 1\nRemaining input:\nbad after marker\n",
+            "stderr": "Skipped invalid record: bad\nSkipped invalid record: ?\n",
+            "status": 1,
+            "after": {
+              "/work/source.txt": "bad\non:Good\n?\noff:END\nEND\nbad after marker\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Whitespace has a stated literal meaning",
+            "args": [],
+            "stdin": " END\non: \nEND\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": " END\non: \nEND\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on: \nAccepted count: 1\nRemaining input:\n",
+            "stderr": "Skipped invalid record:  END\n",
+            "status": 1,
+            "after": {
+              "/work/source.txt": " END\non: \nEND\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          },
+          {
+            "name": "Unicode names and literal hash are data",
+            "args": [],
+            "stdin": "on:Café\non:# sign\nEND\n\n",
+            "env": {},
+            "files": {
+              "/work/source.txt": "on:Café\non:# sign\nEND\n\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            },
+            "stdout": "Accepted: on:Café\nAccepted: on:# sign\nAccepted count: 2\nRemaining input:\n\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "on:Café\non:# sign\nEND\n\n",
+              "/work/keep.txt": "Unrelated intake notes.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "count=0\nstatus=0\nfound=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  case \"$line\" in\n    ''|'#'*|off:*) continue ;;\n    END) found=yes; break ;;\n    on:?*) true ;;\n    *) printf 'Skipped invalid record: %s\\n' \"$line\" >&2; status=1; continue ;;\n  esac\n  printf 'Accepted: %s\\n' \"$line\"\n  count=$((count + 1))\ndone\nif test \"$found\" = no; then\n  printf 'Missing END marker.\\n' >&2\n  status=2\nfi\nprintf 'Accepted count: %s\\nRemaining input:\\n' \"$count\"\ncat\nexit \"$status\"\n"
+      ],
+      "unit": "shell-loop-recovery",
+      "prerequisites": [
+        "shell-preserve-lines",
+        "shell-number-records",
+        "shell-case-interface"
+      ],
+      "teaching": {
+        "prerequisite_note": "Revisit line-preserving reads, case patterns, counters and exit status in the named prerequisites. This unit introduces skipping the current iteration and stopping a loop without ending the script. The example is separate, ungraded practice; your assignment draft is preserved.",
+        "concepts": [
+          {
+            "title": "Skip this item, keep the loop",
+            "text": "continue stops the remaining commands in the current iteration. The loop then asks for its next item. In the example, skip is ignored without ending the selection."
+          },
+          {
+            "title": "Stop this loop, keep the script",
+            "text": "break leaves the nearest active loop. Commands after done still run. exit ends the whole script instead, so it would lose the summary and the remaining-input handoff."
+          },
+          {
+            "title": "Read one whole record",
+            "text": "The assignment receives finite standard input. IFS= read -r line preserves spaces and backslashes; || test -n \"$line\" keeps a final line without a line break. This was taught in Keep every label while reading text."
+          },
+          {
+            "title": "Recognize only the stated records",
+            "text": "A case matches the whole line. on:?* requires on: followed by at least one character. Empty, # at the first character and off: records are skipped. Leading spaces are data, not silently trimmed."
+          },
+          {
+            "title": "Keep the tail for the next stage",
+            "text": "Read only as far as END. After leaving the loop, cat copies whatever standard input has not yet been read, including its final line-break choice. Reading everything in advance would consume that tail."
+          },
+          {
+            "title": "Keep a useful overall result",
+            "text": "Count accepted records, warn and continue after invalid pre-marker records, then report status 1. If END never arrives, report the separate missing-marker error/status 2. Ordinary completion is 0; later reporting commands must not erase that decision."
+          }
+        ],
+        "example": "for exhibit in lamp skip frame stop vase; do\n  case \"$exhibit\" in\n    skip) continue ;;\n    stop) break ;;\n  esac\n  printf 'Kept: %s\\n' \"$exhibit\"\ndone\n",
+        "inputs": "The example creates its exhibit list itself; it has no arguments or input. gallery-notes.txt is separate practice data and stays unchanged. The assignment instead receives a line stream and source.txt audit copy.",
+        "try_change": "Move stop to the front of the exhibit list and Run example. Nothing should be kept. Restore the original list to repair the example.",
+        "fixture": {
+          "name": "Gallery selection example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/gallery-notes.txt": "Practice notes stay unchanged.\n"
+          },
+          "stdout": "Kept: lamp\nKept: frame\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/gallery-notes.txt": "Practice notes stay unchanged.\n"
+          }
+        }
+      },
+      "retry_guidance": "If the summary disappears, inspect exit versus break. If skipped rows are counted, inspect continue. If the tail is missing, check for an early whole-input read; if its final newline changes, forward it with cat rather than printf on a capture."
+    },
+    {
+      "id": "shell-loop-fallback",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Loop control and local recovery",
+      "title": "Recover each delivery job independently",
+      "summary": "Choose the first ready source within a budget without abandoning other jobs or damaging failed outputs.",
+      "objective": "Arguments are LIMIT followed by 1–4 job IDs. LIMIT is exactly 1 or 2. Each ID is 1–8 characters: a–z first, then a–z, 0–9 or hyphens. For example, job scan uses scan.primary, scan.backup and scan.result. Process jobs in argument order, including repeats. For each valid ID, inspect ID.primary and then ID.backup, trying no more than LIMIT candidates. A candidate is usable only if its first line is exactly READY; an ending newline is optional, extra spaces or a carriage return are not. Copy the first usable candidate’s entire original content to ID.result, then print “Copied ID from primary.” or “Copied ID from backup.” on stdout. Do not try later candidates after success. If neither permitted candidate is usable, print “Unavailable: ID” on stderr and preserve its previous result (or keep it absent). Invalid IDs print “Invalid job: ID” on stderr and do not touch files. Continue other jobs; return 1 if any job failed, otherwise 0. Wrong argument count first gives “Usage: fallback LIMIT JOB...”; otherwise a bad LIMIT gives “Limit must be 1 or 2.” Both global errors return 2 with no stdout or file changes. Messages end in a newline. Preserve all source and unrelated files; successful jobs remain copied even if another job fails.",
+      "difficulty": "Advanced",
+      "minutes": 34,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Keep the complete assignment visible. Learn mode has a skippable introduction and separate practice example.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Control changes where execution continues. It must preserve the data and status required by the assignment.",
+          "action": "Write the complete script in the assignment editor and Run. Inspect the first failing case and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "Correct output, error status and unchanged files matter together.",
+          "action": "Use optional hints or a worked explanation when needed. Challenge keeps the full independent assignment.",
+          "commands": []
+        }
+      ],
+      "explanation": "Follow the assignment’s policy at each boundary, then report the combined result. The reference below is one supported solution; equivalent behavior is accepted.\n\nOne supported solution, available on request:\nvalid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n",
+      "hints": [
+        "Validate argument count and the literal1|2 limit before shift or any file changes. Reject bad IDs before building source paths.",
+        "Put the candidate for loop inside a helper. Inspect .primary before .backup; clear header before each read and compare its text, not read status alone.",
+        "Open ID.result only after a ready header, copy with cat, then break that helper’s loop. Return the job result and preserve an independent caller failure flag."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/break.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/continue.html"
+      ],
+      "simplifications": "All files, standard input and execution are simulated offline. No host commands/files/network or real timing. break/continue are portable shell concepts; this simulator supports only own-scope for/while loops, optional canonical ASCII counts 1–24, and no loop transfer through pipeline stages or caller functions/captures. Unimplemented syntax is an honest diagnostic. Flat UTF-8 virtual files only, bounded instructions/output/memory. No real locks, atomic rename, concurrent writers or crash recovery.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the full assignment here. Run supplies each test’s input.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "First ready candidate wins; another job needs backup",
+            "args": [
+              "2",
+              "alpha",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nAlpha preferred\n",
+              "/work/alpha.backup": "READY\nAlpha alternate\n",
+              "/work/beta.primary": "STALE\nDo not publish\n",
+              "/work/beta.backup": "READY\nBeta recovery\n",
+              "/work/alpha.result": "old alpha\n",
+              "/work/beta.result": "old beta\n"
+            },
+            "stdout": "Copied alpha from primary.\nCopied beta from backup.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nAlpha preferred\n",
+              "/work/alpha.backup": "READY\nAlpha alternate\n",
+              "/work/beta.primary": "STALE\nDo not publish\n",
+              "/work/beta.backup": "READY\nBeta recovery\n",
+              "/work/alpha.result": "READY\nAlpha preferred\n",
+              "/work/beta.result": "READY\nBeta recovery\n"
+            }
+          },
+          {
+            "name": "One-attempt budget cannot borrow the backup",
+            "args": [
+              "1",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.backup": "READY\nAvailable but outside budget\n",
+              "/work/alpha.result": "keep failed alpha\n"
+            },
+            "stdout": "",
+            "stderr": "Unavailable: alpha\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.backup": "READY\nAvailable but outside budget\n",
+              "/work/alpha.result": "keep failed alpha\n"
+            }
+          },
+          {
+            "name": "A failed first job does not cancel the next job",
+            "args": [
+              "2",
+              "alpha",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "STALE\n",
+              "/work/alpha.result": "keep failed alpha\n",
+              "/work/beta.primary": "READY\nBeta completes\n",
+              "/work/beta.result": "old beta\n"
+            },
+            "stdout": "Copied beta from primary.\n",
+            "stderr": "Unavailable: alpha\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "STALE\n",
+              "/work/alpha.result": "keep failed alpha\n",
+              "/work/beta.primary": "READY\nBeta completes\n",
+              "/work/beta.result": "READY\nBeta completes\n"
+            }
+          },
+          {
+            "name": "Reject a slash in one ID and keep working",
+            "args": [
+              "2",
+              "bad/name",
+              "beta"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/beta.primary": "READY\nUseful work\n"
+            },
+            "stdout": "Copied beta from primary.\n",
+            "stderr": "Invalid job: bad/name\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/beta.primary": "READY\nUseful work\n",
+              "/work/beta.result": "READY\nUseful work\n"
+            }
+          },
+          {
+            "name": "Empty and CR headers reject; a final READY needs no newline",
+            "args": [
+              "2",
+              "empty",
+              "cr",
+              "last"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/empty.primary": "",
+              "/work/empty.backup": "READY\nEmpty recovered\n",
+              "/work/cr.primary": "READY\r\nWrong header\n",
+              "/work/cr.backup": "READY\nCR recovered\n",
+              "/work/last.primary": "READY",
+              "/work/last.result": "old final\n"
+            },
+            "stdout": "Copied empty from backup.\nCopied cr from backup.\nCopied last from primary.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/empty.primary": "",
+              "/work/empty.backup": "READY\nEmpty recovered\n",
+              "/work/cr.primary": "READY\r\nWrong header\n",
+              "/work/cr.backup": "READY\nCR recovered\n",
+              "/work/last.primary": "READY",
+              "/work/last.result": "READY",
+              "/work/empty.result": "READY\nEmpty recovered\n",
+              "/work/cr.result": "READY\nCR recovered\n"
+            }
+          },
+          {
+            "name": "Repeated jobs remain separate requests",
+            "args": [
+              "2",
+              "alpha",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nFirst choice\n",
+              "/work/alpha.backup": "READY\nSecond choice\n"
+            },
+            "stdout": "Copied alpha from primary.\nCopied alpha from primary.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nFirst choice\n",
+              "/work/alpha.backup": "READY\nSecond choice\n",
+              "/work/alpha.result": "READY\nFirst choice\n"
+            }
+          },
+          {
+            "name": "ASCII validation rejects a Unicode lookalike ID",
+            "args": [
+              "2",
+              "équipe",
+              "gamma"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/gamma.primary": "READY\nGamma\n"
+            },
+            "stdout": "Copied gamma from primary.\n",
+            "stderr": "Invalid job: équipe\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/gamma.primary": "READY\nGamma\n",
+              "/work/gamma.result": "READY\nGamma\n"
+            }
+          },
+          {
+            "name": "Unavailable job keeps an absent result absent",
+            "args": [
+              "2",
+              "missing"
+            ],
+            "env": {},
+            "stdin": "",
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n"
+            },
+            "stdout": "",
+            "stderr": "Unavailable: missing\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n"
+            }
+          },
+          {
+            "name": "Valid one-character, digit-hyphen and eight-character IDs",
+            "args": [
+              "2",
+              "a",
+              "a-1",
+              "abcd1234"
+            ],
+            "env": {},
+            "stdin": "",
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/a.primary": "READY\nOne-character ID\n",
+              "/work/a-1.primary": "READY\nDigit and hyphen\n",
+              "/work/abcd1234.primary": "READY\nEight-character ID\n"
+            },
+            "stdout": "Copied a from primary.\nCopied a-1 from primary.\nCopied abcd1234 from primary.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/a.primary": "READY\nOne-character ID\n",
+              "/work/a-1.primary": "READY\nDigit and hyphen\n",
+              "/work/abcd1234.primary": "READY\nEight-character ID\n",
+              "/work/a.result": "READY\nOne-character ID\n",
+              "/work/a-1.result": "READY\nDigit and hyphen\n",
+              "/work/abcd1234.result": "READY\nEight-character ID\n"
+            }
+          },
+          {
+            "name": "Overlong ID is a per-job failure",
+            "args": [
+              "2",
+              "ninechars",
+              "ok"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/ok.primary": "READY\nShort ID\n"
+            },
+            "stdout": "Copied ok from primary.\n",
+            "stderr": "Invalid job: ninechars\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/ok.primary": "READY\nShort ID\n",
+              "/work/ok.result": "READY\nShort ID\n"
+            }
+          },
+          {
+            "name": "Zero budget is rejected before any job",
+            "args": [
+              "0",
+              "alpha"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            },
+            "stdout": "",
+            "stderr": "Limit must be 1 or 2.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/alpha.primary": "READY\nNo write\n",
+              "/work/alpha.result": "retain\n"
+            }
+          },
+          {
+            "name": "Only exact READY header is eligible",
+            "args": [
+              "1",
+              "dash"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/dash.primary": " READY\nNot exact\n",
+              "/work/dash.backup": "READY\nOutside budget\n",
+              "/work/dash.result": "preserve previous\n"
+            },
+            "stdout": "",
+            "stderr": "Unavailable: dash\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated delivery notes.\n",
+              "/work/dash.primary": " READY\nNot exact\n",
+              "/work/dash.backup": "READY\nOutside budget\n",
+              "/work/dash.result": "preserve previous\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "valid_job() {\n  case \"$1\" in\n    ''|*[!a-z0-9-]*|?????????*) return 1 ;;\n    [a-z]*) return 0 ;;\n    *) return 1 ;;\n  esac\n}\ncopy_job() {\n  local job=\"$1\" limit=\"$2\" attempt=0 source='' header='' found=1\n  for side in primary backup; do\n    attempt=$((attempt + 1))\n    if test \"$attempt\" -gt \"$limit\"; then break; fi\n    source=\"$job.$side\"\n    if test -f \"$source\"; then\n      header=''\n      IFS= read -r header < \"$source\"\n      if test \"$header\" = READY; then\n        cat -- \"$source\" > \"$job.result\"\n        printf 'Copied %s from %s.\\n' \"$job\" \"$side\"\n        found=0\n        break\n      fi\n    fi\n  done\n  return \"$found\"\n}\nif test \"$#\" -lt 2 || test \"$#\" -gt 5; then\n  printf 'Usage: fallback LIMIT JOB...\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2) limit=\"$1\" ;;\n  *) printf 'Limit must be 1 or 2.\\n' >&2; exit 2 ;;\nesac\nshift\nfailed=0\nfor job in \"$@\"; do\n  if valid_job \"$job\"; then\n    if copy_job \"$job\" \"$limit\"; then\n      true\n    else\n      printf 'Unavailable: %s\\n' \"$job\" >&2\n      failed=1\n    fi\n  else\n    printf 'Invalid job: %s\\n' \"$job\" >&2\n    failed=1\n    continue\n  fi\ndone\nexit \"$failed\"\n"
+      ],
+      "unit": "shell-loop-recovery",
+      "prerequisites": [
+        "shell-loop-intake",
+        "shell-numeric-retry",
+        "shell-scope-capstone",
+        "shell-return"
+      ],
+      "teaching": {
+        "prerequisite_note": "This capstone assumes the intake lesson, numeric validation, function return status and Bash local scope. Reopen those prerequisites if needed. Learn mode explains the first-success policy; Challenge keeps the same complete independent job assignment.",
+        "concepts": [
+          {
+            "title": "One failed job does not undo another",
+            "text": "This task commits each successful job independently. Preserve the previous result of an unavailable job, report it and keep processing later jobs. This differs from the earlier all-or-nothing plan-publication tasks."
+          },
+          {
+            "title": "Bound the request before using it",
+            "text": "Require a single-digit limit 1 or 2 before arithmetic. A job ID is 1–8 ordinary characters: a–z first, then a–z, 0–9 or hyphens. These exact characters are called ASCII; look-alikes are different. Reject a bad ID as one job failure before constructing a filename."
+          },
+          {
+            "title": "Investigate candidates in order",
+            "text": "For a job, try its .primary file first and .backup second, within the limit. test -f checks virtual existence. Read the first line into a cleared header variable; only exact READY is usable. A final READY without a newline still supplies that header even when read returns1."
+          },
+          {
+            "title": "Choose before opening the destination",
+            "text": "Read and check the header before redirecting output. Only a chosen candidate may replace JOB.result; cat copies its whole original text and line endings. An empty, missing or differently spelled header is not ready."
+          },
+          {
+            "title": "Stop the helper’s own loop",
+            "text": "break ends the candidate loop after its first successful copy. It does not end the caller’s job loop. return reports the helper’s result. local keeps helper working variables separate and is Bash-specific; a portable helper with distinct variable names is also valid."
+          },
+          {
+            "title": "Keep the batch status",
+            "text": "A job reports Copied or a specific error. Keep a separate overall failure flag and exit 1 if any job failed; a later success must not reset it. Handle repeated IDs as repeated requests in order. Never use exit inside the helper to abandon later jobs."
+          }
+        ],
+        "example": "choose_card() {\n  local candidate='' header='' found=1\n  for candidate in front-card reserve-card; do\n    header=''\n    IFS= read -r header < \"$candidate\"\n    if test \"$header\" = AVAILABLE; then\n      cat -- \"$candidate\" > gallery-card.txt\n      printf 'Chosen: %s\\n' \"$candidate\"\n      found=0\n      break\n    fi\n  done\n  return \"$found\"\n}\nchoose_card\n",
+        "inputs": "Both practice card files start AVAILABLE and contain different text. The example chooses front-card and replaces only gallery-card.txt; no arguments are supplied. These names and the AVAILABLE marker differ from the assignment.",
+        "try_change": "Remove the break line and Run example. Both choices are copied and the reserve text overwrites the first choice. Restore break to keep the first usable card.",
+        "fixture": {
+          "name": "Gallery card example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/front-card": "AVAILABLE\nMain gallery\n",
+            "/work/reserve-card": "AVAILABLE\nReserve gallery\n",
+            "/work/gallery-card.txt": "Old display\n",
+            "/work/gallery-notes.txt": "Practice only.\n"
+          },
+          "stdout": "Chosen: front-card\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/front-card": "AVAILABLE\nMain gallery\n",
+            "/work/reserve-card": "AVAILABLE\nReserve gallery\n",
+            "/work/gallery-card.txt": "AVAILABLE\nMain gallery\n",
+            "/work/gallery-notes.txt": "Practice only.\n"
+          }
+        }
+      },
+      "retry_guidance": "If the backup overwrites a ready primary, inspect break or your done flag. If a failed result becomes empty, find an early > redirect. If later jobs disappear, inspect exit inside a helper. If only final READY files fail, check the stored header even when read returns1."
+    }
+  ]
+}

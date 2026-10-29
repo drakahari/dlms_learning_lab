@@ -1,209 +1,152 @@
 # Continue the complete Learning Lab implementation
 
-Updated2026-10-29. Continue the owner's authorized full curriculum automatically
-through tested, reviewed, committed/pushed batches. Do not stop at this checkpoint,
-a small source batch or a Fedora package. No arbitrary lab-count target. Work
-only here: native Rust/egui, offline bounded simulation,28themes, approved complete
-assignments and skippable Introduction → separate practice → Assignment. Preserve
-all progress. MIT is approved. No public release, unrelated-project edits, host
-learner execution or desktop/GPU/swap/service/model changes. No owner decision
-blocks current independent work. Read BUILD_WORKFLOW.md before heavy commands.
+Updated2026-10-29. Continue the owner's authorized full curriculum through tested,
+reviewed, committed/pushed batches. Do not stop at a checkpoint, small batch or
+Fedora package. No arbitrary lab-count target. Work only here: native Rust/egui,
+offline bounded simulation,28themes, approved complete assignments and skippable
+Introduction → separate practice → Assignment. Preserve all progress. MIT approved.
+No public release, unrelated-project edits, host learner execution or desktop/GPU/
+swap/service/model changes. No owner decision blocks current independent work.
+Read BUILD_WORKFLOW.md before any heavy build/test/reference/native command.
 
-## Current Main and actual coverage
+## Current implemented catalog and verified scope
 
-Main contains180 authored assignments/47units:53CCNA/14units,40LPIC-1/10,
-32LPIC-2/8,55Bash/15. Evaluator12. Four newly integrated OneOff tasks preserve
-all176 predecessor definitions/46raw units and55scripts/420cases/55examples.
-Core foundation commits929cd20 andc03999c are pushed; the180 source append and
-updated docs are not yet committed. Earlier5410fb9/96e78de/c9faed4 remain pushed.
+Normal182 assignments/48units:53CCNA/14units,40LPIC-1/10,32LPIC-2/8,57Bash/16.
+Evaluator13;57scripts/442cases/57examples. All180 predecessor definitions/47raw
+units and original55scripts/420cases/55examples remain pinned. Core929cd20/
+c03999c and OneOff180/2b61300 are pushed; the current182 milestone has passed its
+implementation gates and is being committed/pushed. See CATALOG182_MILESTONE.md.
 
-Current coverage175Partial/1Supporting/1064Open over1240 overlapping references;
-all136 parents remain incomplete(94Open/42Partial). Only107.2.T9/T10/T11 gain
-narrow at/atq/atrm practice;107.2/K1 strengthen. At access files, timers, services,
-spool, overlap/locking, real time and full utility/shell behavior remain absent.
-Current CCNAv1.1/LPIC-1v5.0/LPIC-2v4.5; upcomingCCNAv2.0 separate. Requirements,
-every gap and authoring queue: COMPLETION.md, OBJECTIVE_MAPPING.md,
-SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md. Pure libraries/proposals are
-not curriculum credit. No full exam-preparation or mastery claim.
+Coverage175Partial/1Supporting/1064Open over1240 overlapping references, not a
+completion percentage. All136 parents incomplete(94Open/42Partial). Only already
+Partial105.2/K3 strengthen for loop recovery. CCNAv1.1/LPIC-1v5.0/LPIC-2v4.5;
+futureCCNAv2.0 remains separate. Every remaining reference/assignment is recorded
+in COMPLETION.md, OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and
+CURRICULUM_RECONCILIATION.md. Pure models/proposals earn no curriculum credit.
 
-## Current Main verification; finish and commit180, then continue182
+## Actual182 acceptance and retained source
 
-- M332 latest inclusive Main:2482PASS/0FAIL/0ignored/196harnesses, all actual
-  history groups, on preceding176+LVM/commit929cd20. Fullyreaped11048exit0;
-  receiptb6fcf2e32ee2f3f1cdce3db3066c0875d4188e0b8bd51c9bfe0688d6719efd91.
-  No compiled-source mutation. Minavailable21043863552B/PSI0/swapout0/OOM0.
-  Do not relabel this a current180 inclusive result.
-- Main180 assembly175paths: reviewed174closedunionad466be3 (peerf4eeed2f)
-  plus exact previously reviewed5line Ether Goal-aware test preparation branch
-  (peer5f0b04a7). Initial M354156total/154PASS2fixtureFAIL; after the omitted
-  helper was included M355 all17 affected testsPASS. Existing assertions/scenarios
-  retained. All W→Main code/data differences are intentional Main library core
-  exports and the newer MAIN development runner; no other test fix is omitted.
-- M356 MainOneOff UI32PASS/full906-step real-event controller; M357 Main
-  all-targetClippy-DwarningsPASS. M359 coverage180/1240PASS. M358 had correctly
-  rejected unused unit metadata in scenarios/: moved exact8c8b3231 bytes to
-  tests/fixtures/one-off-unit-proposal.json, raw registered unit unchanged, no
-  references/runtime change and validator unchanged. Keep only real packs plus
-  units-v1.json in scenarios/.
-- M360Python346PASS/2current-consumerFAIL: old43/44 historical assertions lacked
-  the new47→46 inverse. Added exactc472recipe before unchanged46→45→44 chain,
-  currentcount47 and OneOfftampernegative; immutable collectors untouched.
-  M361 all348PythonPASS, fullyreaped49235. No heavy invocation is active.
-  Source/docs privacy/format/diff gates then commit/push180. Main
-  unified inclusive remains pending with the next coherent182 integration.
+- M362six targets47PASS2catalog-helperFAIL; replace wrong empty-guide assumption
+  with full guide equality/four tamper negatives. M363catalog5PASS; M364native
+  phase-controller10PASS.
+- M365inclusive2679PASS4FAIL in three current-consumer files. Exact reviewed
+  remedy99fb6c76 keeps47-prefix/current48 tuple, selected OneOff IDs rather than
+  catalog tail, and complete178foreign-source matrices including both newScript
+  identities/absent fabricated credit. M366all19affectedPASS.
+- M367full inclusive2683PASS/0FAIL/0ignored208harnesses, fullyreaped26935exit0;
+  all995source paths unchangedaa9bfbeb. Receipt16da8340ea9902ea318e69e10e010ae6b6d395c636bd7ad3604b65cf5c800c95.
+  Minavailable23788412928B/PSI0/swapout0/OOM0. All genuine historical groups run.
+- Postfull two lint-only inner dead_code attributes in shared test/developer
+  one_off_boundary/loop_registration helpers; every function body/assertion
+  unchanged, independently reviewed. M370alltargetClippy-DwarningsPASS;
+  M371348PythonPASS; M372coverage182/1240PASS.
+- M373ordinary native build retained before furtherCargo:
+  .build-artifacts/reviews/bash-loop-recovery/main182-native-m373/dlms-learning-lab
+  209141160B SHA4895101a21415dd96e66c0e3656506270b55d2b5dd2f8a944afaaad80bc6a6ff;
+  full995-source archive digest75d9b447af47258de090584b4e51247265746c154645990696effd6ba1bcfa2b.
+- M374restricted pre-windowNoCompositor is separate from app failures. Approved
+  desktop M375exactretainedELF completes82captures/all2tasks/ref+2alts/wrongpartial/
+  examples/keyboardUndo/RunStop/limits/reset/raw+portable warmContinue and exits0,
+  fullyreaped59731. Receipt62596115c2d5cd8479dede8f386f6893008abf6843b62ced087783e0ebeee617.
+  Screens .build-artifacts/native-runs/run-_5hm7oh8/screenshots/workspaces.
+  Root14originals plus independent9originals46c13aa1: no material finding in selected
+  views.20representative width/scale/theme settings plus capstone200% task slices,
+  not every control/all28themes or novice/device/reader/otherOS acceptance.
+  Minavailable24101380096B/PSI0/swapout0/OOM0. Source unchanged during native.
 
-All heavy work uses MAIN absolute tools/dev.py, one shared lock, Cargo2jobs/Rust
-2threads, separate checkout targets and verified NVMe-backed artifacts. No second
-heavy invocation. No new large /tmp data or cleanup without exact approval.
-Never mutate compiled checkout source during a heavy run. Workers are source-only.
+No active heavy invocation remains after M375. Use MAIN absolute tools/dev.py,
+one shared lock, Cargo2jobs/Rust2threads, exclusive checkout targets and verified
+NVMe-backed artifacts. No concurrent heavy work/new large/tmp/cleanup. Do not
+mutate a compiled checkout while its command runs. Workers are source-only.
 
-## Actual OneOff180 native evidence, retained identities
+## Immediate continuation: genuine13 baseline, then LVM186/NTP190
 
-W .build-artifacts/worktrees/curriculum-network176; exclusive target
-.build-artifacts/targets/curriculum-network176-ebbe88e9a1000408. Its source is
-still180/evaluator12, separate from Main extra pure libraries/development tools.
+1. Finish scoped182 documentation/coverage/privacy/format checks, commit and push.
+2. Apply reviewed before14 capture helpers ONLY after narrowly rebasing their
+   compiled-source pins to the two helper lint attributes/current accepted182.
+   Do not advance evaluator14 until actual13capture is independently sealed.
+3. Apply closed normal186 LVM integration, run25scoped groups/old-family regressions/
+   Clippy/Python/coverage and actual native four-task flows, then commit/push.
+4. Integrate normal190 NTP on that exact186 composition, preserving the combined
+   source-aware progress boundary. Continue other ledger gaps without stopping.
 
-M338906-phase native controller pair2PASS, M336old30UI PASS; M34372core/content/
-workspace/registrationPASS. Root corrected real driver defects, retaining all
-assertions: natural separate hover (no parent-scroll drag), deferred ShiftTab,
-actual popup x for wheels, stable geometry/Env acknowledgements and real RunStop.
-A short authored Check can finish before Stop: current route queues4 actual
-32-command jobs through native editor/terminal, snapshots prepared work, stops
-Run, checks24idle/warmBack/resume, then selected Reset and actual reference work
-again. It never fabricates a Goal/proof or reduces production work budgets.
+Before14 R2 .build-artifacts/reviews/bash-ere-integration-before14-source-r2/
+MANIFEST.json754bec52c9550d4f327aedf414135c6ad12ba6ff7c46d3c60a1be689ecb9f578;
+patch6b839974. Sevenpaths/fivenew/29prospectivePython groups UNRUN. PeerACKa168bb43
+fixes all five R1 findings: correct prior12manifest key, preserved practice source
+correspondence, rawCRLF refusal/escaped\r acceptance, current transitive
+native_reopen.py in708-source closure, and before-shell-v13 filename holding
+raw12bytes. R2 still needs current lint-pin rebase, actual build/prepare/exact
+source+compiler+ELF approval/capture/readback/seals.57/442/57, genuine12raw145
+contexts55Script90nonScript plus only2actuallyrunLoop contexts→147;35nonScript stay
+absent. Two entire authentic unfinished Attempts/practice remain unchanged.
+Original9–12 producers/helpers/source/captures stay immutable. No actual13baseline
+or14semantics is accepted from source-only proposals.
 
-M341 actual native all4tasks/ref+2alts/wrongpartial/examples/owner+capture/reset/
-warmresume/keyboard/Stop/20settings/53PNGs exits0 after1155.603s, fullyreaped89985.
-Before source9619b572e01, ELF208470720Ba7c92e31. Original53screens/full961-source
-archive retained under .reviews/one-off/actual-native180-m341-r1; original dev ELF
-was subsequently replaced by ordinary Cargo integration builds, so hash identifies
-that run rather than an available binary. Independent37original PNG reviewe635638f
-plus3Rootviews found five presentation issues; no renderer/backend change.
+Normal186 R2 .build-artifacts/reviews/lvm-normal186-source-r2/MANIFEST.json
+3ee97405ca239dcdfa5a3e76b9dea72b747fad288be2ed0caf65294b2cd00316;
+patcha7d3a3af.71owned12new936protected against actual182 plus only2lint attrs.
+Peer fullR1ACK4d4edb34 + narrowR2ACK. OriginalR3fourtask pack/prediction bytes and
+six UI bodies remain exact;9content+9UI+7registration=25UNRUN. Four tasks: free
+pool growth, new blankPV, filesystem-only diagnosis, preserved two-volume handover.
+Native author uses NATIVE-HANDOFF.json, real widgets/events, no invented state/
+proof. Preserve later before14 tool/source deltas narrowly rather than overwriting
+stale whole afterimages. shared Save must source-admit every current LVM attempt
+before the unchanged writer, full current catalogs/matrices retain new sources.
 
-CompactR205bfdb52/sourcepeer4f5f00ca fixes prerequisite jargon, six-row empty file
-reserve, stretched labels, repeated permanent detail and green bookkeeping before
-the real failure. Grading indices/truth unchanged; only four prerequisite notes
-change in the pack (newd469ba09; canonical recipe c472de75). M34232UI/M34372
-contentPASS. Root added a real indexed-failure-first capture assertion at all4
-wrong screens; M34532UI/full906routePASS. QA idle50ms onlyOneOff (others350ms)
-keeps all explicit Undo1.2s/wheel150ms/geometry/capture/Stop/15s/300poll guards.
+NTP unitR2 .build-artifacts/reviews/ntp-unit-source-r2/MANIFEST.json
+5105468f33bcf507396bd24d07af0dfc912085b1fbe36d62815241980c9dd218;
+peer4e4deafe. Four distinct chain/cycle/asymmetric-return/policy-handover tasks,
+compact native topology/optional inventory/source-aware save/load/restore. Old
+14content+9UI and prospective7registration =30UNRUN in upcoming normal190
+composition by Selection, based on exact virtual186. No normal registration,
+new objective credit, clock/network/daemon change or accepted runtime yet.
 
-M349alltargetClippy/M350ordinarybuildPASS. Retained exact current executable:
-.build-artifacts/reviews/one-off/polished180-m350-build/dlms-learning-lab
-208481936B SHAe1acf8d2a7ab9a1b40e63d3857214a38a3cf8f8ee4aa22d5b70b6771c0dee61a;
-source961 digestb24ca8a110707992727fe4675c2cd74046e07900b718ee7a308a2b236ca9f114.
-M353 actual polished repeat all53/20settings/all4flows exits0 in300.151s,
-fullyreaped84261. Receipt3ad6d7f9ad1509f122232f7cedf36c161f51eae5bc6d99bf0df4f118c45b5cbd.
-Source unchanged, retained executable used. Independent16originals reviewed with
-same-name before pins, peer3800af68; Root3originals. All4 failures visible first;
-readability/alignment across5scales/twowidths/LightDark and200% goal edges checked.
-Populated multi-job label not independently viewed in those16; not all53 controls
-or28themes/novice/screen-reader/physical-device/otherOS/package acceptance.
-Minavailable24204206080B/PSI0/swapout0/OOM0. Private screenshots remain ignored:
-.native-runs/run-shylqp_e/screenshots/workspaces (before run-x3rzjbhb).
+## Further foundations, not curriculum credit
 
-## Next shell182 closed proposals; apply narrow current-source composition
+Main LVM16/NTP18/ERE16 core groups PASS(M34450, M34716ERE), Clippy/Python baseline
+PASS; no learner ERE utility or authored LVM/NTP credit until units accepted.
+Strict resize2fs uses /dev/VG/LV; all15old assertions plus16th shorthand refusal.
+ERE42bc6a56 is bounded C-byte ThompsonNFA without dependencies. compile_work is not
+complete VM instruction accounting; cooperative VM utility/global work/memory/Stop
+integration is being proposed source-only for14. Original grep-F behavior remains.
 
-Normal182R4 .reviews/bash-loop-recovery/normal182-source-r4/MANIFEST.json
-721f74fd237620cf0d5518c4a29e30e3f36639101efb3499662889c2bf8e998b;
-75owned/15new. NativeR2 .reviews/bash-loop-recovery/native182-source-r2/
-MANIFEST.json02d4d905c5a8f4382c73eb3b7576a5e44bf85ddf336e6389d2261b4e4a82ea0c,
-8paths/3new. Override only its smoke.rs afterimage using compact pacing delta
-.reviews/bash-loop-recovery/native182-source-r3-pacing-delta/MANIFEST.json
-92f1089021a93b2010f312359283e99cceb3e82f386fbd76f9ce3ac4d8a1a582.
-Other75+7 afterimages unchanged. Add one-file Python182 current inverse
-.reviews/bash-loop-recovery/python182-current-inverse-r1/MANIFEST.json
-931f097b8aef5ae37b22f2dc6d64baaf6090c488c4d4a964ae8af1eed27d4e91,
-patch60db6111; applies only after unit48, preserves Root47 and all old44/43 guards.
-Source peers0f7991c3/f55e7b73 and exact rebases
-retain all original55/420/55/history and polished OneOff data/recipes.
+FixedEREcollectorR2 .build-artifacts/reviews/ere-reference/source-r2/MANIFEST.json
+5ccc5055f9602b1a692971c61364136a7a8f2c4fb5635d40cfc82bf38a636268,
+patch edc1e3dd, peer59f33d07. Fivepaths/14guards UNAPPLIED/UNRUN. Build/pin/approve
+exact source/compiler/ELF/GNU before34fixed GNU comparisons and8VM-only exclusions.
+No arbitrary patterns/scripts/probes/checkout selectors or learner-host execution.
 
-DO NOT copy stale whole files: Main library has LVM/NTP exports; Ether helper is
-bf11; shared UI Clippy cleanup50962 and input78bc preserved; OneOff native current
-has Root's later failure-first assertion beyond0d06. Apply ONEOFF-COUNT-ONLY
-metadata hunks to current driver/test, preserving906/53 and Root assertions.
-One new authoring-file relocation above is intentional; older protected manifests
-still list its scenarios/ path. Preserve bytes at tests/fixtures instead.
+HSRP pure .reviews/hsrp-foundation-source-r1/MANIFEST.json b7adcb80,18UNRUN;
+links pure .reviews/links-foundation-source-r1/MANIFEST.json b8adc39a,16UNRUN.
+IndependentjointsourceACK9e2ae60b. HSRP preserves incumbent/strict-priority preempt/
+initialIPtie and explicit stableLAN/timer/partition limits. Links models actual
+inode aliases/copies/physical symlink-before-parent traversal/40hop/dangling/
+no-follow observations/atomic bounded persistence, separate from old Tree. Neither
+has Goal/UI/content/coverage yet. Backup directory-selection proposals also remain
+unregistered. Rebase/test and author before counting any.
 
-This adds2distinct scripts/1unit,57scripts/442cases/57examples; normal182/48
-=53CCNA/40LPIC-1/32LPIC-2/57Bash. Nothing counts until current normal integration
-and gates. Scope: real owned-loop break/continue, stream handoff and independent
-fallback jobs. No caller-loop/function/pipeline control escape. Pure13 isolated
-full2376PASS/all27 actualhistorygroups/Clippy PASS, receipt0a1b509b. Content10PASS
-(ref+2alts/22cases/wrongpartialhardcodes/examples/resetresume). Actual fixed16
-Bash comparisons match+8honest exclusions; manifest20767c35/attestation1aaa1c27.
-Native2-script82capture/10paired-group source remains unrun. After normal182
-apply, notify selection_review with exact source receipt for LVM186 closed rebase.
-
-## LVM186 and NTP190 units: reviewed source, unrun, unregistered
-
-LVM unitR3 .reviews/lvm-unit-source-r3/MANIFEST.json0159fe3dd186e45dfcaf859713b732066da8625d1dfbf4d63f1871b616a0f44b;
-sourcepeer5cae90b7.28paths/7new,9content+6UI=15UNRUN. Doc-only38fd42d9 fixes old
-2UI/11 wording. R3 fixes shared controls, ASCII/UTF8 dropped-paste/Enter ordering,
-deep Undo/selection, readable capacities/status and retry errors. Four distinct
-free-pool/new-PV/filesystem-only/preserved-handover assignments with separate
-practice. Strict core16MainPASS uses real resize2fs /dev/VG/LV syntax. No host LVM.
-
-selection_review is preparing .reviews/lvm-normal186-source-r1 DRAFT on actual
-Main182: mandatory OneOff optional-field/refusal/exhaustive merges, shared Next,
-reset/Undo, strict complete182prefix/raw49→48 recipe and current-consumer loops.
-Do not freeze its shared beforeimages against old176 or count it early. Projected
-186/49 =53CCNA/40LPIC-1/36LPIC-2/57Bash, not current totals.
-
-NTP unitR2 .reviews/ntp-unit-source-r2/MANIFEST.json5105468f33bcf507396bd24d07af0dfc912085b1fbe36d62815241980c9dd218;
-sourcepeer4e4deafee2317f988b57056521886dea904c43663ecc7cac9d9757fc3e9a0ad9.
-27paths/7new,14content+9UI=23UNRUN. Four real chain/cycle/asymmetric-return/policy
-handover tasks; separate examples, immutable supplied world, native shared cards/
-connectors, adjacent Check, optional inventory, readable cycle instruction and
-shared Next. source-aware save_with_catalog checks all attempts/source+state
-kinds before unchanged writer, catalog-owned restore/open/library admission;
-old-family/producers stay exact. Compose narrowly after OneOff/Loop/LVM; no normal
-registry/current consumer/native acceptance yet. No clock/network/daemon changes.
-
-## Pure models/reference tools and historical integrity
-
-Main c03999c: current LVM16/NTP18/ERE16 core groups pass (M34450; style-only ERE
-letchain then M34716), M348alltargetClippy, M351348Python, M352176coverage before
-OneOff append. ERE pure src/ere.rs is unexported/not a learner utility, compiler
-SHA42bc6a56. Nonbacktracking bounded C-byte regex, no dependencies/host input.
-Core sourcepeer817550e5; compile_work is not yet a complete VM instruction charge;
-cooperative latency/VM integration and genuine13 before14 remain future gates.
-
-FixedEREcollectorR2 .reviews/ere-reference/source-r2/MANIFEST.json5ccc5055f9602b1a692971c61364136a7a8f2c4fb5635d40cfc82bf38a636268;
-patch edc1e3dd7e564364f32dff0efa8e21289379ee6a2c4f5fd5dfdca1af76dc3a8f,
-sourcepeer59f33d07.5paths direct-core probe/fixed34GNU+8excluded collector/
-14mockguardgroups/guide/single runner allowlist. UNAPPLIED/UNRUN. Prepare launches
-no child; Root must build, independently pin/approve source+compiler+ELF+GNU then
-capture in disposable disk fixtures. AllactualsNULL until observed. Existing
-source_identity helper packed-only-ref limitation fails closed; current loose Main
-ref works. Do not modify immutable historical helpers or Git refs to evade gates.
-
-Original9/10/11/12 sources/producers/captures remain immutable. Genuine12 public171
-55/420/55/145context baseline109d1c74/attestation0f03d347, source2966fb2b, retained
-ELF0a32601f. Current extra non-script labs have no invented earlier records. New
-language requires honest rerun/history, not relabeled current success. Directory-
-selection backup1 older proposals stay unregistered; rebase/gate before counting.
-
-## Available candidate; final available-platform acceptance still required
+## Available installed candidate; final acceptance remains required
 
 "$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g065032d0a90b-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 
 171labs/44units. ELF63914944B SHAda35b65a622f33f81e8def365454b978c4011df42bd3768dd9e4ab56d5832f94;
 archive43131971B SHA022bfe6d8ef0c6afe28025fe0ec9f4ba6f0a764dc33294d03616ba352c127721.
-M236build/M237installed upgradefromc683/original9 exact/uninstallreinstallPASS.
 Installed .build-artifacts/installations/verified-065032d0a90b-stxg8zqo/application/
-dlms-learning-lab: NFS writer75.506s/read30.492s distinct exited processesPASS,
-tenWaylandstartsPASS7067accf; installed numeric101PASS5a4b69fd. No new180candidate.
+dlms-learning-lab. M236package/M237upgradefromc683/original9exact/uninstallreinstallPASS.
+Distinct NFS writer75.506s/read30.492s/exits0PASS,10Waylandstarts7067accf and
+installed numeric101/5a4b69fd. No new182candidate/cold acceptance is implied.
 
-Before next candidate-ready claim: full inclusive Rust/include-ignored, Python,
-Clippy, notices, clean identified Main package; install/upgrade/reopen/progress/
-uninstall, NFS two-process cold and representative new flows on installed exact
-ELF, actual width/scale/theme review. Physical native long M297 had108captures
-then143; cause unknown, retained source/ELF41 remain. Three short same-ELF exits0
-are not long-route proof. Repeat/diagnose it. OneOff long/shorter clean exits do
-not establish Physical's cause or universal Wayland acceptance.
+Before candidate-ready claim: current inclusive/Python/Clippy/notices/clean Main
+build identity, installed upgrade/uninstall/reopen/progress, NFS two exited-process
+cold and representative new flows, real width/scale/theme review. Physical long
+M297 captured108 then143, cause unknown. Retained source/ELF41cd8c15 at
+.reviews/physical-native/compact41-retained; three short same-ELF exits0 do not
+prove long-route acceptance. Repeat/diagnose without touching other processes.
+OneOff53/20/all4 actual flows M353exit0/3ad6d7f9 retain exactELFe1acf8d2/source
+b24ca8a1 and original screenshots; they do not resolve Physical143.
 
-Windows/macOS desktop/signing, screen-reader/physical-device and novice acceptance
-remain pending. macOS dispatch0.2 original notice still unavailable at locked
-revision (recheck405254a1); do not invent attribution or call macOS redistributable.
-Finish independent curriculum work. No release or installer publication.
+Windows/macOS desktop/signing, physical-device/screen-reader and novice acceptance
+remain pending. macOS dispatch0.2 original notice is still unavailable at locked
+revision; do not invent attribution or call macOS redistributable. Finish all
+independent curriculum work; no public release or installer publication.

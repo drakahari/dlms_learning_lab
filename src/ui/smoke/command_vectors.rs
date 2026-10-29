@@ -257,7 +257,7 @@ impl LabApp {
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
-            55
+            57
         );
         assert!(
             self.units

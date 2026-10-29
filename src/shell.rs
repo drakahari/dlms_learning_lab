@@ -6,6 +6,7 @@ pub mod cron;
 mod execution;
 mod getopts;
 mod globbing;
+mod loop_control;
 pub mod one_off;
 mod parameters;
 mod preparation;
@@ -23,7 +24,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 12;
+pub const EVALUATOR_REVISION: u32 = 13;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -673,6 +674,7 @@ struct Program {
     code: Vec<Code>,
     main: Range<usize>,
     bodies: Vec<Range<usize>>,
+    loop_sites: Vec<loop_control::Site>,
 }
 impl Program {
     fn text_bytes(&self) -> usize {
@@ -710,7 +712,8 @@ impl Program {
                 Code::WhileStart(Some(word), _) => words(std::slice::from_ref(word)),
                 _ => 0,
             })
-            .sum()
+            .sum::<usize>()
+            + self.loop_sites.capacity() * std::mem::size_of::<loop_control::Site>()
     }
 }
 struct Unit {
@@ -753,12 +756,13 @@ impl Compiler {
         self.bodies.push(unit);
         Ok(id)
     }
-    fn finish(self, main: Unit) -> Arc<Program> {
+    fn finish(self, main: Unit) -> Result<Arc<Program>, String> {
         let main_end = main.code.len();
         let mut program = Program {
             code: main.code,
             main: 0..main_end,
             bodies: Vec::new(),
+            loop_sites: Vec::new(),
         };
         for body in self.bodies {
             let start = program.code.len();
@@ -786,7 +790,8 @@ impl Compiler {
             }
             program.bodies.push(start..program.code.len());
         }
-        Arc::new(program)
+        program.loop_sites = loop_control::sites(&program)?;
+        Ok(Arc::new(program))
     }
 }
 struct Parser<'a> {
@@ -1237,7 +1242,7 @@ fn parse_unit(source: &str, compiler: &mut Compiler, subst_depth: usize) -> Resu
 fn compile(source: &str) -> Result<Arc<Program>, String> {
     let mut compiler = Compiler::default();
     let main = parse_unit(source, &mut compiler, 0).map_err(classified)?;
-    Ok(compiler.finish(main))
+    compiler.finish(main)
 }
 /// The separate terminal remains literal-only; parsed child programs never run.
 fn lex(source: &str) -> Result<Vec<Token>, String> {

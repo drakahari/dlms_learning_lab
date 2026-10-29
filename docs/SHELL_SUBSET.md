@@ -16,7 +16,9 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 
 ## Honest exclusions
 
-Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators beyond the read-only extension below, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+For bounded `break` and `continue`, see **Evaluator13: bounded loop control** below.
+
+Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators beyond the read-only extension below, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 Diagnostic clarification (2026-10-25): `elif` clauses remain unsupported. Use
 nested `if`/`else` blocks. A bare unquoted `elif` command head, including a pipeline
@@ -295,3 +297,31 @@ cases plus one explicitly amended Syntax failure confirmed by actual Bash,
 with five separate balanced controls passing controlled comparison. Whole-script compile
 preflight/status2 is an intentional simulator difference from Bash runtime error
 timing/status1. See the detailed contract/amendment above.
+
+
+## Evaluator13: bounded loop control
+
+`break` leaves a loop; `continue` starts its next iteration. Both accept an
+optional normally expanded canonical ASCII decimal count from1 through24.
+Omitted means1; a count greater than the active loops selects all loops in the
+current scope. Zero, signed/leading-zero counts, larger numbers and extra
+operands are explicit simulator exclusions, not claims about Bash grammar.
+
+Supported contexts are this scope's `for` and `while` loops, including
+conditions, `if`, `case`, and `&&`/`||` command lists. Own loops inside functions
+and command substitutions work. Controlling a caller's loop across a function
+or substitution boundary, or placing control in a multi-command pipeline, is
+Unsupported. This deliberately avoids approximating cross-scope Bash behavior.
+
+Command heads and counts use ordinary quoting, expansion and ordered
+redirection. Those expansion/redirection effects occur before the control;
+a failed input redirect does not transfer control. Temporary command input is
+restored before unwinding redirected loops, including their outer cursor and
+input identity. An executed control command succeeds with status0.
+
+Immutable lexical loop targets attach to existing compiled instructions.
+No extra instruction executes on old loop paths. Retained target metadata is
+charged to the unchanged256KiB virtual memory limit; new control scans use the
+existing expansion-work allowance. Instruction/output/source/work limits and
+cooperative Stop stay unchanged. No host process, file, service or network access
+is introduced. Current normal catalog stays unchanged by this capability.

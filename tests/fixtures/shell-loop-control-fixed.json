@@ -1,0 +1,420 @@
+{
+  "status": "FIXED_SOURCE_ONLY_UNRUN_NO_REFERENCE_APPROVAL",
+  "supported_cases": 16,
+  "honest_exclusions": 8,
+  "cases": [
+    {
+      "id": "first-break",
+      "partition": "supported",
+      "source": "for v in a b c; do\n printf '%s\\n' \"$v\"\n break\ndone\nprintf 'status=%s\\n' \"$?\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "a\nstatus=0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "skip-one",
+      "partition": "supported",
+      "source": "for v in a skip b; do\n if test \"$v\" = skip; then continue; fi\n printf '%s\\n' \"$v\"\ndone\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "a\nb\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "nested-local-break",
+      "partition": "supported",
+      "source": "for outer in A B; do\n for inner in 1 2; do\n  printf '%s%s\\n' \"$outer\" \"$inner\"\n  break\n done\ndone\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "A1\nB1\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "while-preserves-records",
+      "partition": "supported",
+      "source": "while IFS= read -r line || test -n \"$line\"; do\n case \"$line\" in ''|\\#*) continue ;; esac\n printf '[%s]\\n' \"$line\"\ndone < rows.txt\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {
+        "/work/rows.txt": "\n#skip\n x \ntail]line"
+      },
+      "expected": {
+        "stdout": "[ x ]\n[tail]line]\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/rows.txt": "\n#skip\n x \ntail]line"
+        }
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "break-restores-finite-input",
+      "partition": "supported",
+      "source": "while IFS= read -r line; do\n printf 'inner=%s\\n' \"$line\"\n break\ndone < inner.txt\nIFS= read -r value\nprintf 'outer=%s\\n' \"$value\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "outside1\noutside2\n",
+      "files": {
+        "/work/inner.txt": "inside1\ninside2\n"
+      },
+      "expected": {
+        "stdout": "inner=inside1\nouter=outside1\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inner.txt": "inside1\ninside2\n"
+        }
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "continue-restores-inner-input",
+      "partition": "supported",
+      "source": "for outer in A B; do\n while IFS= read -r inner; do\n  printf '%s%s\\n' \"$outer\" \"$inner\"\n  continue 2\n done < inner.txt\n printf 'wrong\\n'\ndone\nIFS= read -r value\nprintf 'outer=%s\\n' \"$value\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "outside\n",
+      "files": {
+        "/work/inner.txt": "1\n2\n"
+      },
+      "expected": {
+        "stdout": "A1\nB1\nouter=outside\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inner.txt": "1\n2\n"
+        }
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "mixed-break-two",
+      "partition": "supported",
+      "source": "for outer in A B; do\n while true; do\n  printf '%s\\n' \"$outer\"\n  break 2\n done\n printf 'wrong\\n'\ndone\nprintf 'done\\n'\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "A\ndone\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "depth-exceeds-local-nesting",
+      "partition": "supported",
+      "source": "for v in a b; do\n printf '%s\\n' \"$v\"\n break 24\ndone\nprintf 'done\\n'\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "a\ndone\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "quoted-expanded-head",
+      "partition": "supported",
+      "source": "action=continue\nfor v in skip keep; do\n if test \"$v\" = skip; then \"$action\"; fi\n printf '%s\\n' \"$v\"\ndone\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "keep\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "case-selected-control",
+      "partition": "supported",
+      "source": "for v in stop later; do\n case \"$v\" in stop) break ;; *) printf 'wrong\\n' ;; esac\ndone\nprintf '%s\\n' \"$?\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "control-short-circuits-remainder",
+      "partition": "supported",
+      "source": "for v in a b; do\n printf '%s\\n' \"$v\"\n continue && printf 'wrong\\n'\ndone\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "a\nb\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "redirect-before-break",
+      "partition": "supported",
+      "source": "for v in a b; do\n break > trace.txt\ndone\nprintf 'done\\n'\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {
+        "/work/trace.txt": "previous\n"
+      },
+      "expected": {
+        "stdout": "done\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/trace.txt": ""
+        }
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "own-function-loop",
+      "partition": "supported",
+      "source": "worker() {\n for v in x y; do printf '%s\\n' \"$v\"; break; done\n printf 'worker-end\\n'\n}\nworker\nprintf 'caller\\n'\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "x\nworker-end\ncaller\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "own-capture-loop",
+      "partition": "supported",
+      "source": "for outer in A B; do\n value=$(for v in x y; do printf '%s' \"$v\"; break; done)\n printf '%s:%s\\n' \"$outer\" \"$value\"\ndone\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "A:x\nB:x\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "return-cleanup-regression",
+      "partition": "supported",
+      "source": "worker() {\n while IFS= read -r value; do return 3; done < inner.txt\n}\nworker\nprintf 'status=%s\\n' \"$?\"\nIFS= read -r value\nprintf '%s\\n' \"$value\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "outside\n",
+      "files": {
+        "/work/inner.txt": "inside\n"
+      },
+      "expected": {
+        "stdout": "status=3\noutside\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inner.txt": "inside\n"
+        }
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "continue-status-zero",
+      "partition": "supported",
+      "source": "for v in a; do\n false\n continue\ndone\nprintf '%s\\n' \"$?\"\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "note": "",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "outside-loop",
+      "partition": "honest_exclusion",
+      "source": "break\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Do not guess Bash's non-loop diagnostic/status; simulator rejects unsupported context honestly.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "caller-function-loop",
+      "partition": "honest_exclusion",
+      "source": "worker() { break; }\nfor v in a b; do worker; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Caller-loop control through a function boundary deliberately excluded.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "pipeline-control",
+      "partition": "honest_exclusion",
+      "source": "for v in a b; do break | cat; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Pipeline control context deliberately excluded; never approximate caller behavior.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "capture-parent-loop",
+      "partition": "honest_exclusion",
+      "source": "for v in a b; do value=$(break); done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "No child control may target a suspended parent loop.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "zero-count",
+      "partition": "honest_exclusion",
+      "source": "for v in a; do break 0; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "N outside accepted canonical1..24 subset.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "noncanonical-count",
+      "partition": "honest_exclusion",
+      "source": "for v in a; do continue 01; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Do not silently parse a broader arithmetic/numeric grammar.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "excessive-count",
+      "partition": "honest_exclusion",
+      "source": "for v in a; do break 999999999999999999999999999; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Reject before allocation or unbounded conversion.",
+      "vm_observation": null,
+      "bash_observation": null
+    },
+    {
+      "id": "extra-operands",
+      "partition": "honest_exclusion",
+      "source": "for v in a; do continue 1 2; done\n",
+      "args": [],
+      "env": {},
+      "stdin": "",
+      "files": {},
+      "expected": null,
+      "note": "Unsupported argument form, never a false successful loop.",
+      "vm_observation": null,
+      "bash_observation": null
+    }
+  ],
+  "negative_redirect_plan": "Add fixed existing/missing input and failing capture order probes after actual12 baseline; simulator-specific errors must be classified explicitly, not compared as exact Bash stderr accidentally."
+}
