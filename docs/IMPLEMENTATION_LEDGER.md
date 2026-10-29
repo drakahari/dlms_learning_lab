@@ -4282,3 +4282,11 @@ R2gradinggaps closed peerbd9557d5, content stillunrun/unregistered. OneOff180
 171pathsource proposal699dc283 receives83corepeercbd1fd63 andconsumer36583eea
 ACK, no runtimeacceptanceyet. A suspectedunusedcron declaration was retracted
 after confirmingactualtransitiveuse; no removals/waivers. Continueordinarybatches.
+
+Milestone commits5410fb9 +96e78de committed/pushed after462Rustformat/privacy186
+files/diff-checkPASS. Source176/46/evaluator12 remains separate from available
+171candidate. M309isolatedLoop13newcontent10PASS/0ignored/22.77s, fullyreaped53823.
+M310inclusiveLoop13alltargets+ignored nowrunning95632. Rootapplied171closedOneOff
+paths onlyinWcurriculum-network176, prospective180/47/959sources, bothpeerACKs.
+Mainnotmodified; originalR17source933 and ELF41 copied/hashed independently on
+projectdisk before further build. No OneOffruntime/newcredit yet.

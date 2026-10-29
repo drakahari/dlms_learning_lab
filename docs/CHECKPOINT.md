@@ -13,7 +13,8 @@ current curriculum work. Read BUILD_WORKFLOW.md before every heavy invocation.
 Main now integrates176authored labs/46units:53CCNA/14,36LPIC-1/9,32LPIC-2/8,
 55Bash/15. Learner evaluator12. Five new tasks are four Physical uplinks and one
 private-office plan; all prior171 fullspecs/42packs/44raw units/55scripts/420cases/
-55examples remain exact. Pushed baseb25b1f0 (learner065032d);176commit/push pending.
+55examples remain exact. Reviewed commits5410fb9(reference tools) and96e78de(176learner milestone) are
+committed and pushed to origin/main. Earlier runnable candidate remains065032d.
 
 M303Main inclusive fullyreaped19662exit0:2467PASS/0FAIL/0ignored/195harnesses;
 all24 actual history groups executed.936sourcepaths unchanged, source431e525d,
@@ -22,8 +23,11 @@ M304alltargetClippy-DwarningsPASS, fullyreaped39527. M305348PythonPASS,
 fullyreaped1214. M306coverage rejected four newCSV src/ui/test path entries;
 Root removed only those unsupported entries, retained all integration-test evidence
 and scoped claims, did not change validator. M307coverage176/1240PASS.
-M308final348PythonPASS, fullyreaped66736. Final formatting/privacy review and commit/push are next; no heavy
-invocation currently running. Do not mistake this checkpoint for completion.
+M308final348PythonPASS, fullyreaped66736. All462Rust files format-checkPASS;
+scoped186-file privacy review/diff-checkPASS. **Sole heavy M310 fullinclusive
+Loop13 Wbash-loop13-b25, wrapper95632**, after M309content10PASS. Do not launch
+a second heavy invocation or mutate compiled LoopW source until fully reaped.
+Main remains clean176/evaluator12; this checkpoint is not completion.
 
 Coverage172Partial/1Supporting/1067Open over1240overlapping references, all136
 parents incomplete(94Open/42Partial). CurrentCCNAv1.1/LPIC-1v5.0/LPIC-2v4.5;
@@ -93,8 +97,13 @@ DO NOT remove that declaration or add lint waiver. No R3 required.
 Shared boundary is privateQA/test-only, validates canonical4OneOff append and
 strict47→46raw/typed inverse, preserves176/46 assertions and all full-current
 behavior loops. Explicit clocks/draft/181fixture/old4-IDs-absent controls retained.
-Future registered180/47 =53CCNA,40LPIC-1,32LPIC-2,55Bash. No count until applied/
-tested/integrated. Apply closed source only after peer; use Main runner with W
+Root applied all171 closed paths to Wcurriculum-network176 after exact933
+beforeimage/171precondition checks. It now has959publicsourcepaths/prospective
+180/47 =53CCNA,40LPIC-1,32LPIC-2,55Bash; still NOT Main-integrated or credited.
+Corepeercbd1fd63 and consumer36583eea ACK. Source/runtimeacceptance pending.
+OriginalR17source933+ELF41 are retained independently at physical-native/
+compact41-retained before future rebuild. Run scoped core/typed/content/catalog
+and actualUI tests after M310; use Main runner with W
 explicit cwd/exclusive target, no shared target or second heavy. Original isolated
 oneoff-after-network176 frozen947 remains; compose R17+staged171 rather than
 copying old whole files. Normal4-lab native controller/actual screens still needed.
@@ -129,8 +138,11 @@ AFTER actualcapture/readback, now901sourcepaths; original898 are unchanged.
 Finite intake/tailhandoff10cases+2guards; independentboundedfallback12cases+8guards.
 Reviewer found absent-destination and digit/hyphen/length grading gaps; R2fixes
 both with realgradedcases, preserving original12/6 and wrongmasks in ninthtest.
-No VM content execution yet. Next run --test shell_loop_recovery_content via Main
-runner/Wcwd (10 prospective tests including digest), then full13/history/Clippy.
+M309actual content10PASS/0FAIL/0ignored in22.77s, fullyreaped53823: references,
+two alternatives perlab,22behaviorcases/fourslices, guards/negativepartialmasks,
+example isolation/invalidation/reset/resume/invalidpacks; Stopgroup is VM-only,
+not native no-record acceptance. M310full13/history nowrunning95632, thenClippy.
+No native or normalregistration acceptance yet.
 Register only after actualcontent/progression/native acceptance; preserve all55old
 scripts/420cases/55examples and original records. Main180 union will need closed
 rebase of capability/current seams, not blind stale afterimages.
