@@ -235,3 +235,23 @@ integration and independently sealed on2026-10-29. Keep that original index,
 compiled source and executable; do not rebase or regenerate this completed
 capture for later catalogs. See SHELL_EVALUATOR12_BASELINE.md and the ledger for
 its exact observations and verified identities.
+
+The new developer-only `loop_control_bash_oracle.py` is likewise a fixed-fixture
+exception, not an execution route for learner scripts. It requires MAIN/default
+runner, the common inherited lock, one exact detached evaluator13 worktree and
+its exclusive target, all898 reviewed source paths and the compiled probe's
+identity. Its24 pinned cases partition16 builtin-only Bash comparisons from eight
+explicit VM-only exclusions. Every host comparison uses disposable disk fixtures,
+stripped environment, empty search path, bounded time/output/files and a retained
+executable descriptor. There is no arbitrary script, worktree, engine or path
+selector. All genuine evaluator12 outputs,296 source inputs and retained producer
+are verified before work. `--mode prepare` launches nothing; capture requires
+independent exact-pin approval. A completed capture with mismatches is retained
+and rejected, never treated as acceptance. Synthetic guard tests, preparing the
+control and building the probe are not actual Bash comparison evidence.
+
+Its collector-local source-identity reader accepts an ordinary detached HEAD,
+ordinary loose branch ref, or bounded packed refs only when the loose ref is
+absent. It refuses aliases, malformed/duplicate records and non-LF control
+separators. Do not rewrite Git refs or alter immutable historical helpers to make
+a new capture tool pass. Existing historical producers and receipts stay exact.
