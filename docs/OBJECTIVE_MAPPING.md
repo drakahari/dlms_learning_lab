@@ -328,3 +328,11 @@ valid alternate RFC1918 plans while checking whole-subnet reservations and
 matching interfaces. Shared media1.3.b and all wider unresolved behaviors remain
 Open. Futurev2.0 receives no inherited credit. The coverage CSV retains all other
 1236 rows exactly. See PHYSICAL_LINK_LESSONS.md and IPV4_PRIVATE_PLANNING_LESSONS.md.
+
+
+The NTP library foundation adds no authored assignment or objective credit. Its
+18 passing core tests cover only bounded single-upstream dependency/stratum and
+immutable supplied delivery/source evidence. Current4.2 stays Open until native
+instruction, separate practice and meaningful configuration/troubleshooting
+assignments pass their own gates. Packet timing, clock discipline, multipeer
+selection and real clocks remain absent; see NTP_SUBSET.md.

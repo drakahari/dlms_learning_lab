@@ -4335,3 +4335,65 @@ The eight-line driver-only settlement keeps all assertions/events and does not
 force focus or alter product behavior. M331 rerun1PASS/1FAIL: focus passes, next failure is a missing actual theme
 menu choice. The source-only driver diagnosis continues; no native acceptance
 is inferred.
+
+
+M332 Main929cd20 inclusive all-targets/include-ignored run passes2482/0/0 across
+196 harnesses, fullyreaped11048exit0. Only checkpoint text changed during the
+run; compiled source remains committed929cd20. Receiptb6fcf2e3; minimum available
+memory21043863552B, PSI0, no swapout/OOM increase. M333 isolated native OneOff
+pair1PASS/1FAIL: earlier focus/theme issue is past, but a200% scale menu receives
+wheels outside its actual horizontal extent. The popup clip spans the window;
+Root's narrow correction uses the actual item x with the same viewport y. Source
+peer confirms all assertions and limits remain intact. M334 rerun is in progress.
+
+
+M336 all30 existing OneOff UI tests pass after equivalent Clippy cleanup
+(three paths, source peer0aed3898). M338 actual paired normal-catalog controller
+checks2PASS after correcting an unmerged test's short-CheckStop premise. The new
+906-step route queues four real bounded jobs through the editor/terminal, stops
+a live Run with full snapshot/24idle/Back/resume checks, then explicitly resets
+and redoes the actual assignment; no Goal/budget/assertion weakening or fabricated
+proof. M339 all-targetClippyPASS; M340 ordinary native buildPASS. M341 actual
+Fedora53capture run is in progress on exact961-source/ELFa7c92e31; no clean-exit
+or full-render acceptance yet. Early review found spacing/wording to simplify
+without changing the meaningful assignment; keep source frozen during this run.
+
+M337 pure NTP foundation18PASS, fullyreaped74611. The source-derived bounded
+configured-dependency/stratum model has no learner UI or catalog credit;4.2 stays
+Open and its gap text now distinguishes a tested library from absent curriculum.
+Strict LVM resize2fs device-path correction8cc (peer6bb7f2f0) is applied to Main;
+all original15 assertions remain, with a new16th shorthand-refusal control. Its
+post-correction rerun and combined Clippy are pending, not inferred from old gates.
+
+
+M341 actual native full180 scheduling route completes53PNGs/20settings/all4
+assignments and exits0 after1155.603s. Exact961 source pins unchanged; receipt
+48512c76. Minimum available23995777024B, PSI0, no swapout/OOM increase.37original
+PNGs independently viewed plus3Rootviews. Five presentation findings drive
+compactR2 (peer4f5f00ca): one-row minimum/six-row maximum output, left-aligned
+labels, shorter essential copy with optional detail, four prerequisite-note
+wording fixes, and first real failure before routine green passes. This is not
+a new task or changed grading. M34232UI and M34372content groups pass. Added
+actual wrong-feedback first-index regression; M34532UI/full906-phase route pass.
+The QA-only incidental delay is50ms for this route, with all explicit readiness
+guards/limits intact; actual polished rerender remains pending.
+
+M344 current Main foundation50PASS:16strictLVM,18NTP,16ERE. M346Clippy's sole
+ERE nested-if style issue was corrected without behavioral/assertion change;
+M34716ERE and M348all-targetClippy pass. No new catalog entries/current learner
+commands are claimed for these foundations.4.2 gaptext records the tested model
+while its objective remainsOpen; other1239 granular and164 planning rows exact.
+ERE GNU comparisons remain unobserved until guarded actual execution; source
+review817550e5 does not substitute for reference/VM/Stop/content acceptance.
+
+
+M345 all32OneOffUI (including full906-step real-event route) pass the new
+failure-first capture assertion; M349 alltargetClippy and M350 ordinary native
+build pass. New exact polished ELF/source are copied before further Cargo work
+(e1acf8d2/b24ca8a1). M353 actual53capture polished rerun is underway using that
+retained executable, with explicit settle/capture checks unchanged.
+
+M351348PythonPASS; M352coverage176/1240PASS, no promotion or count inflation.
+Foundation scope remains library work only; all136 parents stay incomplete.
+Scoped privacy/source review and formatting pass. Current new-core tests and
+alltargetClippy are verified independently of the unchanged176 learner catalog.

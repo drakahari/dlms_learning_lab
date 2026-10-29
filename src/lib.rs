@@ -154,3 +154,6 @@ pub mod physical_link;
 pub mod physical_link_assignment;
 pub mod physical_link_teaching;
 pub mod physical_link_workspace;
+
+/// Bounded single-upstream virtual NTP foundation; no curriculum integration.
+pub mod ntp;

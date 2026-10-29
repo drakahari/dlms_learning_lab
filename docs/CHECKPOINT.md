@@ -34,7 +34,28 @@ all-target Clippy -DwarningsPASS, fullyreaped40571exit0. Four reviewed foundatio
 paths are applied; no engine/catalog/progress/coverage credit. M331 native OneOff controller pair fullyreaped34514exit1:1PASS/1FAIL;
 Shift-Tab now passes after an ordinary deferred-focus frame. Next actual-event
 failure is a missing theme-menu choice; source-only driver diagnosis continues.
-No heavy invocation is active.
+M332 Main176+LVM inclusive fullyreaped11048exit0:2482PASS/0FAIL/0ignored/
+196harnesses. Receiptb6fcf2e32ee2f3f1cdce3db3066c0875d4188e0b8bd51c9bfe0688d6719efd91.
+Main compiled source unchanged from929cd20. Minavailable21043863552B, PSI0,
+swapout0/OOM0. M3341PASS/1FAIL reached Stop after all menu settings; an actual short Check
+finishes before the Stop click. M338 corrected real RunStop route906stages/53
+planned captures2PASS, fullyreaped6755. M336 all30 prior OneOffUI PASS; M339
+all-targetClippyPASS; M340 ordinary native buildPASS. M341 actual Fedora OneOff run89985/run-x3rzjbhb fullyreapedexit0, all53PNGs/
+20settings/all4flows in1155.603s. Receipt48512c76503ba0903dd04ca992fd5989cd194ab18771d1f9c8b36ae3bb612d22;
+source961 exactbefore/after, minimumavailable23995777024B/PSI0/swapout0/OOM0.
+37originalPNGpeerreviewe635638f plus3Rootviews exposed fivepresentationfindings.
+CompactR205bfdb52 (peer4f5f00ca) applied after the run, including onlyfour new
+prerequisite-note edits and canonicalrecipepinupdates. M342all32UI+M343content72
+PASS. Rootadded real failure-first display assertion at allfourwrongcapture
+phases; M345all32PASS,906/53unchanged. QAidle50ms onlyOneOff (other350 unchanged)
+preserves explicitready/Undo/wheel/Stop/captureguards; needs actual rerender.
+M349 W alltargetClippyPASS and M350 ordinarybuildPASS. Retained current
+polished source/ELF before another Cargo run: source961 b24ca8a1,208481936B
+ELFe1acf8d2a7ab9a1b40e63d3857214a38a3cf8f8ee4aa22d5b70b6771c0dee61a,
+.build-artifacts/reviews/one-off/polished180-m350-build/. M353 actualpolished
+53capture rerun is sole heavy84261; do not mutate W or launch another heavy
+invocation until reaped. This uses the retained exact executable/private profile. Source9619b572e01; ELF208470720B
+a7c92e31f053b856bd0bfe26731ca8438bb6af4467a728c669abaab7285f4982.
 
 M310Loop full failed2375PASS/1FAIL/0ignored/188harnesses, source901unchanged.
 Only failure: genuine11 future-record refusal used hardcoded13, now current13.
@@ -207,27 +228,76 @@ exclusive per-W target and verified disk-backed artifacts. M303minimumavailable
 18004926464B, maxsome/fullPSI0.57, swapout11261pages/OOM0. No additional heavy
 launch under pressure. Never delete evidence/baselines/toolchains or use RAM/tmp.
 
-## Source-only proposals pending subsequent gates
+## Current isolated proposals and next execution
 
-NormalOneOff native4 route62f38156/patch5989a472 is frozen source-only, sixpaths
-(fourhooks/twonewfiles), predicts872boundedstages/53captures. Selection peer78a4a105 requires Env checkbox→field phaseack and smooth-wheel
-settlement fixes; R2applied with sourcepeer37310ae; M328 actualpaired1PASS/1FAIL then
-eight-line next-frame timing correction7a231321 applied. Must exercise paired actualcapture phases
-before native run; no context
-reentry within data/graphics locks, no model/grade/focus/scroll installation.
-Current957/955protected bookkeeping must preserve later RootUI diagnostic changes.
+OneOff native R2 six hooks are applied in Wcurriculum-network176 (961 paths).
+Initial source peer37310ae; Shift-Tab next-frame correction7a231321 fixes the
+first M328 focus failure. M331 then1PASS/1FAIL on an absent theme-menu item.
+Root applied sole-file geometry-hover guard6fd764ff, current source0b296f84;
+it reaches a moved control in a separate real frame and retains every assertion.
+M3331PASS/1FAIL reaches the later200% scale popup: wheel clip center x549
+is outside actual popup x386..451. Source-reviewed narrow actual-row-x wheel
+correction applied (source d0e210eb); M334 passed the menu settings and failed the short CheckStop premise.
+M338 real RunStop remedy is applied and passes; see current active run above. Actual Fedora M341 is still running; early captures are not whole-run acceptance.
+Keep all four real tasks/906 stages/53
+captures,20 measured settings, original scroll/time limits and real native input.
+No model, grade, popup, focus or scroll installation is authorized.
 
-Loop normal182/48 integration sourceR1 2ea0dd62/patch9c8c4c06,74owned/15new/900
-protected againstcorrected180 source959. Peer60dd9fb7 requires two current guards
-12→13 (tests/catalog175.rs and PhysicalnativeBootstrap); historical producer12
-guards must remain. Author preparingR2 composing Rootscope/driver corrections,
-two lowercase testnames and actual12dedup condition; do not overwrite newer whole
-files. Future182=53CCNA/40LPIC-1/32LPIC-2/57Bash,57scripts442cases57examples;
-only planned until integrated/gated. Root currentOneOffW has2countfixa8e08d6e,
-2cfgtestscopefix8ba28d98 andUI driverb5c4e9b pluslogging; preserve all.
+Loop normal182/48 integration R3 is frozen at
+.build-artifacts/reviews/bash-loop-recovery/normal182-source-r3/MANIFEST.json,
+SHA123932d20d05e2a0db22ac959277f672c1fd047ac25dc0e4d8b4162b4d3182cd.
+Its75 proposed paths remain byte-exact to peer-reviewed R2 (0f7991c3);901
+protected paths preserve the Ether helper and all native OneOff hooks through
+e642 Shift-Tab. The later0b296f84 hover guard must also be retained. Six native
+count/navigation changes are explicitly deferred, never silently overwritten.
+The two new scripting tasks and native route are pending normal integration.
+Projected182/48 =53CCNA/40LPIC-1/32LPIC-2/57Bash,57scripts442cases57examples;
+these are not current Main totals. Isolated evaluator13 full2376/all27 actual
+history groups and Clippy pass. Original historical producers remain immutable.
 
-Pure LVMfoundations source-only work is authorized for recordedLPIC-2v4.5 204.3
-(existingVGlinearLVgrowth/separateext4growth/preservedvirtualfiles). No authored
-labcount or coveragecredit; authorNativepreparingboundedcore/tests withofficial
-references, nohostdevice/lvmcommands/subprocess/newdependency orWMain changes.
-Keep currentOneOff/Loop/selection deliverypriority.
+Main929cd20 adds the reviewed LVM pure module/export, subset guide and15 tests.
+The independently reviewed strict resize2fs device-path correction8cc is now
+applied with16 tests (new combined rerun pending). Pure NTP four paths are also
+applied; M337 all18 testsPASS, fullyreaped74611. No NTP/4.2 authored credit.
+Do not overwrite the Main LVM or NTP exports when composing pending OneOff.
+M329 all15 and M330 all-target Clippy pass; pushed. Current authored totals and
+204.3 Open status are unchanged. Main M332 inclusive176+LVM2482PASS/0FAIL/0ignored/196harnesses, fullyreaped
+11048exit0; compiled source unchanged. No pressure/swapout/OOM. The source-only four-task LVM unit is being
+authored with explicit device-path syntax for resize2fs, independent examples,
+preserved neighboring volumes/data and no real device access. A strict parser/
+help correction for the bare resize2fs map alias is pending with that proposal.
+
+Finish actual M341 native OneOff rendering; fix real failures
+without weakening assertions, then build/run and inspect actual Fedora screens.
+Compose Main180 only from the174 owned OneOff paths, preserving Main's new LVM
+export and three files; all other reviewed before-images still match exactly.
+Then full/static/coverage gates, honest documentation, commit/push and continue
+directly to the reviewed182 shell unit and LVM. No owner decision blocks work.
+
+
+Main uncommitted foundations: NTP fourpaths, strict LVM threepaths, ERE fournew
+paths (unexported). M344all50corePASS (16ERE/16LVM/18NTP), fullyreaped88025.
+M346Clippy found one equivalent ERE nested-if style issue; corrected to letchain
+(current src/ere.rs42bc6a56, no semantic/assertion change). M34716EREPASS and
+M348alltargetClippyPASS, fullyreaped39174. No NTP/ERE authored credit. Main
+objective counts remain172Partial/1Supporting/1067Open;4.2 onlygaptext corrected.
+
+Pending source gates: normal182R4 manifest721f74fd, nativeR2overlay02d4d905
+plus one-file formatted-QApacing delta92f10890. Root's later failure-first QA
+assertion must survive via narrow OneOff count-only hunks; never replace whole
+old0d06afterimage. LVMunitR3manifest0159fe3d, sourcepeer5cae90b7;28paths/7new,
+9content+6UI=15groupsUNRUN; apply strict core first (doneMain), compose mandatory
+OneOff fields/exhaustive seams before registration. Doc-only38fd42d9 corrects
+stale counts. NTPfour-task source authoring continues. EREcore sourcepeer817550e5;
+fixedreferencecollectorR2manifest5ccc5055 is source-only, independentreview and
+14guardtests/build/prepare/Rootpinapproval/actual34comparisons stillpending.
+No owner decision blocks work. Continue through coherent tested batches; no final
+summary/stop at these gates and no curriculum completion claim.
+
+
+M351 Main348PythonPASS; M352coverage176/1240PASS. Current foundation code/privacy/
+format gates pass; no objective promotion or authored count changed. Source-only
+collector peer59f33d07 ACK;14 mocked groups/build/prepare/approval/actual GNU
+observations remain pending. Native182 compact pacing delta92f10890 preserves
+formattedb128 smoke source; its other7 hooks must also preserve Root's later
+failure-first assertion using narrow count-only hunks. Do not copy stale files.

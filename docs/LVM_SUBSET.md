@@ -52,9 +52,11 @@ Identifiers that look like `/dev/NAME` or `/dev/VG/LV` are map keys only.
 | `lvextend -l +100%FREE VG/LV` | Add all the current VG free extents. Other percentages/policies are unsupported. |
 | `lvextend -L N[M\|G] VG/LV` | Grow to the requested absolute byte size, rounded upward to a whole extent. `--size` is equivalent. Integer suffixless values mean MiB. |
 | `lvextend -L +N[M\|G] VG/LV` | Add the requested byte size, rounded upward to a whole extent. |
-| `resize2fs VG/LV [N\|NM\|NG]` | Grow the separate supplied modeled ext4 container. Suffixless integers mean4096-byte blocks, unlike LVM's suffixless MiB. Same-size requests are read-only no-ops. |
+| `resize2fs /dev/VG/LV [N\|NM\|NG]` | Grow the separate supplied modeled ext4 container. Suffixless integers mean4096-byte blocks, unlike LVM's suffixless MiB. Same-size requests are read-only no-ops. |
 
-All LV forms also accept `/dev/VG/LV`. M/G input letters are case-insensitive,
+LVM utility forms accept `VG/LV` and `/dev/VG/LV`. `resize2fs` instead requires
+the device pathname `/dev/VG/LV`; bare `VG/LV` is not a real resize2fs shorthand
+and is refused. M/G input letters are case-insensitive,
 binary powers of1024; `MiB`/`GiB` multi-letter suffixes, decimals and other size
 units are honestly unsupported. Checked integer arithmetic precedes allocation.
 Insufficient VG extents, oversized filesystem requests, wrong volume identifiers
@@ -129,10 +131,11 @@ device command was run, and no native/candidate/platform acceptance is claimed.
 
 ## Verification at this foundation milestone
 
-Fifteen integration tests pass against the in-process model: normal and
+Sixteen integration tests pass against the in-process model: normal and
 alternate growth, real free holes and rounding, insufficient/foreign capacity,
 atomic multi-device failure, preservation, round-trip validation, hostile
-serialized data and resource boundaries. All-target Clippy passes with warnings
+serialized data, real device-path refusal and resource boundaries. All original
+fifteen outcome assertions remain. All-target Clippy passes with warnings
 denied. These checks do not run real LVM and do not establish a lesson, native
 workspace, full-suite milestone or real-device equivalence. Authored teaching
 and learner interaction remain subsequent work.

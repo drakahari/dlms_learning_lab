@@ -4,6 +4,9 @@ One native Rust package; no browser runtime, plugin platform, host-shell executi
 
 | Module | Responsibility |
 | --- | --- |
+| `ere.rs` | Standalone bounded C-locale byte ERE parser/NFA foundation; not yet a learner command, utility or lesson |
+| `lvm.rs` | Pure bounded virtual extent allocation and separate filesystem growth; no authored LVM unit integrated yet |
+| `ntp.rs` | Pure bounded single-upstream dependency/stratum and immutable-environment checks; no authored NTP unit integrated yet |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
 | `dns.rs`, `dns_workspace.rs`, `dns_teaching.rs`, `ui/dns_workspace.rs` | Bounded authoritative RRsets/aliases, separate configured/primary/secondary copies, typed readiness/serial decisions, current outcomes, native record editing/lookups and isolated saved practice; six authored forward-zone/recovery assignments |

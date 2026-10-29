@@ -157,7 +157,7 @@ fn reference_grows_backing_then_filesystem_and_preserves_mapping_and_data() {
         &s.groups["data"].volumes["reports"].extents[..2],
         before.groups["data"].volumes["reports"].extents.as_slice()
     );
-    run(&mut s, "resize2fs data/reports");
+    run(&mut s, "resize2fs /dev/data/reports");
     assert!(rows(&s).iter().all(|b| *b));
     assert_eq!(
         s.read_file("data/reports", "/report.txt").unwrap(),
@@ -189,7 +189,7 @@ fn legitimate_absolute_relative_extent_size_and_automatic_pv_initialization_alte
     run(&mut s, "lvextend -l +100%FREE data/reports");
     assert_eq!(s.free_extents("data").unwrap(), 0);
     assert_eq!(s.lv_bytes("data/reports").unwrap(), 44 * MIB);
-    run(&mut s, "resize2fs data/reports 24M");
+    run(&mut s, "resize2fs /dev/data/reports 24M");
     assert_eq!(rows(&s), vec![true, true, true]);
     assert_eq!(s.filesystem_bytes("data/reports").unwrap(), 24 * MIB);
 }
@@ -227,17 +227,19 @@ fn extent_rounding_uses_binary_units_and_drops_only_unusable_pv_tail() {
     assert_eq!(s.filesystem_bytes("data/reports").unwrap(), 8 * MIB);
     run(&mut s, "lvextend -L 13M data/reports");
     assert_eq!(s.lv_bytes("data/reports").unwrap(), 16 * MIB);
-    run(&mut s, "resize2fs data/reports 12m");
+    run(&mut s, "resize2fs /dev/data/reports 12m");
     assert_eq!(s.filesystem_bytes("data/reports").unwrap(), 12 * MIB);
     let before = s.clone();
-    run(&mut s, "resize2fs data/reports 12M");
+    run(&mut s, "resize2fs /dev/data/reports 12M");
     assert_eq!(s, before); // Real no-op at same size.
 }
 #[test]
 fn growth_before_backing_capacity_wrong_volume_and_overallocation_fail_without_effects() {
     let mut s = fixture();
     assert_eq!(
-        s.execute("resize2fs data/reports 24M").unwrap_err().kind,
+        s.execute("resize2fs /dev/data/reports 24M")
+            .unwrap_err()
+            .kind,
         ErrorKind::NoSpace
     );
     for cmd in [
@@ -246,7 +248,7 @@ fn growth_before_backing_capacity_wrong_volume_and_overallocation_fail_without_e
         "lvextend -L 64M data/reports",
         "vgextend no-such /dev/vdb",
         "vgextend data /dev/vdd",
-        "resize2fs data/neighbor",
+        "resize2fs /dev/data/neighbor",
     ] {
         refusal(&mut s, cmd);
     }
@@ -274,7 +276,7 @@ fn unsupported_shrink_force_shell_path_alias_and_unknown_syntax_are_honest() {
     for cmd in [
         "lvreduce -L 4M data/reports",
         "lvextend -L 4M data/reports",
-        "resize2fs data/reports 1M",
+        "resize2fs /dev/data/reports 1M",
         "pvcreate -ff /dev/vdc",
         "lvextend -r -L +4M data/reports",
         "lvextend -L 8.5M data/reports",
@@ -289,11 +291,11 @@ fn unsupported_shrink_force_shell_path_alias_and_unknown_syntax_are_honest() {
         "pvs\n",
         "pvcreate /dev/../etc/passwd",
         "resize2fs /dev/mapper/data-reports",
-        "resize2fs data/reports 1é",
+        "resize2fs /dev/data/reports 1é",
     ] {
         refusal(&mut s, cmd);
     }
-    let e = s.execute("resize2fs data/reports 1M").unwrap_err();
+    let e = s.execute("resize2fs /dev/data/reports 1M").unwrap_err();
     assert!(e.message.contains("real offline resize2fs can shrink"));
     assert!(lvm::HELP.contains("Real LVM"));
 }
@@ -304,13 +306,13 @@ fn overflow_and_raw_command_bounds_never_panic_or_change_state() {
         "lvextend -l +18446744073709551615 data/reports",
         "lvextend -L 18446744073709551615G data/reports",
         "lvextend -l 18446744073709551616 data/reports",
-        "resize2fs data/reports 18446744073709551615",
+        "resize2fs /dev/data/reports 18446744073709551615",
         "lvextend -l 4097 data/reports",
     ] {
         refusal(&mut s, cmd);
     }
     refusal(&mut s, &"x".repeat(2049));
-    refusal(&mut s, "resize2fs data/reports ☃");
+    refusal(&mut s, "resize2fs /dev/data/reports ☃");
 }
 #[test]
 fn reports_are_read_only_and_derived_from_current_extent_ownership() {
@@ -355,7 +357,7 @@ fn multiple_vg_extent_sizes_and_small_pv_alignment_are_validated() {
     run(&mut s, "lvextend -L +1M peer/archive");
     assert_eq!(s.lv_bytes("peer/archive").unwrap(), 4 * MIB);
     assert_eq!(s.filesystem_bytes("peer/archive").unwrap(), 2 * MIB);
-    run(&mut s, "resize2fs peer/archive");
+    run(&mut s, "resize2fs /dev/peer/archive");
     assert_eq!(s.filesystem_bytes("peer/archive").unwrap(), 4 * MIB);
     s.devices.get_mut("/dev/vdb").unwrap().bytes = DATA_START + 512;
     s.validate().unwrap();
@@ -366,7 +368,7 @@ fn saved_state_roundtrip_keeps_exact_files_and_new_requirements_cannot_inherit_s
     let mut s = fixture();
     run(&mut s, "vgextend data /dev/vdb");
     run(&mut s, "lvextend -L 24M data/reports");
-    run(&mut s, "resize2fs data/reports");
+    run(&mut s, "resize2fs /dev/data/reports");
     assert_eq!(rows(&s), vec![true, true, true]);
     let raw = serde_json::to_vec(&s).unwrap();
     let mut restored = State::from_json(&raw).unwrap();
@@ -571,7 +573,7 @@ fn gibibyte_input_and_maximum_extent_boundary_are_math_not_command_matches() {
         run(&mut s, cmd);
         assert_eq!(s.lv_bytes("data/reports").unwrap(), expected);
         assert_eq!(s.filesystem_bytes("data/reports").unwrap(), 8 * MIB);
-        run(&mut s, "resize2fs data/reports");
+        run(&mut s, "resize2fs /dev/data/reports");
         assert_eq!(s.filesystem_bytes("data/reports").unwrap(), expected);
         assert_eq!(
             s.read_file("data/reports", "/report.txt").unwrap(),
@@ -588,4 +590,16 @@ fn gibibyte_input_and_maximum_extent_boundary_are_math_not_command_matches() {
     refusal(&mut s, "lvextend -l +1 data/reports");
     let raw = serde_json::to_vec(&s).unwrap();
     assert_eq!(State::from_json(&raw).unwrap(), s);
+}
+
+#[test]
+fn resize2fs_requires_a_device_path_not_lvm_utility_shorthand() {
+    let mut s = fixture();
+    for command in ["resize2fs data/reports", "resize2fs data/reports 8M"] {
+        refusal(&mut s, command);
+    }
+    let before = s.clone();
+    run(&mut s, "resize2fs /dev/data/reports 8M");
+    assert_eq!(s, before);
+    assert!(s.execute("lvs").unwrap().contains("reports data"));
 }

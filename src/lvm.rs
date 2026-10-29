@@ -17,7 +17,7 @@ pub const MAX_STATE_BYTES: usize = 2 * 1024 * 1024;
 const MAX_DEVICE_BYTES: u64 = 1024 * 1024 * MIB;
 const MAX_COMMAND_BYTES: usize = 2048;
 
-pub const HELP: &str = "Virtual LVM growth only: pvs; vgs; lvs; pvcreate /dev/NAME...; vgextend VG /dev/NAME...; lvextend -l N|+N|+100%FREE VG/LV; lvextend -L N|+N[M|G] VG/LV; resize2fs VG/LV [BLOCKS|SIZE[M|G]]. /dev/VG/LV is also accepted. Integer LVM size without a suffix means MiB; resize2fs size without a suffix means 4096-byte blocks. M/G are binary and case-insensitive. LV sizes round upward to whole extents; resize2fs changes the separate modeled ext4 capacity. pvs/vgs/lvs use a fixed simulator report with explicit byte columns. No shell syntax, force, shrink, deletion, creation of VGs/LVs/filesystems, snapshots, activation, RAID, thin provisioning, mounts, real devices or host commands. Real LVM has additional and potentially destructive operations; this simulator's refusal is not a real-system safety guarantee.";
+pub const HELP: &str = "Virtual LVM growth only: pvs; vgs; lvs; pvcreate /dev/NAME...; vgextend VG /dev/NAME...; lvextend -l N|+N|+100%FREE VG/LV; lvextend -L N|+N[M|G] VG/LV; resize2fs /dev/VG/LV [BLOCKS|SIZE[M|G]]. LVM tools also accept /dev/VG/LV. resize2fs requires the device pathname, not bare VG/LV. Integer LVM size without a suffix means MiB; resize2fs size without a suffix means 4096-byte blocks. M/G are binary and case-insensitive. LV sizes round upward to whole extents; resize2fs changes the separate modeled ext4 capacity. pvs/vgs/lvs use a fixed simulator report with explicit byte columns. No shell syntax, force, shrink, deletion, creation of VGs/LVs/filesystems, snapshots, activation, RAID, thin provisioning, mounts, real devices or host commands. Real LVM has additional and potentially destructive operations; this simulator's refusal is not a real-system safety guarantee.";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ErrorKind {
@@ -794,14 +794,14 @@ fn parse(input: &str) -> Result<Action> {
                 growth,
             })
         }
-        ["resize2fs", id] => {
+        ["resize2fs", id] if id.starts_with("/dev/") => {
             volume_name(id)?;
             Ok(Action::ResizeFs {
                 id: (*id).into(),
                 blocks: None,
             })
         }
-        ["resize2fs", id, size] => {
+        ["resize2fs", id, size] if id.starts_with("/dev/") => {
             volume_name(id)?;
             let amount = bytes(size, BLOCK_BYTES)?;
             if amount % BLOCK_BYTES != 0 {
