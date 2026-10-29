@@ -14,8 +14,8 @@ Read BUILD_WORKFLOW.md before any heavy build/test/reference/native command.
 Normal182 assignments/48units:53CCNA/14units,40LPIC-1/10,32LPIC-2/8,57Bash/16.
 Evaluator13;57scripts/442cases/57examples. All180 predecessor definitions/47raw
 units and original55scripts/420cases/55examples remain pinned. Core929cd20/
-c03999c and OneOff180/2b61300 are pushed; the current182 milestone has passed its
-implementation gates and is being committed/pushed. See CATALOG182_MILESTONE.md.
+c03999c and OneOff180/2b61300 are pushed; the current182 milestone b6f58a8 is committed/pushed after its
+implementation gates. See CATALOG182_MILESTONE.md.
 
 Coverage175Partial/1Supporting/1064Open over1240 overlapping references, not a
 completion percentage. All136 parents incomplete(94Open/42Partial). Only already
@@ -54,34 +54,40 @@ CURRICULUM_RECONCILIATION.md. Pure models/proposals earn no curriculum credit.
   not every control/all28themes or novice/device/reader/otherOS acceptance.
   Minavailable24101380096B/PSI0/swapout0/OOM0. Source unchanged during native.
 
-No active heavy invocation remains after M375. Use MAIN absolute tools/dev.py,
+No active heavy invocation remains after M384 sealed-baseline verification. Use MAIN absolute tools/dev.py,
 one shared lock, Cargo2jobs/Rust2threads, exclusive checkout targets and verified
 NVMe-backed artifacts. No concurrent heavy work/new large/tmp/cleanup. Do not
 mutate a compiled checkout while its command runs. Workers are source-only.
 
-## Immediate continuation: genuine13 baseline, then LVM186/NTP190
+## Immediate continuation: integrate LVM186/NTP190; preserve genuine13
 
-1. Finish scoped182 documentation/coverage/privacy/format checks, commit and push.
-2. Apply reviewed before14 capture helpers ONLY after narrowly rebasing their
-   compiled-source pins to the two helper lint attributes/current accepted182.
-   Do not advance evaluator14 until actual13capture is independently sealed.
-3. Apply closed normal186 LVM integration, run25scoped groups/old-family regressions/
-   Clippy/Python/coverage and actual native four-task flows, then commit/push.
-4. Integrate normal190 NTP on that exact186 composition, preserving the combined
-   source-aware progress boundary. Continue other ledger gaps without stopping.
+1. Finish current genuine13 baseline documentation/privacy checks and commit/push
+   its tooling/seals; normal182/b6f58a8 is already pushed.
+2. Apply closed normal186 LVM integration, preserving the later before14 Cargo/
+   developer-runner/tooling overlay rather than stale whole-file afterimages.
+   Run25scoped groups/old-family regressions/Clippy/Python/coverage and actual
+   native four-task flows, then commit/push.
+3. Integrate normal190 NTP on that exact186 composition, preserving combined
+   source-aware progress. Continue all ledger gaps without waiting for approval.
+4. ERE14 source remains unaccepted: fixed GNU reference/cooperative utility/
+   actual13 migration/admission/current-consumer/native/content gates are required
+   before language advancement or new authored credit.
 
-Before14 R2 .build-artifacts/reviews/bash-ere-integration-before14-source-r2/
-MANIFEST.json754bec52c9550d4f327aedf414135c6ad12ba6ff7c46d3c60a1be689ecb9f578;
-patch6b839974. Sevenpaths/fivenew/29prospectivePython groups UNRUN. PeerACKa168bb43
-fixes all five R1 findings: correct prior12manifest key, preserved practice source
-correspondence, rawCRLF refusal/escaped\r acceptance, current transitive
-native_reopen.py in708-source closure, and before-shell-v13 filename holding
-raw12bytes. R2 still needs current lint-pin rebase, actual build/prepare/exact
-source+compiler+ELF approval/capture/readback/seals.57/442/57, genuine12raw145
-contexts55Script90nonScript plus only2actuallyrunLoop contexts→147;35nonScript stay
-absent. Two entire authentic unfinished Attempts/practice remain unchanged.
-Original9–12 producers/helpers/source/captures stay immutable. No actual13baseline
-or14semantics is accepted from source-only proposals.
+Genuine13 baseline IS OBSERVED/SEALED; SHELL_EVALUATOR13_BASELINE.md has identities.
+Exact7 helper proposalR3 .reviews/bash-ere-integration-before14-source-r3/
+MANIFEST7fd069c7/CLOSED6b839974 applied994protected unchanged. M378all377Python,
+M379defaultClippy/M380producerbuild/M381featureClippyPASS. M382prepare pins1024
+files316913725B; Root+peer74cca119 readbacks exact, approvalonlyliteraltrue.
+M383actualcapture exits0/reaped73940:57/442/57,499LFrows,147contexts,current57/55,
+90nonScript exact,2unfinished entireAttempts/practice exact,35absent,allhistory
+multiplicity309/299/raw12backupv13 exact. Peeractualff243216. Root fills only2seals;
+M384verifyPASS, no replay/regeneration. Manifest8ea1df74fdc71db3f7290e2908467c6ec4162eff7231d91440ad4131bc983441,
+attestation0855fd6df6c1ad0260fddc8a5c6d1f04c6e065e16d0ce8a176d44581a53b49d1.
+Retained708-sourcea1c391c4 and148202504-byteELF338e4bccc584e656b168cb055360815c32edc9022f805ff1c3d1ee35895624d3
+live in .reviews/bash-ere-integration/captures/public13-182-442-r1. Keep all original
+9–13 producers/helpers/captures immutable. Public collector now contains actual
+seals; captured original None-source remains privately retained. Actual13
+migration-consumer gates remain pending before14; a baseline alone is not acceptance.
 
 Normal186 R2 .build-artifacts/reviews/lvm-normal186-source-r2/MANIFEST.json
 3ee97405ca239dcdfa5a3e76b9dea72b747fad288be2ed0caf65294b2cd00316;

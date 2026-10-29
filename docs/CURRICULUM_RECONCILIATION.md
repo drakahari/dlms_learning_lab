@@ -297,11 +297,11 @@ or test-only fixture is not a delivered lesson.
    all-target Clippy,348 Python checks and actual Fedora82-capture native flows.
    Preserve its original180 definitions,55 scripts/420 cases/55 examples and all
    genuine evaluator9–12 evidence. Installed171 candidate acceptance is separate.
-2. Seal a genuine evaluator13 baseline before any evaluator14 advance. The
-   reviewed before14 collector still requires actual current-source/ELF approval
-   and observation; a source proposal or synthetic guard is not migration evidence.
-3. Integrate the reviewed four-task LVM unit after normal182 and the baseline
-   capture, then the four-task NTP unit, with current-catalog/source-aware progress,
+2. Preserve the genuine evaluator13 baseline observed and independently sealed
+   in SHELL_EVALUATOR13_BASELINE.md. Before any14 advance, add actual current-versus-
+   genuine13 regression tests; a sealed baseline alone is not migration acceptance.
+3. Integrate the reviewed four-task LVM unit after accepted normal182 and its
+   sealed baseline, then the four-task NTP unit, with source-aware progress,
    runtime/alternative/negative checks and actual native flows. Their pure models
    are tested; source-only units currently earn no catalog or objective credit.
 4. Validate controlled ERE reference comparisons and cooperative shell integration

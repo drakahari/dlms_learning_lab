@@ -4461,3 +4461,23 @@ startup/numeric identity. New182cold/installed, Physicalsignal143 diagnosis,
 otherOS/reader/device/novice acceptance and full curriculum remain pending.
 Continue genuine13baseline, reviewed LVM186/NTP190 and every mapped gap; source-only
 proposals add no authored credit and there is no arbitrary catalog target.
+
+
+### Genuine13 baseline before future language changes
+
+Normal182 b6f58a8 is pushed. Reviewed before14R3 7fd069c7 exact7afterimages
+6b839974 preserve all994unowned paths; all29new guard cases remain from reviewedR2.
+M378377Python/M379defaultClippy/M380fixedproducerbuild/M381featureClippyPASS.
+M382nochildprepare1024pins316913725B, Root+peer74cca119 exactreadback; only literal
+root_reviewed becomestrue. M383actual fixed13 producer exits0:57scripts442cases/
+57examples499LFrows and147contextprofiles current57/55,90nonScript exact,
+2wholeunfinishedAttempt/practice exact,35absent,309/299priorRecordmultiplicity and
+raw12backupv13suffix exact. All11outputs708sourcecopies/heldELF338e4bcc retained.
+Peeractualreadbackff243216 agrees; only then Root fills manifest8ea1df74 and
+attestation0855fd6d seals. M384sealedverifyPASS without replay/regeneration.
+Minavailable24066596864B/PSI0/swapout0/OOM0; one sharedrunner/2jobs/2threads/disk.
+SHELL_EVALUATOR13_BASELINE.md records exact identities. The observed baseline
+changes no authored count/objective status and does not itself accept evaluator14.
+Continue reviewed LVM186/NTP190 actual gates, bounded ERE reference/integration/
+migration and all remaining scope. No package/release publication or platform
+acceptance inferred.

@@ -255,3 +255,17 @@ ordinary loose branch ref, or bounded packed refs only when the loose ref is
 absent. It refuses aliases, malformed/duplicate records and non-LF control
 separators. Do not rewrite Git refs or alter immutable historical helpers to make
 a new capture tool pass. Existing historical producers and receipts stay exact.
+
+
+The genuine evaluator13 producer similarly requires the nondefault
+`historical-evaluator13-capture` feature and actual revision13. Its fixed
+normal182 baseline was observed and independently sealed before future14 work;
+see SHELL_EVALUATOR13_BASELINE.md. The new guarded
+`tools/dev.py tool scripting_before14_verify.py --mode verify` checks retained
+499 API observations,147-context original/draft profiles,708 source inputs and
+the actual executed producer without replay. Preserve original9–13 producers,
+raw observations and source/ELF bundles. Explicit old producer compilation after
+a revision advance is refused; no feature selects an earlier evaluator.
+New language still needs migration/negative/current-state tests; the seal itself
+is not new evaluator or curriculum acceptance. All memory/lock/disk rules above
+remain mandatory for this tool and every worker.
