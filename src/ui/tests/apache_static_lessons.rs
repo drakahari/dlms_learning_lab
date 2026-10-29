@@ -6,7 +6,7 @@ fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     assert_eq!(
         a.scenarios.len(),
-        168,
+        171,
         "normal143 registration required, no fake filler scenarios"
     );
     assert!(

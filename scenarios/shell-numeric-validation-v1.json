@@ -1,0 +1,1149 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-numeric-retry",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Numeric input and safe decisions",
+      "title": "Validate a retry window",
+      "summary": "Reject unsafe numeric arguments before calculating a retry plan.",
+      "objective": "Write a script receiving ATTEMPTS and DELAY as two arguments. ATTEMPTS is one decimal digit, 1–8. DELAY is 0–300 seconds, written using ordinary digits 0–9 with no leading zeros except 0. Print Attempts, Delay and Wait window as three “Label: value” lines. Wait window is (ATTEMPTS − 1) × DELAY. On a wrong argument count, print “Usage: retry-plan ATTEMPTS DELAY”; otherwise reject attempts first, then delay, using the exact Invalid messages shown in the cases. Errors go to stderr with status 2 and no stdout. Preserve all simulated files.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Read the complete assignment and the expected results. The introduction and separate example remain available in Learn mode.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Check the original text before interpreting it as a number. Handle rejected input as the assignment describes.",
+          "action": "Write the complete script and Run. Compare the first failing case, adjust the code and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "Ordinary input is only one part of a reliable script. Invalid input and unchanged files are graded too.",
+          "action": "Review failed rows and exit status. Worked solutions are optional, not shown by default in Challenge.",
+          "commands": []
+        }
+      ],
+      "explanation": "Validate argument count and text shape first. A small accepted width prevents overflow-sized inputs from reaching integer operations. Bound delay to 300, then calculate one fewer waiting interval than attempts.\n\nOne supported solution, available on request:\ndecimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+      "hints": [
+        "Start with the argument count, then validate attempts so the error order is predictable.",
+        "An allowlist of exact digit widths rejects empty, signed, non-ASCII, leading-zero and overlong values without arithmetic.",
+        "After text is safe, enforce DELAY ≤300. An initial attempt does not require a preceding delay."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax within the bounded in-process subset, in fixed C/POSIX locale. ASCII digits only; no fractions, signs, base# conversion, regex, Unicode digit classification or arbitrary precision. Files are virtual UTF-8 text in flat /work; no host commands/files/network. This unit rejects leading zeros deliberately; it does not claim Bash rejects every leading-zero number. Validation before a single output write is not an operating-system atomic-rename or crash-recovery guarantee.",
+      "initial": {
+        "kind": "Script",
+        "source": "# The lab supplies attempts as $1 and delay as $2.\n# Reject bad text before calculating the wait window.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary retry plan",
+            "args": [
+              "3",
+              "10"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Attempts: 3\nDelay: 10\nWait window: 20\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "One attempt and zero delay",
+            "args": [
+              "1",
+              "0"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Attempts: 1\nDelay: 0\nWait window: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Largest allowed plan",
+            "args": [
+              "8",
+              "300"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Attempts: 8\nDelay: 300\nWait window: 2100\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Missing arguments",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: retry-plan ATTEMPTS DELAY\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Leading zero delay",
+            "args": [
+              "3",
+              "010"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "No attempts",
+            "args": [
+              "0",
+              "10"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid attempts: use 1 through 8.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Too many attempts",
+            "args": [
+              "9",
+              "10"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid attempts: use 1 through 8.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Delay exceeds operational limit",
+            "args": [
+              "3",
+              "301"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Overflow-sized digits",
+            "args": [
+              "3",
+              "18446744073709551616"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "ASCII digits with a suffix",
+            "args": [
+              "3",
+              "12x"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Non-ASCII numeral",
+            "args": [
+              "3",
+              "４"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Newline is not part of a number",
+            "args": [
+              "3",
+              "10\n"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n"
+      ],
+      "prerequisites": [
+        "shell-case-publication",
+        "shell-pack-items"
+      ],
+      "teaching": {
+        "prerequisite_note": "This is not the first shell unit. Revisit the named prerequisites for variables, quoted %s printing, argument counts, if/test, functions and status, line-preserving reads and arithmetic. Run supplies each test’s arguments to the script in your editor. Usage messages name the fictional script; do not call that name inside it. New numeric text checks are introduced here before the assignment.",
+        "concepts": [
+          {
+            "title": "Numbers arrive as text",
+            "text": "The lab supplies $1 and $2 as arguments. A blank, 12x or a very long run of digits is still text. Validate it before using test -gt or arithmetic. You create working variables such as wait; they are not supplied answers."
+          },
+          {
+            "title": "A class describes one position",
+            "text": "In case, [0-9] matches one ordinary digit from 0 through 9 (ASCII). Other numeral shapes, such as ３, are not part of this rule. [1-9][0-9] matches a two-digit value without a leading zero. A pattern matches the whole value. Alternatives use |; the first matching arm runs."
+          },
+          {
+            "title": "A star does not repeat the digit rule",
+            "text": "[0-9]* means a digit followed by anything, so 3x matches it. To detect any non-digit, use *[!0-9]*. Handle an empty value separately. Quoted values remain data, even when they look like shell code."
+          },
+          {
+            "title": "Check spelling and width before value",
+            "text": "For at most two digits, accept 0, [1-9] or [1-9][0-9]. This bounds the text before a numeric test. For three digits, add a third explicit digit position. Then enforce the smaller practical limit required by the task."
+          },
+          {
+            "title": "Leading zero has a different meaning in arithmetic",
+            "text": "Shell arithmetic can treat 010 as octal eight, and 08 is not valid octal. Very large arithmetic values can wrap. This unit deliberately accepts only ordinary decimal spelling and small limits, so neither case reaches arithmetic."
+          },
+          {
+            "title": "Explain a rejected request",
+            "text": "A useful error says which input to fix, goes to stderr with >&2 and exits with status 2. A valid request exits0. The separate example checks its own working variable; your assignment must check the lab-supplied arguments."
+          }
+        ],
+        "example": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=14\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n",
+        "inputs": "The example creates slots=14 itself; it has no supplied arguments. A separate virtual badge-notes.txt must remain unchanged. The decimal2 helper reports success or failure before multiplication.",
+        "try_change": "Change slots=14 to slots=014 and Run example. It should print a useful error instead of multiplying an octal-looking value. Restore 14 to repair the example.",
+        "fixture": {
+          "name": "Badge slots example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          },
+          "stdout": "Double: 28\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          }
+        }
+      },
+      "retry_guidance": "An unsupported integer/arithmetic operand can mean input reached numeric work too early. Check its spelling and width first. For valid requests, count the gaps between attempts.",
+      "unit": "shell-numeric-validation"
+    },
+    {
+      "id": "shell-numeric-intake",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Numeric input and safe decisions",
+      "title": "Audit malformed intake records",
+      "summary": "Continue after bad records while preserving their exact text and counting valid quantities.",
+      "objective": "Write a script receiving one SOURCE filename for a supplied virtual text file. Each line should be 0–999 in ordinary decimal without leading zeros except 0. Inspect every line, including a final line without newline. For each invalid line, print “Rejected line N: TEXT” to stderr using its one-based line number and exact text; continue with later records. Print Accepted, Rejected and Total as three “Label: value” lines. Total sums only accepted values. Exit 0 if all records are valid,1 if any were rejected. Wrong argument count or missing source is status 2 with the exact case message and no stdout. Do not alter any file.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Read the complete assignment and the expected results. The introduction and separate example remain available in Learn mode.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Check the original text before interpreting it as a number. Handle rejected input as the assignment describes.",
+          "action": "Write the complete script and Run. Compare the first failing case, adjust the code and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "Ordinary input is only one part of a reliable script. Invalid input and unchanged files are graded too.",
+          "action": "Review failed rows and exit status. Worked solutions are optional, not shown by default in Challenge.",
+          "commands": []
+        }
+      ],
+      "explanation": "Keep raw rows intact, then classify them as bounded canonical decimals. Record position is independent of acceptance. Reporting invalid data is a successful implementation of this assignment when output, status and unchanged files match all cases.\n\nOne supported solution, available on request:\ndecimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+      "hints": [
+        "Reuse a text-only numeric check before adding a row to total. Empty, space-padded and non-ASCII rows are invalid.",
+        "Use the line-preserving read/EOF pattern from the prerequisite. Do not pipe the loop if its counters are needed afterward.",
+        "The complete audit prints its summary even after bad rows; missing input or wrong arguments are different preflight errors."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax within the bounded in-process subset, in fixed C/POSIX locale. ASCII digits only; no fractions, signs, base# conversion, regex, Unicode digit classification or arbitrary precision. Files are virtual UTF-8 text in flat /work; no host commands/files/network. This unit rejects leading zeros deliberately; it does not claim Bash rejects every leading-zero number. Validation before a single output write is not an operating-system atomic-rename or crash-recovery guarantee.",
+      "initial": {
+        "kind": "Script",
+        "source": "# The lab supplies the source filename as $1.\n# Inspect every original row; leave all files unchanged.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Recover after malformed rows",
+            "args": [
+              "intake.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/intake.txt": "7\noops\n5\n01\n"
+            },
+            "stdout": "Accepted: 2\nRejected: 2\nTotal: 12\n",
+            "stderr": "Rejected line 2: oops\nRejected line 4: 01\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/intake.txt": "7\noops\n5\n01\n"
+            }
+          },
+          {
+            "name": "Zero maximum and final record without newline",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "0\n999\n12"
+            },
+            "stdout": "Accepted: 3\nRejected: 0\nTotal: 1011\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "0\n999\n12"
+            }
+          },
+          {
+            "name": "Empty source",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": ""
+            },
+            "stdout": "Accepted: 0\nRejected: 0\nTotal: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": ""
+            }
+          },
+          {
+            "name": "Blank rows are reported",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "\n4\n\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 2\nTotal: 4\n",
+            "stderr": "Rejected line 1: \nRejected line 3: \n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "\n4\n\n"
+            }
+          },
+          {
+            "name": "Leading zero is never octal",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "010\n08\n2\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 2\nTotal: 2\n",
+            "stderr": "Rejected line 1: 010\nRejected line 2: 08\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "010\n08\n2\n"
+            }
+          },
+          {
+            "name": "Very large text is rejected before arithmetic",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "18446744073709551616\n6\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 1\nTotal: 6\n",
+            "stderr": "Rejected line 1: 18446744073709551616\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "18446744073709551616\n6\n"
+            }
+          },
+          {
+            "name": "Non-ASCII and edge spaces stay visible",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "３\n 4\n5 \n-2\n6\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 4\nTotal: 6\n",
+            "stderr": "Rejected line 1: ３\nRejected line 2:  4\nRejected line 3: 5 \nRejected line 4: -2\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "３\n 4\n5 \n-2\n6\n"
+            }
+          },
+          {
+            "name": "Missing file",
+            "args": [
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot audit: source is missing.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            }
+          },
+          {
+            "name": "Missing source argument",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: intake-audit SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            }
+          },
+          {
+            "name": "Extra source argument",
+            "args": [
+              "queue.txt",
+              "other.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: intake-audit SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "7\n"
+            }
+          },
+          {
+            "name": "Shell-looking data stays data",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "$(printf changed)\n$((2+2))\n9\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 2\nTotal: 9\n",
+            "stderr": "Rejected line 1: $(printf changed)\nRejected line 2: $((2+2))\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/queue.txt": "$(printf changed)\n$((2+2))\n9\n"
+            }
+          },
+          {
+            "name": "Spaced option-looking source and carriage return",
+            "args": [
+              "- intake notes.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/- intake notes.txt": "2\r\n3\n"
+            },
+            "stdout": "Accepted: 1\nRejected: 1\nTotal: 3\n",
+            "stderr": "Rejected line 1: 2\r\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/- intake notes.txt": "2\r\n3\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n"
+      ],
+      "prerequisites": [
+        "shell-numeric-retry",
+        "shell-preserve-lines",
+        "shell-number-records"
+      ],
+      "teaching": {
+        "prerequisite_note": "This is not the first shell unit. Revisit the named prerequisites for variables, quoted %s printing, argument counts, if/test, functions and status, line-preserving reads and arithmetic. Run supplies each test’s arguments to the script in your editor. Usage messages name the fictional script; do not call that name inside it. New numeric text checks are introduced here before the assignment.",
+        "concepts": [
+          {
+            "title": "Choose recovery deliberately",
+            "text": "A bad request may require stopping. An intake audit instead records the problem and keeps inspecting later rows. Do not add rejected text to the total, and do not let a malformed row become an arithmetic error."
+          },
+          {
+            "title": "Preserve the text you diagnose",
+            "text": "IFS= read -r row keeps edge spaces and backslashes so a report can show what was actually supplied. Plain read can trim spaces and accidentally turn a rejected row into a valid number. LF separates records; a carriage return remains part of the row."
+          },
+          {
+            "title": "Do not lose the last record",
+            "text": "read assigns a final nonempty line without LF but returns failure. The existing while pattern “IFS= read -r row || test -n \"$row\"” processes that last value too. An empty file has no records; a blank line is one rejected record."
+          },
+          {
+            "title": "Count position and acceptance separately",
+            "text": "Advance the line number for every record. Advance the accepted count and total only after its text passes the numeric rule. Advance the rejected count and print an error for every other row; no break or continue is required."
+          },
+          {
+            "title": "An error report can be the correct solution",
+            "text": "Exit 1 means the audit found rejected records, not that your script is necessarily wrong. The lab expects that status for those sample files. Syntax/unsupported diagnostics are different: the script should handle bad data itself."
+          }
+        ],
+        "example": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n",
+        "inputs": "The example reads its own labels.txt, containing 3, 12 and x. It creates checked and flagged counters. These files and counters are separate from assignment drafts and inputs.",
+        "try_change": "Change the accepted pattern [0-9] to [0-9]|[1-9][0-9]. Run example: two labels now pass and one needs review. Restore the single-digit pattern to repair it.",
+        "fixture": {
+          "name": "Crate label example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          },
+          "stdout": "Labels checked: 1\nLabels to review: 2\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          }
+        }
+      },
+      "retry_guidance": "Rejected data rows are expected in some cases. Compare line numbers, exact original text, accepted totals and status. Syntax/unsupported diagnostics are different failures. Continue after malformed rows.",
+      "unit": "shell-numeric-validation"
+    },
+    {
+      "id": "shell-numeric-publication",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Numeric input and safe decisions",
+      "title": "Preview a safe batch allocation",
+      "summary": "Validate every amount and the whole budget before changing an existing plan.",
+      "objective": "Write a script receiving MODE, BUDGET, SOURCE and DESTINATION as four arguments. MODE is preview or publish. BUDGET is 0–999 in ordinary decimal without leading zeros except 0. Use simple filenames: nonempty, no slash, not . or .. or -. SOURCE must exist and differ from DESTINATION. Each source line is a job requesting 1–99 units in the same decimal spelling; inspect a final line without LF too. An empty file is a valid zero-job plan. Reject the first bad row or a total above budget. On success, build the five-line Source/Jobs/Units/Budget/Remaining report shown in the cases. Preview prints that report and changes nothing. Publish writes it to DESTINATION with one final newline and prints “Created: NAME”. Any rejection is status 2, stderr only and every file unchanged. Validate in order: argument count, mode, budget, source name, destination name, collision, source existence, row order, total budget.",
+      "difficulty": "Advanced",
+      "minutes": 28,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Read the complete assignment and the expected results. The introduction and separate example remain available in Learn mode.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Check the original text before interpreting it as a number. Handle rejected input as the assignment describes.",
+          "action": "Write the complete script and Run. Compare the first failing case, adjust the code and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "Ordinary input is only one part of a reliable script. Invalid input and unchanged files are graded too.",
+          "action": "Review failed rows and exit status. Worked solutions are optional, not shown by default in Challenge.",
+          "commands": []
+        }
+      ],
+      "explanation": "Preflight arguments and names, validate all source rows, then compare the total. A capture or a separate validation pass can delay publication. Any valid supported design passes when its output, status and entire virtual file map match, including rejected and preview requests.\n\nOne supported solution, available on request:\ndecimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+      "hints": [
+        "Handle argument and mode errors before interpreting any budget text. Bound its spelling before using a numeric comparison.",
+        "Use the previous unit’s read and numeric checks, but stop with the first bad row instead of publishing a partial allocation.",
+        "Keep report construction before the only destination write. Capture strips trailing LF, so restore exactly one with printf. A direct validate-then-print solution also works."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax within the bounded in-process subset, in fixed C/POSIX locale. ASCII digits only; no fractions, signs, base# conversion, regex, Unicode digit classification or arbitrary precision. Files are virtual UTF-8 text in flat /work; no host commands/files/network. This unit rejects leading zeros deliberately; it does not claim Bash rejects every leading-zero number. Validation before a single output write is not an operating-system atomic-rename or crash-recovery guarantee.",
+      "initial": {
+        "kind": "Script",
+        "source": "# The lab supplies mode, budget, source and destination as $1 through $4.\n# Preview and rejected plans must leave every file unchanged.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview retains an existing plan",
+            "args": [
+              "preview",
+              "100",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "Source: jobs.txt\nJobs: 3\nUnits: 60\nBudget: 100\nRemaining: 40\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Publish a different exact-budget batch",
+            "args": [
+              "publish",
+              "100",
+              "- jobs list.txt",
+              "- approved plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/- jobs list.txt": "1\n99",
+              "/work/- approved plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "Created: - approved plan.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/- jobs list.txt": "1\n99",
+              "/work/- approved plan.txt": "Source: - jobs list.txt\nJobs: 2\nUnits: 100\nBudget: 100\nRemaining: 0\n"
+            }
+          },
+          {
+            "name": "Unknown mode cannot touch output",
+            "args": [
+              "apply",
+              "100",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Mode must be preview or publish.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Leading-zero budget is not decimal policy",
+            "args": [
+              "publish",
+              "010",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid budget: use 0 through 999 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Huge budget text is not safe just because it has digits",
+            "args": [
+              "publish",
+              "18446744073709551616",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid budget: use 0 through 999 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Late non-ASCII row prevents publication",
+            "args": [
+              "publish",
+              "100",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n４\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid units on line 3: use 1 through 99 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n４\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Leading-zero row prevents publication",
+            "args": [
+              "publish",
+              "100",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n02\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n02\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Budget exceeded",
+            "args": [
+              "publish",
+              "59",
+              "jobs.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Batch exceeds budget.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Missing source preserves old plan",
+            "args": [
+              "publish",
+              "100",
+              "missing.txt",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot plan: source is missing.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Destination cannot be the input",
+            "args": [
+              "publish",
+              "100",
+              "jobs.txt",
+              "jobs.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Source and destination must differ.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Empty destination is not a filename",
+            "args": [
+              "publish",
+              "100",
+              "jobs.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid destination name.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          },
+          {
+            "name": "Missing arguments",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: plan MODE BUDGET SOURCE DESTINATION\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/jobs.txt": "10\n20\n30\n",
+              "/work/plan.txt": "Previous approved plan.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-numeric-intake",
+        "shell-capture-handover"
+      ],
+      "teaching": {
+        "prerequisite_note": "This is not the first shell unit. Revisit the named prerequisites for variables, quoted %s printing, argument counts, if/test, functions and status, line-preserving reads and arithmetic. Run supplies each test’s arguments to the script in your editor. Usage messages name the fictional script; do not call that name inside it. New numeric text checks are introduced here before the assignment.",
+        "concepts": [
+          {
+            "title": "Decide whether partial work is useful",
+            "text": "The intake audit could continue after bad data. An approved allocation cannot contain partial or invalid amounts. Here a bad row or an over-budget total must leave the existing plan exactly as it was."
+          },
+          {
+            "title": "Validate the interface before reading",
+            "text": "Check mode and budget before source/destination names. This lab deliberately uses simple flat virtual filenames, not general Linux path handling. A quoted filename remains one value even when it contains spaces, a dash or a literal star."
+          },
+          {
+            "title": "Validate amounts before adding them",
+            "text": "Each job needs1–99 units; 0 is not a valid job size. Match one or two digit positions without leading zero before adding. Count every accepted job, including a final line without LF, then compare the total with the already validated budget."
+          },
+          {
+            "title": "Build before publishing",
+            "text": "The existing report=$(build_plan ...) form captures a function’s output and removes trailing LF. Keep all errors on stderr; on rejection return 2 before printing a report. Use || to stop publication when that function fails. A separate validate-then-print approach is equally valid."
+          },
+          {
+            "title": "Preview and publish share one decision",
+            "text": "Both modes must accept or reject the same input. Preview prints the validated report but never writes the destination. Publish uses printf with a fixed %s format and a final newline to write the full report only after validation."
+          },
+          {
+            "title": "Be precise about safety",
+            "text": "This practice protects virtual input and unrelated files from mistaken early writes. It does not implement operating-system temporary files, atomic rename, crashes or resumable jobs. Portable syntax here does not mean every shell feature is supported."
+          }
+        ],
+        "example": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=preview\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n",
+        "inputs": "The example creates mode=preview and reads its own rooms.txt. Its limit is 8 seats, not the assignment budget interface. room-notice.txt initially contains an older notice and must stay unchanged in preview.",
+        "try_change": "Change mode=preview to mode=publish and Run example. Only the example room-notice.txt should change; assignment files and credit stay untouched. Restore preview to repair the example.",
+        "fixture": {
+          "name": "Room capacity preview example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Previous room notice.\n"
+          },
+          "stdout": "Seats requested: 5\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Previous room notice.\n"
+          }
+        }
+      },
+      "retry_guidance": "Compare the file map as well as stdout. Preview and every rejection must preserve old plans. A plausible report does not compensate for an early write during a failed request.",
+      "unit": "shell-numeric-validation"
+    }
+  ]
+}

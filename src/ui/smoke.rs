@@ -26,6 +26,7 @@ pub(in crate::ui) mod nat;
 pub(in crate::ui) mod nat_lessons;
 mod nfs_alignment;
 pub(in crate::ui) mod nfs_lessons;
+pub(in crate::ui) mod numeric_validation;
 pub(in crate::ui) mod optional_inputs;
 mod ospf;
 mod ospf_lessons;
@@ -360,6 +361,7 @@ impl LabApp {
             );
         let immediate_stop = immediate_stop || command_vectors::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || optional_inputs::immediate_stop(self.smoke_stage);
+        let immediate_stop = immediate_stop || numeric_validation::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop =
             immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
@@ -645,6 +647,13 @@ impl LabApp {
             }
             n @ nat::FIRST..=nat::LAST => {
                 let (advance, capture) = self.nat_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 68000..=68718 => {
+                let (advance, capture) = self.numeric_validation_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

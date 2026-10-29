@@ -1,4 +1,4 @@
-//! Current11 boundaries use actual9 evidence ONLY in explicit private replay.
+//! Current12 boundaries use actual9 evidence ONLY in explicit private replay.
 //! The default tests never fabricate historical9 outcomes or implied revisions.
 use dlms_learning_lab::{
     backup,
@@ -50,11 +50,11 @@ fn history(profile: &Progress, include_main: bool) -> BTreeMap<String, Vec<shell
         .collect()
 }
 fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
-    assert_eq!(shell::EVALUATOR_REVISION, 11);
+    assert_eq!(shell::EVALUATOR_REVISION, 12);
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 168);
+    assert_eq!(labs.len(), 171);
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -90,6 +90,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "shell-optional-policy",
             "shell-optional-report",
             "shell-optional-handover",
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication",
             "lpic2-nfs-reference",
             "lpic2-nfs-publication",
             "lpic2-nfs-handover",
@@ -108,6 +111,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         ("shell-optional-policy", true),
         ("shell-optional-report", true),
         ("shell-optional-handover", true),
+        ("shell-numeric-retry", true),
+        ("shell-numeric-intake", true),
+        ("shell-numeric-publication", true),
         ("lpic2-nfs-reference", false),
         ("lpic2-nfs-publication", false),
         ("lpic2-nfs-handover", false),
@@ -195,7 +201,7 @@ fn unchanged_except_execution_and_history(now: &Progress, old: &Progress) {
 }
 #[test]
 fn empty_legacy9_record_shape_is_explicitly_ungraded_not_a_fabricated_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 11);
+    assert_eq!(shell::EVALUATOR_REVISION, 12);
     let labs = pack::bundled().unwrap();
     let lab = labs.iter().find(|s| s.id == "shell-arguments").unwrap();
     let mut attempt = Attempt::new(lab, 1);
@@ -248,7 +254,7 @@ fn actual9_open_prepare_preserves_all6_7_8_9_histories_drafts_and_unrelated_cont
     let (raw, original, labs) = private();
     let mut loaded = progress::decode(&raw, &labs).unwrap();
     evidence::exact(&history(&loaded, false), &history(&original, false));
-    // These are the exact loaded133 contexts. All35 later tasks stay absent; opening
+    // These are the exact loaded133 contexts. All38 later tasks stay absent; opening
     // an older profile must not fabricate Attempts or historical answers.
     for lab in labs
         .iter()

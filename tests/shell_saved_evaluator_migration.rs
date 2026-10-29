@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 168);
+    assert_eq!(all.len(), 171);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -150,7 +150,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        52
+        55
     );
     let mut case_count = 0;
     for old in originals {
@@ -214,6 +214,9 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "shell-optional-policy",
             "shell-optional-report",
             "shell-optional-handover",
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication",
             "lpic2-dns-reverse-investigation",
             "lpic2-dns-reverse-ipv6",
             "lpic2-dns-reverse-handover",
@@ -239,11 +242,14 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All52 later tasks remain absent and ungraded; no invented contexts.
+    ); // All55 later tasks remain absent and ungraded; no invented contexts.
     for id in [
         "shell-optional-policy",
         "shell-optional-report",
         "shell-optional-handover",
+        "shell-numeric-retry",
+        "shell-numeric-intake",
+        "shell-numeric-publication",
     ] {
         let source = all.iter().find(|s| s.id == id).unwrap();
         assert!(

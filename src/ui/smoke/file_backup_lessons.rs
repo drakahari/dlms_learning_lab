@@ -125,7 +125,7 @@ fn sources() -> &'static Vec<Scenario> {
         let all = pack::bundled().unwrap();
         assert_eq!(
             all.len(),
-            168,
+            171,
             "Normal registration is required; never append a private fixture"
         );
         let tail = all[164..168].to_vec();
@@ -307,7 +307,7 @@ impl LabApp {
     fn bk_scope(&self) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (168, 43));
+        assert_eq!((self.scenarios.len(), self.units.len()), (171, 44));
         assert_eq!(
             self.scenarios[164..168]
                 .iter()

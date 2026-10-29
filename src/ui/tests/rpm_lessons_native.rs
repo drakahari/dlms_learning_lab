@@ -11,7 +11,7 @@ struct Witness {
 }
 fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (168, 43));
+    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
     assert!(a.progress.attempts.is_empty());
     a.smoke = true;
     a.smoke_stage = FIRST;

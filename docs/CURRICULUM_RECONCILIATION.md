@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main168 source, reconciled2026-10-28; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main171 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -13,7 +13,7 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | CCNA | 48 | 12 | 69 | 42 | 0 |
 | LPIC-1 | 36 | 9 | 504 | 93 | 1 |
 | LPIC-2 | 32 | 8 | 498 | 33 | 0 |
-| Bash/Shell | 52 | 14 | Separate path below | — | — |
+| Bash/Shell | 55 | 15 | Separate path below | — | — |
 
 All136 current parent objectives remain incomplete (97 Open,39 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
@@ -248,12 +248,17 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 
 | LPIC-2 | Backups: inspect, recover and preserve history (`backup-and-recovery`) | `lpic2-backup-selective-recovery`, `lpic2-backup-incremental-chain`, `lpic2-backup-snapshot-branch`, `lpic2-backup-recovery-handover` |
 
+| Bash/Shell | Numeric input and safe decisions (`shell-numeric-validation`) | `shell-numeric-retry`, `shell-numeric-intake`, `shell-numeric-publication` |
+
 ## Bash/Shell remaining path
 
-The52 delivered scripts span14 units. They already cover bounded indexed arrays,
+The55 source-integrated scripts span15 units. The new numeric unit has passed
+private full/native and final Main full/static/coverage gates; new171 candidate
+verification remains pending. They already cover bounded indexed arrays,
 command-output capture, getopts, case dispatch, command-list construction,
 read-only literal fallback/alternate expansion and optional-input projects,
-C-locale cut/sort/uniq work and explicit pipefail. Older Stage4 wording calling
+C-locale cut/sort/uniq work, explicit pipefail and bounded case-class numeric
+validation, malformed-record recovery and whole-plan publication. Older Stage4 wording calling
 command construction planned is stale; those three authored tasks are delivered.
 The original agreed scope still requires the following distinct capabilities
 and projects, with prerequisite teaching before assessment:
@@ -264,7 +269,6 @@ and projects, with prerequisite teaching before assessment:
 | Arguments and interfaces | Robust long-option/input validation projects beyond the bounded getopts subset; streamed row validation and meaningful handling of malformed inputs. |
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Meaningful recovery using conditional branches, break/continue and bounded retries where needed; teach every newly required control form before assessing it. |
-| Numeric validation | Reject malformed, leading-zero or overflowing numeric input before arithmetic; preserve status/data through invalid inputs. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
 | Text processing | Regex, deliberate sed/awk or equivalent documented utility capabilities; snapshot comparison, malformed-row recovery, log-analysis projects. Current literal filters and byte-field utilities do not cover these. |
 | Debugging and errors | Actual bounded tracing, useful error propagation, traps/cleanup and recovery; debugging and repair assignments, not only deliberately incorrect scripts. |
@@ -282,24 +286,20 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Finish and pin normal Main168 actual backup/native and the earlier ten-source
-   LACP/optional-input/Cron flows on the final combined candidate. Recheck its
-   packaged Fedora lifecycle and exact installed NFS cold reopen. Earlier154
-   evidence remains tied to its actual ELF; source/test counts do not prove renders.
-2. Extend the delivered manual backup subset into important-directory selection,
-   products/media choices and the remaining automation/recovery requirements.
-   Seven explicitly scoped rows are Partial; the wider backup objective is incomplete.
-3. Continue physical-uplink capability/content and remaining CCNA frontiers; the
-   unregistered pure physical backend grants no current objective credit. L3
-   EtherChannel and packet/timer behavior remain separate from delivered L2 work.
-4. Extend the shell course beyond delivered optional inputs to faithful bounded
-   malformed-input recovery, debugging and safe file-automation projects; the
-   remaining table is not replaced by a larger authored count.
-5. Continue LPIC scheduling with one-off jobs, timers and overlap/locking, plus
-   all remaining Linux/storage/network/security/service gaps. Keep coarse and
-   granular evidence aligned after each reviewed batch without routine approval
-   gates. Every current parent remains incomplete.
+1. FinalMain171 full/all24history/Clippy/Python/coverage gates pass. Commit/push
+   the reviewed numeric3 integration, then continue the following work. Private2337/native101 acceptance retains its
+   own executable identity; old168 Fedora candidatec683 remains available and
+   separately verified. No artifact identity is moved to newer code.
+2. Complete physical-link foreign/UI/index tests and authored4/native gates;
+   Source prototypes and private fixtures are not normal-catalog credit.
+3. Compile/test the shared completion index before registering fifth-backup FHS
+   selection; complete ArtifactSet/content/progress/normal-native gates. Never
+   increase cache caps to hide fairness problems.
+4. Build one-off scheduling adapters/teaching/workspace from the actual19-pass
+   core, then meaningful assignments; records alone are not execution proof.
+5. Continue every remaining network/Linux/scripting assignment and capability in
+   the granular ledger. Current reference versions/fingerprints and future CCNA
+   separation remain as recorded; no arbitrary catalog quota or routine approval.
 
-Full curriculum acceptance is separate from Windows/macOS desktop, physical-device,
-screen-reader and novice comprehension acceptance. Fedora native/install evidence
-continues per milestone. No release publication is authorized.
+Full curriculum acceptance stays separate from Windows/macOS desktop,
+physical-device/screen-reader and novice acceptance. No release publication.

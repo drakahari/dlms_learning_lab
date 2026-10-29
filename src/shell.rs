@@ -22,7 +22,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 11;
+pub const EVALUATOR_REVISION: u32 = 12;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }

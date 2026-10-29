@@ -1,0 +1,189 @@
+{
+  "status": "Fixed independent prospective native row vectors; unrun, not expected outcomes injected into app",
+  "current_review_sha256": "cbd43f56953215549b15db950bf4abd9a8fd548480ab5b7985e3755ebca2e53d",
+  "partial_reason": [
+    "Allows leading-zero delay before arithmetic",
+    "Drops final EOF-assigned row without newline",
+    "Omits required preview report while retaining file preservation"
+  ],
+  "plans": [
+    {
+      "id": "shell-numeric-retry",
+      "alternates": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+        "if test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2|3|4|5|6|7|8) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\ncase \"$2\" in\n  0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9])\n    if test \"$2\" -le 300; then true\n    else printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2; exit 2\n    fi ;;\n  *) printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2; exit 2 ;;\nesac\ntries=$1\npause=$2\nseconds=$(( (tries - 1) * pause ))\nprintf 'Attempts: %s\\n' \"$tries\"\nprintf 'Delay: %s\\n' \"$pause\"\nprintf 'Wait window: %s\\n' \"$seconds\"\n"
+      ],
+      "partial": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+      "partial_expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "wrong": "printf '%s' 'Attempts: 3\nDelay: 10\nWait window: 20\n'\n",
+      "wrong_expected": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "experiment": {
+        "source": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=014\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n",
+        "expected": {
+          "name": "Leading-zero badge experiment",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          },
+          "stdout": "",
+          "stderr": "Use 0 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          }
+        }
+      },
+      "repair": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=14\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n"
+    },
+    {
+      "id": "shell-numeric-intake",
+      "alternates": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+        "if test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  case \"$row\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9])\n      total=$((total + row))\n      accepted=$((accepted + 1)) ;;\n    *)\n      printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n      rejected=$((rejected + 1)) ;;\n  esac\ndone < \"$1\"\nprintf 'Accepted: %s\\n' \"$accepted\"\nprintf 'Rejected: %s\\n' \"$rejected\"\nprintf 'Total: %s\\n' \"$total\"\nif test \"$rejected\" -gt 0; then exit 1; fi\n"
+      ],
+      "partial": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+      "partial_expected": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "wrong": "printf '%s' 'Accepted: 2\nRejected: 2\nTotal: 12\n'\nprintf '%s' 'Rejected line 2: oops\nRejected line 4: 01\n' >&2\nexit 1\n",
+      "wrong_expected": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "experiment": {
+        "source": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]|[1-9][0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n",
+        "expected": {
+          "name": "Wider crate-label experiment",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          },
+          "stdout": "Labels checked: 2\nLabels to review: 1\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          }
+        }
+      },
+      "repair": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n"
+    },
+    {
+      "id": "shell-numeric-publication",
+      "alternates": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nline=0\njobs=0\nunits=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  case \"$row\" in\n    [1-9]|[1-9][0-9]) true ;;\n    *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; exit 2 ;;\n  esac\n  jobs=$((jobs + 1))\n  units=$((units + row))\ndone < \"$source\"\nif test \"$units\" -gt \"$budget\"; then\n  printf 'Batch exceeds budget.\\n' >&2\n  exit 2\nfi\nremaining=$((budget - units))\nshow_report() {\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$source\" \"$jobs\" \"$units\" \"$budget\" \"$remaining\"\n}\nif test \"$mode\" = preview; then\n  show_report\nelse\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$source\" \"$jobs\" \"$units\" \"$budget\" \"$remaining\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n"
+      ],
+      "partial": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  true\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+      "partial_expected": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "wrong": "printf '%s' 'Source: jobs.txt\nJobs: 3\nUnits: 60\nBudget: 100\nRemaining: 40\n'\n",
+      "wrong_expected": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "experiment": {
+        "source": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=publish\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n",
+        "expected": {
+          "name": "Publish room notice experiment",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Previous room notice.\n"
+          },
+          "stdout": "Saved example notice.\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Seats requested: 5\n"
+          }
+        }
+      },
+      "repair": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=preview\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n"
+    }
+  ]
+}

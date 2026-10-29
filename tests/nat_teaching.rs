@@ -307,7 +307,7 @@ fn foreign_practice_rejects_current_save_decode_and_good_file_is_unchanged() {
 #[test]
 fn old_140_wire_and_views_are_unchanged_and_technical_fixture_unregistered() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 168);
+    assert_eq!(all.len(), 171);
     assert!(all[..140].iter().all(|s| s.nat_teaching.is_none()));
     assert_eq!(
         all[140..143]
@@ -447,6 +447,6 @@ fn actual9_profile_plus_practice_retains_every_old_attempt_raw_target_and_receip
     evidence::exact(&loaded.attempts[&s.id], &selected);
     assert_eq!(loaded.attempts.len(), 134);
     let receipts = serde_json::to_value(loaded.migration_receipts).unwrap();
-    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 11]));
+    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 12]));
     assert_eq!(evidence::original9(), raw);
 }

@@ -1,6 +1,9 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop learning application for networking, Linux administration and scripting. **168 authored assignments in43 units:**48 CCNA,36 LPIC-1,32 LPIC-2 and52 Bash/Shell. The latest source unit adds four practical backup/recovery assignments after the L2 LACP, optional shell-input and recurring-job units. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Source, full-regression, native and candidate acceptance for the latest four additions are separated in [the catalog168 milestone](docs/CATALOG168_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop learning application for networking, Linux administration and scripting. **171 authored assignments in44 units:**48 CCNA,36 LPIC-1,32 LPIC-2 and55 Bash/Shell. The newest unit adds three numeric-validation, malformed-record and safe-publication assignments after backup/recovery. Main full2337/Clippy/Python/coverage gates pass; a matching private171 native build passes its scoped101capture walkthrough. A new171 installer is pending. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Source, full-regression, native and candidate acceptance for the latest four additions are separated in [the catalog168 milestone](docs/CATALOG168_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
+
+[Learner guide](docs/LEARNER_GUIDE.md): choosing a course, separate practice,
+checking and retrying, saved work, backups and appearance.
 
 ## Open the168-lab Fedora candidate
 

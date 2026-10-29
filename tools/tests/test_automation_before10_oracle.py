@@ -219,7 +219,21 @@ class FixedAutomationSafety(unittest.TestCase):
             self.assertEqual(teaching_amendment.historical_example(ROOT, p),s['example_source'])
             self.assertEqual(p['teaching']['fixture'],s['example_case'])
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
-        units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
+        current_raw=(ROOT/'scenarios/units-v1.json').read_bytes()
+        numeric_raw=(ROOT/'tests/fixtures/catalog171-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(numeric_raw).hexdigest(),
+                         '573d8d85745ef923b515673ebce518107dbdc19e6558906aae13f6b9f3b4519c')
+        numeric=json.loads(numeric_raw)
+        self.assertEqual(hashlib.sha256(current_raw).hexdigest(),numeric['after_units44_sha256'])
+        suffix=numeric['append_suffix_utf8'].encode()
+        self.assertTrue(current_raw.endswith(suffix))
+        previous_raw=current_raw[:-len(suffix)]+numeric['old_tail_utf8'].encode()
+        self.assertEqual(hashlib.sha256(previous_raw).hexdigest(),numeric['before_units43_sha256'])
+        self.assertEqual(len(previous_raw),numeric['before_units43_bytes'])
+        units=json.loads(previous_raw)
+        self.assertEqual(units,numeric['before_units43'])
+        self.assertEqual(json.loads(current_raw),{**units,'units':units['units']+[numeric['numeric_unit']]})
+        self.assertEqual(len(json.loads(current_raw)['units']),44)
         self.assertEqual(units['version'],1)
         frozen=json.loads((ROOT/'tests/fixtures/catalog133-original-index.json').read_bytes())
         self.assertEqual(len(units['units']),43)
@@ -254,7 +268,7 @@ class FixedAutomationSafety(unittest.TestCase):
         backup=json.loads(backup_raw)
         self.assertEqual(units['units'][:42],backup['before_units42']['units'])
         self.assertEqual(units['units'][42],backup['backup_unit'])
-        self.assertEqual(hashlib.sha256((ROOT/'scenarios/units-v1.json').read_bytes()).hexdigest(),
+        self.assertEqual(hashlib.sha256(previous_raw).hexdigest(),
                          backup['after_units43_sha256'])
         original35=units['units'][:35]
         self.assertEqual(len(original35),35)

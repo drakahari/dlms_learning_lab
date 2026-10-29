@@ -1,5 +1,10 @@
 # Bounded case selection — evaluator 8
 
+This page retains the original evaluator8 milestone and evidence. The separate
+[evaluator12 ASCII-class contract](SHELL_CASE_CLASSES.md) describes the later
+numeric-validation extension and its pending acceptance; it does not rewrite
+the original observations or imply full bracket-pattern support.
+
 Accepted capability milestone, checked 2026-10-24. The native application adds
 bounded `case` selection without a new dependency or host execution. Current
 content remains106 authored labs/25units; a supported language construct alone

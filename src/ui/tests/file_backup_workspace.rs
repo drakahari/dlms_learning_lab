@@ -5,21 +5,36 @@ mod fixture;
 use dlms_learning_lab::{file_backup_workspace as work, script_teaching::View};
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (168, 43));
+    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
     let authored = fixture::catalog();
     assert_eq!(
         serde_json::to_value(&a.scenarios[..164]).unwrap(),
         serde_json::to_value(&authored[..164]).unwrap(),
         "Complete prior164 prefix"
     );
+    // The historical authoring fixture appends its four tasks after all other
+    // registered content. Keep its complete prior164 and compare both appended
+    // canonical packs in their actual normal-catalog order.
+    let numeric: dlms_learning_lab::pack::Pack = serde_json::from_str(include_str!(
+        "../../../scenarios/shell-numeric-validation-v1.json"
+    ))
+    .unwrap();
+    let backup: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
+    assert_eq!(numeric.scenarios.len(), 3);
+    assert_eq!(backup.scenarios.len(), 4);
+    let expected = authored[..164]
+        .iter()
+        .chain(&backup.scenarios)
+        .chain(&numeric.scenarios)
+        .collect::<Vec<_>>();
     assert_eq!(
         serde_json::to_value(&a.scenarios).unwrap(),
-        serde_json::to_value(authored).unwrap(),
-        "Entire actual normal catalog"
+        serde_json::to_value(expected).unwrap(),
+        "Entire actual normal catalog: all prior164, canonical backup4 and canonical numeric3"
     );
     let canonical: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
     assert_eq!(
-        serde_json::to_value(&a.scenarios[164..]).unwrap(),
+        serde_json::to_value(&a.scenarios[164..168]).unwrap(),
         serde_json::to_value(canonical.scenarios).unwrap(),
         "Exactly four canonical registered tasks"
     );

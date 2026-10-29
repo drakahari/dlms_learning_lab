@@ -1,5 +1,7 @@
 //! Original bounded-case regression cases, plus retained actual fixed Bash5.3.9
 //! observations. No test invokes a host shell, account tool, process or network.
+#[path = "../examples/support/automation_digest.rs"]
+mod amendment_sha;
 use dlms_learning_lab::shell::{self, Case, Outcome, Record, Vm};
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -60,8 +62,37 @@ fn retained_actual_bash_observations_match_at_all_tick_slices_with_explicit_excl
     const {
         assert!(shell::EVALUATOR_REVISION >= 8);
     } // Retained case capability; migration/current acceptance remains a separate gate
+    let mut amended = 0;
     for observation in oracle.observations {
         assert_eq!(observation.observation_sha256.len(), 64);
+        if observation.name == "dynamic-bracket-boundary" {
+            let amendment: serde_json::Value =
+                serde_json::from_str(include_str!("fixtures/shell-case-class-amendment-v12.json"))
+                    .unwrap();
+            assert_eq!(
+                amendment["original_fixture_sha256"],
+                amendment_sha::hash(include_bytes!("fixtures/shell-case-bash539.json"))
+            );
+            assert!(observation.excluded && amendment["old_excluded"] == true);
+            assert_eq!(amendment["amended_name"], observation.name);
+            assert_eq!(
+                amendment["original_observation_sha256"],
+                observation.observation_sha256
+            );
+            assert_eq!(amendment["source"], observation.source);
+            assert_eq!(
+                amendment["case"],
+                serde_json::to_value(&observation.case).unwrap()
+            );
+            for slice in [1, 16, 32, 64] {
+                assert_eq!(
+                    sliced(&observation.source, &observation.case, slice),
+                    observation.actual
+                );
+            }
+            amended += 1;
+            continue;
+        }
         if observation.excluded {
             let result = shell::run(&observation.source, &observation.case);
             assert_eq!(result.status, 2, "{}", observation.name);
@@ -84,6 +115,10 @@ fn retained_actual_bash_observations_match_at_all_tick_slices_with_explicit_excl
             );
         }
     }
+    assert_eq!(
+        amended, 1,
+        "Only the source-keyed class feature changes retained exclusions"
+    );
 }
 #[test]
 fn malformed_or_excluded_static_grammar_fails_before_any_effect() {
@@ -96,7 +131,6 @@ fn malformed_or_excluded_static_grammar_fails_before_any_effect() {
         "case x in x) printf bad esac",
         "case x in x) :;& *) :;; esac",
         "case x in x) :;;& *) :;; esac",
-        "case x in [ab]) :;; esac",
         "case x in x) :;; esac > keep.txt",
         "case x in x) :;; esac | cat",
         "printf x | case x in x) :;; esac",
@@ -198,7 +232,7 @@ fn expanded_pattern_bound_applies_to_literal_and_quoted_text_without_truncation(
 }
 #[test]
 fn dynamic_unsupported_patterns_are_lazy_and_quoted_data_stays_literal() {
-    for pattern in ["[ab]", "\\*", "@(a|b)"] {
+    for pattern in ["\\*", "@(a|b)"] {
         let mut case = fixture();
         case.env.insert("p".into(), pattern.into());
         assert_eq!(
@@ -483,7 +517,7 @@ fn capture_delimiter_keeps_array_elements_as_data_and_reenters_real_commands_aft
 
 #[test]
 fn static_case_brackets_fail_before_effects_without_changing_ordinary_test_words() {
-    for pattern in ["[", "]", "[ab]"] {
+    for pattern in ["[", "]"] {
         for source in [
             format!("printf changed > keep.txt; case x in {pattern}) :;; esac"),
             format!("printf changed > keep.txt; case good in good) :;; {pattern}) :;; esac"),

@@ -3907,3 +3907,74 @@ Root. Both200%narrow Remove buttons fit; Pass/Needs-work literal labels readable
 843.44s/844memorysamples/min22.87GiB/PSIavg10=0/OOM0; all651source+ELFunchanged.
 This closes the installed Cron route only; optional/LACP/backup routes remain.
 Root M221 isolated171 inclusive now active; no second heavy command launched.
+
+## M221–M230 — genuine evaluator12 curriculum gates and further simulator foundations
+
+2026-10-29. Main remains168/c683, private numeric171 is not yet counted. Failed
+inclusiveM2212306PASS/21FAIL/0ignored is retained with unchanged880source: two old
+catalog tail helpers caused18 setup failures, two current unit counts and one
+ordinary-draft count caused3. Independent R5/R6/R7 reviews keep all original
+behavioral assertions, exact prior164/canonicalBackup4 and allnewNumeric3 objects.
+New10 native paired groups initially exposed incorrect capture expectations:
+Undo expected an end-caret without creating its checkpoint; Tab expected four
+spaces rather than egui's literal tab. Actual separate CtrlEnd/frame+observed
+stable checkpoint and exact literalTab fix the capture driver, preserving all
+source/fullProgress/receipt/cursor/focus/limit/reset checks. Failed runs remain.
+
+M225 full corrected private1712337PASS/0FAIL/0ignored/184harnesses, all24 genuine
+retained history groups actually executed. Source8839e8d06e1, receipt8a1cd7e2.
+M226 Clippy found only equivalent3|4|5 range spelling; no warning suppression.
+M22710pairedPASS18.74s/alltargetClippy-DwarningsPASS/305PythonPASS8.444s. Current
+source883da39876b differs from full9e8 only by that equivalent pattern; identities
+remain separate. M228regularnativebuildPASS9.38s,187121264-byte ELF980b9bec,
+buildreceipte0343533. Main114-path transfer is prepared only; all unowned code
+matches and eight newer Main documentation files are explicitly retained.
+
+Actual private171 native wrapper85451 exited0 after101 captures (85narrow946×929,
+16wide1920×1080),20measured settings and12capstoneGoal views. All883source/ELF pins
+unchanged. Root inspected selectedCasePass with clear overall11-fail explanation
+and the full four-argument capstone assignment. Final image-only worker receipt
+is pending here; Main integration/finalMainfull/package are not inferred.
+
+M229OneOff core19/0/0 and M230privateIPv439/0/0 across5harnesses actually PASS,
+all6/3 ownedsources unchanged; receipta7a98aa7. M230wrong initial test target was
+refused before compiling; corrected ipv4_teaching target and oldrouting/content/
+workspace checks run. Models remain unregistered: no new lab or objective credit.
+New SameSubnet sourceR31d4fc37c complements private/capacity/reachability and
+rejects mismatched masks despite a possible successful ping; three new groups
+UNRUN, peers7ef43f2b/1735309b ACK. OneOff typed/replay/relative-retry draft remains
+unfrozen; evictable records alone never prove a completed timed behavior.
+
+Physical frozen-base compile caught two missing exhaustive foreign-classifier
+fields; corrected explicitly with actual foreign rejection, no wildcard. Next
+fixture used unsupported Foundation difficulty; corrected only to existing
+Beginner. A new warm test was in the wrong private-helper module; moved unchanged
+with exact inverse proof, all old history bytes retained. SourceR40b947253 has
+50typedPASS; remaining6foreign/22UI/Clippy are the current sole lease. All failed
+runs and measurements remain. Separate controller107 is source-only/private,
+not authored registration or normal-catalog acceptance. Selection169 source R3
+c62e58a7/peereb0d2aad likewise remains unrun: capacity test now proves retained
+Practice growth refusal and valid Assignment history pruning. Shared index R3
+and all runtime/native gates are mandatory before fifth backup registration.
+GNU primary installed manual1.35 source read supports the existing cf/xf/-C
+subset (receipt224d76c7); web links remain unavailable, no hosttar execution or
+new tool-comparison claim. No public release or completed-curriculum/platform claim.
+
+Numeric101 final image receipt017ae29c confirms28actual viewed PNGs, all12large
+capstone views (8unique+4identicalwidealiases),9wide/23narrowrows,101actualcaptures;
+369memorysamples/min22.20GiB/max some/fullPSIavg10 0.64%/OOM0, no sustainedpressure.
+All883source+ELFunchanged; no cold/platform/novice claim. Root readreceipt and two
+representativeimages, then applied exact114 reviewed paths toMain. Allunownedcode
+matched; eight newer Main documents retained. Main working171/44/lang12 now;
+finalMainfull/all24/Clippy/Python/coverage and commit are queued behind physical
+lease. Only already-Partial105.2parent/K3 evidence gains3new IDs (same parentCSV);
+no status/sourcefingerprint/futureversion promotion. OfficialLPI5.0/105.2 rechecked
+2026-10-29, originalnormalizedsnapshotdate remains2026-10-22. Public learnerguide
+coverscourse/practice/feedback/resume/backup/appearance without adding curriculum.
+
+Physical typed50PASS after metadatafixture difficulty correction, then bin compile
+caught a new test in the wrong helper module. Exact unchanged1923-byte new test
+moved; removal frombefore/after restores every originalbyte, including genuine
+history. RootsourceACK266f1836; R4source0b947253, six explicit nonemptyforeign
+filters and22UI/Clippy pending. No visibility/loader/assertion waivers. Separate
+controller107 remains private/source-only until actual gates/registration.

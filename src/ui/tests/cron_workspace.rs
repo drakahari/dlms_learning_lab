@@ -7,7 +7,7 @@ pub(in crate::ui) fn sources() -> Vec<Scenario> {
 }
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (168, 43));
+    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
     let at = 160;
     assert_eq!(
         a.scenarios[at..164]
@@ -17,7 +17,7 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         crate::ui::smoke::cron_lessons::IDS
     );
     assert_eq!(
-        a.scenarios[164..]
+        a.scenarios[164..168]
             .iter()
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
@@ -27,7 +27,19 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
             "lpic2-backup-snapshot-branch",
             "lpic2-backup-recovery-handover"
         ],
-        "The entire new tail must contain only the four canonical backup assignments"
+        "The four canonical backup assignments retain their exact positions"
+    );
+    assert_eq!(
+        a.scenarios[168..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication"
+        ],
+        "The entire remaining tail contains exactly the three numeric assignments"
     );
     a.launch(at + n);
     draw(&ctx, &mut a);
@@ -646,7 +658,7 @@ fn route_reveal(ctx: &egui::Context, a: &mut LabApp, key: &str) -> egui::Rect {
 fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_checks() {
     let (ctx, mut a) = app();
     draw(&ctx, &mut a);
-    assert_eq!((a.scenarios.len(), a.units.len()), (168, 43));
+    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
     assert!(a.progress.attempts.is_empty());
     let before = snapshot(&a);
     let picker = route_reveal(&ctx, &mut a, "unit");

@@ -3,8 +3,80 @@ use super::digest;
 use serde_json::Value;
 const NFS_INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
 const BASH_REVIEW_SHA: &str = "fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb";
-/// Exact new43-to-reviewed42 inverse. No old unit object or recipe is rewritten.
+/// Exact new44-to-reviewed43 inverse. All old raw objects and recipes stay fixed.
+pub fn before_numeric_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let bytes = include_bytes!("../fixtures/catalog171-registration.json");
+    if digest::hash(bytes) != "573d8d85745ef923b515673ebce518107dbdc19e6558906aae13f6b9f3b4519c" {
+        return Err("Immutable numeric append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["after_units44_sha256"]
+            .as_str()
+            .ok_or("New44 pin missing")?
+        || raw.len() as u64
+            != recipe["after_units44_bytes"]
+                .as_u64()
+                .ok_or("New44 length missing")?
+    {
+        return Err("Exact current44 raw units differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let prefix = text
+        .strip_suffix(
+            recipe["append_suffix_utf8"]
+                .as_str()
+                .ok_or("Numeric suffix missing")?,
+        )
+        .ok_or("Exact final numeric append differs")?;
+    let before = format!(
+        "{prefix}{}",
+        recipe["old_tail_utf8"]
+            .as_str()
+            .ok_or("Reviewed43 tail missing")?
+    )
+    .into_bytes();
+    if digest::hash(&before)
+        != recipe["before_units43_sha256"]
+            .as_str()
+            .ok_or("Reviewed43 pin missing")?
+        || before.len() as u64
+            != recipe["before_units43_bytes"]
+                .as_u64()
+                .ok_or("Reviewed43 length missing")?
+    {
+        return Err("Full reviewed43 raw bytes differ".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != recipe["before_units43"] {
+        return Err("Full reviewed43 typed units differ".into());
+    }
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Reviewed43 units absent")?;
+    if units.len() != 43 {
+        return Err("Reviewed43 count differs".into());
+    }
+    units.push(recipe["numeric_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside exact numeric unit append".into());
+    }
+    reviewed_before_backup_units(&before)?;
+    Ok(before)
+}
+/// Only normalize the exact accepted numeric suffix before the retained43 body.
 pub fn before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let before = if digest::hash(raw)
+        == "4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b"
+    {
+        Some(before_numeric_units(raw)?)
+    } else {
+        None
+    };
+    reviewed_before_backup_units(before.as_deref().unwrap_or(raw))
+}
+/// Exact new43-to-reviewed42 inverse. No old unit object or recipe is rewritten.
+fn reviewed_before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     let bytes = include_bytes!("../fixtures/catalog168-registration.json");
     if digest::hash(bytes) != "8e8b382e4546f3e48a7441281f4db9448b68bf9333b19c7acf20e882623d4c23" {
         return Err("Immutable backup append recipe differs".into());
@@ -67,6 +139,14 @@ pub fn before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
 }
 /// Normalize only the exact new append, then use the retained reviewed42 body.
 pub fn before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let numeric = if digest::hash(raw)
+        == "4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b"
+    {
+        Some(before_numeric_units(raw)?)
+    } else {
+        None
+    };
+    let raw = numeric.as_deref().unwrap_or(raw);
     let before = if digest::hash(raw)
         == "667727c71295957dfe7a0553d938dd2e7c4a4ba82d0af3b33b9e7d24f19dd7a9"
     {

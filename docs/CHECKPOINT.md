@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-Updated2026-10-28. Owner-authorized full-curriculum work continues; a small batch,
+Updated2026-10-29. Owner-authorized full-curriculum work continues; a small batch,
 passing test count or Fedora candidate is not completion. Work only in this
 project. Native Rust/egui, offline bounded simulation, all28 themes, approved
 Introduction → separate practice → full assignment and existing progress remain.
@@ -9,11 +9,15 @@ GPU/swap/service/model changes or host execution of learner work.
 
 ## Current implemented Main
 
-Pushed implementation `c683994432708db908ef2a599dac63e3d53eecdc` follows
-09fb923/819c349/821d58d/73199d5. **168 integrated assignments /43 units**:
-48CCNA/12units,36LPIC-1/9,32LPIC-2/8,52Bash/14. Original154 definitions and newer164
-prefix remain pinned. Newest four are actual native backup/recovery assignments;
-no numeric/physical/selection/one-off proposal is counted.
+Pushed baseline implementation `c683994432708db908ef2a599dac63e3d53eecdc` has168
+assignments/43units; documentation750cac1 is pushed. Current verified Main has
+**171 assignments/44units** after the reviewed114-path numeric transfer and both
+private full2337/native101 and final Main2337/all24history/Clippy/305Python/coverage
+gates. A coherent commit/push is being prepared; available candidate stays168.
+Counts:48CCNA/12units,36LPIC-1/9,32LPIC-2/8,55Bash/15. Original168fullspecs and
+52old scripts/384cases/52examples plus43rawunit objects are preserved. Available
+Fedora candidate remains168/c683, not171. No physical/selection/one-off/private-
+address proposal is counted. No release.
 
 Coverage remains incomplete:1240 overlapping current references,168 narrowly
 Partial/1Supporting/1071Open; all136 full parents incomplete(97Open/39Partial).
@@ -35,7 +39,7 @@ Memory minimum21.73GiB available, PSIavg10some/full0, OOMdelta0; not a reservati
 Exact candidate to open:
 
 ```sh
-/home/drak/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gc68399443270-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gc68399443270-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 ELF SHA256 `ba09481427a32a2e08c1787ee8f18ceac6793b6b17b30b98407eb0bc88b09d4a`.
@@ -72,8 +76,46 @@ All651source and installed ELFba094814 unchanged; minimum22.87GiB/PSI0/OOM0.
 Installed optional-input132, normal LACP and backup81 routes remain pending.
 See FEDORA_C683_VERIFICATION.md for exact evidence and limits.
 
-**Current sole heavy lease: Root Numeric171 inclusive M221, session79528**,
-log `.build-artifacts/logs/m221-numeric171-inclusive-r1.log`. No other heavy work.
+**Current sole heavy lease: NONE.** Root47495Main171FULLYREAPED2337PASS/0FAIL/
+0ignored/184harnesses, all24historygroups, source66418898e38a86ba84863fe152dce07568ca2b87ff15798ee7939e7d43bd710a4b0,
+receipt6b4cdcd1. Root45533FULLYREAPED alltargetClippy-Dwarnings/305Python/coverage
+PASS(171registered,1240refs,nodrafts). CurrentMain114transfer is gated and ready
+for privacy-reviewed commit/push; no source changes since frozen664. Docs updated.
+
+Physical R6 private source916f7d94:57typedPASS, UI12PASS/1FAIL, index10+Clippy
+pending. Reviewedgesture542fd6b5/peerb0b02e80 fixes both actual stale-sample mutation
+failures and newheld-release/discard test passes; remaining originaltest expects
+Undo12butgets24. Worker prepares an identical-event plain-egui control before
+changing product/test premise; no waiver. All wrappers reaped/released. Source-only
+OneOffR26bb5e18f addresses three peer findings, uncompiled; renderer separate.
+
+Numeric actual101finalreceipt017ae29c:28PNGviewed,20measured settings/12capstoneGoal
+views, source883da39876b+ELF980b9bec unchanged. Main working171/lang12 after114paths;
+allunownedcode matched and eight newer Main docs retained. Available168candidate
+c683 keeps own identity; new171candidate/installedflows not claimed yet. No others
+have a heavy grant. Resume from fresh explicit worker followup (send_message does
+not wake a completed worker); keep common lock and source pins.
+
+Private171 M22560175FULLYREAPEDPASS:2337PASS/0FAIL/0ignored/184harnesses, all24
+retained history groups actually execute; full source8839e8d06e1/receipt8a1cd7e2.
+One later equivalent Clippy pattern3|4|5→3..=5 has separate before/after evidence;
+current883source da39876b9d774a69dc344ce3ea9732d1f4a3a8f25770f5daaa9e56894b5c9836.
+M227Root29967fullyreaped10pairedPASS/Clippy-DwarningsPASS/305PythonPASS;
+M22810998regularbuildPASS9.38s, ELF187121264bytes980b9bec, buildreceipte0343533.
+FinalMainfull afterintegration remains mandatory; do not relabel earlier source.
+
+Failed M2212306PASS/21FAIL remains retained:18old catalog-helper setups, two unit
+counts, one ordinary-draft count. Reviewed R5/R6/R7 keep every behavior assertion
+and verify complete prior+new catalog. New10 native paired tests preserve all
+Undo/source/fullProgress/cursor/focus checks: R9 uses real CtrlEnd in a separate
+observed frame before1.2s checkpoint, R10 expects actual literalTab. No product
+editor/grader, installed cursor/history, cap or test waiver.
+
+New independent core scopes M229/230 fullyreapedPASS: OneOff19/0/0, privateIPv439/0/0
+across five harnesses including7new. All6/3 owned source paths unchanged, receipt
+a7a98aa7. One wrong requested test target was refused before compilation; corrected
+actual ipv4_teaching target used, diagnostic retained. Clippy/composition/content/
+native gates remain for these unregistered capabilities. No new authored count.
 
 ## Immediate next implementation queue (source-only proposals are not credit)
 
@@ -86,37 +128,51 @@ log `.build-artifacts/logs/m221-numeric171-inclusive-r1.log`. No other heavy wor
    separate examples and13wrong/partial/hardcoded programs. Source peer808f5db1.
    Scoped gates: catalog5/history6/case12 PASS; content14/14 PASS after correcting
    three *new* negative fixtures, not graders/masks/assertions. Failed runs retained.
-   CorrectionsR3de675eec/R4 plus independent peerc03ac0b7. Next full inclusive with
-   all24 history groups, Clippy/Python; native proposal102f67de six paths/101planned
-   captures needs peer review, paired tests and actual rendering before integration.
+   CorrectionsR3de675eec/R4 plus independent peerc03ac0b7. Full inclusive now2337PASS/0FAIL/0ignored/all24history;
+   Clippy/Python/regularbuild M226 pending. NativeR28d24f412 plus reviewed R9/R10
+   has10pairedPASS and101planned captures; actual101PASS/28viewed/finalreceipt017ae29c;114paths nowMain171, finalMaingatespending.
    Main learner engine remains11 until verified merge.
 2. **Physical Ethernet:** typed W ccna-physical-integration-168 source7f18c3c8,
    47paths/833protected/55prospective groups, peer36a17033. Four authored drafts
-   63fdd653, not registered. Native/index overlay R24078d138 uncompiled. Peer
-   b654eaef found per-frame work reset on discarded passes and nonexistent
-   Progress.clone in a new test; Ether worker preparing separate R3 fixes and
-   actual controller. Preserve current Main c683 backup fixes by reviewed diffs,
+   63fdd653, not registered. Native/index R360676a25 fixes discarded-frame
+   quota and newtest Progress.clone; independent peer6c550335 ACK. Fresh composed
+   W physical-native-index-168 on c683:57owned/834protected, source-readyf84103ad;
+   50typedPASS after explicit missingforeignfield and technicalfixture-difficulty
+   corrections. Newwarmguard test moved unchanged to helper-owning module; R4
+   0b947253, peer/rootreviews45a4e4da/266f1836. Remaining6foreign+22UI+Clippy
+   are current lease. No tests waived. Ether
+   actual controller/held-paste veto remains separate unfinished source. Preserve current Main c683 backup fixes by reviewed diffs,
    never overwrite with the older865-path base. Actual private backend35PASS and
    Clippy remain narrower historical evidence, not integrated curriculum.
 3. **Shared bounded completion index:** needed before fifth backup family to avoid
-   current four-snapshot-cache thrash. R2 proposed exact Source+Attempt Arc
+   current four-snapshot-cache thrash. R3 proposed exact Source+Attempt Arc
    certificates/64MiB+1000keys/one proof per root frame/explicit pending status;
-   selected snapshot caps unchanged. Not applied, compiled or accepted. Fix/review
-   R3 before registering selection. Never increase caps to hide policy failure.
+   selected snapshot caps unchanged. Not applied, compiled or accepted. Compile/test R3
+   before registering selection. Never increase caps to hide policy failure.
 4. **One-off scheduling:** reviewed core/seam R265aca414, peer3f73f473. Private W
    `.build-artifacts/worktrees/one-off-core-168` exact six paths on c683;19prospective
-   tests UNRUN. Next scoped compile/tests/Clippy when lease free. Captured owner/env/
+   tests UNRUN. Core19scopedPASS; Clippy and typed
+   composition pending. Captured owner/env/
    script and live dispatch files, bounded existing interpreter, explicit simulated
    transactional cancellation. LPIC-1v5.0 **107.2**, not LPIC-2 206.1 (source-install).
-   No State/Goal/UI/content/progress integration or count yet. No host at/atd.
+   Bash worker has an UNFROZEN typed adapter draft with replay-verifiable
+   before/end proofs plus fresh behavioral probes; record history alone cannot
+   earn credit. No State/Goal/UI/content/progress integration/count yet. No hostat/atd.
 5. **Backup selection:** ArtifactSet capability R298899573 two paths/six tests,
    peer675e49f0 wording corrected; unapplied/uncompiled. Exact artifact names are
    separate from contents/fresh recoverability. FHS-selection authored R20b8d4785
    one meaningful project/13rows/two alternatives/independent Willow example;
-   unrun/unregistered. Requires typed capability, shared index, content+native gates.
+   unrun/unregistered. Selection169 integration R3c62e58a7 has99owned/781protected,
+   exact168/43 preservation,22prospective groups, peereb0d2aad ACK after correcting
+   a newly authored capacity-test premise. Practice growth must refuse without
+   losing caller; Assignment may legitimately prune history. GNU source receipt
+   224d76c7 independently reads primary installed manual1.35; web links unavailable,
+   no new hosttar execution. Requires typed capability/index/content/native gates.
 6. **Private subnet allocation:** Root source-only R28457d0be three paths/seven prospective
    groups, entire RFC1918 containment, host capacity and protected-prefix overlap;
-   multiple valid pools/hosts/prefixes. No lab or credit; independent peer32b7c0a5 ACK.
+   multiple valid pools/hosts/prefixes. No lab or credit; independent peer32b7c0a5 ACK; actual39scopedPASS.
+   NewunappliedR31d4fc37c adds explicit SameSubnet (matchingmasks are not proved
+   byping), three prospective groups; peers7ef43f2b/1735309b ACK, uncompiled.
    Current native topology/configuration tools can support eventual task without
    redesign. Official RFC1918/IANA references checked2026-10-28.
 

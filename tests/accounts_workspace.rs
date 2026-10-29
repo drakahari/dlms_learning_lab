@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 168);
+    assert_eq!(all.len(), 171);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -544,11 +544,11 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             )
         })
         .collect::<Vec<_>>();
-    assert_eq!(
-        old.len(),
-        119,
-        "all current context-free assignment kinds remain exercised"
-    );
+    let numeric_ids=["shell-numeric-retry","shell-numeric-intake","shell-numeric-publication"];
+    assert_eq!(old.iter().filter(|s|!numeric_ids.contains(&s.id.as_str())).count(),119,"Every original119 context-free assignment remains in the loop");
+    assert_eq!(old.iter().filter(|s|numeric_ids.contains(&s.id.as_str())).map(|s|s.id.as_str()).collect::<Vec<_>>(),numeric_ids);
+    assert!(old.iter().filter(|s|numeric_ids.contains(&s.id.as_str())).all(|s|matches!(s.initial,State::Script{..})&&matches!(s.goal,engine::Goal::Script{..})&&s.teaching.is_some()));
+    assert_eq!(old.len(),122,"all current context-free assignment kinds remain exercised");
     assert_eq!(
         old[113..116]
             .iter()

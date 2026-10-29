@@ -38,16 +38,156 @@ pub(super) fn check_static_word(word: &Word) -> Result<(), String> {
     Ok(())
 }
 
-/// Case patterns have no ordinary-test-word [ / ] exception. Statically bare
-/// brackets fail compilation even in a later arm; parameter brackets are skipped.
+/// Fully literal patterns receive a compile-first subset check. Expanding or
+/// captured patterns retain lazy validation after their reached scalar expands;
+/// no variable/capture is evaluated merely to inspect an unselected arm.
 pub(super) fn check_static_pattern(word: &Word) -> Result<(), String> {
+    if word.0.iter().any(|part| {
+        part.text()
+            .is_none_or(|text| part.quote != Quote::Single && text.contains('$'))
+    }) {
+        return Ok(());
+    }
+    let mut text = Vec::new();
+    let mut active = Vec::new();
     for part in &word.0 {
-        if part.quote == Quote::Bare
-            && let Some(text) = part.text()
-            && values::bracket_glob(text)?
-        {
-            return Err("Unsupported bracket case pattern; quote literal brackets".into());
+        let bytes = part.text().unwrap().as_bytes();
+        text.extend_from_slice(bytes);
+        active.extend(std::iter::repeat_n(
+            u8::from(part.quote == Quote::Bare),
+            bytes.len(),
+        ));
+    }
+    scan_pattern(&text, &active, |_| {})
+}
+
+/// ASCII members, with C-byte negation also able to match non-ASCII bytes.
+/// No locale library, filename matching or host regex is involved.
+#[derive(Clone, Copy, Debug)]
+enum Atom {
+    Byte(u8),
+    Any,
+    Star,
+    Class { members: [u64; 2], negated: bool },
+}
+impl Atom {
+    fn matches(self, byte: u8) -> bool {
+        match self {
+            Self::Byte(value) => value == byte,
+            Self::Any => true,
+            Self::Star => false,
+            Self::Class { members, negated } => {
+                let member =
+                    byte < 128 && members[usize::from(byte / 64)] & (1u64 << (byte % 64)) != 0;
+                member != negated
+            }
         }
+    }
+}
+fn ascii_member(text: &[u8], active: &[u8], at: usize) -> Result<u8, String> {
+    let byte = text[at];
+    if !byte.is_ascii() {
+        return Err(
+            "Unsupported non-ASCII case class member; use ASCII lists/ranges in C/POSIX matching"
+                .into(),
+        );
+    }
+    if active[at] == 1 && matches!(byte, b'[' | b'\\') {
+        return Err("Unsupported nested class, named/collating/equivalence class or active backslash; quote a literal bracket/backslash".into());
+    }
+    Ok(byte)
+}
+fn insert_range(members: &mut [u64; 2], low: u8, high: u8) {
+    // At most two constant-time word operations, never a loop over a range.
+    for slot in low / 64..=high / 64 {
+        let left = if slot == low / 64 { low % 64 } else { 0 };
+        let right = if slot == high / 64 { high % 64 } else { 63 };
+        members[usize::from(slot)] |= (u64::MAX << left) & (u64::MAX >> (63 - right));
+    }
+}
+fn class(text: &[u8], active: &[u8], opening: usize) -> Result<(Atom, usize), String> {
+    let mut first = opening + 1;
+    let negated = text.get(first) == Some(&b'!') && active.get(first) == Some(&1);
+    if negated {
+        first += 1;
+    }
+    if !negated && text.get(first) == Some(&b'^') && active.get(first) == Some(&1) {
+        return Err(
+            "Unsupported Bash-only ^ class negation; use portable [!...] or quote literal ^".into(),
+        );
+    }
+    let mut end = first;
+    // A first ] is a member; another active ] must still close the class.
+    if text.get(end) == Some(&b']') {
+        end += 1;
+    }
+    while end < text.len() && !(text[end] == b']' && active[end] == 1) {
+        end += 1;
+    }
+    if end == text.len() || end == first {
+        return Err("Unsupported bracket case pattern: close a nonempty ASCII class, or quote literal brackets".into());
+    }
+    let mut members = [0u64; 2];
+    let mut at = first;
+    while at < end {
+        let low = ascii_member(text, active, at)?;
+        if at + 2 < end && text[at + 1] == b'-' && active[at + 1] == 1 {
+            let high = ascii_member(text, active, at + 2)?;
+            if (low == b'-' && active[at] == 1) || (high == b'-' && active[at + 2] == 1) {
+                return Err("Unsupported adjacent active hyphens in a case class; quote a literal hyphen or use separate ascending ranges".into());
+            }
+            if low > high {
+                return Err(
+                    "Unsupported descending case range; use ascending ASCII endpoints".into(),
+                );
+            }
+            insert_range(&mut members, low, high);
+            at += 3;
+        } else {
+            insert_range(&mut members, low, low);
+            at += 1;
+        }
+    }
+    Ok((Atom::Class { members, negated }, end + 1))
+}
+/// Shared pure validation/tokenization; the compiler's visitor allocates no
+/// tokens. Runtime admission reserves the bounded token vector before copying.
+fn scan_pattern(text: &[u8], active: &[u8], mut emit: impl FnMut(Atom)) -> Result<(), String> {
+    debug_assert_eq!(text.len(), active.len());
+    let mut at = 0;
+    while at < text.len() {
+        let byte = text[at];
+        if active[at] == 1 {
+            if byte == b'[' {
+                let (atom, next) = class(text, active, at)?;
+                emit(atom);
+                at = next;
+                continue;
+            }
+            if byte == b']' {
+                return Err("Unsupported bracket case pattern; quote literal brackets".into());
+            }
+            if byte == b'\\' {
+                return Err(
+                    "Unsupported active backslash or bracket case pattern; quote literal text"
+                        .into(),
+                );
+            }
+            if matches!(byte, b'@' | b'!' | b'+' | b'?' | b'*')
+                && text.get(at + 1) == Some(&b'(')
+                && active.get(at + 1) == Some(&1)
+            {
+                return Err(
+                    "Unsupported extended case pattern; use * or ? and ASCII classes only".into(),
+                );
+            }
+        }
+        emit(match (byte, active[at]) {
+            (b'*', 1) => Atom::Star,
+            (b'?', 1) => Atom::Any,
+            (byte, _) => Atom::Byte(byte),
+        });
+        at += 1;
     }
     Ok(())
 }
@@ -133,11 +273,17 @@ struct Matcher {
     subject: usize,
     star: Option<usize>,
     retry: usize,
+    atoms: Option<Vec<Atom>>,
 }
 impl Matcher {
-    fn validate(vm: &Vm, pattern: &Scalar) -> Result<(), String> {
-        // Same precedence as the existing filename guard, without changing its
-        // diagnostic or timing. Check only after a reached pattern expands:
+    fn bytes(&self) -> usize {
+        self.atoms
+            .as_ref()
+            .map_or(0, |v| v.capacity() * std::mem::size_of::<Atom>())
+    }
+    fn prepare(vm: &Vm, pattern: &Scalar) -> Result<Self, String> {
+        // The locale guard keeps its prior precedence and reached-pattern
+        // diagnostic timing. Check only after a reached pattern expands:
         // selector/pattern capture effects remain, but no selected body runs.
         let locale = vm.scalar("LC_ALL").filter(|value| !value.is_empty());
         let non_c = if let Some(value) = locale {
@@ -152,25 +298,30 @@ impl Matcher {
             return Err("Unsupported case-matching locale; this simulator supports C/POSIX byte matching only".into());
         }
         vm.charge_expansion(pattern.text.len())?;
-        for (i, &byte) in pattern.text.as_bytes().iter().enumerate() {
-            if pattern.active[i] == 0 {
-                continue;
-            }
-            if matches!(byte, b'\\' | b'[' | b']') {
-                return Err(
-                    "Unsupported active backslash or bracket case pattern; quote literal text"
-                        .into(),
-                );
-            }
-            if matches!(byte, b'@' | b'!' | b'+' | b'?' | b'*')
-                && pattern.text.as_bytes().get(i + 1) == Some(&b'(')
-                && pattern.active.get(i + 1) == Some(&1)
-            {
-                return Err("Unsupported extended case pattern; use * or ? only".into());
-            }
-        }
-        Ok(())
+        let has_class = pattern
+            .text
+            .as_bytes()
+            .iter()
+            .enumerate()
+            .any(|(at, byte)| *byte == b'[' && pattern.active[at] == 1);
+        let atoms = if has_class {
+            let capacity = pattern.text.len();
+            vm.reserve_memory(capacity * std::mem::size_of::<Atom>())?;
+            let mut atoms = Vec::with_capacity(capacity);
+            scan_pattern(pattern.text.as_bytes(), &pattern.active, |atom| {
+                atoms.push(atom)
+            })?;
+            Some(atoms)
+        } else {
+            scan_pattern(pattern.text.as_bytes(), &pattern.active, |_| {})?;
+            None
+        };
+        Ok(Self {
+            atoms,
+            ..Self::default()
+        })
     }
+
     /// At most256 charged transitions, independent of the semantic instruction budget.
     fn advance(
         &mut self,
@@ -180,7 +331,24 @@ impl Matcher {
     ) -> Result<Option<bool>, String> {
         let text = pattern.text.as_bytes();
         let subject = subject.as_bytes();
-        let star = |p: usize| text.get(p) == Some(&b'*') && pattern.active.get(p) == Some(&1);
+        let atoms = self.atoms.as_deref();
+        let length = atoms.map_or(text.len(), <[Atom]>::len);
+        let star = |p: usize| {
+            atoms.map_or_else(
+                || text.get(p) == Some(&b'*') && pattern.active.get(p) == Some(&1),
+                |atoms| matches!(atoms.get(p), Some(Atom::Star)),
+            )
+        };
+        let matches = |p: usize, byte: u8| {
+            atoms.map_or_else(
+                || {
+                    text.get(p).is_some_and(|value| {
+                        (*value == b'?' && pattern.active[p] == 1) || *value == byte
+                    })
+                },
+                |atoms| atoms.get(p).is_some_and(|atom| atom.matches(byte)),
+            )
+        };
         for _ in 0..256 {
             vm.charge_expansion(1)?;
             if self.subject == subject.len() {
@@ -188,16 +356,13 @@ impl Matcher {
                     self.pattern += 1;
                     continue;
                 }
-                return Ok(Some(self.pattern == text.len()));
+                return Ok(Some(self.pattern == length));
             }
             if star(self.pattern) {
                 self.star = Some(self.pattern);
                 self.pattern += 1;
                 self.retry = self.subject;
-            } else if text.get(self.pattern).is_some_and(|byte| {
-                (*byte == b'?' && pattern.active[self.pattern] == 1)
-                    || *byte == subject[self.subject]
-            }) {
+            } else if matches(self.pattern, subject[self.subject]) {
                 self.pattern += 1;
                 self.subject += 1;
             } else if let Some(star) = self.star {
@@ -235,7 +400,9 @@ impl Task {
         })
     }
     pub fn bytes(&self) -> usize {
-        self.subject.len() + self.scalar.as_ref().map_or(0, Scalar::bytes)
+        self.subject.len()
+            + self.scalar.as_ref().map_or(0, Scalar::bytes)
+            + self.matcher.as_ref().map_or(0, Matcher::bytes)
     }
     pub fn resume(&mut self, vm: &Vm, value: String) -> Result<(), String> {
         let old = self.bytes();
@@ -278,8 +445,7 @@ impl Task {
             if !pattern.advance(vm)? {
                 return Ok(false);
             }
-            Matcher::validate(vm, pattern)?;
-            self.matcher = Some(Matcher::default());
+            self.matcher = Some(Matcher::prepare(vm, pattern)?);
             return Ok(false);
         }
         let Some(matched) = self
@@ -291,6 +457,7 @@ impl Task {
             return Ok(false);
         };
         if matched {
+            self.matcher = None;
             self.scalar = None;
             self.subject = String::new();
             vm.pc = arm.entry;
@@ -321,6 +488,176 @@ mod tests {
             stderr: String::new(),
             status: 0,
             after: BTreeMap::new(),
+        }
+    }
+    #[test]
+    fn class_tokens_are_preflighted_and_counted_while_legacy_patterns_allocate_none() {
+        let vm = Vm::new("", &fixture()).unwrap();
+        let scalar = |text: &str| Scalar {
+            parts: vec![].into_iter(),
+            text: text.into(),
+            active: vec![1; text.len()],
+            pattern: true,
+            waiting: None,
+        };
+        let legacy = Matcher::prepare(&vm, &scalar("*a?")).unwrap();
+        assert_eq!(legacy.bytes(), 0);
+        let pattern = scalar("[0-9]*");
+        let required = pattern.text.len() * std::mem::size_of::<Atom>();
+        let before = vm.memory_bytes();
+        {
+            // Ledger admission unit, not an allocator/RSS or full-app claim.
+            let _live = vm.scratch(MAX_TEXT - before - required + 1).unwrap();
+            assert!(
+                Matcher::prepare(&vm, &pattern)
+                    .err()
+                    .unwrap()
+                    .contains("memory")
+            );
+        }
+        let matcher = Matcher::prepare(&vm, &pattern).unwrap();
+        assert_eq!(matcher.bytes(), required);
+        let task = Task {
+            definition: Arc::new(Definition {
+                selector: Word(vec![]),
+                arms: vec![],
+                end: 0,
+            }),
+            subject: "7".into(),
+            scalar: Some(pattern),
+            arm: 0,
+            alternative: 0,
+            selecting: false,
+            matcher: Some(matcher),
+        };
+        assert_eq!(
+            task.bytes(),
+            1 + task.scalar.as_ref().unwrap().bytes() + required
+        );
+    }
+    #[test]
+    fn class_matching_yields_and_charges_exactly_the_same_transition_ceiling() {
+        let vm = Vm::new("", &fixture()).unwrap();
+        let scalar = Scalar {
+            parts: vec![].into_iter(),
+            text: "*[b]".into(),
+            active: vec![1; 4],
+            pattern: true,
+            waiting: None,
+        };
+        let mut matcher = Matcher::prepare(&vm, &scalar).unwrap();
+        let before = vm.expansion_work.get();
+        assert_eq!(
+            matcher.advance(&vm, &"a".repeat(10_000), &scalar).unwrap(),
+            None
+        );
+        assert_eq!(vm.expansion_work.get() - before, 256);
+        assert!(matcher.subject < 10_000);
+    }
+    #[test]
+    fn ascii_class_masks_agree_with_independent_membership_sets_including_byte_negation() {
+        for (text, members, negated) in [
+            ("[0-9]", (b'0'..=b'9').collect::<Vec<_>>(), false),
+            ("[9-A]", (b'9'..=b'A').collect(), false),
+            (
+                "[0-9A-F]",
+                (b'0'..=b'9').chain(b'A'..=b'F').collect(),
+                false,
+            ),
+            ("[!a-c]", vec![b'a', b'b', b'c'], true),
+            ("[]-]", vec![b']', b'-'], false),
+        ] {
+            let vm = Vm::new("", &fixture()).unwrap();
+            let scalar = Scalar {
+                parts: vec![].into_iter(),
+                text: text.into(),
+                active: vec![1; text.len()],
+                pattern: true,
+                waiting: None,
+            };
+            let matcher = Matcher::prepare(&vm, &scalar).unwrap();
+            let atoms = matcher.atoms.as_ref().unwrap();
+            assert_eq!(atoms.len(), 1);
+            for byte in 0u8..=255 {
+                assert_eq!(
+                    atoms[0].matches(byte),
+                    members.contains(&byte) != negated,
+                    "{text}/{byte}"
+                );
+            }
+        }
+    }
+    #[test]
+    fn class_star_matching_agrees_with_a_separate_dynamic_programming_oracle() {
+        #[derive(Clone)]
+        enum Reference {
+            Star,
+            Byte(u8),
+            Set(Vec<u8>, bool),
+            Any,
+        }
+        fn oracle(tokens: &[Reference], subject: &[u8]) -> bool {
+            let mut table = vec![vec![false; subject.len() + 1]; tokens.len() + 1];
+            table[0][0] = true;
+            for (p, token) in tokens.iter().enumerate() {
+                for n in 0..=subject.len() {
+                    if matches!(token, Reference::Star) {
+                        table[p + 1][n] = table[p][n] || (n > 0 && table[p + 1][n - 1]);
+                    } else if n > 0 && table[p][n - 1] {
+                        table[p + 1][n] = match token {
+                            Reference::Byte(byte) => *byte == subject[n - 1],
+                            Reference::Set(members, negated) => {
+                                members.contains(&subject[n - 1]) != *negated
+                            }
+                            Reference::Any => true,
+                            Reference::Star => unreachable!(),
+                        };
+                    }
+                }
+            }
+            table[tokens.len()][subject.len()]
+        }
+        let choices = [
+            ("*", Reference::Star),
+            ("?", Reference::Any),
+            ("a", Reference::Byte(b'a')),
+            ("[ab]", Reference::Set(vec![b'a', b'b'], false)),
+            ("[!0-2]", Reference::Set(vec![b'0', b'1', b'2'], true)),
+        ];
+        let mut subjects = vec![String::new()];
+        for a in ["a", "b", "0", "3"] {
+            subjects.push(a.into());
+            for b in ["a", "b", "0", "3"] {
+                subjects.push(format!("{a}{b}"));
+            }
+        }
+        let vm = Vm::new("", &fixture()).unwrap();
+        for (left, l) in &choices {
+            for (right, r) in &choices {
+                let text = format!("{left}{right}");
+                let scalar = Scalar {
+                    parts: vec![].into_iter(),
+                    active: vec![1; text.len()],
+                    text,
+                    pattern: true,
+                    waiting: None,
+                };
+                for subject in &subjects {
+                    let mut matcher = Matcher::prepare(&vm, &scalar).unwrap();
+                    let mut result = None;
+                    for _ in 0..10 {
+                        if result.is_none() {
+                            result = matcher.advance(&vm, subject, &scalar).unwrap();
+                        }
+                    }
+                    assert_eq!(
+                        result,
+                        Some(oracle(&[l.clone(), r.clone()], subject.as_bytes())),
+                        "{} / {subject}",
+                        scalar.text
+                    );
+                }
+            }
         }
     }
     #[test]

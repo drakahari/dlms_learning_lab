@@ -177,7 +177,12 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         }
         p.attempts.insert(s.id.clone(), a);
     }
-    assert_eq!((original_drafts, backup_drafts), (164, 4));
+    assert_eq!((original_drafts, backup_drafts), (167, 4));
+    assert_eq!(
+        labs[168..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        ["shell-numeric-retry", "shell-numeric-intake", "shell-numeric-publication"],
+        "Only the three new numeric drafts extend the prior164 non-backup drafts"
+    );
     progress::save(&path, &p).unwrap();
     let q = progress::load(&path, &labs).unwrap();
     assert_eq!(

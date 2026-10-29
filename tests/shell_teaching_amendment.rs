@@ -118,7 +118,7 @@ fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_f
         }
         count += 1;
     }
-    assert_eq!(count, 52);
+    assert_eq!(count, 55);
     assert_eq!(changed_defaults, ["shell-bundle", "shell-text-capstone"]);
 }
 

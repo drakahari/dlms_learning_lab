@@ -127,8 +127,13 @@ matches any number of bytes and `?` one byte; quote wildcard characters to match
 them literally. Matching uses the C/POSIX locale. `case` is portable shell syntax;
 Bash-specific indexed lists inside it retain their separate portability limits.
 
-The subset deliberately excludes bracket expressions, extended patterns,
-fallthrough (`;&` / `;;&`), whole-case pipelines/redirections and list-valued
+Evaluator12 adds the bounded ASCII list/range/`!` class contract in
+[SHELL_CASE_CLASSES.md](SHELL_CASE_CLASSES.md), for example `[0-9]` and
+`[!0-9]`. Its capability/reference/migration acceptance is a separate gate;
+it does not broaden filename globbing or parameter-operator WORD syntax.
+
+The subset deliberately excludes class forms outside that contract, extended
+patterns, fallthrough (`;&` / `;;&`), whole-case pipelines/redirections and list-valued
 selectors/patterns. Unsupported syntax produces a diagnostic. Limits are 32 arms,
 128 alternatives total, 8 per arm and 256 expanded bytes per pattern, sharing
 the existing instruction, memory, output, expansion-work and responsive Stop

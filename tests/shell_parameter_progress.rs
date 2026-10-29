@@ -1,4 +1,4 @@
-//! Capability11 compatibility. Historical8 bytes are genuine and hash-pinned.
+//! Current12 compatibility of retained capability11. Historical8 bytes are genuine and hash-pinned.
 //! This is not evidence of evaluator10; its separate capture is required before integration.
 use dlms_learning_lab::{
     engine::{Goal, State},
@@ -15,7 +15,7 @@ fn json(value: &impl serde::Serialize) -> Value {
 }
 #[test]
 fn actual8_drafts_examples_results_and_raw_backup_survive_without_invented_current_credit() {
-    assert_eq!(shell::EVALUATOR_REVISION, 11);
+    assert_eq!(shell::EVALUATOR_REVISION, 12);
     assert_eq!(
         digest::hash(ACTUAL8),
         "88c07f20276ba1555eaad886ec2a58eff3d3b3cb3cef2bf3108be64a63bacd26"
@@ -72,7 +72,7 @@ fn actual8_drafts_examples_results_and_raw_backup_survive_without_invented_curre
     std::fs::write(&path, ACTUAL8).unwrap();
     progress::save(&path, &loaded).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v11.json")).unwrap(),
+        std::fs::read(path.with_extension("before-shell-v12.json")).unwrap(),
         ACTUAL8
     );
     assert_eq!(json(&progress::load(&path, &all).unwrap()), json(&loaded));
@@ -83,7 +83,7 @@ fn actual8_drafts_examples_results_and_raw_backup_survive_without_invented_curre
             .unwrap()
             .shell
             .iter()
-            .all(|r| *r < 11),
+            .all(|r| *r < 12),
         "Saving cannot stamp its caller"
     );
     assert_eq!(
@@ -93,11 +93,11 @@ fn actual8_drafts_examples_results_and_raw_backup_survive_without_invented_curre
             .unwrap()
             .shell
             .last(),
-        Some(&11)
+        Some(&12)
     );
 }
 #[test]
-fn explicit11_run_edit_invalidation_separate_example_and_selected_reset_round_trip() {
+fn explicit12_run_edit_invalidation_separate_example_and_selected_reset_round_trip() {
     let all = pack::bundled().unwrap();
     let scenario = all.iter().find(|s| s.id == "shell-handover").unwrap();
     let Goal::Script { cases } = &scenario.goal else {
@@ -169,7 +169,7 @@ fn explicit11_run_edit_invalidation_separate_example_and_selected_reset_round_tr
         .as_ref()
         .unwrap();
     assert_eq!(learning.example_source, example);
-    assert_eq!(learning.example_revision, 11);
+    assert_eq!(learning.example_revision, 12);
     assert!(learning.example_result.is_some());
     assert!(!progress::current_solved(
         &restored.attempts[&scenario.id],

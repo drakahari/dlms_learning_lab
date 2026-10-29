@@ -1,0 +1,1248 @@
+{
+  "status": "UNREGISTERED SOURCE DRAFT; mathematical authored expectations only; all VM/loader/reference/native gates pending",
+  "required_evaluator": 12,
+  "capability_receipt": "case-classes-source-r2/a33615013bb7dbec2b59d859ffafe33adc2b8c0b52ddc8ac7a6a5499cab36383",
+  "unit_proposal": {
+    "id": "shell-numeric-validation",
+    "track": "Bash/Shell",
+    "title": "Numeric input, recovery and safe allocation",
+    "summary": "Check numerical requests before arithmetic, recover from malformed records and publish only validated batch plans.",
+    "prerequisites": [
+      "shell-counts",
+      "shell-safe-automation",
+      "shell-case-dispatch",
+      "shell-command-capture"
+    ],
+    "labs": [
+      "shell-numeric-retry",
+      "shell-numeric-intake",
+      "shell-numeric-publication"
+    ]
+  },
+  "labs": [
+    {
+      "id": "shell-numeric-retry",
+      "alternatives": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+        "if test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  1|2|3|4|5|6|7|8) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\ncase \"$2\" in\n  0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9])\n    if test \"$2\" -le 300; then true\n    else printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2; exit 2\n    fi ;;\n  *) printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2; exit 2 ;;\nesac\ntries=$1\npause=$2\nseconds=$(( (tries - 1) * pause ))\nprintf 'Attempts: %s\\n' \"$tries\"\nprintf 'Delay: %s\\n' \"$pause\"\nprintf 'Wait window: %s\\n' \"$seconds\"\n"
+      ],
+      "reference_authored_expected_pass": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "alternative_authored_expected_pass": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "common_wrong": {
+        "interprets_before_validation": {
+          "source": "early=$(( $2 + 0 ))\ndecimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+          "must_fail_case_names": [
+            "ASCII digits with a suffix",
+            "Non-ASCII numeral"
+          ],
+          "reason": "An unhandled arithmetic diagnostic occurs before the script can explain invalid input."
+        },
+        "leading_zero_accepted": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+          "must_fail_case_names": [
+            "Leading zero delay"
+          ],
+          "reason": "Digits-only spelling is not enough: leading zero reaches octal arithmetic."
+        },
+        "digit_star_is_not_numeric_validation": {
+          "source": "decimal3() {\n  case \"$1\" in [0-9]*) return 0 ;; *) return 1 ;; esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\nWait window: %s\\n' \"$1\" \"$2\" \"$wait\"\n",
+          "must_fail_case_names": [
+            "Overflow-sized digits",
+            "ASCII digits with a suffix",
+            "Newline is not part of a number"
+          ],
+          "reason": "The star accepts arbitrary suffix text; integer operations are reached before validation."
+        },
+        "missing_wait_line": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 2; then\n  printf 'Usage: retry-plan ATTEMPTS DELAY\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  [1-8]) true ;;\n  *) printf 'Invalid attempts: use 1 through 8.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then\n  if test \"$2\" -gt 300; then\n    printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n    exit 2\n  fi\nelse\n  printf 'Invalid delay: use 0 through 300 without leading zeros.\\n' >&2\n  exit 2\nfi\nwait=$(( ($1 - 1) * $2 ))\nprintf 'Attempts: %s\\nDelay: %s\\n' \"$1\" \"$2\"\n",
+          "must_fail_case_names": [
+            "Ordinary retry plan"
+          ],
+          "must_pass_case_names": [
+            "Missing arguments"
+          ],
+          "reason": "Partial formatting is not a complete successful plan."
+        },
+        "hardcodes_first_case": {
+          "source": "printf '%s' 'Attempts: 3\nDelay: 10\nWait window: 20\n'\n",
+          "authored_expected_pass": [
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "reason": "A fixed first output cannot implement the other requests, errors and complete file outcomes."
+        }
+      },
+      "supplemental_cases": [
+        {
+          "name": "Explicit empty delay",
+          "args": [
+            "2",
+            ""
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Extra argument",
+          "args": [
+            "2",
+            "4",
+            "extra"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: retry-plan ATTEMPTS DELAY\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Negative delay",
+          "args": [
+            "2",
+            "-4"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Leading space",
+          "args": [
+            "2",
+            " 4"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Hex-looking delay",
+          "args": [
+            "2",
+            "0x10"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid delay: use 0 through 300 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Attempt leading zero",
+          "args": [
+            "02",
+            "4"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid attempts: use 1 through 8.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        },
+        {
+          "name": "Empty attempts",
+          "args": [
+            "",
+            "4"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid attempts: use 1 through 8.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n"
+          }
+        }
+      ],
+      "supplemental_reference_and_alternatives_expected": "all cases should pass; authored prediction, not observed",
+      "practice": {
+        "reference": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=14\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n",
+        "experiment": {
+          "source": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=014\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n",
+          "case": {
+            "name": "Leading-zero badge experiment",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Use 0 through 99 without leading zeros.\n",
+            "status": 2,
+            "after": {
+              "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+            }
+          }
+        },
+        "repair": "decimal2() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nslots=14\nif decimal2 \"$slots\"; then\n  doubled=$((slots * 2))\n  printf 'Double: %s\\n' \"$doubled\"\nelse\n  printf 'Use 0 through 99 without leading zeros.\\n' >&2\n  exit 2\nfi\n",
+        "repair_case": {
+          "name": "Badge slots example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          },
+          "stdout": "Double: 28\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/badge-notes.txt": "Example notes stay unchanged.\n"
+          }
+        }
+      },
+      "native_acceptance_required": [
+        "Introduction skippable/reopenable",
+        "actual example Run, experiment and repair",
+        "full assignment reference, both alternatives and wrong/partial feedback",
+        "edit invalidation, Stop/limit, reset only selected attempt, raw/typed restart/restore",
+        "Challenge with same assignment and no unsolicited worked solutions",
+        "100/115/125/150/200%, light/dark, real wide/narrow; capstone essential-row visibility"
+      ],
+      "actual_results": null
+    },
+    {
+      "id": "shell-numeric-intake",
+      "alternatives": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+        "if test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  case \"$row\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9])\n      total=$((total + row))\n      accepted=$((accepted + 1)) ;;\n    *)\n      printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n      rejected=$((rejected + 1)) ;;\n  esac\ndone < \"$1\"\nprintf 'Accepted: %s\\n' \"$accepted\"\nprintf 'Rejected: %s\\n' \"$rejected\"\nprintf 'Total: %s\\n' \"$total\"\nif test \"$rejected\" -gt 0; then exit 1; fi\n"
+      ],
+      "reference_authored_expected_pass": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "alternative_authored_expected_pass": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "common_wrong": {
+        "trims_before_validation": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+          "must_fail_case_names": [
+            "Non-ASCII and edge spaces stay visible"
+          ],
+          "reason": "Trimming changes rejected input and hides its original text."
+        },
+        "drops_final_record": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+          "must_fail_case_names": [
+            "Zero maximum and final record without newline"
+          ],
+          "reason": "EOF status does not mean the last assigned row is empty."
+        },
+        "stops_after_first_bad_row": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 1; then\n  printf 'Usage: intake-audit SOURCE\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse printf 'Cannot audit: source is missing.\\n' >&2; exit 2\nfi\nline=0\naccepted=0\nrejected=0\ntotal=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  if decimal3 \"$row\"; then\n    accepted=$((accepted + 1))\n    total=$((total + row))\n  else\n    rejected=$((rejected + 1))\n    printf 'Rejected line %s: %s\\n' \"$line\" \"$row\" >&2\n    exit 1\n  fi\ndone < \"$1\"\nprintf 'Accepted: %s\\nRejected: %s\\nTotal: %s\\n' \"$accepted\" \"$rejected\" \"$total\"\nif test \"$rejected\" -eq 0; then exit 0; else exit 1; fi\n",
+          "must_fail_case_names": [
+            "Recover after malformed rows"
+          ],
+          "reason": "Later valid and invalid rows still belong in a recovery audit."
+        },
+        "hardcodes_first_case": {
+          "source": "printf '%s' 'Accepted: 2\nRejected: 2\nTotal: 12\n'\nprintf '%s' 'Rejected line 2: oops\nRejected line 4: 01\n' >&2\nexit 1\n",
+          "authored_expected_pass": [
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "reason": "A fixed first output cannot implement the other requests, errors and complete file outcomes."
+        }
+      },
+      "supplemental_cases": [
+        {
+          "name": "Sixteen valid records",
+          "args": [
+            "many.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/many.txt": "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15"
+          },
+          "stdout": "Accepted: 16\nRejected: 0\nTotal: 120\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/many.txt": "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15"
+          }
+        },
+        {
+          "name": "Only final invalid record",
+          "args": [
+            "last.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/last.txt": "12x"
+          },
+          "stdout": "Accepted: 0\nRejected: 1\nTotal: 0\n",
+          "stderr": "Rejected line 1: 12x\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/last.txt": "12x"
+          }
+        },
+        {
+          "name": "Quoted literal filename",
+          "args": [
+            "* notes.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/* notes.txt": "8\n"
+          },
+          "stdout": "Accepted: 1\nRejected: 0\nTotal: 8\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/* notes.txt": "8\n"
+          }
+        }
+      ],
+      "supplemental_reference_and_alternatives_expected": "all cases should pass; authored prediction, not observed",
+      "practice": {
+        "reference": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n",
+        "experiment": {
+          "source": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]|[1-9][0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n",
+          "case": {
+            "name": "Wider crate-label experiment",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/labels.txt": "3\n12\nx\n",
+              "/work/example-notes.txt": "Crate labels are separate practice.\n"
+            },
+            "stdout": "Labels checked: 2\nLabels to review: 1\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "3\n12\nx\n",
+              "/work/example-notes.txt": "Crate labels are separate practice.\n"
+            }
+          }
+        },
+        "repair": "checked=0\nflagged=0\nwhile IFS= read -r label || test -n \"$label\"; do\n  case \"$label\" in\n    [0-9]) checked=$((checked + 1)) ;;\n    *) flagged=$((flagged + 1)) ;;\n  esac\ndone < \"labels.txt\"\nprintf 'Labels checked: %s\\nLabels to review: %s\\n' \"$checked\" \"$flagged\"\n",
+        "repair_case": {
+          "name": "Crate label example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          },
+          "stdout": "Labels checked: 1\nLabels to review: 2\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/labels.txt": "3\n12\nx\n",
+            "/work/example-notes.txt": "Crate labels are separate practice.\n"
+          }
+        }
+      },
+      "native_acceptance_required": [
+        "Introduction skippable/reopenable",
+        "actual example Run, experiment and repair",
+        "full assignment reference, both alternatives and wrong/partial feedback",
+        "edit invalidation, Stop/limit, reset only selected attempt, raw/typed restart/restore",
+        "Challenge with same assignment and no unsolicited worked solutions",
+        "100/115/125/150/200%, light/dark, real wide/narrow; capstone essential-row visibility"
+      ],
+      "actual_results": null
+    },
+    {
+      "id": "shell-numeric-publication",
+      "alternatives": [
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+        "decimal3() {\n  case \"$1\" in\n    0|[1-9]|[1-9][0-9]|[1-9][0-9][0-9]) return 0 ;;\n    *) return 1 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nline=0\njobs=0\nunits=0\nwhile IFS= read -r row || test -n \"$row\"; do\n  line=$((line + 1))\n  case \"$row\" in\n    [1-9]|[1-9][0-9]) true ;;\n    *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; exit 2 ;;\n  esac\n  jobs=$((jobs + 1))\n  units=$((units + row))\ndone < \"$source\"\nif test \"$units\" -gt \"$budget\"; then\n  printf 'Batch exceeds budget.\\n' >&2\n  exit 2\nfi\nremaining=$((budget - units))\nshow_report() {\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$source\" \"$jobs\" \"$units\" \"$budget\" \"$remaining\"\n}\nif test \"$mode\" = preview; then\n  show_report\nelse\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$source\" \"$jobs\" \"$units\" \"$budget\" \"$remaining\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n"
+      ],
+      "reference_authored_expected_pass": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "alternative_authored_expected_pass": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "common_wrong": {
+        "truncates_before_validation": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nprintf '' > \"$destination\"\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+          "must_fail_case_names": [
+            "Preview retains an existing plan",
+            "Late non-ASCII row prevents publication",
+            "Budget exceeded"
+          ],
+          "reason": "Even an empty write destroys the previous report before the new data is approved."
+        },
+        "ignores_total_budget": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if false; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  printf '%s\\n' \"$report\"\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+          "must_fail_case_names": [
+            "Budget exceeded"
+          ],
+          "reason": "Valid individual amounts may still exceed the shared budget."
+        },
+        "omits_preview_report": {
+          "source": "decimal3() {\n  case \"$1\" in\n    ''|*[!0-9]*|0?*|????*) return 1 ;;\n    *) return 0 ;;\n  esac\n}\nif test \"$#\" -ne 4; then\n  printf 'Usage: plan MODE BUDGET SOURCE DESTINATION\\n' >&2\n  exit 2\nfi\ncase \"$1\" in\n  preview|publish) true ;;\n  *) printf 'Mode must be preview or publish.\\n' >&2; exit 2 ;;\nesac\nif decimal3 \"$2\"; then true\nelse printf 'Invalid budget: use 0 through 999 without leading zeros.\\n' >&2; exit 2\nfi\ncase \"$3\" in\n  ''|.|..|-|*/*) printf 'Invalid source name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\ncase \"$4\" in\n  ''|.|..|-|*/*) printf 'Invalid destination name.\\n' >&2; exit 2 ;;\n  *) true ;;\nesac\nif test \"$3\" = \"$4\"; then\n  printf 'Source and destination must differ.\\n' >&2\n  exit 2\nfi\nif test -f \"$3\"; then true\nelse printf 'Cannot plan: source is missing.\\n' >&2; exit 2\nfi\nmode=$1\nbudget=$2\nsource=$3\ndestination=$4\nbuild_plan() {\n  line=0\n  jobs=0\n  units=0\n  while IFS= read -r row || test -n \"$row\"; do\n    line=$((line + 1))\n    case \"$row\" in\n      [1-9]|[1-9][0-9]) true ;;\n      *) printf 'Invalid units on line %s: use 1 through 99 without leading zeros.\\n' \"$line\" >&2; return 2 ;;\n    esac\n    jobs=$((jobs + 1))\n    units=$((units + row))\n  done < \"$1\"\n  if test \"$units\" -gt \"$2\"; then\n    printf 'Batch exceeds budget.\\n' >&2\n    return 2\n  fi\n  allowance=$2\n  remaining=$((allowance - units))\n  printf 'Source: %s\\nJobs: %s\\nUnits: %s\\nBudget: %s\\nRemaining: %s\\n' \"$1\" \"$jobs\" \"$units\" \"$allowance\" \"$remaining\"\n}\nreport=$(build_plan \"$source\" \"$budget\") || exit 2\nif test \"$mode\" = preview; then\n  true\nelse\n  printf '%s\\n' \"$report\" > \"$destination\"\n  printf 'Created: %s\\n' \"$destination\"\nfi\n",
+          "must_fail_case_names": [
+            "Preview retains an existing plan"
+          ],
+          "must_pass_case_names": [
+            "Publish a different exact-budget batch"
+          ],
+          "reason": "Preview must show the complete plan as well as preserve files."
+        },
+        "hardcodes_first_case": {
+          "source": "printf '%s' 'Source: jobs.txt\nJobs: 3\nUnits: 60\nBudget: 100\nRemaining: 40\n'\n",
+          "authored_expected_pass": [
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "reason": "A fixed first output cannot implement the other requests, errors and complete file outcomes."
+        }
+      },
+      "supplemental_cases": [
+        {
+          "name": "Empty valid batch and zero budget",
+          "args": [
+            "publish",
+            "0",
+            "empty.txt",
+            "fresh.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/empty.txt": ""
+          },
+          "stdout": "Created: fresh.txt\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/empty.txt": "",
+            "/work/fresh.txt": "Source: empty.txt\nJobs: 0\nUnits: 0\nBudget: 0\nRemaining: 0\n"
+          }
+        },
+        {
+          "name": "Publish may create a new filename",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "fresh plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "8\n9\n"
+          },
+          "stdout": "Created: fresh plan.txt\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "8\n9\n",
+            "/work/fresh plan.txt": "Source: jobs.txt\nJobs: 2\nUnits: 17\nBudget: 100\nRemaining: 83\n"
+          }
+        },
+        {
+          "name": "Malformed later row needs recovery first",
+          "args": [
+            "preview",
+            "100",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n12x\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n12x\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Blank row prevents publication",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Zero job size prevents publication",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n0\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n0\n5\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Oversized row prevents arithmetic",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n18446744073709551616\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n18446744073709551616\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Newline inside argument is not a budget",
+          "args": [
+            "preview",
+            "10\n",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid budget: use 0 through 999 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Source path traversal is outside interface",
+          "args": [
+            "publish",
+            "100",
+            "../jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid source name.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Absolute destination is outside interface",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "/work/plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid destination name.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Extra argument is an error",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "plan.txt",
+            "extra"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: plan MODE BUDGET SOURCE DESTINATION\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Standard input is not a selected file",
+          "args": [
+            "preview",
+            "100",
+            "-",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid source name.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        },
+        {
+          "name": "Destination with literal wildcard is a single file",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "* plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "Created: * plan.txt\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "10\n20\n30\n",
+            "/work/plan.txt": "Previous approved plan.\n",
+            "/work/* plan.txt": "Source: jobs.txt\nJobs: 3\nUnits: 60\nBudget: 100\nRemaining: 40\n"
+          }
+        },
+        {
+          "name": "No startup expression runs from record text",
+          "args": [
+            "publish",
+            "100",
+            "jobs.txt",
+            "plan.txt"
+          ],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n$(printf changed)\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid units on line 2: use 1 through 99 without leading zeros.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Retain this unrelated file.\n",
+            "/work/jobs.txt": "4\n$(printf changed)\n",
+            "/work/plan.txt": "Previous approved plan.\n"
+          }
+        }
+      ],
+      "supplemental_reference_and_alternatives_expected": "all cases should pass; authored prediction, not observed",
+      "practice": {
+        "reference": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=preview\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n",
+        "experiment": {
+          "source": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=publish\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n",
+          "case": {
+            "name": "Publish room notice experiment",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "LC_ALL": "C"
+            },
+            "files": {
+              "/work/rooms.txt": "2\n3\n",
+              "/work/room-notice.txt": "Previous room notice.\n"
+            },
+            "stdout": "Saved example notice.\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/rooms.txt": "2\n3\n",
+              "/work/room-notice.txt": "Seats requested: 5\n"
+            }
+          }
+        },
+        "repair": "make_notice() {\n  seats=0\n  while IFS= read -r row || test -n \"$row\"; do\n    case \"$row\" in\n      [1-9]) seats=$((seats + row)) ;;\n      *) printf 'Room entry needs review.\\n' >&2; return 2 ;;\n    esac\n  done < \"rooms.txt\"\n  if test \"$seats\" -gt 8; then\n    printf 'Room limit exceeded.\\n' >&2\n    return 2\n  fi\n  printf 'Seats requested: %s\\n' \"$seats\"\n}\nmode=preview\nnotice=$(make_notice) || exit 2\nif test \"$mode\" = publish; then\n  printf '%s\\n' \"$notice\" > \"room-notice.txt\"\n  printf 'Saved example notice.\\n'\nelse\n  printf '%s\\n' \"$notice\"\nfi\n",
+        "repair_case": {
+          "name": "Room capacity preview example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "LC_ALL": "C"
+          },
+          "files": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Previous room notice.\n"
+          },
+          "stdout": "Seats requested: 5\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/rooms.txt": "2\n3\n",
+            "/work/room-notice.txt": "Previous room notice.\n"
+          }
+        }
+      },
+      "native_acceptance_required": [
+        "Introduction skippable/reopenable",
+        "actual example Run, experiment and repair",
+        "full assignment reference, both alternatives and wrong/partial feedback",
+        "edit invalidation, Stop/limit, reset only selected attempt, raw/typed restart/restore",
+        "Challenge with same assignment and no unsolicited worked solutions",
+        "100/115/125/150/200%, light/dark, real wide/narrow; capstone essential-row visibility"
+      ],
+      "actual_results": null
+    }
+  ],
+  "original_52_labs_384_cases_52_examples_changed": false,
+  "assignment_case_total": 36,
+  "supplemental_case_total": 23,
+  "actual_passes": null,
+  "new_credit": null,
+  "original_source_pins": [
+    {
+      "path": "scenarios/starter-v1.json",
+      "bytes": 82094,
+      "sha256": "3ead700a694ad83aed05e93b0461863523d54297c38cc605963279e83be81a57"
+    },
+    {
+      "path": "scenarios/shell-unit-v1.json",
+      "bytes": 46290,
+      "sha256": "a211d4717fd091f571f11cbecfdeb4c5a5a24f378afdd8de4ef95e613bee8d75"
+    },
+    {
+      "path": "scenarios/shell-composition-v1.json",
+      "bytes": 33572,
+      "sha256": "f452a4c0d4a17a7b4e17f13d1740922ea0ffedc29f111f00b756e6de5e9dfb98"
+    },
+    {
+      "path": "scenarios/shell-reusable-v1.json",
+      "bytes": 36112,
+      "sha256": "cbb8df4b6b83bfbb83d29af01fac55942a9a97e0ce101b5cc58cf1ac49aa4caf"
+    },
+    {
+      "path": "scenarios/linux-files-v1.json",
+      "bytes": 59671,
+      "sha256": "a2ef56ebeb13289d601ad82389941062d939bee2fa6d69c4d7f48be53338a5bc"
+    },
+    {
+      "path": "scenarios/ipv6-static-v1.json",
+      "bytes": 92130,
+      "sha256": "d196b91afa9c48bcace2b3e68223de51d1bf8e16227ce68413e0b68e9f736bd4"
+    },
+    {
+      "path": "scenarios/shell-scope-v1.json",
+      "bytes": 33253,
+      "sha256": "c5804a45bc660089f67448bb043c998c9ff72d216aaaada7d06fe7bed5fb9d1d"
+    },
+    {
+      "path": "scenarios/shell-text-v1.json",
+      "bytes": 41724,
+      "sha256": "b1e9e087124102161bd6ae53552afb850c0b39bac4893c75eb2ba94251679bfb"
+    },
+    {
+      "path": "scenarios/shell-counts-v1.json",
+      "bytes": 46139,
+      "sha256": "f87220e67cfa547135befd9952716174cbd7aee652cbed4bd2a20ab5fe3e36b9"
+    },
+    {
+      "path": "scenarios/linux-access-v1.json",
+      "bytes": 46994,
+      "sha256": "296cd1242966b6a0a37604dfc39a2c2f9020195e3080398ecea5fe61e0b74b0b"
+    },
+    {
+      "path": "scenarios/vlan-data-v1.json",
+      "bytes": 69235,
+      "sha256": "4a7a739d4ca1454a762418f90be68761f9dc5bd3429f8a4d0a20adadc84b676b"
+    },
+    {
+      "path": "scenarios/shell-file-batches-v1.json",
+      "bytes": 38010,
+      "sha256": "782886fbc19e32323d666f801c467e59d53cbde6e3eaf984f531f828cc460a9b"
+    },
+    {
+      "path": "scenarios/ipv4-static-v1.json",
+      "bytes": 132393,
+      "sha256": "aec07081d948bd9ad0c6be902763f9c09fe48abde3def6d3bc81a153f9aaeb78"
+    },
+    {
+      "path": "scenarios/dns-forward-v1.json",
+      "bytes": 139574,
+      "sha256": "dea61c30e4c96b17a669356a1d9d7518119d270b8837588ff2d2ce97fbaba22f"
+    },
+    {
+      "path": "scenarios/shell-arrays-v1.json",
+      "bytes": 43401,
+      "sha256": "43bae8b5651f8b63de711396034fe74b763485e4baf95d9b13e75ec989a66ff6"
+    },
+    {
+      "path": "scenarios/linux-processes-v1.json",
+      "bytes": 68293,
+      "sha256": "b491ced2e5179a467f653aaeea000634bbc90a7cb3e98d633df8241308e3c7b6"
+    },
+    {
+      "path": "scenarios/discovery-v1.json",
+      "bytes": 119033,
+      "sha256": "df01f002921216a7db0cabf44b8d53a60bdb0b34ea0b26806106fdd9c779ff2c"
+    },
+    {
+      "path": "scenarios/storage-v1.json",
+      "bytes": 65685,
+      "sha256": "373e4862a107a4411d3ed1218b6af535c6fa6e6320b05212f3e0f7a7ceaa115e"
+    },
+    {
+      "path": "scenarios/shell-capture-v1.json",
+      "bytes": 67211,
+      "sha256": "cd22ad53457785ef648b5423c0400502d6b09bb2f265d75ca8813ad589d6da25"
+    },
+    {
+      "path": "scenarios/acl-policy-v1.json",
+      "bytes": 158469,
+      "sha256": "bc61f73814e868a65c0fe3765a37bbbbf67a606f002c343d91dfb939c4d54816"
+    },
+    {
+      "path": "scenarios/accounts-lifecycle-v1.json",
+      "bytes": 227263,
+      "sha256": "0c9e00d1e1f55cc91339a5e967e41a3b189ac11d519f36502fc805590b908d38"
+    },
+    {
+      "path": "scenarios/ospf-p2p-v1.json",
+      "bytes": 152455,
+      "sha256": "301a5590e65a0aeff83e91a70d4210a6d009235ce72e3f51edc5ccdfca06f65a"
+    },
+    {
+      "path": "scenarios/unit-manager-v1.json",
+      "bytes": 139344,
+      "sha256": "14a034d1970d77e4bbbe8ec26266ce958af64e84f89ba7518504d8c9a472d94d"
+    },
+    {
+      "path": "scenarios/shell-case-v1.json",
+      "bytes": 59145,
+      "sha256": "ecbe8e382b00cf0e02e650d3f819715f66b6838fa61b115f071777ffd29f9184"
+    },
+    {
+      "path": "scenarios/mac-learning-v1.json",
+      "bytes": 119995,
+      "sha256": "000be0776d9be13f471c8809845058cfd885afb326503ff1665cd322b2496308"
+    },
+    {
+      "path": "scenarios/linux-find-v1.json",
+      "bytes": 68383,
+      "sha256": "cd56f97c9664e352474c7fad2133f8021042a9ea666906ad0713b7854939131f"
+    },
+    {
+      "path": "scenarios/dns-reverse-v1.json",
+      "bytes": 65982,
+      "sha256": "8dfa7123e0ab8b5ff63cba992c0232078e8efb8956fac541244818765e64fd94"
+    },
+    {
+      "path": "scenarios/shell-getopts-v1.json",
+      "bytes": 68751,
+      "sha256": "62e46d2f1a2f4b81e53b97998b4b121eae2e808484099dfa21210f8ed4e342b5"
+    },
+    {
+      "path": "scenarios/dhcpv4-client-v1.json",
+      "bytes": 105726,
+      "sha256": "ac28cb1c226c7a3ebe0178c49949840e12023e36dd87ca72682303d0b2fa4e17"
+    },
+    {
+      "path": "scenarios/debian-packages-v1.json",
+      "bytes": 130317,
+      "sha256": "d33e565a9aec51f0370573c2754763132708a4f9b77094083c44b4a44d0d7a55"
+    },
+    {
+      "path": "scenarios/spanning-tree-v1.json",
+      "bytes": 79391,
+      "sha256": "3d572b8f6ac6c53d7ebaf9c85b2b80c0466a65361c4411818df9905db5da6dc7"
+    },
+    {
+      "path": "scenarios/shell-safe-automation-v1.json",
+      "bytes": 48326,
+      "sha256": "675a81721bdf3225e31c1074c799292236ee7012e73e3e1b133d28f95848c147"
+    },
+    {
+      "path": "scenarios/apache-static-v1.json",
+      "bytes": 108996,
+      "sha256": "3d5e8a02ea4b00bce659d3351bbad9db7f255d573ba863b09bc46f1f2aa15dd8"
+    },
+    {
+      "path": "scenarios/nat-basic-v1.json",
+      "bytes": 68067,
+      "sha256": "3010efd859e41b0dff5047611c0d261e83c1ccc2f20ed1b17d63d345d006b53d"
+    },
+    {
+      "path": "scenarios/rpm-packages-v1.json",
+      "bytes": 128075,
+      "sha256": "44471854302dc6b384cd35129c2447fb3e4fb59a446c13a434e8062b3af1d6f5"
+    },
+    {
+      "path": "scenarios/shell-command-vectors-v1.json",
+      "bytes": 62589,
+      "sha256": "8852a3609ce90da2b1607a698edc86db9112d7168a79f6f6cd9eac3f4773c4cc"
+    },
+    {
+      "path": "scenarios/nfs-v1.json",
+      "bytes": 211595,
+      "sha256": "5d200ae8fb0596b29a1830abdbad5f0b26f8483a23a47b1db77fe91d6a11a38c"
+    },
+    {
+      "path": "scenarios/etherchannel-v1.json",
+      "bytes": 230039,
+      "sha256": "8085a3b6e91a1c0b7a62bb8faeefb7e2f7fdebcf9e96ecebac77b786727ef717"
+    },
+    {
+      "path": "scenarios/shell-optional-inputs-v1.json",
+      "bytes": 54461,
+      "sha256": "30d72ae7cb0bbeabcc9c4a1e0268103c50ce58355198f69afe7cd6e5a61d5678"
+    },
+    {
+      "path": "scenarios/linux-cron-v1.json",
+      "bytes": 160700,
+      "sha256": "e2212f904ce2361d1cf9d7249732daae090ac7598d478645919964c834f68b5c"
+    },
+    {
+      "path": "scenarios/file-backup-v1.json",
+      "bytes": 151048,
+      "sha256": "73e2f6a395457c0b78355a54592a6749f2c166c6fef2cd1df553bf5bd4d3b729"
+    }
+  ],
+  "original_catalog_count": 168,
+  "original_units43_sha256": "667727c71295957dfe7a0553d938dd2e7c4a4ba82d0af3b33b9e7d24f19dd7a9",
+  "original_units43_text": "{\n  \"version\": 1,\n  \"units\": [\n    {\n      \"id\": \"ipv4-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"IPv4 addressing and diagnosis\",\n      \"summary\": \"Find subnet boundaries, allocate networks, and diagnose a workstation configuration. These labs cover part of CCNA addressing, not the whole exam.\",\n      \"prerequisites\": [],\n      \"labs\": [\n        \"ccna-ipv4\",\n        \"ccna-vlsm\",\n        \"ccna-gateway\"\n      ]\n    },\n    {\n      \"id\": \"vlan-data-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"VLAN groups, trunks and handover\",\n      \"summary\": \"Connect workgroups, carry tagged traffic, understand native classification and diagnose a three-group handover. Native port tables and broadcast evidence; restricted data plane, without STP or Cisco CLI.\",\n      \"prerequisites\": [],\n      \"labs\": [\n        \"ccna-vlan-access\",\n        \"ccna-vlan-trunk\",\n        \"ccna-vlan-native\",\n        \"ccna-vlan-handover\"\n      ]\n    },\n    {\n      \"id\": \"ethernet-learning\",\n      \"track\": \"CCNA\",\n      \"title\": \"Ethernet learning, aging and recovery\",\n      \"summary\": \"Build source-to-port knowledge, repair an older table selectively, prove quiet-period behavior and hand over two groups across three switches. Original finite Ethernet simulation; no IOS terminal, STP or real equipment equivalence.\",\n      \"prerequisites\": [\n        \"vlan-data-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-mac-learn-paths\",\n        \"ccna-mac-stale-location\",\n        \"ccna-mac-source-refresh\",\n        \"ccna-mac-handover\"\n      ]\n    },\n    {\n      \"id\": \"ipv4-static-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"IPv4 routes, return paths and resilient handover\",\n      \"summary\": \"Build network routes, diagnose replies and overlapping entries, create a host exception and prove a primary/backup branch handover. Bounded native static forwarding; no IOS interpreter or dynamic protocols.\",\n      \"prerequisites\": [\n        \"ipv4-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-ipv4-network-route\",\n        \"ccna-ipv4-return-route\",\n        \"ccna-ipv4-specific-route\",\n        \"ccna-ipv4-host-exception\",\n        \"ccna-ipv4-floating-route\",\n        \"ccna-ipv4-branch-handover\"\n      ]\n    },\n    {\n      \"id\": \"ipv6-static-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"IPv6 links, routes and recovery\",\n      \"summary\": \"Configure an IPv6 workstation, diagnose local versus remote paths, scope link-local next hops, repair route preference and verify a branch handover. Bounded static simulation, not full router protocol coverage.\",\n      \"prerequisites\": [\n        \"ipv4-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-ipv6-neighbor\",\n        \"ccna-ipv6-workstation\",\n        \"ccna-ipv6-scope\",\n        \"ccna-ipv6-specific-route\",\n        \"ccna-ipv6-backup\",\n        \"ccna-ipv6-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-file-foundations\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Files, paths and safe handovers\",\n      \"summary\": \"Start with no Linux command knowledge. Navigate, inspect, copy, move, remove precisely and create private files, then complete a practical handover.\",\n      \"prerequisites\": [],\n      \"labs\": [\n        \"lpic1-file-navigation\",\n        \"lpic1-file-names\",\n        \"lpic1-copy-move\",\n        \"lpic1-file-cleanup\",\n        \"lpic1-creation-mask\",\n        \"lpic1-file-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-access-policy\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Access policy and safe file changes\",\n      \"summary\": \"Share with a known group, distinguish directory names from file content, update existing files and complete a permission-safe handover. Ordinary user; no root or real account changes.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\"\n      ],\n      \"labs\": [\n        \"lpic1-team-brief\",\n        \"lpic1-drop-directory\",\n        \"lpic1-update-existing\",\n        \"lpic1-retire-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-file-access\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"File access and investigation\",\n      \"summary\": \"Repair file access, investigate group and directory permissions, then locate and filter a simulated log.\",\n      \"prerequisites\": [\n        \"linux-access-policy\"\n      ],\n      \"labs\": [\n        \"lpic1-permissions\",\n        \"lpic1-traversal\",\n        \"lpic1-logs\"\n      ]\n    },\n    {\n      \"id\": \"linux-file-search\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Search, investigate and hand over files\",\n      \"summary\": \"Select the right files, repair a blocked search and hand over reports with the requested access.\",\n      \"prerequisites\": [\n        \"linux-file-access\"\n      ],\n      \"labs\": [\n        \"lpic1-search-release-set\",\n        \"lpic1-search-incomplete-intake\",\n        \"lpic1-search-private-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-service-recovery\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Service, DNS and storage recovery\",\n      \"summary\": \"Diagnose saved versus active configuration, repair services and resolution, and investigate a capacity/mount problem. Assumes basic Linux file and command skills.\",\n      \"prerequisites\": [\n        \"linux-file-access\"\n      ],\n      \"labs\": [\n        \"lpic2-service\",\n        \"lpic2-dns\",\n        \"lpic2-storage\"\n      ]\n    },\n    {\n      \"id\": \"shell-foundations\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Reliable shell foundations\",\n      \"summary\": \"Start with no shell knowledge. Build toward a safe report using quoted values, input, conditions, files and loops. Experienced learners can open any assignment directly.\",\n      \"prerequisites\": [],\n      \"labs\": [\n        \"shell-handover\",\n        \"shell-arguments\",\n        \"shell-input\",\n        \"shell-validation\",\n        \"shell-report\",\n        \"shell-loop\",\n        \"shell-capstone\"\n      ]\n    },\n    {\n      \"id\": \"shell-composition\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Streams, pipelines and resilient batches\",\n      \"summary\": \"Repair output routing, compose filters, preserve final input records, and audit batches without hiding failures.\",\n      \"prerequisites\": [\n        \"shell-foundations\"\n      ],\n      \"labs\": [\n        \"shell-streams\",\n        \"shell-pipelines\",\n        \"shell-eof\",\n        \"shell-batch-audit\"\n      ]\n    },\n    {\n      \"id\": \"shell-reusable\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Reusable functions and safe composition\",\n      \"summary\": \"Build reusable helpers, handle per-item failures, consume arguments and validate before replacing a report.\",\n      \"prerequisites\": [\n        \"shell-composition\"\n      ],\n      \"labs\": [\n        \"shell-functions\",\n        \"shell-return\",\n        \"shell-shift\",\n        \"shell-bundle\"\n      ]\n    },\n    {\n      \"id\": \"shell-scope\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Bash scope and safe helper design\",\n      \"summary\": \"Debug shared-variable collisions, trace nested filter settings and repair a report builder that risks its inputs. Bash-specific local is taught explicitly; equivalent supported repairs are welcome.\",\n      \"prerequisites\": [\n        \"shell-reusable\"\n      ],\n      \"labs\": [\n        \"shell-local-heading\",\n        \"shell-scope-review\",\n        \"shell-scope-capstone\"\n      ]\n    },\n    {\n      \"id\": \"shell-text\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Text records and reliable audits\",\n      \"summary\": \"Extract delimited fields, build stable manifests, count records correctly and publish a duplicate-identity audit. Portable shell with a documented GNU utility subset.\",\n      \"prerequisites\": [\n        \"shell-composition\"\n      ],\n      \"labs\": [\n        \"shell-cut-inventory\",\n        \"shell-sort-manifest\",\n        \"shell-uniq-counts\",\n        \"shell-text-capstone\"\n      ]\n    },\n    {\n      \"id\": \"shell-counts\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Counters, totals and safe publication\",\n      \"summary\": \"Number records, calculate whole-cent totals, plan full groups and leftovers, then publish a validated multi-file count report. Small supplied integer inputs; no floating-point or arbitrary-text numeric validation.\",\n      \"prerequisites\": [\n        \"shell-reusable\"\n      ],\n      \"labs\": [\n        \"shell-number-records\",\n        \"shell-order-total\",\n        \"shell-pack-items\",\n        \"shell-count-capstone\"\n      ]\n    },\n    {\n      \"id\": \"shell-file-batches\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Filename selection and safe batch reports\",\n      \"summary\": \"Discover changing file sets, collect incidents and publish a collision-safe handover from a captured source list.\",\n      \"prerequisites\": [\n        \"shell-counts\"\n      ],\n      \"labs\": [\n        \"shell-file-manifest\",\n        \"shell-collect-errors\",\n        \"shell-file-batch-capstone\"\n      ]\n    },\n    {\n      \"id\": \"dns-forward\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Forward DNS: records, repairs and publication\",\n      \"summary\": \"Add dual-stack hosts, trace alias failures, restore mail discovery, preserve address sets and complete a primary/secondary handover. In-memory forward records only; no full BIND, recursion, reverse zones or transfer protocol.\",\n      \"prerequisites\": [\n        \"linux-service-recovery\"\n      ],\n      \"labs\": [\n        \"lpic2-dns-dualstack\",\n        \"lpic2-dns-aliases\",\n        \"lpic2-dns-mail\",\n        \"lpic2-dns-rrsets\",\n        \"lpic2-dns-secondary\",\n        \"lpic2-dns-handover\"\n      ]\n    },\n    {\n      \"id\": \"dns-reverse\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Reverse names and DNS handovers\",\n      \"summary\": \"Repair IPv4 reverse names, publish an IPv6 rollout and retire addresses without stale answers.\",\n      \"prerequisites\": [\n        \"dns-forward\"\n      ],\n      \"labs\": [\n        \"lpic2-dns-reverse-investigation\",\n        \"lpic2-dns-reverse-ipv6\",\n        \"lpic2-dns-reverse-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-arrays\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Bash lists, snapshots and safe handovers\",\n      \"summary\": \"Preserve separate values, debug whole-list replacement, inspect grouped file selections, then preview or publish a validated handover. Bash-specific dense arrays; equivalent supported programs are accepted.\",\n      \"prerequisites\": [\n        \"shell-scope\",\n        \"shell-file-batches\"\n      ],\n      \"labs\": [\n        \"shell-array-intake\",\n        \"shell-array-priority\",\n        \"shell-array-package\",\n        \"shell-array-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-processes\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Process investigation and priority\",\n      \"summary\": \"Select the right instance, distinguish pause from ending, understand pending signals and niceness, then complete a safe parent/child handover.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\",\n        \"linux-access-policy\"\n      ],\n      \"labs\": [\n        \"lpic1-process-pause\",\n        \"lpic1-process-pending\",\n        \"lpic1-process-priority\",\n        \"lpic1-process-handover\"\n      ]\n    },\n    {\n      \"id\": \"lldp-discovery\",\n      \"track\": \"CCNA\",\n      \"title\": \"LLDP neighbors, inventory and handover\",\n      \"summary\": \"Repair direction, refresh advertised inventory, retain inbound discovery while silencing one transmitter, and complete a multi-link handover. Explicit offline LLDP events; no CDP, IOS CLI or real network.\",\n      \"prerequisites\": [\n        \"vlan-data-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-lldp-receive\",\n        \"ccna-lldp-inventory\",\n        \"ccna-lldp-transmit-policy\",\n        \"ccna-lldp-handover\"\n      ]\n    },\n    {\n      \"id\": \"persistent-mounts\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Persistent mounts and stable volume identity\",\n      \"summary\": \"Identify the intended filesystem, reconcile saved and live access, keep maintenance storage manual, then complete a multi-volume handover under changing device names. Clean in-memory metadata only; no real disks or system boot.\",\n      \"prerequisites\": [\n        \"linux-service-recovery\"\n      ],\n      \"labs\": [\n        \"lpic2-mount-identity\",\n        \"lpic2-mount-policy\",\n        \"lpic2-mount-manual\",\n        \"lpic2-mount-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-command-capture\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Command output, reliable decisions and report previews\",\n      \"summary\": \"Prepare intact captured text, preserve useful command status, and combine isolated variables with safe shared-file effects.\",\n      \"prerequisites\": [\n        \"shell-text\",\n        \"shell-scope\"\n      ],\n      \"labs\": [\n        \"shell-capture-preview\",\n        \"shell-capture-evidence\",\n        \"shell-capture-decision\",\n        \"shell-capture-handover\"\n      ]\n    },\n    {\n      \"id\": \"ipv4-access-policy\",\n      \"track\": \"CCNA\",\n      \"title\": \"IPv4 access policies without collateral blocking\",\n      \"summary\": \"Build source filters, repair ordered service rules and direction, then hand over a two-router policy.\",\n      \"prerequisites\": [\n        \"ipv4-static-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-acl-source-policy\",\n        \"ccna-acl-service-order\",\n        \"ccna-acl-direction-repair\",\n        \"ccna-acl-policy-handover\"\n      ]\n    },\n    {\n      \"id\": \"local-account-lifecycle\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Local accounts and careful team handovers\",\n      \"summary\": \"Create explicit identities and homes, repair groups, retain numeric evidence and complete a safe account handover.\",\n      \"prerequisites\": [\n        \"linux-access-policy\"\n      ],\n      \"labs\": [\n        \"lpic1-account-onboarding\",\n        \"lpic1-account-membership\",\n        \"lpic1-account-retirement\",\n        \"lpic1-account-team-handover\"\n      ]\n    },\n    {\n      \"id\": \"ospf-p2p-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"Point-to-point OSPFv2 compatibility and route costs\",\n      \"summary\": \"Diagnose identity and process faults, match configured P2P parameters, calculate directed equal-cost choices and hand over passive LAN advertisement.\",\n      \"prerequisites\": [\n        \"ipv4-static-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-ospf-router-identity\",\n        \"ccna-ospf-p2p-parameters\",\n        \"ccna-ospf-directed-ecmp\",\n        \"ccna-ospf-passive-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-unit-manager-foundations\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Service definitions, dependencies and target handover\",\n      \"summary\": \"Compare saved and running settings, prepare required data, handle an optional failure and verify a careful service handover now and next session.\",\n      \"prerequisites\": [\n        \"linux-service-recovery\"\n      ],\n      \"labs\": [\n        \"lpic2-unit-loaded-recovery\",\n        \"lpic2-unit-preparation-order\",\n        \"lpic2-unit-optional-wants\",\n        \"lpic2-unit-target-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-case-dispatch\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Clear dispatch and safe publication\",\n      \"summary\": \"Design exact operation interfaces, route ordered records and separate validation from publication.\",\n      \"prerequisites\": [\n        \"shell-command-capture\",\n        \"shell-file-batches\"\n      ],\n      \"labs\": [\n        \"shell-case-interface\",\n        \"shell-case-routing\",\n        \"shell-case-publication\"\n      ]\n    },\n    {\n      \"id\": \"shell-option-interfaces\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Reliable short-option tools and independent jobs\",\n      \"summary\": \"Build a flexible report interface, reuse independent parsers and publish only a completely validated multi-job plan.\",\n      \"prerequisites\": [\n        \"shell-case-dispatch\",\n        \"shell-arrays\",\n        \"shell-scope\"\n      ],\n      \"labs\": [\n        \"shell-options-report\",\n        \"shell-options-jobs\",\n        \"shell-options-publication\"\n      ]\n    },\n    {\n      \"id\": \"dhcpv4-client-foundations\",\n      \"track\": \"CCNA\",\n      \"title\": \"DHCP client leases, relays and safe handover\",\n      \"summary\": \"Separate applied policy from client-held leases, diagnose a relay and wrong mask, then hand over a reserved and shared address pool. Logical DHCP with supplied paths; no IOS commands, real packets or proof of router/DNS service.\",\n      \"prerequisites\": [\n        \"ipv4-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-dhcp-held-options\",\n        \"ccna-dhcp-relay-scope\",\n        \"ccna-dhcp-lease-handover\"\n      ]\n    },\n    {\n      \"id\": \"debian-package-administration\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Debian packages: inspect, install, repair and retire\",\n      \"summary\": \"Use supported package commands on separate sample workstations. Distinguish installed records, metadata, files and retention policies; preserve working software during repairs.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\"\n      ],\n      \"labs\": [\n        \"lpic1-package-install\",\n        \"lpic1-package-metadata\",\n        \"lpic1-package-payload\",\n        \"lpic1-package-handover\"\n      ]\n    },\n    {\n      \"id\": \"spanning-tree-steady-state\",\n      \"track\": \"CCNA\",\n      \"title\": \"Spanning-tree roots and stable paths\",\n      \"summary\": \"Choose a root, diagnose local cost and parallel uplinks, then hand over a four-bridge topology. Ideal point-to-point steady state only; no protocol, PVST, guard or packet-delivery claim.\",\n      \"prerequisites\": [\n        \"vlan-data-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-stp-root\",\n        \"ccna-stp-local-cost\",\n        \"ccna-stp-parallel\",\n        \"ccna-stp-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-safe-automation\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Reliable text input and careful publication\",\n      \"summary\": \"Preserve complete records, detect a failed pipeline and publish a validated handover without changing protected files.\",\n      \"prerequisites\": [\n        \"shell-counts\",\n        \"shell-composition\",\n        \"shell-command-capture\",\n        \"shell-text\",\n        \"shell-case-dispatch\",\n        \"shell-scope\"\n      ],\n      \"labs\": [\n        \"shell-preserve-lines\",\n        \"shell-pipeline-status\",\n        \"shell-safe-handover\"\n      ]\n    },\n    {\n      \"id\": \"static-web-services\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Static sites: names, pages, access and handover\",\n      \"summary\": \"Route site names, choose and update pages, limit access to staff notes and verify a careful service handover.\",\n      \"prerequisites\": [],\n      \"labs\": [\n        \"lpic2-web-routing\",\n        \"lpic2-web-pages\",\n        \"lpic2-web-access\",\n        \"lpic2-web-handover\"\n      ]\n    },\n    {\n      \"id\": \"basic-nat\",\n      \"track\": \"CCNA\",\n      \"title\": \"Basic NAT address mapping\",\n      \"summary\": \"Repair a static address, diagnose dynamic eligibility and pool capacity after static reservations, then hand over real held mappings while preserving a neighboring static map.\",\n      \"prerequisites\": [\n        \"ipv4-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-nat-static\",\n        \"ccna-nat-pool\",\n        \"ccna-nat-handover\"\n      ]\n    },\n    {\n      \"id\": \"rpm-package-investigation\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"RPM records, providers, payloads and handover\",\n      \"summary\": \"Choose a versioned provider, account for epoch ordering, repair actual recorded payload files and retire a provider while preserving its consumer and neighboring work.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\"\n      ],\n      \"labs\": [\n        \"lpic1-rpm-provider\",\n        \"lpic1-rpm-epoch\",\n        \"lpic1-rpm-payload\",\n        \"lpic1-rpm-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-command-construction\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Build and dispatch safe command requests\",\n      \"summary\": \"Compose bounded argument lists, select known transformations and prepare results before publication.\",\n      \"prerequisites\": [\n        \"shell-arrays\",\n        \"shell-text\",\n        \"shell-case-dispatch\",\n        \"shell-safe-automation\"\n      ],\n      \"labs\": [\n        \"shell-command-options\",\n        \"shell-command-dispatch\",\n        \"shell-command-plan\"\n      ]\n    },\n    {\n      \"id\": \"nfs-network-file-sharing\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Shared files: export policy, clients and safe handover\",\n      \"summary\": \"Restrict a reference share, diagnose publication permissions, move a client safely and complete a two-share handover while preserving neighboring work. Supplied virtual NFS only.\",\n      \"prerequisites\": [\n        \"persistent-mounts\",\n        \"linux-file-access\"\n      ],\n      \"labs\": [\n        \"lpic2-nfs-reference\",\n        \"lpic2-nfs-publication\",\n        \"lpic2-nfs-handover\",\n        \"lpic2-nfs-capstone\"\n      ]\n    },\n    {\n      \"id\": \"ccna-lacp\",\n      \"track\": \"CCNA\",\n      \"title\": \"LACP: form, diagnose and safely migrate a bundle\",\n      \"summary\": \"Supplied Layer 2 members, VLAN admission and independent cable-loss checks.\",\n      \"prerequisites\": [\n        \"vlan-data-foundations\"\n      ],\n      \"labs\": [\n        \"ccna-lacp-initiation\",\n        \"ccna-lacp-member-service\",\n        \"ccna-lacp-resilient-handover\"\n      ]\n    },\n    {\n      \"id\": \"shell-optional-inputs\",\n      \"track\": \"Bash/Shell\",\n      \"title\": \"Optional inputs and intentional empty values\",\n      \"summary\": \"Choose defaults deliberately, validate an optional report request and repair a configuration handover.\",\n      \"prerequisites\": [\n        \"shell-scope\",\n        \"shell-case-dispatch\"\n      ],\n      \"labs\": [\n        \"shell-optional-policy\",\n        \"shell-optional-report\",\n        \"shell-optional-handover\"\n      ]\n    },\n    {\n      \"id\": \"linux-cron-foundations\",\n      \"track\": \"LPIC-1\",\n      \"title\": \"Recurring jobs: reports, access and safe handover\",\n      \"summary\": \"Schedule and troubleshoot reports, manage table access separately from installed jobs, and complete a careful user/system handover using a supplied virtual UTC clock. One-off jobs, timers and locking are outside this unit.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\",\n        \"shell-foundations\",\n        \"local-account-lifecycle\"\n      ],\n      \"labs\": [\n        \"lpic1-cron-weekday-report\",\n        \"lpic1-cron-environment-output\",\n        \"lpic1-cron-access-retirement\",\n        \"lpic1-cron-calendar-handover\"\n      ]\n    },\n    {\n      \"id\": \"backup-and-recovery\",\n      \"track\": \"LPIC-2\",\n      \"title\": \"Backups: inspect, recover and preserve history\",\n      \"summary\": \"Inspect virtual archives, recover selected files and complete chains, branch snapshots without rewriting older evidence, and hand over a verified recovery. GNU-tar-style subset; no host archives, compression or scheduling.\",\n      \"prerequisites\": [\n        \"linux-file-foundations\"\n      ],\n      \"labs\": [\n        \"lpic2-backup-selective-recovery\",\n        \"lpic2-backup-incremental-chain\",\n        \"lpic2-backup-snapshot-branch\",\n        \"lpic2-backup-recovery-handover\"\n      ]\n    }\n  ]\n}\n",
+  "private_registration": {
+    "status": "PRIVATE source171/44 only; no runtime pass/native acceptance/delivered credit",
+    "registration_fixture_sha256": "573d8d85745ef923b515673ebce518107dbdc19e6558906aae13f6b9f3b4519c",
+    "required_evaluator": 12,
+    "frozen_content_draft_sha256": "6a645373d5d7d0c339f89330ac175f1249c17aba9ce1dd9104af1bcd392ac955"
+  }
+}

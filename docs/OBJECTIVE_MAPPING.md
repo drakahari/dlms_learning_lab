@@ -305,3 +305,14 @@ checked2026-10-28, retaining all original1240 fingerprint/URL/position fields
 and29 future rows. Final Main full/native/installed gates and exact evidence
 identities remain separately pending in CATALOG168_MILESTONE.md. Earlier
 M179 draft/source observations and CATALOG164 native history remain historical.
+
+
+At source Main171/44, only already-Partial LPIC-1v5.0 105.2 parent andK3 gain
+additional explicit numeric3 IDs and state/behavior evidence.36graded plus23
+supplemental cases cover validation before arithmetic, malformed-record recovery
+and full preview/publication outcomes. The existing168Partial/1Supporting/1071Open
+reference totals and all136incomplete parents stay unchanged; no child/tool or
+future CCNA credit is inherited. Official LPI page/version5.0/105.2 rechecked
+2026-10-29; original2026-10-22 source fingerprints unchanged. Private full2337/
+all24history and native101 pass; final Main2337/static/coverage pass; a new171
+candidate remains pending. See SHELL_NUMERIC_VALIDATION_LESSONS.md and CATALOG171_MILESTONE.md.

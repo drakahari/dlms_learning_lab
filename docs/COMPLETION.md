@@ -6,7 +6,7 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | --- | --- | --- |
 | C1 | Current official objective versions, dates and source links verified; announced future blueprints separate | Objective snapshot2026-10-22; official version boundaries rechecked2026-10-27; finer authoring references record their own dates; see CURRICULUM.md |
 | C2 | Every active objective and listed subobjective maps to practical coverage, supporting teaching, or a specific justified fidelity limitation; configure/troubleshoot requirements need actual modeled practice | Open; 165-row planning index plus1240-reference granular evidence/gap ledger; most required behavior remains absent, see OBJECTIVE_MAPPING.md |
-| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;168 source assignments/43 units (48CCNA/36LPIC-1/32LPIC-2/52Bash). The four backup additions retain the accepted full-task/separate-practice structure; source/content, final full-regression, native and candidate receipts are separated in CATALOG168_MILESTONE.md. Earlier154 installed evidence remains historical. Expanded curriculum, all136 full parent objectives and novice acceptance remain incomplete |
+| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;171 source-integrated assignments/44units (48CCNA/36LPIC-1/32LPIC-2/55Bash). New numeric3 has private full/native and final Main full/static/coverage acceptance in CATALOG171_MILESTONE.md. Available168 installed candidate keeps its own identity. All136 full parent objectives and novice acceptance remain incomplete |
 | S1 | Implement required networking/Linux/shell capabilities before dependent content; typed state and multiple deterministic behavior cases, alternate solutions and plausible negative tests | Open; subset and capability gaps remain |
 | S2 | Learner input stays inside bounded in-process simulation; test resource/path/malformed-input limits and responsive Stop; controlled disposable reference comparisons only | Existing boundary implemented; independent review and extension regression work open |
 | G1 | Examples cannot award assignment credit; edits invalidate success; objective expansion never fabricates learner answers/mastery | Implemented baseline; audit all extensions |
@@ -19,13 +19,13 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | R2 | Actual OS clean install/reopen/upgrade/uninstall acceptance, not just CI/cross-build | Fedora scoped installed-candidate lifecycle/flows verified; full-product acceptance remains open; Windows/macOS desktop environments unavailable here |
 | R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | MIT approved 2026-10-22; target notice/source bundle implemented; macOS dispatch notice, signing decisions and platform acceptance remain open |
 
-The current source batch adds four backup/recovery assignments after the ten
-LACP/optional-input/recurring-job additions. The43 units are12CCNA,9LPIC-1,
-8LPIC-2 and14Bash. Source, behavior, final full-regression, real native and
-packaged acceptance are separate gates in [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md).
-The earlier154-lab Fedora candidate and passing test counts do not close C2,
-C3, U2 or platform requirements. All136 current parent objectives remain
-incomplete:97 Open and39 narrowly Partial. Windows/macOS runtime, physical
-assistive-device and novice acceptance remain pending until actually tested.
+The current source batch adds three numeric-validation/recovery/publication tasks
+following the four backup/recovery assignments.44units:12CCNA,9LPIC-1,8LPIC-2 and
+15Bash. Main full2337/all24history/static/coverage and private native101 pass;
+CATALOG171_MILESTONE.md separates each identity and remaining packaging scope.
+Available Fedora168/c683 keeps its actual prior acceptance. Tests/catalog totals
+do not close C2,C3,U2 or platform requirements: all136current parent objectives
+remain incomplete(97Open/39Partial). Windows/macOS runtime, physical assistive
+technology and novice acceptance remain pending.
 
 A model can teach evidence interpretation without performing physical, kernel or cryptographic operations, but its exact limits must accompany coverage. A limitation is not a substitute for implementing a difficult supported configuration task. No incomplete objective becomes “covered” merely because a related command is recognized. No public release or deployment is authorized.

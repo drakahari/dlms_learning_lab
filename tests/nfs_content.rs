@@ -202,8 +202,10 @@ fn preserve(a: &Attempt, s: &pack::Scenario, requirements: &[work::Requirement])
 #[test]
 fn prerequisites_guides_and_six_or_fewer_concepts_precede_real_native_actions() {
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 168);
-    assert_eq!(course::bundled(&normal).unwrap().len(), 43);
+    assert_eq!(normal.len(), 171);
+    let units = course::bundled(&normal).unwrap();
+    assert_eq!(units.len(), 44);
+    assert_eq!(units.last().unwrap().id, "shell-numeric-validation");
     assert!(normal[..147].iter().all(|s| !IDS.contains(&s.id.as_str())));
     let all = labs();
     assert_eq!(all.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), IDS);
@@ -670,7 +672,7 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
  {
     let all = labs();
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 168);
+    assert_eq!(catalog.len(), 171);
     exact(&catalog[150..154], &all);
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut p = progress::decode(original, &catalog).unwrap();

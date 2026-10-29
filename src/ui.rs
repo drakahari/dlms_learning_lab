@@ -610,6 +610,11 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
+            } else if let Some(stage) = Self::numeric_validation_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) = Self::optional_inputs_stage(
                 smoke,
                 std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),

@@ -2,10 +2,12 @@
 
 Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **168 authored assignments
-/43 units:48CCNA,36LPIC-1,32LPIC-2,52Bash/Shell**. The latest four backup/recovery assignments follow
-L2 LACP, deliberate optional shell inputs and bounded recurring cron practice.
-Units by track are12CCNA,9LPIC-1,8LPIC-2 and14Bash. Generated
+evidence ledger, not complete exam preparation. Main has **171 source-integrated assignments
+/44 units:48CCNA,36LPIC-1,32LPIC-2,55Bash/Shell**. Three numeric-validation,
+malformed-record and safe-publication assignments follow the backup unit. Private
+full/native and final Main full/static/coverage gates passed; a new171 candidate
+is pending.
+Units by track are12CCNA,9LPIC-1,8LPIC-2 and15Bash. Generated
 numerical practice and developer-only synthetic entries are excluded. All136
 current parent objectives remain incomplete (97 Open,39 Partial).
 

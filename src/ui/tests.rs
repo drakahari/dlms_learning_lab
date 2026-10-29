@@ -23,6 +23,7 @@ mod nat_native;
 mod nat_teaching;
 mod nfs_lessons_native;
 pub(in crate::ui) mod nfs_workspace;
+mod numeric_validation;
 mod optional_inputs;
 mod ospf;
 mod safe_automation_lessons;
