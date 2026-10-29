@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import os
+import signal
 from pathlib import Path
 import subprocess
 import sys
@@ -170,6 +171,76 @@ class BuildSafety(unittest.TestCase):
                 with self.assertRaises(KeyboardInterrupt):
                     session.run([sys.executable, '-c', 'import time; time.sleep(20)'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             session.pressure.clear()
+
+    @unittest.skipUnless(os.name == 'posix', 'POSIX wrapper termination')
+    def test_termination_handlers_restore_previous_handlers_on_success_and_unwind(self):
+        before = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGHUP)}
+        with safety.termination_cleanup():
+            self.assertTrue(all(callable(signal.getsignal(sig)) for sig in before))
+        self.assertEqual({sig: signal.getsignal(sig) for sig in before}, before)
+        for received in before:
+            with self.assertRaises(SystemExit) as caught:
+                with safety.termination_cleanup():
+                    signal.getsignal(received)(received, None)
+            self.assertEqual(caught.exception.code, 128 + received)
+            self.assertEqual({sig: signal.getsignal(sig) for sig in before}, before)
+
+    @unittest.skipUnless(os.name == 'posix', 'POSIX owned process group termination')
+    def test_terminated_wrapper_reaps_owned_child_before_releasing_lock(self):
+        pidfile = self.fixture / 'terminated-child.pid'
+        child_code = "import os,time;from pathlib import Path;Path(%r).write_text(str(os.getpid()));time.sleep(20)" % str(pidfile)
+        wrapper = "import sys;sys.path.insert(0,%r);from build_safety import workflow;\nwith workflow(%r,'unit-terminated') as s:s.run([sys.executable,'-c',%r])" % (str(ROOT / 'tools'), str(self.fixture), child_code)
+        process = subprocess.Popen([sys.executable, '-c', wrapper], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        pid = None
+        try:
+            deadline = time.monotonic() + 5
+            while not pidfile.exists() and time.monotonic() < deadline:
+                time.sleep(.01)
+            self.assertTrue(pidfile.exists())
+            pid = int(pidfile.read_text())
+            process.terminate()
+            self.assertEqual(process.wait(timeout=8), 128 + signal.SIGTERM)
+            child = Path('/proc') / str(pid)
+            if child.exists():
+                self.assertEqual((child / 'stat').read_text().rsplit(')', 1)[1].split()[0], 'Z')
+            self.assertFalse((self.fixture / '.build-artifacts/active-command.json').exists())
+            self.assertFalse((self.fixture / '.build-artifacts/unfinished-child.json').exists())
+            with safety.workflow(self.fixture, 'unit-after-terminated'):
+                pass
+        finally:
+            if process.poll() is None:
+                process.kill(); process.wait(timeout=2)
+            if pid is not None:
+                try:
+                    os.killpg(pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+
+    @unittest.skipUnless(os.name == 'posix', 'POSIX launch-window termination')
+    def test_termination_during_popen_return_defers_until_owned_child_is_known(self):
+        original_popen = subprocess.Popen
+        children = []
+
+        def launch_then_terminate(*args, **kwargs):
+            child = original_popen(*args, **kwargs)
+            children.append(child)
+            signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)
+            self.assertTrue(safety._ACTIVE.launching)
+            self.assertEqual(safety._ACTIVE.termination_signal, signal.SIGTERM)
+            return child
+
+        with self.assertRaises(SystemExit) as caught:
+            with safety.workflow(self.fixture, 'unit-launch-terminated') as session:
+                with patch.object(safety.subprocess, 'Popen', side_effect=launch_then_terminate):
+                    session.run([sys.executable, '-c', 'import time; time.sleep(20)'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.assertEqual(caught.exception.code, 128 + signal.SIGTERM)
+        self.assertEqual(len(children), 1)
+        self.assertIsNotNone(children[0].poll())
+        self.assertFalse(safety.group_alive(children[0]))
+        self.assertFalse((self.fixture / '.build-artifacts/active-command.json').exists())
+        self.assertFalse((self.fixture / '.build-artifacts/unfinished-child.json').exists())
+        with safety.workflow(self.fixture, 'unit-after-launch-terminated'):
+            pass
 
     def test_cargo_flags_cannot_override_validated_target_jobs_or_config(self):
         import dev

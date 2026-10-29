@@ -141,6 +141,8 @@ class Session:
         self.pressure = threading.Event()
         self.monitor_error = None
         self.lock = None
+        self.launching = False
+        self.termination_signal = None
 
     def checkpoint(self):
         if self.monitor_error is not None:
@@ -174,7 +176,15 @@ class Session:
         child = None
         try:
             inherited = {'pass_fds': (self.lock.fileno(),)} if os.name == 'posix' else {}
-            child = subprocess.Popen(args, start_new_session=os.name == 'posix', **inherited, **kwargs)
+            self.launching = True
+            try:
+                child = subprocess.Popen(args, start_new_session=os.name == 'posix', **inherited, **kwargs)
+            finally:
+                self.launching = False
+            if self.termination_signal is not None:
+                # A termination during Popen must wait until the returned child
+                # is assigned, so the finally block can reap that exact group.
+                signal.raise_signal(self.termination_signal)
             active.write_text(json.dumps({'wrapper_pid': os.getpid(), 'child_pid': child.pid, 'state': 'running'}) + '\n')
             while child.poll() is None:
                 if self.pressure.wait(.25):
@@ -200,6 +210,37 @@ class Session:
                     # active-command.json remains even if writing the extra report fails.
             if not cleaned:
                 raise RuntimeError('Owned command could not be reaped; further work blocked by command marker')
+
+
+@contextmanager
+def termination_cleanup():
+    """Unwind the runner's own cleanup on a catchable wrapper termination.
+
+    SIGKILL remains uncatchable: the inherited lock and marker still fail closed.
+    Handlers are local to this CLI workflow and restored before returning.
+    """
+    if os.name != 'posix' or threading.current_thread() is not threading.main_thread():
+        yield
+        return
+    previous = {sig: signal.getsignal(sig) for sig in (signal.SIGTERM, signal.SIGHUP)}
+
+    def interrupted(signum, _frame):
+        if _ACTIVE is not None and _ACTIVE.launching:
+            if _ACTIVE.termination_signal is None:
+                _ACTIVE.termination_signal = signum
+            return
+        # Repeated termination must not interrupt bounded child/group teardown.
+        for sig in previous:
+            signal.signal(sig, signal.SIG_IGN)
+        raise SystemExit(128 + signum)
+
+    try:
+        for sig in previous:
+            signal.signal(sig, interrupted)
+        yield
+    finally:
+        for sig, handler in previous.items():
+            signal.signal(sig, handler)
 
 
 @contextmanager
@@ -245,19 +286,20 @@ def workflow(cwd, label='development'):
         thread = threading.Thread(target=session.observe, daemon=True)
         thread.start()
         _ACTIVE = session
-        try:
-            yield session
-            session.checkpoint()
-        finally:
-            _ACTIVE = None
-            session.stop.set()
-            thread.join()
-            tempfile.tempdir = prior_temp
-            for key, value in saved.items():
-                if value is None:
-                    os.environ.pop(key, None)
-                else:
-                    os.environ[key] = value
+        with termination_cleanup():
+            try:
+                yield session
+                session.checkpoint()
+            finally:
+                _ACTIVE = None
+                session.stop.set()
+                thread.join()
+                tempfile.tempdir = prior_temp
+                for key, value in saved.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
     finally:
         lock.close()
 

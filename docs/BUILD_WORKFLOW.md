@@ -173,6 +173,13 @@ a running job. On POSIX the child also inherits the shared lock descriptor.
 Normal/error/KeyboardInterrupt cleanup is bounded and targets its own process
 group, including descendants. Sampler failures fail closed.
 
+Catchable POSIX SIGTERM/SIGHUP now unwind that same owned-child cleanup. A signal
+during Popen is deferred until the returned child is known; handlers are restored
+after the CLI workflow. SIGKILL remains uncatchable, so inherited-lock/marker
+recovery still requires exact process inspection. Long native/test sessions use
+an allocated tool terminal and regular handle polling; neither that nor a partial
+capture proves completion. Preserve interrupted logs and verify the actual exit.
+
 Fake-pressure unit tests exercise the refusal/cancellation path without creating
 real memory pressure. Gate failures retain their evidence and require reassessing
 headroom before retrying, not changing swap, GPU allocation or OOM behavior.
