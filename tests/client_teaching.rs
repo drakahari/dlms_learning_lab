@@ -538,7 +538,7 @@ fn backup_recheck_preserves_genuine_six_seven_and_current_eight_records_without_
         "incomplete"
     );
     let path = dir.path().join("profile.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let before = std::fs::read(&path).unwrap();
     let restored = dlms_learning_lab::backup::restore(&path, &candidate, &labs).unwrap();
     assert_eq!(

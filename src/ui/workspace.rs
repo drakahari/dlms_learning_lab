@@ -147,6 +147,10 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::Lvm { .. }) {
+            self.lvm_page(ui, i);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::OneOff { .. }) {
             self.one_off_page(ui, i);
             Self::workspace_footer(ui);

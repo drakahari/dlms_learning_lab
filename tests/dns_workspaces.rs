@@ -402,7 +402,7 @@ fn progress_roundtrip_retains_broken_drafts_examples_and_legacy_attempts_with_ho
     }
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let stored: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
     assert_eq!(serde_json::to_vec(&stored).unwrap(), bytes);
     let receipts = stored.migration_receipts.as_ref().unwrap();
@@ -442,7 +442,7 @@ fn progress_roundtrip_retains_broken_drafts_examples_and_legacy_attempts_with_ho
     let malformed_bytes = serde_json::to_vec(&malformed).unwrap();
     let restored = progress::decode(&malformed_bytes, &labs).unwrap();
     assert_eq!(serde_json::to_vec(&restored).unwrap(), malformed_bytes);
-    progress::save(&dir.path().join("malformed.json"), &restored).unwrap();
+    progress::save_with_catalog(&dir.path().join("malformed.json"), &restored, &labs).unwrap();
     let mut reset = progress::decode(&bytes, &labs).unwrap();
     reset.attempts.insert(fixture.id.clone(), attempt(&fixture));
     assert_eq!(reset.attempts.len(), p.attempts.len());

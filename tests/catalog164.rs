@@ -72,9 +72,18 @@ fn every_reviewed160_definition_and_order_precedes_the_exact_four_authored_cron_
     let authored: pack::Pack = serde_json::from_slice(raw).unwrap();
     assert_eq!(value(&all[160..164]), value(&authored.scenarios));
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

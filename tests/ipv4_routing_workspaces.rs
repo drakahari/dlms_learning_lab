@@ -357,12 +357,12 @@ fn save_resume_preserves_old_attempts_and_unfinished_drafts_without_stale_succes
     let before = serde_json::to_value(&p).unwrap();
     let folder = tempfile::tempdir().unwrap();
     let path = folder.path().join("progress.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let mut loaded = progress::load(&path, &labs).unwrap();
     assert_eq!(serde_json::to_value(&loaded).unwrap(), before);
     assert!(!progress::current_solved(&loaded.attempts[&lab.id], &lab));
     loaded.attempts.insert(lab.id.clone(), attempt(&lab));
-    progress::save(&path, &loaded).unwrap();
+    progress::save_with_catalog(&path, &loaded, &labs).unwrap();
     let after = serde_json::to_value(progress::load(&path, &labs).unwrap()).unwrap();
     for s in labs.iter().take(labs.len() - 1) {
         assert_eq!(after["attempts"][&s.id], before["attempts"][&s.id]);

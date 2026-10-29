@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main182 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main186 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -12,10 +12,10 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 53 | 14 | 65 | 46 | 0 |
 | LPIC-1 | 40 | 10 | 501 | 96 | 1 |
-| LPIC-2 | 32 | 8 | 498 | 33 | 0 |
+| LPIC-2 | 36 | 9 | 492 | 39 | 0 |
 | Bash/Shell | 57 | 16 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (94 Open,42 Partial).
+All136 current parent objectives remain incomplete (93 Open,43 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -164,7 +164,7 @@ configuration or troubleshooting.
 | 203.3 | Open | Tune filesystem behavior for a workload | filesystem option/automount model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 204.1 | Open | Replace a failed mirror member | RAID degradation/rebuild model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 204.2 | Open | Diagnose a storage path mismatch | iSCSI/device mapping model. Required model not implemented; cannot claim faithful command or state behavior. |
-| 204.3 | Open | Extend a volume while preserving data | LVM extent allocator. Required model not implemented; cannot claim faithful command or state behavior. |
+| 204.3 | Partial practice · lpic2-lvm-free-space;lpic2-lvm-add-pv;lpic2-lvm-filesystem-gap;lpic2-lvm-handover | Extend a volume while preserving data | Supplied blank-PV initialization, existing VG/LV growth and separate modeled filesystem sizing only. Creation/removal/reduction of VGs/LVs, snapshots, activation, mount integration, mapper aliases, lvm.conf and real device/filesystem conformance remain absent. |
 | 205.1 | Open | Restore dual-stack server connectivity | persistent multi-interface IP model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 205.2 | Open | Repair a bonded VLAN uplink | bond/VLAN/bridge state machine. Required model not implemented; cannot claim faithful command or state behavior. |
 | 205.3 | Open | Trace intermittent network failures | packet counters and route diagnostics. Required model not implemented; cannot claim faithful command or state behavior. |
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These48 units, and only their182 registered authored scenarios, count as
+These49 units, and only their186 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -256,6 +256,8 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 | LPIC-1 | One-off jobs: capture, inspect and hand over (`linux-one-off-jobs`) | `lpic1-at-report`, `lpic1-at-capture-repair`, `lpic1-at-owner-queue`, `lpic1-at-handover` |
 | Bash/Shell | Loop control and local recovery (`shell-loop-recovery`) | `shell-loop-intake`, `shell-loop-fallback` |
 
+| LPIC-2 | Existing-volume growth and careful handovers (`lvm-volume-growth`) | `lpic2-lvm-free-space`, `lpic2-lvm-add-pv`, `lpic2-lvm-filesystem-gap`, `lpic2-lvm-handover` |
+
 ## Bash/Shell remaining path
 
 The57 source-integrated scripts span16 units. The new numeric unit has passed
@@ -293,26 +295,25 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. The normal182/evaluator13 milestone passes inclusive2,683 Rust tests,
-   all-target Clippy,348 Python checks and actual Fedora82-capture native flows.
-   Preserve its original180 definitions,55 scripts/420 cases/55 examples and all
-   genuine evaluator9–12 evidence. Installed171 candidate acceptance is separate.
-2. Preserve the genuine evaluator13 baseline observed and independently sealed
-   in SHELL_EVALUATOR13_BASELINE.md. Before any14 advance, add actual current-versus-
-   genuine13 regression tests; a sealed baseline alone is not migration acceptance.
-3. Integrate the reviewed four-task LVM unit after accepted normal182 and its
-   sealed baseline, then the four-task NTP unit, with source-aware progress,
-   runtime/alternative/negative checks and actual native flows. Their pure models
-   are tested; source-only units currently earn no catalog or objective credit.
-4. Validate controlled ERE reference comparisons and cooperative shell integration
-   before authoring meaningful regex/text-processing projects. Keep unsupported
-   syntax honest and all host reference work restricted to fixed disposable data.
-5. Complete the fifth-backup directory-selection ArtifactSet/content/progress/
-   normal-native gates against accepted shared controls. Test the independently
-   reviewed HSRP and inode/link foundations before dependent content.
+1. Preserve accepted186/evaluator13: inclusive2,715 Rust tests, all-target Clippy,
+   396 Python checks and actual68-capture Fedora storage flows. All182 predecessor
+   definitions/48 raw units and57 scripts/442 cases/57 examples remain exact.
+   Installed171 candidate acceptance is separate.
+2. Preserve the genuine evaluator13 baseline in SHELL_EVALUATOR13_BASELINE.md.
+   A future14 advance requires actual current-versus-genuine13 regression tests;
+   a sealed baseline alone is not migration acceptance.
+3. Test the reviewed HSRP and inode/link pure foundations before dependent content.
+   Integrate the reviewed four-task NTP unit with source-aware progress, runtime
+   alternatives/negatives and actual native flows. Source proposals earn no credit.
+4. Validate cooperative ERE shell integration, actual fixed24 utility comparisons
+   and genuine history before accepting its three reviewed text-evidence projects.
+   Keep all host reference work restricted to fixed disposable data.
+5. Complete reviewed HSRP/links native/source/persistence layers, then author and
+   validate meaningful content. The fifth-backup directory-selection proposal also
+   needs its ArtifactSet/content/progress/normal-native gates.
 6. Continue every remaining network/Linux/scripting assignment and capability in
-   the granular ledger. Current reference fingerprints and future CCNA separation
-   remain as recorded; no arbitrary catalog quota or routine approval gate.
+   the granular ledger. Current source fingerprints/future CCNA separation remain;
+   no arbitrary catalog quota, routine approval gate or stop after this milestone.
 
 Full curriculum acceptance stays separate from Windows/macOS desktop,
 physical-device/screen-reader and novice acceptance. No release publication.

@@ -1325,7 +1325,7 @@ fn new_draft_and_learning_are_refused_on_every_registered_kind_and_valid_nfs() {
             old_prepared(s)
         };
         // All admitted old kinds are controls, including incomplete work; state grading is never manufactured.
-        progress::save(&path, &profile(s, good.clone())).unwrap();
+        progress::save_with_catalog(&path, &profile(s, good.clone()), &all).unwrap();
         let original = std::fs::read(&path).unwrap();
         assert!(progress::decode(&original, &all).is_ok());
         for (d, l) in [(true, false), (false, true), (true, true)] {
@@ -1340,7 +1340,7 @@ fn new_draft_and_learning_are_refused_on_every_registered_kind_and_valid_nfs() {
             assert!(w.valid());
             let before = serde_json::to_value(&bad).unwrap();
             assert!(!progress::current_solved(&bad, s));
-            assert!(progress::save(&path, &profile(s, bad.clone())).is_err());
+            assert!(progress::save_with_catalog(&path, &profile(s, bad.clone()), &all).is_err());
             assert_eq!(std::fs::read(&path).unwrap(), original);
             assert!(
                 progress::decode(&serde_json::to_vec(&profile(s, bad.clone())).unwrap(), &all)

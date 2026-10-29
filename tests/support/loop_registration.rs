@@ -1,5 +1,7 @@
 //! Closed loop48→47 and182→180 predecessor checks for tests/developer QA only.
 #![allow(dead_code)] // Each integration binary imports a different helper subset.
+#[path = "lvm_registration.rs"]
+pub mod lvm_registration;
 use dlms_learning_lab::{
     course::Unit,
     engine::{Goal, State},
@@ -15,6 +17,8 @@ fn recipe() -> &'static Value {
     })
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_lvm = lvm_registration::prefix_units(raw)?;
+    let raw = without_lvm.as_deref().unwrap_or(raw);
     let r = recipe();
     let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
     if raw.len() as u64 != r["after_units48_bytes"].as_u64().ok_or("48bytes")? {
@@ -42,7 +46,9 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
-    if raw == include_bytes!("../../scenarios/units-v1.json") {
+    let without_lvm = lvm_registration::prefix_units(raw)?;
+    let raw = without_lvm.as_deref().unwrap_or(raw);
+    if raw == include_bytes!("../fixtures/lvm-units-before182.json") {
         before_units(raw).map(Some)
     } else {
         Ok(None)
@@ -57,6 +63,7 @@ fn canonical() -> &'static Vec<Scenario> {
     })
 }
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    let all = lvm_registration::prefix_scenarios(all).unwrap_or(all);
     assert_eq!(all.len(), 182);
     let old = recipe()["before_ids"].as_array().unwrap();
     assert_eq!(old.len(), 180);
@@ -75,6 +82,7 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..180]
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = lvm_registration::prefix_typed_units(all).unwrap_or(all);
     static UNITS: OnceLock<Vec<Unit>> = OnceLock::new();
     let expected = UNITS.get_or_init(|| {
         let r = recipe();
@@ -108,6 +116,7 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..47]
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = lvm_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 48);
     let r = recipe();
     assert_eq!(&all[..47], r["before_units47"]["units"].as_array().unwrap());

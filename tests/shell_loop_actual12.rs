@@ -225,7 +225,7 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
 #[ignore = "Requires genuine12 sealed profile; explicit guarded current13 migration"]
 fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 182);
+    assert_eq!(all.len(), 186);
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();
@@ -253,10 +253,25 @@ fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() 
         assert!(!old.favorites.contains(&s.id));
         assert!(!current.favorites.contains(&s.id));
     }
+    for id in [
+        "lpic2-lvm-free-space",
+        "lpic2-lvm-add-pv",
+        "lpic2-lvm-filesystem-gap",
+        "lpic2-lvm-handover",
+    ] {
+        assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
+        assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::Lvm { .. }));
+        assert!(!progress::current_solved(
+            &progress::Attempt::new(source, 1),
+            source
+        ));
+    }
     assert_eq!(current.attempts.len(), 145);
     assert_eq!(v(&current), v(&old));
     assert_eq!(v(&current.migration_receipts), v(&old.migration_receipts));
-    for (s, id) in all[180..]
+    for (s, id) in all[180..182]
         .iter()
         .zip(["shell-loop-intake", "shell-loop-fallback"])
     {

@@ -225,12 +225,19 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 182);
+    assert_eq!(p.attempts.len(), 186);
     assert_eq!(
         p.attempts
             .keys()
             .filter(|id| !one_off_registration::IDS.contains(&id.as_str())
-                && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str()))
+                && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str())
+                && ![
+                    "lpic2-lvm-free-space",
+                    "lpic2-lvm-add-pv",
+                    "lpic2-lvm-filesystem-gap",
+                    "lpic2-lvm-handover"
+                ]
+                .contains(&id.as_str()))
             .count(),
         176
     );
@@ -260,7 +267,7 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("synthetic.json");
     std::fs::write(&path, raw).unwrap();
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     assert_eq!(
         std::fs::read(path.with_extension(format!(
             "before-shell-v{}.json",

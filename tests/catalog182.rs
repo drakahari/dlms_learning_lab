@@ -73,9 +73,18 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
         [53, 40, 32, 55]
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == t)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         all.iter()
@@ -94,7 +103,7 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
         442
     );
     assert_eq!(all.iter().filter(|s| s.teaching.is_some()).count(), 57);
-    for s in &all[180..] {
+    for s in &all[180..182] {
         assert_eq!(s.version, 1);
         assert_eq!(s.unit, "shell-loop-recovery");
         assert!(
@@ -109,12 +118,16 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
 fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrecipes() {
     let all = pack::bundled().unwrap();
     let old = registration::before_scenarios(&all);
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current_raw = include_bytes!("../scenarios/units-v1.json");
+    let checked48 = registration::lvm_registration::before_units(current_raw).unwrap();
+    let raw = checked48.as_slice();
     let before = registration::before_units(raw).unwrap();
     let r = recipe();
     assert_eq!(digest::hash(raw), r["after_units48_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units47_sha256"]);
-    let units = course::bundled(&all).unwrap();
+    let current_units = course::bundled(&all).unwrap();
+    assert_eq!(current_units.len(), 49);
+    let units = registration::lvm_registration::before_typed_units(&current_units);
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), old).unwrap();
     assert_eq!((units.len(), old_units.len()), (48, 47));
     assert_eq!(v(&units[..47]), v(&old_units));

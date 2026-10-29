@@ -936,7 +936,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 }
                 simulation.reconfigure(configuration).unwrap();
             }
-            State::OneOff { .. }
+            State::Lvm { .. }
+            | State::OneOff { .. }
             | State::FileBackup { .. }
             | State::Cron { .. }
             | State::Nfs { .. }
@@ -7175,3 +7176,6 @@ fn scripting_capture_reveals_a_tall_introduction_before_clicking_its_example_act
 mod rpm_packages;
 
 mod rpm_lessons_native;
+
+mod lvm_growth;
+mod lvm_lessons_native;

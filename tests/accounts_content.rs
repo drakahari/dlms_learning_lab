@@ -643,6 +643,26 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
             assert!(a.workspace.as_ref().unwrap().command.is_empty());
             assert!(one::context(&a, s).is_ok());
             assert!(!progress::current_solved(&a, s));
+        } else if let (State::Lvm { simulation }, Goal::Lvm { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            simulation
+                .set_command(
+                    definition,
+                    format!("Retained LVM assignment draft for {}", s.id),
+                    false,
+                )
+                .unwrap();
+            simulation
+                .set_command(
+                    definition,
+                    "Retained independent LVM example draft".into(),
+                    true,
+                )
+                .unwrap();
+            dlms_learning_lab::lvm_workspace::context(&a, s).unwrap();
+            assert!(a.workspace.as_ref().unwrap().command.is_empty());
+            assert!(!progress::current_solved(&a, s));
         } else if matches!(a.state, State::PhysicalLink { .. }) {
             use dlms_learning_lab::physical_link_workspace as physical;
             physical::prepare_attempt(&mut a, s, true).unwrap();
@@ -697,7 +717,7 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
     }
     let dir = tempfile::tempdir().unwrap();
     let profile = dir.path().join("progress.json");
-    progress::save(&profile, &p).unwrap();
+    progress::save_with_catalog(&profile, &p, &all).unwrap();
     let exact = std::fs::read(&profile).unwrap();
     let loaded = progress::load(&profile, &all).unwrap();
     assert_eq!(std::fs::read(&profile).unwrap(), exact);
@@ -740,7 +760,7 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
     again
         .attempts
         .insert(selected.id.clone(), attempt(selected));
-    progress::save(&destination, &again).unwrap();
+    progress::save_with_catalog(&destination, &again, &all).unwrap();
     let again = progress::load(&destination, &all).unwrap();
     for (id, a) in &again.attempts {
         if id != &selected.id {

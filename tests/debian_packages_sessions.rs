@@ -526,7 +526,7 @@ fn both_sessions_and_full_attempts_survive_actual_backup_restore_before_selected
     p.favorites.insert(s.id.clone());
     all.push(s.clone());
     let path = dir.path().join("progress.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     let loaded = progress::load(&path, &all).unwrap();
     assert_eq!(
         serde_json::to_value(&loaded.attempts[&s.id]).unwrap(),

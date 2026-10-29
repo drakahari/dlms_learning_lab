@@ -468,7 +468,7 @@ fn all_bundled_attempts_current_runs_real6_history_and_malformed_acl_drafts_surv
     let path = dir.path().join("progress.json");
     let raw = encoded(&p);
     std::fs::write(&path, &raw).unwrap();
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     assert_eq!(
         std::fs::read(
             path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))

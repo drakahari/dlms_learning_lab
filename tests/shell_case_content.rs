@@ -108,9 +108,18 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
     let all = catalog();
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

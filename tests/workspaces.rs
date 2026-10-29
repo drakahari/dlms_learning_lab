@@ -154,6 +154,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     let mut physical_drafts = 0;
     let mut private_drafts = 0;
     let mut one_off_drafts = 0;
+    let mut lvm_drafts = 0;
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
@@ -197,6 +198,20 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
             )
             .unwrap();
             one_off_drafts += 1;
+            p.attempts.insert(s.id.clone(), a);
+            continue;
+        }
+        if let (State::Lvm { simulation }, engine::Goal::Lvm { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            simulation
+                .set_command(definition, "unfinished LVM assignment |".into(), false)
+                .unwrap();
+            simulation
+                .set_command(definition, "separate unfinished LVM example |".into(), true)
+                .unwrap();
+            dlms_learning_lab::lvm_workspace::context(&a, s).unwrap();
+            lvm_drafts += 1;
             p.attempts.insert(s.id.clone(), a);
             continue;
         }
@@ -263,6 +278,8 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     assert_eq!(physical_drafts, 4);
     assert_eq!(private_drafts, 1);
     assert_eq!(one_off_drafts, 4);
+    assert_eq!(lvm_drafts, 4);
+    assert_eq!(p.attempts.len(), 186);
     assert_eq!(
         labs[176..180]
             .iter()
@@ -287,13 +304,51 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         ],
         "Only the three new numeric drafts extend the prior164 non-backup drafts"
     );
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let q = progress::load(&path, &labs).unwrap();
     assert_eq!(
         serde_json::to_value(&p).unwrap(),
         serde_json::to_value(&q).unwrap()
     );
     let valid_raw = std::fs::read(&path).unwrap();
+    for source in labs
+        .iter()
+        .filter(|s| matches!(s.initial, State::Lvm { .. }))
+    {
+        let a = &q.attempts[&source.id];
+        let State::Lvm { simulation } = &a.state else {
+            panic!()
+        };
+        assert_eq!(simulation.command, "unfinished LVM assignment |");
+        assert_eq!(
+            simulation.example_command,
+            "separate unfinished LVM example |"
+        );
+        assert_eq!(simulation.current, simulation.initial);
+        assert_eq!(simulation.example, simulation.example_initial);
+        assert!(!progress::current_solved(a, source));
+        for field in 0..4 {
+            let mut foreign = progress::decode(&valid_raw, &labs).unwrap();
+            let w = foreign
+                .attempts
+                .get_mut(&source.id)
+                .unwrap()
+                .workspace
+                .as_mut()
+                .unwrap();
+            match field {
+                0 => w.service_port = Some("unfinished".into()),
+                1 => w.dns_address = Some("192.0.".into()),
+                2 => w.dns_serial = Some("draft".into()),
+                _ => w.mount_device = Some("/dev/vd".into()),
+            }
+            let before = serde_json::to_value(&foreign).unwrap();
+            assert!(progress::save_with_catalog(&path, &foreign, &labs).is_err());
+            assert_eq!(std::fs::read(&path).unwrap(), valid_raw);
+            assert_eq!(serde_json::to_value(&foreign).unwrap(), before);
+        }
+    }
+
     for s in &labs[176..180] {
         let a = &q.attempts[&s.id];
         let w = a.workspace.as_ref().unwrap();
@@ -329,7 +384,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
                 _ => unreachable!(),
             }
             assert!(
-                progress::save(&path, &foreign).is_err(),
+                progress::save_with_catalog(&path, &foreign, &labs).is_err(),
                 "Foreign OneOff field {field}"
             );
             assert_eq!(std::fs::read(&path).unwrap(), valid_raw);
@@ -367,7 +422,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
                 _ => unreachable!(),
             }
             assert!(
-                progress::save(&path, &foreign).is_err(),
+                progress::save_with_catalog(&path, &foreign, &labs).is_err(),
                 "Foreign backup field {field}"
             );
             assert_eq!(
@@ -385,7 +440,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         .unwrap()
         .version = 99;
     let retained = std::fs::read(&path).unwrap();
-    assert!(progress::save(&path, &p).is_err());
+    assert!(progress::save_with_catalog(&path, &p, &labs).is_err());
     assert_eq!(std::fs::read(&path).unwrap(), retained);
     std::fs::write(&path, serde_json::to_vec(&p).unwrap()).unwrap();
     let original = std::fs::read(&path).unwrap();

@@ -197,6 +197,22 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         assert!(!p.attempts.contains_key(id));
         assert!(!p.favorites.contains(id));
     }
+    for id in [
+        "lpic2-lvm-free-space",
+        "lpic2-lvm-add-pv",
+        "lpic2-lvm-filesystem-gap",
+        "lpic2-lvm-handover",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Lvm { .. }) && matches!(source.goal, Goal::Lvm { .. })
+        );
+        assert!(!p.attempts.contains_key(id) && !p.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(source, 0),
+            source
+        ));
+    }
     let missing: BTreeSet<_> = all
         .iter()
         .filter(|s| !p.attempts.contains_key(&s.id))
@@ -205,6 +221,10 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "lpic2-lvm-free-space",
+            "lpic2-lvm-add-pv",
+            "lpic2-lvm-filesystem-gap",
+            "lpic2-lvm-handover",
             "shell-loop-intake",
             "shell-loop-fallback",
             "lpic1-at-report",

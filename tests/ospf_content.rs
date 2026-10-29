@@ -505,7 +505,7 @@ fn profiles_preserve_all_four_unfinished_practice_and_assignment_drafts_through_
     let expected = serde_json::to_value(&p.attempts).unwrap();
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("synthetic-current.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     let before = std::fs::read(&path).unwrap();
     let loaded = progress::load(&path, &all).unwrap();
     assert_eq!(serde_json::to_value(&loaded.attempts).unwrap(), expected);
@@ -542,7 +542,7 @@ fn profiles_preserve_all_four_unfinished_practice_and_assignment_drafts_through_
     loaded
         .attempts
         .insert(IDS[0].into(), prepared(&authored[0]));
-    progress::save(&target, &loaded).unwrap();
+    progress::save_with_catalog(&target, &loaded, &all).unwrap();
     let reset = progress::load(&target, &all).unwrap();
     for s in &all {
         if !IDS.contains(&s.id.as_str()) {

@@ -88,7 +88,11 @@ fn sources() -> &'static Vec<Scenario> {
     static SOURCES: std::sync::OnceLock<Vec<Scenario>> = std::sync::OnceLock::new();
     SOURCES.get_or_init(|| {
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 182);
+        assert_eq!(
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all).len(),
+            182
+        );
+        assert_eq!(all.len(), 186);
         assert_eq!(
             all[176..180]
                 .iter()
@@ -936,7 +940,20 @@ impl LabApp {
     fn oo_scope(&self) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (182, 48));
+        assert_eq!(
+            (
+                one_off_boundary::loop_registration::lvm_registration::before_scenarios(
+                    &self.scenarios
+                )
+                .len(),
+                one_off_boundary::loop_registration::lvm_registration::before_typed_units(
+                    &self.units
+                )
+                .len()
+            ),
+            (182, 48)
+        );
+        assert_eq!((self.scenarios.len(), self.units.len()), (186, 49));
         assert_eq!(
             self.scenarios[176..180]
                 .iter()

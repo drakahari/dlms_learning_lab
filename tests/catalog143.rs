@@ -187,9 +187,18 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
         IDS
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

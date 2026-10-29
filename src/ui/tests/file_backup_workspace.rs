@@ -77,8 +77,10 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         .into_iter()
         .chain(&loops.scenarios)
         .collect::<Vec<_>>();
+    let prior182 =
+        one_off_boundary::loop_registration::lvm_registration::before_scenarios(&a.scenarios);
     assert_eq!(
-        serde_json::to_value(&a.scenarios).unwrap(),
+        serde_json::to_value(prior182).unwrap(),
         serde_json::to_value(&expected).unwrap(),
         "Entire182 old180 pluscanonicalLoop2"
     );

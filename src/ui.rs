@@ -23,6 +23,7 @@ mod dns_workspace;
 mod etherchannel_workspace;
 mod file_backup_workspace;
 mod legacy_learning;
+mod lvm_workspace;
 mod nat_workspace;
 mod nfs_workspace;
 mod one_off_boundary;
@@ -57,6 +58,7 @@ struct Metrics {
     nfs: nfs_workspace::NfsMetrics,
     ether: etherchannel_workspace::EtherMetrics,
     physical: physical_link_workspace::Metrics,
+    lvm: lvm_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -344,6 +346,7 @@ pub struct LabApp {
     nfs_presentation: nfs_workspace::Presentation,
     ether_presentation: etherchannel_workspace::Presentation,
     physical_presentation: physical_link_workspace::Presentation,
+    lvm_presentation: lvm_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     one_off_presentation: one_off_workspace::Presentation,
@@ -487,6 +490,7 @@ impl LabApp {
             scroll_command: false,
             lesson_scroll_reset: false,
             notice: None,
+            lvm_presentation: Default::default(),
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
@@ -650,6 +654,10 @@ impl LabApp {
             {
                 72000
             } else if let Some(stage) =
+                Self::lvm_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::loop_recovery_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -802,6 +810,22 @@ impl LabApp {
         }
     }
     fn launch(&mut self, i: usize) {
+        let source = &self.scenarios[i];
+        let previous = self.progress.attempts.get(&source.id);
+        if matches!(source.initial, engine::State::Lvm { .. })
+            || matches!(source.goal, engine::Goal::Lvm { .. })
+            || previous.is_some_and(|a| matches!(a.state, engine::State::Lvm { .. }))
+        {
+            let admission = dlms_learning_lab::lvm_workspace::source(source).and_then(|()| {
+                previous.map_or(Ok(()), |a| {
+                    dlms_learning_lab::lvm_workspace::context(a, source)
+                })
+            });
+            if let Err(e) = admission {
+                self.notice = Some(e);
+                return;
+            }
+        }
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
@@ -1024,6 +1048,9 @@ impl LabApp {
         };
     }
     fn reset_attempt(&mut self, i: usize) {
+        if matches!(self.scenarios[i].initial, engine::State::Lvm { .. }) {
+            self.lvm_presentation.reset_all();
+        }
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
@@ -1193,7 +1220,7 @@ impl LabApp {
     }
     fn save(&mut self) {
         if self.dirty && !self.read_only {
-            match progress::save(&self.path, &self.progress) {
+            match progress::save_with_catalog(&self.path, &self.progress, &self.scenarios) {
                 Ok(saved) => {
                     self.dirty = false;
                     self.storage_error = saved.durability_warning
@@ -1205,7 +1232,8 @@ impl LabApp {
     fn text_size_picker(&mut self, ui: &mut egui::Ui) {
         let observe_picker = self.reopen.is_some()
             || self.physical_capture_active()
-            || self.one_off_capture_active();
+            || self.one_off_capture_active()
+            || self.lvm_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1251,7 +1279,8 @@ impl LabApp {
     fn theme_dropdown_width(&mut self, ui: &mut egui::Ui, width: f32) {
         let observe_picker = self.reopen.is_some()
             || self.physical_capture_active()
-            || self.one_off_capture_active();
+            || self.one_off_capture_active()
+            || self.lvm_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)

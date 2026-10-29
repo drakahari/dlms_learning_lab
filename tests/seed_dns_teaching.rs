@@ -466,7 +466,7 @@ fn both_seed_practices_all_contexts_actual_records_and_raw_drafts_survive_save_r
     let desired = serde_json::to_value(&p).unwrap();
     let dir = tempfile::tempdir().unwrap();
     let target = dir.path().join("profile.json");
-    progress::save(&target, &p).unwrap();
+    progress::save_with_catalog(&target, &p, &all).unwrap();
     let bytes = std::fs::read(&target).unwrap();
     let loaded = progress::load(&target, &all).unwrap();
     assert_eq!(serde_json::to_value(&loaded).unwrap(), desired);

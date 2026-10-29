@@ -818,6 +818,10 @@ fn parse(input: &str) -> Result<Action> {
     }
 }
 
+/// Syntax-only authored command admission. No state changes or host I/O.
+pub fn validate_command(input: &str) -> Result<()> {
+    parse(input).map(|_| ())
+}
 /// Pure outcome checks for a future authored assignment; not catalog registration.
 pub fn growth_checks(
     state: &State,

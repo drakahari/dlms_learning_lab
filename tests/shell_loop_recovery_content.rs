@@ -15,6 +15,8 @@ use std::{
 };
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "support/lvm_registration.rs"]
+mod lvm_registration;
 const PACK: &str = include_str!("../scenarios/shell-loop-recovery-v1.json");
 const REVIEW: &str = include_str!("fixtures/shell-loop-recovery-review.json");
 const IDS: [&str; 2] = ["shell-loop-intake", "shell-loop-fallback"];
@@ -55,8 +57,8 @@ fn catalog() -> &'static Vec<Scenario> {
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 13);
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 182);
-        assert_eq!(value(&all[180..]), value(&authored()));
+        assert_eq!(all.len(), 186);
+        assert_eq!(value(&all[180..182]), value(&authored()));
         bounded(all)
     })
 }
@@ -100,7 +102,8 @@ fn full(p: &Progress) -> Value {
 #[test]
 fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420_cases() {
     let current = pack::bundled().unwrap();
-    let old = current[..180].to_vec();
+    let prior182 = lvm_registration::before_scenarios(&current);
+    let old = prior182[..180].to_vec();
     let r = review();
     assert_eq!(
         (
@@ -161,10 +164,31 @@ fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420
         proposed.iter().map(|s| cases(s).len()).collect::<Vec<_>>(),
         [10, 12]
     );
-    let all = catalog();
+    let normal = catalog();
+    assert_eq!(
+        value(normal),
+        value(&current),
+        "Full current catalog JSON roundtrip"
+    );
+    let current_units = course::bundled(normal).unwrap();
+    let current_roundtrip = course::load(
+        &json!({"version":1,"units":current_units}).to_string(),
+        normal,
+    )
+    .unwrap();
+    assert_eq!(value(&current_roundtrip), value(&current_units));
+    // Project only after validating every new LVM source/unit against the
+    // complete canonical append; retain the original Loop182 assertions below.
+    let all = lvm_registration::before_scenarios(normal);
     assert_eq!(value(&all[..old.len()]), value(&old));
     assert_eq!(value(&all[old.len()..]), value(&proposed));
-    let units = course::bundled(all).unwrap();
+    let raw48 =
+        lvm_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let units = course::load(std::str::from_utf8(&raw48).unwrap(), all).unwrap();
+    assert_eq!(
+        value(&units),
+        value(lvm_registration::before_typed_units(&current_units))
+    );
     assert_eq!(value(units.last().unwrap()), r["unit_proposal"]);
     let units = course::load(&json!({"version":1,"units":units}).to_string(), all).unwrap();
     assert_eq!(units.last().unwrap().labs, IDS);

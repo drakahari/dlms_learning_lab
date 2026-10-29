@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Lvm {
+        simulation: Box<crate::lvm_workspace::Session>,
+    },
     PhysicalLink {
         simulation: crate::physical_link::State,
     },
@@ -163,6 +166,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Lvm {
+        definition: Box<crate::lvm_workspace::Definition>,
+    },
     PhysicalLink {
         definition: Box<crate::physical_link_assignment::Definition>,
     },
@@ -349,6 +355,7 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Lvm { simulation }, Goal::Lvm { definition }) => definition.checks(simulation),
         (State::PhysicalLink { simulation }, Goal::PhysicalLink { definition }) => {
             definition.checks(simulation)
         }
@@ -686,6 +693,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Lvm { .. } => crate::lvm::HELP,
         State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
         State::EtherChannel { .. } => crate::etherchannel_workspace::HELP,
@@ -753,6 +761,12 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::Lvm { simulation } = s {
+        let Goal::Lvm { definition } = goal else {
+            return Err("LVM commands require their authored Goal".into());
+        };
+        return simulation.execute(definition, input, false);
+    }
     if let State::PhysicalLink { simulation } = s {
         let Goal::PhysicalLink { definition } = goal else {
             return Err("Physical-link actions need their authored task".into());
@@ -974,6 +988,13 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::Lvm { .. }) {
+        return match input {
+            "help" => Ok(crate::lvm::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("LVM changes require the supplied task context".into()),
+        };
+    }
     if matches!(s, State::PhysicalLink { .. }) {
         if input.len()
             > crate::physical_link_workspace::PREFIX.len() + crate::physical_link::MAX_ACTION
@@ -1211,7 +1232,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::PhysicalLink { .. }
+        State::Lvm { .. }
+        | State::PhysicalLink { .. }
         | State::OneOff { .. }
         | State::FileBackup { .. }
         | State::EtherChannel { .. }
@@ -1664,6 +1686,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Lvm { simulation } => format!(
+            "Virtual linear LVM · {} supplied groups · separate LV/filesystem capacity; no real devices",
+            simulation.current.groups.len()
+        ),
         State::PhysicalLink { simulation } => format!(
             "Simulated physical uplinks: {} supplied interfaces and {} point-to-point links. Qualification and deterministic samples are not physical measurements or real network traffic",
             simulation.topology().ports.len(),

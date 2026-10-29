@@ -671,7 +671,7 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
     let old7 = include_bytes!("fixtures/shell-v7-synthetic-writer-progress.json");
     std::fs::write(&path, old8).unwrap();
     std::fs::write(path.with_extension("before-shell-v8.json"), old7).unwrap();
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     assert_eq!(
         std::fs::read(
             path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))

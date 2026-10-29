@@ -572,6 +572,26 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         assert!(dlms_learning_lab::one_off_workspace::context(&own, source).is_ok());
         assert!(own.workspace.as_ref().unwrap().command.is_empty());
     }
+    let lvm = all
+        .iter()
+        .filter(|s| matches!(s.initial, State::Lvm { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(lvm.len(), 4);
+    for source in lvm {
+        let mut raw = source.initial.clone();
+        let before = raw.clone();
+        assert!(engine::execute(&mut raw, &source.solution[0]).is_err());
+        assert_eq!(raw, before);
+        let mut contextual = source.initial.clone();
+        for command in &source.solution {
+            engine::execute_for_goal(&mut contextual, &source.goal, command).unwrap();
+        }
+        assert!(engine::solved(&contextual, &source.goal));
+        let mut own = Attempt::new(source, 1);
+        workspace::prepare(&mut own);
+        dlms_learning_lab::lvm_workspace::context(&own, source).unwrap();
+        assert!(own.workspace.as_ref().unwrap().command.is_empty());
+    }
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -595,6 +615,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::FileBackup { .. }
                     | State::PhysicalLink { .. }
                     | State::OneOff { .. }
+                    | State::Lvm { .. }
             )
         })
         .collect::<Vec<_>>();

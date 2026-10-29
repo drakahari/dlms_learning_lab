@@ -18,7 +18,7 @@ contexts are added only after execution. Both saved profiles contain147 contexts
 90 original non-script Attempts remain exact and35 current non-script labs remain
 absent. The original profile has57 actual current records/examples; the draft
 profile has55, retaining both entire unfinished assignment/practice Attempts.
-Prior record multiplicities309/299 and all historical outcomes remain unchanged.
+Prior record multiplicities309/303 and all historical outcomes remain unchanged.
 The real writer creates a `before-shell-v13` backup containing exact raw12 bytes.
 
 Independent readback checks all11 manifested outputs,499 API rows and authored

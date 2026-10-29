@@ -2,17 +2,16 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are175 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1064 Open rows; no full-objective completion is asserted. Main source
-contains182 authored assignments/48 units (53CCNA,40LPIC-1,32LPIC-2,57Bash).
-The loop-recovery unit strengthens only already Partial105.2/K3 evidence;
-no new source item or full-objective completion is promoted. All136 parents
-remain incomplete(94Open/42Partial). The current inclusive Rust suite passes
-2,683 tests with0fail/0ignored; static and actual native gates are separated in
-[CATALOG182_MILESTONE.md](CATALOG182_MILESTONE.md). Candidate065032d0a90b still
-contains171 assignments; its installed lifecycle, NFS cold reopening and ten
-serialized Wayland launches retain that exact ELF. See also
-[FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are181 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1058 Open rows; no full-objective completion is asserted. Main source
+contains186 authored assignments/49 units (53CCNA,40LPIC-1,36LPIC-2,57Bash).
+The four storage assignments add only narrow204.3/K1/K2/T1–T3 evidence;
+snapshots, activation, mount integration, mapper aliases and lvm.conf stay Open.
+All136 parents remain incomplete(93Open/43Partial). The inclusive Rust suite
+passes2,715 tests with0fail/0ignored; static and actual native gates are separated
+in [CATALOG186_MILESTONE.md](CATALOG186_MILESTONE.md). Candidate065032d0a90b still
+contains171 assignments, with its separate installed lifecycle/NFS cold/startup
+identity. See [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
 [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
@@ -355,3 +354,14 @@ actual native flows pass. No source fingerprint/status changes;175Partial/
 1Supporting/1064Open remain overlapping bookkeeping. General Bash control escape,
 regex, locking, clock/network retries and the wider scripting objective remain
 unimplemented. See SHELL_LOOP_RECOVERY_LESSONS.md and CATALOG182_MILESTONE.md.
+
+
+The186 existing-volume unit adds only six narrowly Partial LPIC-2v4.5 rows:
+204.3 parent/K1/K2/T1–T3. Per-row scenario IDs distinguish inspection, PV/VG/LV
+mutation and filesystem-only diagnosis. Four distinct assignments retain separate
+practice, alternatives, partial/wrong/current-state feedback and saved work.
+No203.2 filesystem-maintenance or complete utility-family credit is inherited.
+Five remaining204.3 Open rows now name their actual missing capability rather
+than incorrectly saying the entire LVM model is absent. Issuer fingerprints and
+source positions remain unchanged; the official4.5/204.3 page was rechecked
+2026-10-29. See LVM_GROWTH_LESSONS.md and CATALOG186_MILESTONE.md.

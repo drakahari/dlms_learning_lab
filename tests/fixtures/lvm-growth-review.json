@@ -1,0 +1,306 @@
+{
+  "status": "SOURCE_PREDICTIONS_ONLY_UNRUN_UNREGISTERED",
+  "labs": [
+    {
+      "id": "lpic2-lvm-free-space",
+      "reference": [
+        "pvs",
+        "vgs",
+        "lvs",
+        "lvextend -L +8M records/reports",
+        "resize2fs /dev/records/reports",
+        "lvs"
+      ],
+      "alternatives": [
+        [
+          "lvextend -l +2 records/reports",
+          "resize2fs /dev/records/reports 4096"
+        ],
+        [
+          "lvextend -l +100%FREE /dev/records/reports",
+          "resize2fs /dev/records/reports"
+        ]
+      ],
+      "initial_rows": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "partial": {
+        "commands": [
+          "lvextend -L 16M records/reports"
+        ],
+        "rows": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "reason": "Backing-only or wrong-volume work cannot satisfy the complete target filesystem requirement."
+      },
+      "wrong": {
+        "commands": [
+          "resize2fs /dev/records/reports 16M"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true
+        ],
+        "expect_error": true,
+        "reason": "Missing backing capacity or a foreign device must be refused without changing the model."
+      },
+      "report_only": {
+        "commands": [
+          "pvs",
+          "vgs",
+          "lvs"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true
+        ]
+      },
+      "actual": null
+    },
+    {
+      "id": "lpic2-lvm-add-pv",
+      "reference": [
+        "pvs",
+        "vgs",
+        "pvcreate /dev/archiveb",
+        "vgextend archive /dev/archiveb",
+        "lvextend -L 40M archive/reports",
+        "resize2fs /dev/archive/reports"
+      ],
+      "alternatives": [
+        [
+          "vgextend archive /dev/archiveb",
+          "lvextend --extents 10 archive/reports",
+          "resize2fs /dev/archive/reports 10240"
+        ],
+        [
+          "pvcreate /dev/archiveb",
+          "vgextend archive /dev/archiveb",
+          "lvextend -l +100%FREE archive/reports",
+          "resize2fs /dev/archive/reports"
+        ]
+      ],
+      "initial_rows": [
+        false,
+        false,
+        true,
+        true
+      ],
+      "partial": {
+        "commands": [
+          "vgextend archive /dev/archiveb",
+          "lvextend -L 40M archive/reports"
+        ],
+        "rows": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "reason": "Backing-only or wrong-volume work cannot satisfy the complete target filesystem requirement."
+      },
+      "wrong": {
+        "commands": [
+          "lvextend -L 40M archive/reports"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true
+        ],
+        "expect_error": true,
+        "reason": "Missing backing capacity or a foreign device must be refused without changing the model."
+      },
+      "report_only": {
+        "commands": [
+          "pvs",
+          "vgs",
+          "lvs"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true
+        ]
+      },
+      "actual": null
+    },
+    {
+      "id": "lpic2-lvm-filesystem-gap",
+      "reference": [
+        "lvs",
+        "resize2fs /dev/service/reports 20M",
+        "lvs"
+      ],
+      "alternatives": [
+        [
+          "resize2fs /dev/service/reports"
+        ],
+        [
+          "resize2fs /dev/service/reports 5120"
+        ]
+      ],
+      "initial_rows": [
+        true,
+        false,
+        true,
+        true
+      ],
+      "partial": {
+        "commands": [
+          "resize2fs /dev/service/neighbor"
+        ],
+        "rows": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "reason": "Backing-only or wrong-volume work cannot satisfy the complete target filesystem requirement."
+      },
+      "wrong": {
+        "commands": [
+          "lvextend -L +4M service/reports"
+        ],
+        "rows": [
+          true,
+          false,
+          true,
+          true
+        ],
+        "expect_error": true,
+        "reason": "Missing backing capacity or a foreign device must be refused without changing the model."
+      },
+      "report_only": {
+        "commands": [
+          "pvs",
+          "vgs",
+          "lvs"
+        ],
+        "rows": [
+          true,
+          false,
+          true,
+          true
+        ]
+      },
+      "actual": null
+    },
+    {
+      "id": "lpic2-lvm-handover",
+      "reference": [
+        "vgs",
+        "vgextend handover /dev/handoverb",
+        "lvextend -L 16M handover/reports",
+        "resize2fs /dev/handover/reports",
+        "lvextend -L 12M handover/queue",
+        "resize2fs /dev/handover/queue",
+        "lvs"
+      ],
+      "alternatives": [
+        [
+          "pvcreate /dev/handoverb",
+          "vgextend handover /dev/handoverb",
+          "lvextend -l +3 handover/reports",
+          "resize2fs /dev/handover/reports 4096",
+          "lvextend -l +2 handover/queue",
+          "resize2fs /dev/handover/queue 3072"
+        ],
+        [
+          "vgextend handover /dev/handoverb",
+          "lvextend -L 20M handover/reports",
+          "resize2fs /dev/handover/reports",
+          "lvextend -L 16M handover/queue",
+          "resize2fs /dev/handover/queue"
+        ]
+      ],
+      "initial_rows": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "partial": {
+        "commands": [
+          "vgextend handover /dev/handoverb",
+          "lvextend -L 16M handover/reports",
+          "resize2fs /dev/handover/reports"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "reason": "Backing-only or wrong-volume work cannot satisfy the complete target filesystem requirement."
+      },
+      "wrong": {
+        "commands": [
+          "pvcreate /dev/handoverforeign"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "expect_error": true,
+        "reason": "Missing backing capacity or a foreign device must be refused without changing the model."
+      },
+      "report_only": {
+        "commands": [
+          "pvs",
+          "vgs",
+          "lvs"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true
+        ]
+      },
+      "actual": null
+    }
+  ],
+  "unit_proposal": {
+    "id": "lvm-volume-growth",
+    "track": "LPIC-2",
+    "title": "Grow existing logical volumes while preserving data",
+    "summary": "Plan physical capacity, allocate extents and resize separate filesystems across four distinct existing-storage problems.",
+    "prerequisites": [
+      "persistent-mounts"
+    ],
+    "labs": [
+      "lpic2-lvm-free-space",
+      "lpic2-lvm-add-pv",
+      "lpic2-lvm-filesystem-gap",
+      "lpic2-lvm-handover"
+    ]
+  },
+  "actual": null
+}

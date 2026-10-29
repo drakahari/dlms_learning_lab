@@ -211,7 +211,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
         p.attempts.insert(s.id.clone(), a);
     }
     p.favorites.insert(labs[0].id.clone());
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let mut q = progress::load(&path, &labs).unwrap();
     assert_eq!(q.attempts.len(), labs.len());
     for s in &labs {
@@ -222,7 +222,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     }
     q.attempts
         .insert(labs[0].id.clone(), Attempt::new(&labs[0], 4));
-    progress::save(&path, &q).unwrap();
+    progress::save_with_catalog(&path, &q, &labs).unwrap();
     let q = progress::load(&path, &labs).unwrap();
     assert!(!engine::solved(
         &q.attempts[&labs[0].id].state,
@@ -347,7 +347,24 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::OneOff { simulation } = &a.state {
+        if let (State::Lvm { simulation }, engine::Goal::Lvm { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            // Deliberate persisted wrong capacity, not an exposed shrink command.
+            // The source-bound supplied inventory and file bytes remain intact.
+            let (vg, lv) = definition.targets[0].volume.split_once('/').unwrap();
+            let initial = &definition.initial.groups[vg].volumes[lv];
+            let grown = simulation
+                .current
+                .groups
+                .get_mut(vg)
+                .unwrap()
+                .volumes
+                .get_mut(lv)
+                .unwrap();
+            grown.filesystem.as_mut().unwrap().blocks = initial.filesystem.as_ref().unwrap().blocks;
+            simulation.validate().unwrap();
+        } else if let State::OneOff { simulation } = &a.state {
             let engine::Goal::OneOff { definition } = &s.goal else {
                 panic!("One-off goal context");
             };
@@ -741,7 +758,7 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         p.attempts.insert(s.id.clone(), a);
     }
     assert_eq!(p.attempts.len(), labs.len());
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let q = progress::load(&path, &labs).unwrap();
     assert_eq!(q.attempts.len(), labs.len());
     for s in &labs {

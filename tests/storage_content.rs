@@ -71,9 +71,18 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
     let all = pack::bundled().unwrap();
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

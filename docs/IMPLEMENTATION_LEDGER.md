@@ -4471,7 +4471,7 @@ M378377Python/M379defaultClippy/M380fixedproducerbuild/M381featureClippyPASS.
 M382nochildprepare1024pins316913725B, Root+peer74cca119 exactreadback; only literal
 root_reviewed becomestrue. M383actual fixed13 producer exits0:57scripts442cases/
 57examples499LFrows and147contextprofiles current57/55,90nonScript exact,
-2wholeunfinishedAttempt/practice exact,35absent,309/299priorRecordmultiplicity and
+2wholeunfinishedAttempt/practice exact,35absent,309/303priorRecordmultiplicity and
 raw12backupv13suffix exact. All11outputs708sourcecopies/heldELF338e4bcc retained.
 Peeractualreadbackff243216 agrees; only then Root fills manifest8ea1df74 and
 attestation0855fd6d seals. M384sealedverifyPASS without replay/regeneration.
@@ -4481,3 +4481,116 @@ changes no authored count/objective status and does not itself accept evaluator1
 Continue reviewed LVM186/NTP190 actual gates, bounded ERE reference/integration/
 migration and all remaining scope. No package/release publication or platform
 acceptance inferred.
+
+Baseline-count clarification: full prior Script Record occurrences are309original/
+303draft;299 was only the rerun-draft subtotal, excluding four records in the
+two entirely preserved unfinished Attempts. Independent full multisets confirm
+writer totals366/358 equal prior plus57/55 actual13 records. Documentation uses
+whole-profile counts; no captured bytes, seals or grading changed. Peer addendum
+000ae91c retains the original review receipt and states this distinction.
+
+
+### Fixed pure ERE GNU comparison and pending LVM readability
+
+Reviewed EREcollector R2 needed only the Root665-byte Foundation-verification
+doc-pin amendment(R3cfd4a27e), all actual core/tests/fixtures exact. Narrow Main
+runner addition preserves full before14 guard/tooling. M403391Python/M404fixed
+probe/M405ClippyPASS; M406prepare nochild/exact23pins. M407firstactual stopped
+before GNU matching because held-FD argv0 produced7 not literalgrep in version.
+R4cf77d065 exact descriptor-name/status/framing guard +2newtests retains14old
+guardbodies/core/probe/34+8/caps; fresh fixedr2 retains failedr1. M409393Python
+PASS/M410newprepare3371455B exactRootreadback+literalapproval. M411actual34match/
+8honestexclusions exits0, manifest528033a6; independent9079b8ed verifies42rows,
+37child raw/status pairs,16sources/bothheldELFs and genuineGNU3.12. No forecasts
+rewritten; actual evidence private. No ERE14, utility, curriculum or platform claim.
+
+M401normal186 actual66before native passes all4LVM flows and20settings, retained
+source228c9488/ELF1b9ab264. Independent12originalviews88073679 find six presentation
+issues despite tests passing. Narrow polishda5f0311/peer562a29e8 improves unit
+capacities, optional file detail, adjacent actions/soleerror/firstissue, transcript
+follow-latest/idle and bounded requested-hint/separate-worked help. All models,
+logical rows and1040/66 route unchanged. M40812UI/phasegroupsPASS, M413alltarget
+ClippyPASS after3equivalent style changes. Full current/actual polished/native
+gates still pending; verified catalog totals stay182 until completed.
+
+M415 inclusive was interrupted after150 completed harnesses/28 observed failures;
+no full-suite acceptance. Eleven backup UI failures share the old whole182
+expectation; strict LVM186-to182 adapter a91a696d preserves every old body. Fifteen
+full-catalog save failures need authored-source validation, not legacy save;
+reviewed18-path fd5376c0/peer6cee4afe fixes21 calls(including one statically found
+late harness), exact legacy-unit inverse and exact LVM foreign-metadata refusal.
+All current attempts/negative tests/byte-retention assertions remain. Applied,
+runtime rerun pending. Partial logs/source and exact stale marker retained.
+
+M416 parent exit143 interrupted monitoring after108 samples, while its native
+child remained alive. Root verified retained ELFf7cc/PGID/argv before stopping
+only that owned group; free shared lock established before preserving marker.
+No memory pressure/OOM was observed; external termination cause not established.
+M417395PythonPASS after scoped TERM/HUP unwind; M420396PASS adds deferred Popen
+return handling and actual owned-child/lock recovery. Existing SIGKILL/pressure/
+KeyboardInterrupt tests stay unchanged; SIGKILL remains uncatchable. Handlers
+restore after the CLI workflow. M418 allocated-terminal retry exits0/all66 LVM
+captures and four behavioral flows, but original rendered review finds collapsed
+command output. This is a real remaining UI defect, not an accepted native gate.
+
+M421 verifies all11 backup UI regressions; M426 verifies201 tests/18 affected
+consumer harnesses with0fail/0ignored, including exact foreign-data rejection and
+all current attempts.232samples/minavailable23824154624B/PSI0/swapout0/OOM0.
+M422 new actual-paint regression fails against the old zero-height transcript;
+bounded six-font-row fix passes M423all11. History browsing additions expose
+first legitimate outer-wheel bubbling, then a real product-width defect(M430):
+egui horizontal auto-shrink narrows the actual interaction rectangle to content
+while the returned prepared viewport remains full-width. No pointer-offset hack
+or relaxed paint assertion: both bounded viewers now retain full row width.
+Optional-file negative M427 independently reproduces zero height; its identical
+minimum-height fix paints actual contents. M431all12PASS includes40geometry
+assignment/example glyph/clip checks, real history up/down and exact whole-profile
+retention. Production diagnostic tracing removed; sourcef5da364c/test016a48ec.
+Native68 adds actual open/capture/close for both file worlds, preserving all1040
+prior actions/66names plus6gestures/2captures; final narrow composition/gates and
+actual new renders still pending. Full current inclusive acceptance not yet given.
+
+M432paired2/M433alltargetClippy/M434396Python/M435registrationPASS. M436 retained
+ELF217027128B SHA d77dec31b51537a0fd8f96844d1b1b9bd50aa3d5f274c251b9183886cf85aa20,
+1020sourceinventory347be1e. M437approveddesktop actual1046events/68captures exits0,
+reaped80348. Both retained-file worlds paint correctly; Root selectedoriginals
+and independent11-view5bdf96c8 find no material block in reviewed widths/themes/
+scales. Rootreceiptfaa4bb57.421samples/min24783360000B/maxfullPSI0.18(no sustained
+pressure)/swapout0/OOM0. Raw/portable warmresume only, not new cold/install proof.
+
+M438 inclusive completes211harnesses/2714PASS1FAIL0ignored with1020sourceexact.
+Single late Loop fixture still assumes its two tasks end the current catalog;
+new LVM4 invalidates that assertion. Reviewed8cf06acf/peer88c5992c preserves full
+currentcatalog/course roundtrips, strict canonical186→182/raw49→48/typed49→48 and
+all old55hash/420case/180prefix/twoLoop unit assertions; other9test/helper suffix
+exact. M439all10PASS; full current rerun required before commit/coveragecredit.
+M438 memory1354samples/min24541904896B/PSI0/swapout0/OOM0. No skipped tests or
+broadened pass conditions; diagnostic logs retained. No curriculum completion,
+installed candidate or other-platform acceptance inferred.
+
+
+### Accepted186 development gates and narrow coverage
+
+M440alltargetClippyPASS. M441full inclusive completes2,715PASS0FAIL0ignored/
+211harnesses; reaped12974exit0, all1020inputs1a222af2unchanged. Rootreceipt
+89787e97.1350samples/minavailable24263680000B/PSI0/swapout0/OOM0. Production code
+is identical to actual nativeM437/d77dec31; only final preservation test/two docs
+changed after native snapshot347be1e. All182predecessors/48rawunits and57script/
+442case/57example data remain exact. No count-based test weakening or skipped
+historical groups.
+
+After actual gates, reviewed coverageR2 9eba4e12/peer76737eee changes only six
+204.3 rows to narrow Partial and five Open remaining descriptions. Per-row IDs
+exclude filesystem-only diagnosis from LVM mutation; no203.2maintenance credit.
+All1229 unrelated skills/164planningrows and issuer fingerprints stay exact.
+Prospective181Partial/1Supporting/1058Open,93Open43Partial parent counts are now
+reported with186/49 catalog; post-doc coverage/Python checks follow before commit.
+README/current reconciliation/checklist and LVM guide now describe implemented
+work, preserving installed171/other-platform/novice/reader/device limits. Detailed
+build/render/test identities are in CATALOG186_MILESTONE.md. Continue next reviewed
+batch after commit/push; this is not complete curriculum or a release candidate.
+
+Post-doc M442396PythonPASS/M443coveragePASS:186registered/49units,
+181Partial1Supporting1058Open/1240references, all165planningrows consistent.
+No extra source fingerprint/status changes. Privacy/whitespace checks and scoped
+commits/push follow; actual Fedora candidate remains171 pending later rebuild.

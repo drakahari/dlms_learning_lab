@@ -494,7 +494,7 @@ fn export_inspect_restore_retains_actual6_7_history_current_runs_and_selected_re
     }
     assert_eq!((six, seven), (33, 37));
     let target = dir.path().join("profile.json");
-    progress::save(&target, &p).unwrap();
+    progress::save_with_catalog(&target, &p, &labs).unwrap();
     let before = std::fs::read(&target).unwrap();
     let saved = dlms_learning_lab::backup::restore(&target, &candidate, &labs).unwrap();
     assert_eq!(std::fs::read(saved.safety_copy.unwrap()).unwrap(), before);

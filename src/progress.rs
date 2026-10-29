@@ -769,6 +769,10 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::Lvm { .. }) || matches!(s.initial, State::Lvm { .. }) {
+        return crate::lvm_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
     if crate::physical_link_workspace::metadata(a).is_err() {
         return false;
     }
@@ -1150,6 +1154,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
         crate::one_off_workspace::metadata(a)?;
         if matches!(a.state, State::OneOff { .. }) {
@@ -1186,6 +1191,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if matches!(a.state, State::Lvm { .. }) {
+            crate::lvm_workspace::context(a, s)?;
         }
         if matches!(a.state, State::PhysicalLink { .. }) {
             crate::physical_link_workspace::context(a, s)?;
@@ -2206,6 +2214,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     }
     validate_provenance(p)?;
     for a in p.attempts.values() {
+        crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
         crate::pack::validate_state(&a.state)?;
         crate::one_off_workspace::metadata(a)?;
@@ -2268,6 +2277,35 @@ enum WriteMode<'a> {
     Restore(&'a [Scenario]),
 }
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
+    if p.attempts
+        .values()
+        .any(|a| matches!(a.state, State::Lvm { .. }))
+    {
+        return Err(
+            "LVM progress needs its authored catalog; use save_with_catalog. Original retained"
+                .into(),
+        );
+    }
+    save_with_writer(path, p, WriteMode::Normal, |_| Ok(()), write_atomic)
+}
+/// Source-aware normal saves for new typed LVM work. All older writer,
+/// provenance and family behavior stays in the same existing transaction.
+pub fn save_with_catalog(
+    path: &Path,
+    p: &Progress,
+    scenarios: &[Scenario],
+) -> Result<Saved, String> {
+    for (id, a) in &p.attempts {
+        let source = scenarios.iter().find(|s| &s.id == id);
+        let lvm_source = source.is_some_and(|s| {
+            matches!(s.initial, State::Lvm { .. })
+                || matches!(s.goal, crate::engine::Goal::Lvm { .. })
+        });
+        if matches!(a.state, State::Lvm { .. }) || lvm_source {
+            let source = source.ok_or("Unknown authored LVM source; original retained")?;
+            crate::lvm_workspace::context(a, source)?;
+        }
+    }
     save_with_writer(path, p, WriteMode::Normal, |_| Ok(()), write_atomic)
 }
 pub(crate) fn save_for_restore(

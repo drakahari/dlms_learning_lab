@@ -272,7 +272,32 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
         .collect::<Vec<_>>();
     assert_eq!(previous.len(), 176);
-    assert_eq!(old.len(), 178);
+    assert_eq!(old.len(), 182);
+    let prior182 = one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all);
+    let prior178 = prior182
+        .iter()
+        .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(prior178.len(), 178);
+    assert_eq!(
+        old[..178].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        prior178.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
+    );
+    assert_eq!(
+        old[178..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "lpic2-lvm-free-space",
+            "lpic2-lvm-add-pv",
+            "lpic2-lvm-filesystem-gap",
+            "lpic2-lvm-handover"
+        ]
+    );
+    assert!(
+        old[178..]
+            .iter()
+            .all(|s| matches!(s.initial, State::Lvm { .. })
+                && matches!(s.goal, engine::Goal::Lvm { .. }))
+    );
     assert_eq!(
         old[..previous.len()]
             .iter()
@@ -281,14 +306,14 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         previous.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
     );
     assert_eq!(
-        old[previous.len()..]
+        old[previous.len()..previous.len() + 2]
             .iter()
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
         ["shell-loop-intake", "shell-loop-fallback"]
     );
     assert!(
-        old[previous.len()..]
+        old[previous.len()..previous.len() + 2]
             .iter()
             .all(|s| matches!(s.initial, State::Script { .. })
                 && matches!(s.goal, engine::Goal::Script { .. }))

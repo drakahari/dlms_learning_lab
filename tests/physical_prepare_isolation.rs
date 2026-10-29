@@ -285,17 +285,54 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         &old_indices[..previous_indices.len()],
         previous_indices.as_slice()
     );
-    assert_eq!(old_indices.len(), 178);
-    assert_eq!(&old_indices[previous_indices.len()..], &[180, 181]);
+    assert_eq!(old_indices.len(), 182);
+    let prior182 = one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all);
+    let prior178 = prior182
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| {
+            !matches!(
+                s.initial,
+                dlms_learning_lab::engine::State::PhysicalLink { .. }
+            )
+        })
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+    assert_eq!(prior178.len(), 178);
+    assert_eq!(&old_indices[..178], prior178.as_slice());
+    assert_eq!(&old_indices[178..], &[182, 183, 184, 185]);
     assert_eq!(
-        old_indices[previous_indices.len()..]
+        old_indices[178..]
+            .iter()
+            .map(|i| all[*i].id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "lpic2-lvm-free-space",
+            "lpic2-lvm-add-pv",
+            "lpic2-lvm-filesystem-gap",
+            "lpic2-lvm-handover"
+        ]
+    );
+    assert!(old_indices[178..].iter().all(|i| matches!(
+        all[*i].initial,
+        dlms_learning_lab::engine::State::Lvm { .. }
+    ) && matches!(
+        all[*i].goal,
+        dlms_learning_lab::engine::Goal::Lvm { .. }
+    )));
+    assert_eq!(
+        &old_indices[previous_indices.len()..previous_indices.len() + 2],
+        &[180, 181]
+    );
+    assert_eq!(
+        old_indices[previous_indices.len()..previous_indices.len() + 2]
             .iter()
             .map(|i| all[*i].id.as_str())
             .collect::<Vec<_>>(),
         ["shell-loop-intake", "shell-loop-fallback"]
     );
     assert!(
-        old_indices[previous_indices.len()..]
+        old_indices[previous_indices.len()..previous_indices.len() + 2]
             .iter()
             .all(|i| matches!(
                 all[*i].initial,
@@ -312,8 +349,16 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         let mut foreign = all.clone();
         foreign[index].physical_link_teaching = lesson.clone();
         let error = contexts(&foreign).unwrap_err();
+        let expected = if matches!(
+            all[index].initial,
+            dlms_learning_lab::engine::State::Lvm { .. }
+        ) {
+            "Foreign teaching metadata on LVM source"
+        } else {
+            "Physical-link teaching/Goal belongs to another activity"
+        };
         assert_eq!(
-            error, "Physical-link teaching/Goal belongs to another activity",
+            error, expected,
             "{} must fail for the injected metadata, not missing prerequisites or a previously mutated neighbor",
             all[index].id
         );

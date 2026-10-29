@@ -196,12 +196,12 @@ fn resume_and_selected_reset_keep_old_attempts() {
     }
     let tmp = tempfile::tempdir().unwrap();
     let path = tmp.path().join("progress-v1.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let mut p = progress::load(&path, &labs).unwrap();
     if let State::Script { source, .. } = &mut p.attempts.get_mut("shell-handover").unwrap().state {
         *source = "# unfinished\nprintf '".into();
     }
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &labs).unwrap();
     let mut resumed = progress::load(&path, &labs).unwrap();
     assert_eq!(
         serde_json::to_value(&p).unwrap(),

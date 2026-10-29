@@ -208,15 +208,26 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
     assert!(a.progress.attempts.is_empty());
     until(&ctx, &mut a, FIRST + 2, &mut w);
     assert_eq!(
-        (a.scenarios.len(), one_off_boundary::before_len(&a.units)),
+        (
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(
+                &a.scenarios[..186]
+            )
+            .len()
+                + 1,
+            one_off_boundary::before_len(&a.units)
+        ),
         (183, 46)
     );
     assert_eq!(
-        serde_json::to_value(&a.scenarios[..182]).unwrap(),
+        (a.scenarios.len(), one_off_boundary::before_len(&a.units)),
+        (187, 46)
+    );
+    assert_eq!(
+        serde_json::to_value(&a.scenarios[..186]).unwrap(),
         serde_json::to_value(pack::bundled().unwrap()).unwrap(),
         "The single private NAT fixture must preserve every normal assignment"
     );
-    assert_eq!(a.scenarios[182].id, ID);
+    assert_eq!(a.scenarios[186].id, ID);
     assert!(
         w.fullscreen_requests.contains(&true),
         "Initial wide view must issue a real fullscreen request; this fake renderer does not claim WM acceptance"

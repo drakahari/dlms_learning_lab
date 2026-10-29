@@ -652,7 +652,7 @@ fn current_contexts_pending_nat_backup_restore_and_selected_reset_retention() {
     let original7 = include_bytes!("fixtures/shell-v7-synthetic-writer-progress.json");
     std::fs::write(&path, original8).unwrap();
     std::fs::write(path.with_extension("before-shell-v8.json"), original7).unwrap();
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     assert_eq!(
         std::fs::read(
             path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))

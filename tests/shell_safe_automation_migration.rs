@@ -92,6 +92,22 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         assert!(!original.attempts.contains_key(id));
         assert!(!original.favorites.contains(id));
     }
+    for id in [
+        "lpic2-lvm-free-space",
+        "lpic2-lvm-add-pv",
+        "lpic2-lvm-filesystem-gap",
+        "lpic2-lvm-handover",
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Lvm { .. }) && matches!(source.goal, Goal::Lvm { .. })
+        );
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(source, 0),
+            source
+        ));
+    }
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -100,6 +116,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "lpic2-lvm-free-space",
+            "lpic2-lvm-add-pv",
+            "lpic2-lvm-filesystem-gap",
+            "lpic2-lvm-handover",
             "shell-loop-intake",
             "shell-loop-fallback",
             "lpic1-at-report",

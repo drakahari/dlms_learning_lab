@@ -333,7 +333,7 @@ fn existing_attempts_both_new_drafts_results_and_selected_reset_survive_a_tempor
     }
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("synthetic-progress.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     let saved = std::fs::read(&path).unwrap();
     let mut loaded = progress::load(&path, &all).unwrap();
     assert_eq!(loaded.clock, p.clock);

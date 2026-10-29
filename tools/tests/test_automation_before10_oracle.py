@@ -204,6 +204,7 @@ class FixedAutomationSafety(unittest.TestCase):
         # Close every reviewed current append before the unchanged old44/43
         # assertions. No historical input, recipe or observation is rewritten.
         for catalog, before_count, after_count, unit_key, expected_recipe in [
+            (186, 48, 49, 'lvm_unit', '72befcc13bf6fb0f8d78b301f699de98b105430d5b4240babcc3b7b409cab861'),
             (182, 47, 48, 'loop_unit', 'e1083dcd628430234e317627335da8dc45e77c96789e1aad4a7f09e98e89bf6b'),
             (180, 46, 47, 'one_off_unit', 'c472de759a336ae226a9349da605b569e08b9ab65c8b86d162276b78d01cda0d'),
             (176, 45, 46, 'private_unit', '690e81765c71f591972c921fed7ce417eb21e67afdd272d8049789290757898f'),
@@ -230,11 +231,19 @@ class FixedAutomationSafety(unittest.TestCase):
         current=(ROOT/'scenarios/units-v1.json').read_bytes()
         old=self.closed_original44_units(current)
         self.assertEqual(hashlib.sha256(old).hexdigest(), '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
-        self.assertEqual(len(json.loads(current)['units']),48)
+        self.assertEqual(len(json.loads(current)['units']),49)
+        before48=(ROOT/'tests/fixtures/lvm-units-before182.json').read_bytes()
+        self.assertEqual(len(json.loads(before48)['units']),48)
+        self.assertEqual(json.loads(current)['units'][:48],json.loads(before48)['units'])
         self.assertEqual(json.loads(current)['units'][:44],json.loads(old)['units'])
         for bad in [current+b' ',current.replace(b'physical-uplink-diagnosis',b'physical-uplink-tampered',1), current.replace(b'linux-one-off-jobs',b'linux-one-off-tampered',1)]:
             with self.assertRaises(AssertionError):
                 self.closed_original44_units(bad)
+
+        lvm_title=b'Grow existing logical volumes while preserving data'
+        self.assertEqual(current.count(lvm_title),1)
+        with self.assertRaises(AssertionError):
+            self.closed_original44_units(current.replace(lvm_title,b'Unreviewed LVM unit metadata',1))
 
         loop_title=b'Loop control and independent recovery'
         self.assertEqual(current.count(loop_title),1)

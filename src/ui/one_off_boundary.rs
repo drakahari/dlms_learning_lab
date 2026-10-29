@@ -182,13 +182,14 @@ where
 }
 impl Boundary for std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt> {
     fn check(&self) -> usize {
-        assert_eq!(self.len(), 182);
+        let normal182 = loop_registration::lvm_registration::before_attempts_len(self);
+        assert_eq!(normal182, 182);
         for id in loop_registration::IDS {
             let a = &self[id];
             assert_eq!(a.scenario_version, 1);
             assert!(matches!(a.state, State::Script { .. }));
         }
-        assert_eq!(self.len() - loop_registration::IDS.len(), 180);
+        assert_eq!(normal182 - loop_registration::IDS.len(), 180);
         for id in [
             "lpic1-at-report",
             "lpic1-at-capture-repair",

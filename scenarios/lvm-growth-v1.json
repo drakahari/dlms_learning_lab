@@ -1,0 +1,2350 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-lvm-free-space",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Bounded LVM volume growth",
+      "unit": "lvm-volume-growth",
+      "title": "Use existing group free space without touching a neighbor",
+      "summary": "The records group already has enough free extents. Grow records/reports and its filesystem to at least16MiB using the existing pool. Preserve neighbor unchanged and retain every report/notes file. Inspect pvs, vgs and lvs, then verify the separate filesystem capacity. No device needs initialization.",
+      "objective": "The records group already has enough free extents. Grow records/reports and its filesystem to at least16MiB using the existing pool. Preserve neighbor unchanged and retain every report/notes file. Inspect pvs, vgs and lvs, then verify the separate filesystem capacity. No device needs initialization.",
+      "retry_guidance": "Read the current physical/group/LV reports and the separate filesystem table. A rejected command retains prior work. If a valid allocation leaves insufficient space for another required LV, Reset only this assignment and plan both volumes before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect current inventory and capacities",
+        "Plan the requested storage change",
+        "Apply only the required growth commands",
+        "Verify every capacity and preserve the existing data"
+      ],
+      "guide": [],
+      "explanation": "The reference is one supported plan. Equivalent extent counts, absolute/relative binary sizes and deliberate use of all free space are accepted when every current capacity and preservation outcome is satisfied. Reports and saved success flags alone cannot grant credit.",
+      "hints": [
+        "Read VFree in vgs before asking lvextend for more extents.",
+        "The filesystem table can remain small even after lvs reports a larger backing LV.",
+        "Use /dev/VG/LV with resize2fs; its suffixless unit is4096-byte blocks."
+      ],
+      "sources": [
+        "https://github.com/lvmteam/lvm2/blob/main/man/lvextend.8_pregen",
+        "https://github.com/lvmteam/lvm2/blob/main/man/pvcreate.8_pregen",
+        "https://github.com/tytso/e2fsprogs/blob/master/resize/resize2fs.8.in"
+      ],
+      "simplifications": "Offline supplied linear LVM growth only. Fixed profile1MiB data start, whole PE allocation and a separate4KiB-block modeled ext4 capacity; flat UTF8 files are retained. No real disk/host command, full ext4 metadata, shrink, force, deletion, aliases or creation of VGs/LVs/filesystems.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordsforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "records monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain records original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordsforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "records monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain records original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/aspena": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "aspen"
+              },
+              "/dev/aspenforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "aspen": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "aspen monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain aspen original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/aspena": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "aspen"
+              },
+              "/dev/aspenforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "aspen": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "aspen monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain aspen original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/aspena",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/recordsa": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "records"
+              },
+              "/dev/recordsforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "records": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "records monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain records original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/recordsa",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "records/reports",
+              "minimum_lv": 16777216,
+              "minimum_filesystem": 16777216,
+              "fill_lv": false
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "You can inspect a supplied disk identity and distinguish a saved mount entry from a live mount. Here you will work inside an existing logical-volume group. PV, VG, LV and filesystem capacity are introduced below; no real administrator experience or host command is assumed.",
+            "concepts": [
+              {
+                "title": "Inspect the three storage layers",
+                "text": "A physical volume (PV) contributes space to a volume group (VG); a logical volume (LV) receives whole extents from that group. Run pvs, vgs and lvs first. The byte columns and the on-screen filesystem table describe current simulated state. Displaying a table does not resize anything."
+              },
+              {
+                "title": "Count usable space before allocating",
+                "text": "This supplied profile reserves 1MiB at the start of each device. Remaining bytes form whole physical extents of the group’s displayed size; a partial tail is unusable. Every extent may belong to only one LV. A blank supplied device is not free VG space until it joins the group. Foreign devices must remain untouched."
+              },
+              {
+                "title": "Choose a valid growth request",
+                "text": "lvextend -L 16M VG/LV requests an absolute size; -L +8M adds 8MiB. Integer M/G units are binary. Requests round upward to whole extents. -l gives an extent count; +100%FREE assigns all currently free group extents to that LV, so another LV may have no room left. No shrink or allocation reversal is supported here."
+              },
+              {
+                "title": "Grow the filesystem separately",
+                "text": "LV backing and the filesystem using it have different capacities. resize2fs /dev/VG/LV grows the modeled ext4 filesystem to the LV boundary; 20M chooses a size and a suffixless count means 4096-byte blocks. The device pathname is required. Enlarging the LV alone leaves the filesystem small; enlarging the filesystem first cannot create backing space."
+              },
+              {
+                "title": "Add only the intended supplied PV",
+                "text": "When existing group free space is insufficient, pvcreate /dev/NAME initializes a supplied blank device and vgextend VG /dev/NAME adds it to an existing group. vgextend can also initialize a blank device itself, so explicit pvcreate is a legitimate optional step. Existing PVs and foreign signatures cannot be wiped here. Neither command creates an LV or a filesystem."
+              },
+              {
+                "title": "Verify capacity and preservation",
+                "text": "Run the read-only reports again, inspect filesystem capacities and existing file contents, then Check work. Preserve the sibling volumes and their data as well as the target files. This simulator retains a rejected command atomically; real storage tools have different failure and safety conditions. No real disk, mounted filesystem, shell, force, removal or device alias is available."
+              }
+            ],
+            "description": "A separate aspen workspace uses different devices, extent sizes, LV names, file contents and target capacities. Commands here never touch the assignment. Run each selected worked command explicitly, then try the documented incomplete change and repair.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/aspena": {
+                  "bytes": 34603008,
+                  "role": "PhysicalVolume",
+                  "group": "aspen"
+                },
+                "/dev/aspenforeign": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "aspen": {
+                  "extent_bytes": 2097152,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/report.txt": {
+                            "contents": "aspen monthly total: 47\n"
+                          },
+                          "/notes": {
+                            "contents": "Retain aspen original notes.\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/aspena",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/peer.txt": {
+                            "contents": "Neighbor data remains unchanged.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "aspen/sample",
+                "minimum_lv": 8388608,
+                "minimum_filesystem": 8388608,
+                "fill_lv": true
+              }
+            ],
+            "worked": [
+              {
+                "text": "vgs",
+                "explanation": "Inspect current state without changing it."
+              },
+              {
+                "text": "lvextend -L 8M aspen/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "resize2fs /dev/aspen/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              }
+            ],
+            "try_change": "After the worked example passes, extend the sample LV by another4MiB without resizing its filesystem. Check why filesystem-to-LV equality now fails, then run the repair to fill the enlarged LV. Assignment state stays unchanged.",
+            "experiment": "lvextend -L +4M aspen/sample",
+            "repair": "resize2fs /dev/aspen/sample"
+          }
+        }
+      },
+      "solution": [
+        "pvs",
+        "vgs",
+        "lvs",
+        "lvextend -L +8M records/reports",
+        "resize2fs /dev/records/reports",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-storage",
+        "lpic2-mount-identity"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-add-pv",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Bounded LVM volume growth",
+      "unit": "lvm-volume-growth",
+      "title": "Add a blank PV when the current group is too small",
+      "summary": "The archive group has only one free4MiB extent. Make archive/reports and its filesystem at least40MiB by adding the supplied blank /dev/archiveb. Preserve archive/neighbor and all existing files. The foreign device is outside the task. Both explicit pvcreate then vgextend and direct initialization by vgextend are legitimate.",
+      "objective": "The archive group has only one free4MiB extent. Make archive/reports and its filesystem at least40MiB by adding the supplied blank /dev/archiveb. Preserve archive/neighbor and all existing files. The foreign device is outside the task. Both explicit pvcreate then vgextend and direct initialization by vgextend are legitimate.",
+      "retry_guidance": "Read the current physical/group/LV reports and the separate filesystem table. A rejected command retains prior work. If a valid allocation leaves insufficient space for another required LV, Reset only this assignment and plan both volumes before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Inspect current inventory and capacities",
+        "Plan the requested storage change",
+        "Apply only the required growth commands",
+        "Verify every capacity and preserve the existing data"
+      ],
+      "guide": [],
+      "explanation": "The reference is one supported plan. Equivalent extent counts, absolute/relative binary sizes and deliberate use of all free space are accepted when every current capacity and preservation outcome is satisfied. Reports and saved success flags alone cannot grant credit.",
+      "hints": [
+        "Read VFree in vgs before asking lvextend for more extents.",
+        "The filesystem table can remain small even after lvs reports a larger backing LV.",
+        "Use /dev/VG/LV with resize2fs; its suffixless unit is4096-byte blocks."
+      ],
+      "sources": [
+        "https://github.com/lvmteam/lvm2/blob/main/man/lvextend.8_pregen",
+        "https://github.com/lvmteam/lvm2/blob/main/man/pvcreate.8_pregen",
+        "https://github.com/tytso/e2fsprogs/blob/master/resize/resize2fs.8.in"
+      ],
+      "simplifications": "Offline supplied linear LVM growth only. Fixed profile1MiB data start, whole PE allocation and a separate4KiB-block modeled ext4 capacity; flat UTF8 files are retained. No real disk/host command, full ext4 metadata, shrink, force, deletion, aliases or creation of VGs/LVs/filesystems.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/archivea": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "archive"
+              },
+              "/dev/archiveforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/archiveb": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "archive": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "archive monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain archive original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 3072,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/archivea": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "archive"
+              },
+              "/dev/archiveforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/archiveb": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "archive": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "archive monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain archive original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 3072,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/willowa": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "willow"
+              },
+              "/dev/willowforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/willowb": {
+                "bytes": 26214400,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "willow": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "willow monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain willow original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1536,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/willowa": {
+                "bytes": 13631488,
+                "role": "PhysicalVolume",
+                "group": "willow"
+              },
+              "/dev/willowforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/willowb": {
+                "bytes": 26214400,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "willow": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "willow monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain willow original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/willowa",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1536,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/archivea": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "archive"
+              },
+              "/dev/archiveforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/archiveb": {
+                "bytes": 34603008,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "archive": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "archive monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain archive original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/archivea",
+                        "index": 4
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 3072,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "archive/reports",
+              "minimum_lv": 41943040,
+              "minimum_filesystem": 41943040,
+              "fill_lv": false
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "You can inspect a supplied disk identity and distinguish a saved mount entry from a live mount. Here you will work inside an existing logical-volume group. PV, VG, LV and filesystem capacity are introduced below; no real administrator experience or host command is assumed.",
+            "concepts": [
+              {
+                "title": "Inspect the three storage layers",
+                "text": "A physical volume (PV) contributes space to a volume group (VG); a logical volume (LV) receives whole extents from that group. Run pvs, vgs and lvs first. The byte columns and the on-screen filesystem table describe current simulated state. Displaying a table does not resize anything."
+              },
+              {
+                "title": "Count usable space before allocating",
+                "text": "This supplied profile reserves 1MiB at the start of each device. Remaining bytes form whole physical extents of the group’s displayed size; a partial tail is unusable. Every extent may belong to only one LV. A blank supplied device is not free VG space until it joins the group. Foreign devices must remain untouched."
+              },
+              {
+                "title": "Choose a valid growth request",
+                "text": "lvextend -L 16M VG/LV requests an absolute size; -L +8M adds 8MiB. Integer M/G units are binary. Requests round upward to whole extents. -l gives an extent count; +100%FREE assigns all currently free group extents to that LV, so another LV may have no room left. No shrink or allocation reversal is supported here."
+              },
+              {
+                "title": "Grow the filesystem separately",
+                "text": "LV backing and the filesystem using it have different capacities. resize2fs /dev/VG/LV grows the modeled ext4 filesystem to the LV boundary; 20M chooses a size and a suffixless count means 4096-byte blocks. The device pathname is required. Enlarging the LV alone leaves the filesystem small; enlarging the filesystem first cannot create backing space."
+              },
+              {
+                "title": "Add only the intended supplied PV",
+                "text": "When existing group free space is insufficient, pvcreate /dev/NAME initializes a supplied blank device and vgextend VG /dev/NAME adds it to an existing group. vgextend can also initialize a blank device itself, so explicit pvcreate is a legitimate optional step. Existing PVs and foreign signatures cannot be wiped here. Neither command creates an LV or a filesystem."
+              },
+              {
+                "title": "Verify capacity and preservation",
+                "text": "Run the read-only reports again, inspect filesystem capacities and existing file contents, then Check work. Preserve the sibling volumes and their data as well as the target files. This simulator retains a rejected command atomically; real storage tools have different failure and safety conditions. No real disk, mounted filesystem, shell, force, removal or device alias is available."
+              }
+            ],
+            "description": "A separate willow workspace uses different devices, extent sizes, LV names, file contents and target capacities. Commands here never touch the assignment. Run each selected worked command explicitly, then try the documented incomplete change and repair.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/willowa": {
+                  "bytes": 13631488,
+                  "role": "PhysicalVolume",
+                  "group": "willow"
+                },
+                "/dev/willowforeign": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                },
+                "/dev/willowb": {
+                  "bytes": 26214400,
+                  "role": "Blank",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "willow": {
+                  "extent_bytes": 2097152,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/willowa",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/willowa",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/report.txt": {
+                            "contents": "willow monthly total: 47\n"
+                          },
+                          "/notes": {
+                            "contents": "Retain willow original notes.\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/willowa",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/willowa",
+                          "index": 3
+                        },
+                        {
+                          "pv": "/dev/willowa",
+                          "index": 4
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1536,
+                        "files": {
+                          "/peer.txt": {
+                            "contents": "Neighbor data remains unchanged.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "willow/sample",
+                "minimum_lv": 16777216,
+                "minimum_filesystem": 16777216,
+                "fill_lv": true
+              }
+            ],
+            "worked": [
+              {
+                "text": "pvcreate /dev/willowb",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "vgextend willow /dev/willowb",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "lvextend -L 16M willow/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "resize2fs /dev/willow/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              }
+            ],
+            "try_change": "After the worked example passes, extend the sample LV by another4MiB without resizing its filesystem. Check why filesystem-to-LV equality now fails, then run the repair to fill the enlarged LV. Assignment state stays unchanged.",
+            "experiment": "lvextend -L +4M willow/sample",
+            "repair": "resize2fs /dev/willow/sample"
+          }
+        }
+      },
+      "solution": [
+        "pvs",
+        "vgs",
+        "pvcreate /dev/archiveb",
+        "vgextend archive /dev/archiveb",
+        "lvextend -L 40M archive/reports",
+        "resize2fs /dev/archive/reports"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-free-space"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-filesystem-gap",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Bounded LVM volume growth",
+      "unit": "lvm-volume-growth",
+      "title": "Find the gap between LV and filesystem capacity",
+      "summary": "An earlier administrator already made service/reports24MiB, but its filesystem is still8MiB. Provide at least20MiB of filesystem capacity without changing the existing LV mapping or neighbor. Diagnose the two capacities before choosing a command; LV growth is unnecessary and there are no free group extents.",
+      "objective": "An earlier administrator already made service/reports24MiB, but its filesystem is still8MiB. Provide at least20MiB of filesystem capacity without changing the existing LV mapping or neighbor. Diagnose the two capacities before choosing a command; LV growth is unnecessary and there are no free group extents.",
+      "retry_guidance": "Read the current physical/group/LV reports and the separate filesystem table. A rejected command retains prior work. If a valid allocation leaves insufficient space for another required LV, Reset only this assignment and plan both volumes before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Inspect current inventory and capacities",
+        "Plan the requested storage change",
+        "Apply only the required growth commands",
+        "Verify every capacity and preserve the existing data"
+      ],
+      "guide": [],
+      "explanation": "The reference is one supported plan. Equivalent extent counts, absolute/relative binary sizes and deliberate use of all free space are accepted when every current capacity and preservation outcome is satisfied. Reports and saved success flags alone cannot grant credit.",
+      "hints": [
+        "Read VFree in vgs before asking lvextend for more extents.",
+        "The filesystem table can remain small even after lvs reports a larger backing LV.",
+        "Use /dev/VG/LV with resize2fs; its suffixless unit is4096-byte blocks."
+      ],
+      "sources": [
+        "https://github.com/lvmteam/lvm2/blob/main/man/lvextend.8_pregen",
+        "https://github.com/lvmteam/lvm2/blob/main/man/pvcreate.8_pregen",
+        "https://github.com/tytso/e2fsprogs/blob/master/resize/resize2fs.8.in"
+      ],
+      "simplifications": "Offline supplied linear LVM growth only. Fixed profile1MiB data start, whole PE allocation and a separate4KiB-block modeled ext4 capacity; flat UTF8 files are retained. No real disk/host command, full ext4 metadata, shrink, force, deletion, aliases or creation of VGs/LVs/filesystems.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/serviceforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "service monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain service original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 6
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 7
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/serviceforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "service monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain service original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 6
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 7
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/cedara": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "cedar"
+              },
+              "/dev/cedarforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "cedar": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "cedar monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain cedar original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 6
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 7
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/cedara": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "cedar"
+              },
+              "/dev/cedarforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "cedar": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "cedar monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain cedar original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 6
+                      },
+                      {
+                        "pv": "/dev/cedara",
+                        "index": 7
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/servicea": {
+                "bytes": 34603008,
+                "role": "PhysicalVolume",
+                "group": "service"
+              },
+              "/dev/serviceforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              }
+            },
+            "groups": {
+              "service": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 1
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 3
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "service monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain service original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 6
+                      },
+                      {
+                        "pv": "/dev/servicea",
+                        "index": 7
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 2048,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "service/reports",
+              "minimum_lv": 25165824,
+              "minimum_filesystem": 20971520,
+              "fill_lv": false
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "You can inspect a supplied disk identity and distinguish a saved mount entry from a live mount. Here you will work inside an existing logical-volume group. PV, VG, LV and filesystem capacity are introduced below; no real administrator experience or host command is assumed.",
+            "concepts": [
+              {
+                "title": "Inspect the three storage layers",
+                "text": "A physical volume (PV) contributes space to a volume group (VG); a logical volume (LV) receives whole extents from that group. Run pvs, vgs and lvs first. The byte columns and the on-screen filesystem table describe current simulated state. Displaying a table does not resize anything."
+              },
+              {
+                "title": "Count usable space before allocating",
+                "text": "This supplied profile reserves 1MiB at the start of each device. Remaining bytes form whole physical extents of the group’s displayed size; a partial tail is unusable. Every extent may belong to only one LV. A blank supplied device is not free VG space until it joins the group. Foreign devices must remain untouched."
+              },
+              {
+                "title": "Choose a valid growth request",
+                "text": "lvextend -L 16M VG/LV requests an absolute size; -L +8M adds 8MiB. Integer M/G units are binary. Requests round upward to whole extents. -l gives an extent count; +100%FREE assigns all currently free group extents to that LV, so another LV may have no room left. No shrink or allocation reversal is supported here."
+              },
+              {
+                "title": "Grow the filesystem separately",
+                "text": "LV backing and the filesystem using it have different capacities. resize2fs /dev/VG/LV grows the modeled ext4 filesystem to the LV boundary; 20M chooses a size and a suffixless count means 4096-byte blocks. The device pathname is required. Enlarging the LV alone leaves the filesystem small; enlarging the filesystem first cannot create backing space."
+              },
+              {
+                "title": "Add only the intended supplied PV",
+                "text": "When existing group free space is insufficient, pvcreate /dev/NAME initializes a supplied blank device and vgextend VG /dev/NAME adds it to an existing group. vgextend can also initialize a blank device itself, so explicit pvcreate is a legitimate optional step. Existing PVs and foreign signatures cannot be wiped here. Neither command creates an LV or a filesystem."
+              },
+              {
+                "title": "Verify capacity and preservation",
+                "text": "Run the read-only reports again, inspect filesystem capacities and existing file contents, then Check work. Preserve the sibling volumes and their data as well as the target files. This simulator retains a rejected command atomically; real storage tools have different failure and safety conditions. No real disk, mounted filesystem, shell, force, removal or device alias is available."
+              }
+            ],
+            "description": "A separate cedar workspace uses different devices, extent sizes, LV names, file contents and target capacities. Commands here never touch the assignment. Run each selected worked command explicitly, then try the documented incomplete change and repair.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/cedara": {
+                  "bytes": 26214400,
+                  "role": "PhysicalVolume",
+                  "group": "cedar"
+                },
+                "/dev/cedarforeign": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "cedar": {
+                  "extent_bytes": 2097152,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 1
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 3
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 4
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 5
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/report.txt": {
+                            "contents": "cedar monthly total: 47\n"
+                          },
+                          "/notes": {
+                            "contents": "Retain cedar original notes.\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 6
+                        },
+                        {
+                          "pv": "/dev/cedara",
+                          "index": 7
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/peer.txt": {
+                            "contents": "Neighbor data remains unchanged.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "cedar/sample",
+                "minimum_lv": 12582912,
+                "minimum_filesystem": 12582912,
+                "fill_lv": true
+              }
+            ],
+            "worked": [
+              {
+                "text": "lvs",
+                "explanation": "Inspect current state without changing it."
+              },
+              {
+                "text": "resize2fs /dev/cedar/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              }
+            ],
+            "try_change": "After the worked example passes, extend the sample LV by another4MiB without resizing its filesystem. Check why filesystem-to-LV equality now fails, then run the repair to fill the enlarged LV. Assignment state stays unchanged.",
+            "experiment": "lvextend -L +4M cedar/sample",
+            "repair": "resize2fs /dev/cedar/sample"
+          }
+        }
+      },
+      "solution": [
+        "lvs",
+        "resize2fs /dev/service/reports 20M",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-free-space"
+      ]
+    },
+    {
+      "id": "lpic2-lvm-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Bounded LVM volume growth",
+      "unit": "lvm-volume-growth",
+      "title": "Plan a two-volume shift handover without starving the second LV",
+      "summary": "Complete the storage handover: grow handover/reports and its filesystem to at least16MiB and handover/queue with its filesystem to at least12MiB. The existing pool alone cannot satisfy both; add the supplied blank /dev/handoverb. Keep neighbor and every existing file unchanged. Plan both allocations before using all free space on one LV. Verify each filesystem separately.",
+      "objective": "Complete the storage handover: grow handover/reports and its filesystem to at least16MiB and handover/queue with its filesystem to at least12MiB. The existing pool alone cannot satisfy both; add the supplied blank /dev/handoverb. Keep neighbor and every existing file unchanged. Plan both allocations before using all free space on one LV. Verify each filesystem separately.",
+      "retry_guidance": "Read the current physical/group/LV reports and the separate filesystem table. A rejected command retains prior work. If a valid allocation leaves insufficient space for another required LV, Reset only this assignment and plan both volumes before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Inspect current inventory and capacities",
+        "Plan the requested storage change",
+        "Apply only the required growth commands",
+        "Verify every capacity and preserve the existing data"
+      ],
+      "guide": [],
+      "explanation": "The reference is one supported plan. Equivalent extent counts, absolute/relative binary sizes and deliberate use of all free space are accepted when every current capacity and preservation outcome is satisfied. Reports and saved success flags alone cannot grant credit.",
+      "hints": [
+        "Read VFree in vgs before asking lvextend for more extents.",
+        "The filesystem table can remain small even after lvs reports a larger backing LV.",
+        "Use /dev/VG/LV with resize2fs; its suffixless unit is4096-byte blocks."
+      ],
+      "sources": [
+        "https://github.com/lvmteam/lvm2/blob/main/man/lvextend.8_pregen",
+        "https://github.com/lvmteam/lvm2/blob/main/man/pvcreate.8_pregen",
+        "https://github.com/tytso/e2fsprogs/blob/master/resize/resize2fs.8.in"
+      ],
+      "simplifications": "Offline supplied linear LVM growth only. Fixed profile1MiB data start, whole PE allocation and a separate4KiB-block modeled ext4 capacity; flat UTF8 files are retained. No real disk/host command, full ext4 metadata, shrink, force, deletion, aliases or creation of VGs/LVs/filesystems.",
+      "initial": {
+        "kind": "Lvm",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/handovera": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "handover"
+              },
+              "/dev/handoverforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/handoverb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "handover": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "handover monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain handover original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/queue.txt": {
+                          "contents": "handover next shift: 12\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "current": {
+            "version": 1,
+            "devices": {
+              "/dev/handovera": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "handover"
+              },
+              "/dev/handoverforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/handoverb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "handover": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "handover monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain handover original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/queue.txt": {
+                          "contents": "handover next shift: 12\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example_initial": {
+            "version": 1,
+            "devices": {
+              "/dev/bircha": {
+                "bytes": 22020096,
+                "role": "PhysicalVolume",
+                "group": "birch"
+              },
+              "/dev/birchforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/birchb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "birch": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "birch monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain birch original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/queue.txt": {
+                          "contents": "birch next shift: 12\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "devices": {
+              "/dev/bircha": {
+                "bytes": 22020096,
+                "role": "PhysicalVolume",
+                "group": "birch"
+              },
+              "/dev/birchforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/birchb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "birch": {
+                "extent_bytes": 2097152,
+                "volumes": {
+                  "sample": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 0
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "birch monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain birch original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 2
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 3
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/queue.txt": {
+                          "contents": "birch next shift: 12\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 4
+                      },
+                      {
+                        "pv": "/dev/bircha",
+                        "index": 5
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "view": "introduction",
+          "command": "",
+          "example_command": "",
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Lvm",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "devices": {
+              "/dev/handovera": {
+                "bytes": 26214400,
+                "role": "PhysicalVolume",
+                "group": "handover"
+              },
+              "/dev/handoverforeign": {
+                "bytes": 34603008,
+                "role": "Foreign",
+                "group": ""
+              },
+              "/dev/handoverb": {
+                "bytes": 17825792,
+                "role": "Blank",
+                "group": ""
+              }
+            },
+            "groups": {
+              "handover": {
+                "extent_bytes": 4194304,
+                "volumes": {
+                  "reports": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 0
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/report.txt": {
+                          "contents": "handover monthly total: 47\n"
+                        },
+                        "/notes": {
+                          "contents": "Retain handover original notes.\n"
+                        }
+                      }
+                    }
+                  },
+                  "queue": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 1
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/queue.txt": {
+                          "contents": "handover next shift: 12\n"
+                        }
+                      }
+                    }
+                  },
+                  "neighbor": {
+                    "extents": [
+                      {
+                        "pv": "/dev/handovera",
+                        "index": 2
+                      }
+                    ],
+                    "filesystem": {
+                      "blocks": 1024,
+                      "files": {
+                        "/peer.txt": {
+                          "contents": "Neighbor data remains unchanged.\n"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "targets": [
+            {
+              "volume": "handover/reports",
+              "minimum_lv": 16777216,
+              "minimum_filesystem": 16777216,
+              "fill_lv": false
+            },
+            {
+              "volume": "handover/queue",
+              "minimum_lv": 12582912,
+              "minimum_filesystem": 12582912,
+              "fill_lv": false
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "You can inspect a supplied disk identity and distinguish a saved mount entry from a live mount. Here you will work inside an existing logical-volume group. PV, VG, LV and filesystem capacity are introduced below; no real administrator experience or host command is assumed.",
+            "concepts": [
+              {
+                "title": "Inspect the three storage layers",
+                "text": "A physical volume (PV) contributes space to a volume group (VG); a logical volume (LV) receives whole extents from that group. Run pvs, vgs and lvs first. The byte columns and the on-screen filesystem table describe current simulated state. Displaying a table does not resize anything."
+              },
+              {
+                "title": "Count usable space before allocating",
+                "text": "This supplied profile reserves 1MiB at the start of each device. Remaining bytes form whole physical extents of the group’s displayed size; a partial tail is unusable. Every extent may belong to only one LV. A blank supplied device is not free VG space until it joins the group. Foreign devices must remain untouched."
+              },
+              {
+                "title": "Choose a valid growth request",
+                "text": "lvextend -L 16M VG/LV requests an absolute size; -L +8M adds 8MiB. Integer M/G units are binary. Requests round upward to whole extents. -l gives an extent count; +100%FREE assigns all currently free group extents to that LV, so another LV may have no room left. No shrink or allocation reversal is supported here."
+              },
+              {
+                "title": "Grow the filesystem separately",
+                "text": "LV backing and the filesystem using it have different capacities. resize2fs /dev/VG/LV grows the modeled ext4 filesystem to the LV boundary; 20M chooses a size and a suffixless count means 4096-byte blocks. The device pathname is required. Enlarging the LV alone leaves the filesystem small; enlarging the filesystem first cannot create backing space."
+              },
+              {
+                "title": "Add only the intended supplied PV",
+                "text": "When existing group free space is insufficient, pvcreate /dev/NAME initializes a supplied blank device and vgextend VG /dev/NAME adds it to an existing group. vgextend can also initialize a blank device itself, so explicit pvcreate is a legitimate optional step. Existing PVs and foreign signatures cannot be wiped here. Neither command creates an LV or a filesystem."
+              },
+              {
+                "title": "Verify capacity and preservation",
+                "text": "Run the read-only reports again, inspect filesystem capacities and existing file contents, then Check work. Preserve the sibling volumes and their data as well as the target files. This simulator retains a rejected command atomically; real storage tools have different failure and safety conditions. No real disk, mounted filesystem, shell, force, removal or device alias is available."
+              }
+            ],
+            "description": "A separate birch workspace uses different devices, extent sizes, LV names, file contents and target capacities. Commands here never touch the assignment. Run each selected worked command explicitly, then try the documented incomplete change and repair.",
+            "fixture": {
+              "version": 1,
+              "devices": {
+                "/dev/bircha": {
+                  "bytes": 22020096,
+                  "role": "PhysicalVolume",
+                  "group": "birch"
+                },
+                "/dev/birchforeign": {
+                  "bytes": 34603008,
+                  "role": "Foreign",
+                  "group": ""
+                },
+                "/dev/birchb": {
+                  "bytes": 17825792,
+                  "role": "Blank",
+                  "group": ""
+                }
+              },
+              "groups": {
+                "birch": {
+                  "extent_bytes": 2097152,
+                  "volumes": {
+                    "sample": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 0
+                        },
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 1
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/report.txt": {
+                            "contents": "birch monthly total: 47\n"
+                          },
+                          "/notes": {
+                            "contents": "Retain birch original notes.\n"
+                          }
+                        }
+                      }
+                    },
+                    "queue": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 2
+                        },
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 3
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/queue.txt": {
+                            "contents": "birch next shift: 12\n"
+                          }
+                        }
+                      }
+                    },
+                    "neighbor": {
+                      "extents": [
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 4
+                        },
+                        {
+                          "pv": "/dev/bircha",
+                          "index": 5
+                        }
+                      ],
+                      "filesystem": {
+                        "blocks": 1024,
+                        "files": {
+                          "/peer.txt": {
+                            "contents": "Neighbor data remains unchanged.\n"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "targets": [
+              {
+                "volume": "birch/sample",
+                "minimum_lv": 8388608,
+                "minimum_filesystem": 8388608,
+                "fill_lv": true
+              },
+              {
+                "volume": "birch/queue",
+                "minimum_lv": 6291456,
+                "minimum_filesystem": 6291456,
+                "fill_lv": true
+              }
+            ],
+            "worked": [
+              {
+                "text": "vgextend birch /dev/birchb",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "lvextend -L 8M birch/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "resize2fs /dev/birch/sample",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "lvextend -L 6M birch/queue",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              },
+              {
+                "text": "resize2fs /dev/birch/queue",
+                "explanation": "Change only the supplied example state; inspect the distinct LV and filesystem capacities afterward."
+              }
+            ],
+            "try_change": "After the worked example passes, extend the sample LV by another4MiB without resizing its filesystem. Check why filesystem-to-LV equality now fails, then run the repair to fill the enlarged LV. Assignment state stays unchanged.",
+            "experiment": "lvextend -L +4M birch/sample",
+            "repair": "resize2fs /dev/birch/sample"
+          }
+        }
+      },
+      "solution": [
+        "vgs",
+        "vgextend handover /dev/handoverb",
+        "lvextend -L 16M handover/reports",
+        "resize2fs /dev/handover/reports",
+        "lvextend -L 12M handover/queue",
+        "resize2fs /dev/handover/queue",
+        "lvs"
+      ],
+      "prerequisites": [
+        "lpic2-lvm-free-space",
+        "lpic2-lvm-add-pv",
+        "lpic2-lvm-filesystem-gap"
+      ]
+    }
+  ]
+}

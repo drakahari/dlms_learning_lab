@@ -508,7 +508,7 @@ fn current_unsaved_edits_and_saved_invalid_ttl_clock_and_practice_drafts_survive
     }
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("progress-v1.json");
-    progress::save(&path, &p).unwrap();
+    progress::save_with_catalog(&path, &p, &all).unwrap();
     let bytes = std::fs::read(&path).unwrap();
     let mut loaded = progress::load(&path, &all).unwrap();
     // Main-file provenance is intentionally absent from portable learning data.

@@ -1761,7 +1761,7 @@ mod attempt_projection_tests {
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
         let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 182);
+        assert_eq!(all.len(), 186);
         let new: crate::pack::Pack =
             serde_json::from_str(include_str!("../scenarios/linux-one-off-v1.json")).unwrap();
         assert_eq!(

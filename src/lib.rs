@@ -77,6 +77,7 @@ pub mod discovery_workspace;
 
 /// Bounded virtual linear-LVM growth foundation; no curriculum integration.
 pub mod lvm;
+pub mod lvm_workspace;
 pub mod storage;
 
 pub mod storage_workspace;
@@ -160,3 +161,10 @@ pub mod physical_link_workspace;
 
 /// Bounded single-upstream virtual NTP foundation; no curriculum integration.
 pub mod ntp;
+// Shared developer-QA manifest hashing; not a production cryptography API.
+// Keep one module owner per crate instead of loading duplicate test modules.
+// The lib-unit harness already owns the immutable historical reader's digest.
+#[cfg(not(test))]
+#[doc(hidden)]
+#[path = "../examples/support/automation_digest.rs"]
+pub mod developer_digest;

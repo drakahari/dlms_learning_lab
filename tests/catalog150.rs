@@ -66,9 +66,18 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
         serde_json::to_value(new.scenarios).unwrap()
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| {
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == t)
+                .count()
+        }),
+        [53, 40, 32, 57]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 32, 57]
+        [53, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

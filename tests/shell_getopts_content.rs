@@ -429,8 +429,16 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     assert_eq!(baseline.len(), 119);
     assert_eq!(one_off_boundary::before_len(&old), 176);
     assert_eq!(
-        old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        one_off_boundary::loop_registration::lvm_registration::before_scenarios(&old)
+            .iter()
+            .map(|s| &s.id)
+            .collect::<BTreeSet<_>>()
+            .len(),
         182
+    );
+    assert_eq!(
+        old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        186
     );
     assert_eq!(
         old[..176]

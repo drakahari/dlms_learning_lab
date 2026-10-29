@@ -76,7 +76,15 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         ("LPIC-2", 32),
         ("Bash/Shell", 57),
     ] {
-        assert_eq!(all.iter().filter(|s| s.track == track).count(), count);
+        assert_eq!(
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count(),
+            count
+        );
+        let current = if track == "LPIC-2" { count + 4 } else { count };
+        assert_eq!(all.iter().filter(|s| s.track == track).count(), current);
     }
 }
 #[test]

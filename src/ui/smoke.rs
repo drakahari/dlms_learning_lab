@@ -20,6 +20,7 @@ pub(in crate::ui) mod file_backup_lessons;
 mod find_lessons;
 mod legacy_terminal;
 pub(in crate::ui) mod loop_recovery;
+pub(in crate::ui) mod lvm_lessons;
 mod mac_layout;
 mod mac_learning;
 mod mac_lessons;
@@ -413,6 +414,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 78000..=79999 => {
+                let (advance, capture) = self.lvm_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 73000..=73999 => {
                 let (advance, capture) = self.one_off_lessons_native(ctx, n);
                 if !advance {

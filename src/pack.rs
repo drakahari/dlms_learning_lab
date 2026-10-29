@@ -237,6 +237,13 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         {
             return Err(format!("{}: invalid learning guidance", s.id));
         }
+        if matches!(s.initial, State::Lvm { .. }) || matches!(s.goal, Goal::Lvm { .. }) {
+            crate::lvm_workspace::source(s)?;
+            let Goal::Lvm { definition } = &s.goal else {
+                return Err("Wrong LVM Goal".into());
+            };
+            definition.validate()?;
+        }
         if let State::Vlsm { allocations, .. } = &s.initial
             && allocations
                 .iter()
@@ -991,6 +998,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Lvm { simulation } => simulation.validate().is_ok(),
         State::PhysicalLink { simulation } => simulation.validate().is_ok(),
         State::FileBackup { simulation } => simulation.valid(),
         State::EtherChannel { simulation } => simulation.validate().is_ok(),
@@ -1208,5 +1216,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/ipv4-private-planning-v1.json"),
         include_str!("../scenarios/linux-one-off-v1.json"),
         include_str!("../scenarios/shell-loop-recovery-v1.json"),
+        include_str!("../scenarios/lvm-growth-v1.json"),
     ])
 }

@@ -318,7 +318,7 @@ fn older_bundled_progress_histories_favorites_and_unrelated_drafts_survive_selec
     .unwrap();
     assert_eq!(pending.progress.attempts.len(), catalog_len + 1);
     let target = dir.path().join("restored.json");
-    progress::save(&target, &loaded).unwrap();
+    progress::save_with_catalog(&target, &loaded, &labs).unwrap();
     let target_bytes = std::fs::read(&target).unwrap();
     let result = dlms_learning_lab::backup::restore(&target, &pending, &labs).unwrap();
     assert_eq!(
