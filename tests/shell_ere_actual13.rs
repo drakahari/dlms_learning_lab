@@ -94,7 +94,7 @@ fn preserved_metadata(mut a: Value, mut b: Value) {
 }
 fn all() -> Vec<pack::Scenario> {
     let out = pack::bundled().unwrap();
-    assert_eq!(out.len(), 190);
+    assert_eq!(out.len(), 193);
     out
 }
 fn save(raw: &[u8], p: &Progress, all: &[pack::Scenario]) -> Progress {
@@ -371,7 +371,7 @@ fn both_captured13_profiles_retain_every_prior12_record_and_exact_non_script_and
 }
 #[test]
 #[ignore = "Requires fixed genuine13 profile; all43 current missing nonScript contexts remain absent"]
-fn current190_absent_non_script_identities_never_gain_answers_favorites_or_mastery() {
+fn current193_absent_non_script_identities_never_gain_answers_favorites_or_mastery() {
     let all = all();
     let raw = evidence::observed("writer13-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
@@ -437,7 +437,9 @@ fn current190_absent_non_script_identities_never_gain_answers_favorites_or_maste
     assert_eq!(ids.len(), 43);
     assert_eq!(
         all.iter()
-            .filter(|s| !old.attempts.contains_key(&s.id))
+            .filter(
+                |s| !matches!(s.initial, State::Script { .. }) && !old.attempts.contains_key(&s.id)
+            )
             .map(|s| s.id.as_str())
             .collect::<std::collections::BTreeSet<_>>(),
         ids
@@ -562,4 +564,29 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
     let reset_resumed = save(&raw, &p, &all);
     assert!(!progress::current_solved(&reset_resumed.attempts[id], s));
     assert_eq!(value(&reset_resumed.attempts[id]), value(&p.attempts[id]));
+}
+
+#[test]
+#[ignore = "Requires fixed genuine13 original and draft profiles; no newly invented ERE work"]
+fn three_new_ere_scripts_are_absent_from_both_genuine13_profiles_without_changing_43_non_script_count()
+ {
+    let all = all();
+    for file in ["writer13-original.json", "writer13-drafts.json"] {
+        let raw = evidence::observed(file);
+        let old: Progress = serde_json::from_slice(&raw).unwrap();
+        let current = progress::decode(&raw, &all).unwrap();
+        for id in [
+            "shell-ere-event-view",
+            "shell-ere-inventory-review",
+            "shell-ere-incident-report",
+        ] {
+            for profile in [&old, &current] {
+                assert!(!profile.attempts.contains_key(id));
+                assert!(!profile.favorites.contains(id));
+            }
+            let source = all.iter().find(|s| s.id == id).unwrap();
+            assert!(matches!(source.initial, State::Script { .. }));
+            assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+        }
+    }
 }

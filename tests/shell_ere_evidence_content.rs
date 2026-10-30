@@ -1,4 +1,4 @@
-//! Unregistered original ERE assignments. All execution is the bounded in-process VM.
+//! Registered original ERE assignments. All execution is the bounded in-process VM.
 use dlms_learning_lab::{
     course,
     engine::{self, Goal, State},
@@ -62,8 +62,8 @@ fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 14);
-        let mut all = pack::bundled().unwrap();
-        all.extend(authored());
+        let all = pack::bundled().unwrap();
+        assert_eq!(all.len(), 193);
         let t = texts(&all);
         assert!(t.iter().all(|s| s.len() <= pack::MAX_PACK_BYTES));
         pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap()
@@ -101,7 +101,8 @@ fn programs(s: &Scenario) -> Vec<String> {
 #[test]
 fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dependency_closure() {
     let r = review();
-    let old = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    let old = ntp_registration::ere_registration::before_scenarios(&current);
     let scripts = old
         .iter()
         .filter(|s| matches!(s.initial, State::Script { .. }))
@@ -130,36 +131,34 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
         assert_eq!(value(s), value(&pinned[&s.id]));
     }
     let units = include_str!("../scenarios/units-v1.json");
-    // Exact current190/50 admission must recover the complete reviewed186/49
+    // Exact current193/51→190/50 admission must recover reviewed186/49
     // bytes. The original historical hash below remains unchanged authority.
-    let predecessor = ntp_registration::before_units(units.as_bytes()).unwrap();
+    let checked50 = ntp_registration::ere_registration::before_units(units.as_bytes()).unwrap();
+    let predecessor = ntp_registration::before_units(&checked50).unwrap();
     assert_eq!(
         digest::hash(&predecessor),
         r["original_units_sha256"].as_str().unwrap()
     );
-    let typed_current = course::bundled(&old).unwrap();
+    let full_units = course::bundled(&current).unwrap();
+    assert_eq!(full_units.len(), 51);
+    let typed_current = ntp_registration::ere_registration::before_typed_units(&full_units);
     let typed_predecessor = course::load(
         std::str::from_utf8(&predecessor).unwrap(),
-        ntp_registration::before_scenarios(&old),
+        ntp_registration::before_scenarios(old),
     )
     .unwrap();
     assert_eq!(
         value(&typed_predecessor),
-        value(ntp_registration::before_typed_units(&typed_current))
+        value(ntp_registration::before_typed_units(typed_current))
     );
     let all = catalog();
-    assert_eq!(value(&all[..old.len()]), value(&old));
+    assert_eq!(value(&all[..old.len()]), value(old));
     assert_eq!(value(&all[old.len()..]), value(&authored()));
     assert_eq!(
         authored().iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         IDS
     );
-    let mut index: Value = serde_json::from_str(units).unwrap();
-    index["units"]
-        .as_array_mut()
-        .unwrap()
-        .push(r["unit_proposal"].clone());
-    let typed = course::load(&index.to_string(), all).unwrap();
+    let typed = course::bundled(all).unwrap();
     assert_eq!(value(typed.last().unwrap()), r["unit_proposal"]);
 }
 #[test]
@@ -386,6 +385,9 @@ fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectati
             _ => unreachable!(),
         }
         let mut all = pack::bundled().unwrap();
+        assert_eq!(all.len(), 193);
+        all.retain(|s| !IDS.contains(&s.id.as_str()));
+        assert_eq!(all.len(), 190);
         all.extend(serde_json::from_value::<Pack>(p).unwrap().scenarios);
         let t = texts(&all);
         assert!(

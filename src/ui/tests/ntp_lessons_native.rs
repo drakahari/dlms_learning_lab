@@ -238,7 +238,8 @@ fn ntp_normal190_real_events_complete_all_tasks_and_every_capture_phase_without_
     a.smoke = true;
     a.smoke_stage = 80000;
     assert!(!a.synthetic && !a.developer);
-    assert_eq!((a.scenarios.len(), a.units.len()), (190, 50));
+    assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&a.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&a.units).len()),(190,50));
+    assert_eq!((a.scenarios.len(), a.units.len()), (193, 51));
     assert!(a.progress.attempts.is_empty());
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();

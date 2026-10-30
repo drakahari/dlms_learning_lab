@@ -3,6 +3,7 @@ import contextlib
 import copy
 import io
 import json
+import stat
 from pathlib import Path
 import sys
 import tempfile
@@ -13,6 +14,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import shell_ere_reference as c
 
 PROJECT = Path(__file__).resolve().parents[2]
+# Named CURRENT QA extension, not inputs observed by the sealed r1 ELF.
+# r1 COMPILED396/SOURCES409/collector/probe stay immutable. Fresh r1 capture
+# must still refuse these paths until a separately reviewed new collector.
+CURRENT_NATIVE_QA_INPUTS = (('src/ui/smoke/ere_evidence.rs', 81398, 'dae5c113b049d5678b298e955a7a7a26a8716a5afb4e0683d68423207d8633ea'), ('src/ui/tests/ere_evidence_native.rs', 30841, '1d5dc8f59e89802af17b2fcbb7c137ee5dfa650674e6b7800877412c2fc2bdc6'))
 
 class ShellEreReferenceGuards(unittest.TestCase):
     def setUp(self):
@@ -311,7 +316,16 @@ class ShellEreReferenceGuards(unittest.TestCase):
         actual = {p.relative_to(PROJECT).as_posix() for family in c.SOURCE_FAMILIES
                   for p in (PROJECT / family).rglob('*') if p.is_file()}
         listed = {name for name in c.COMPILED if Path(name).parts[0] in c.SOURCE_FAMILIES}
-        self.assertEqual(listed, actual)
+        extension = {name for name, _, _ in CURRENT_NATIVE_QA_INPUTS}
+        self.assertEqual(len(extension), 2)
+        self.assertTrue(listed.isdisjoint(extension))
+        self.assertEqual(listed | extension, actual)
+        for name, size, sha in CURRENT_NATIVE_QA_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
         self.assertTrue({'Cargo.toml', 'Cargo.lock', c.PROBE_SOURCE,
                          'examples/support/automation_digest.rs', c.FIXTURE} <= set(c.COMPILED))
         self.assertEqual(len(c.CORE_PINS), 18)
@@ -378,4 +392,31 @@ class ShellEreReferenceGuards(unittest.TestCase):
             with self.assertRaises(c.safe.OracleError): c.verify(self.root)
             source.write_bytes(original)
             self.assertEqual(c.verify(self.root)['status'], 'VERIFIED24-FIXED-UTILITY-COMPARISONS')
+            child.assert_not_called()
+
+
+    def test_frozen_r1_prepare_refuses_each_named_current_qa_addition_before_any_child(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_NATIVE_QA_INPUTS:
+                path = self.put(name, 'SYNTHETIC named later QA file')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                # Remove only exact newly-created disposable mock paths.
+                path.unlink()
+                parent = path.parent
+                while parent != self.root / 'src':
+                    previous = parent
+                    parent = parent.parent
+                    previous.rmdir()
+                self.assertEqual(c.project_roster(self.root), set(names))
             child.assert_not_called()

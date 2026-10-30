@@ -204,6 +204,7 @@ class FixedAutomationSafety(unittest.TestCase):
         # Close every reviewed current append before the unchanged old44/43
         # assertions. No historical input, recipe or observation is rewritten.
         for catalog, before_count, after_count, unit_key, expected_recipe in [
+            (193,50,51,'ere_unit','c26dec73f0727ce2ee24d76b991204e3114be028be41cd562397714b7c1ced55'),
             (190,49,50,'ntp_unit','29d8d6d38b61d6d8a81ab89cf7e4cc7e0454ec605fbc838f73b43a1747331966'),
             (186, 48, 49, 'lvm_unit', '72befcc13bf6fb0f8d78b301f699de98b105430d5b4240babcc3b7b409cab861'),
             (182, 47, 48, 'loop_unit', 'e1083dcd628430234e317627335da8dc45e77c96789e1aad4a7f09e98e89bf6b'),
@@ -232,7 +233,10 @@ class FixedAutomationSafety(unittest.TestCase):
         current=(ROOT/'scenarios/units-v1.json').read_bytes()
         old=self.closed_original44_units(current)
         self.assertEqual(hashlib.sha256(old).hexdigest(), '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
-        self.assertEqual(len(json.loads(current)['units']),50)
+        self.assertEqual(len(json.loads(current)['units']),51)
+        before50=(ROOT/'tests/fixtures/ere-units-before190.json').read_bytes()
+        self.assertEqual(len(json.loads(before50)['units']),50)
+        self.assertEqual(json.loads(current)['units'][:50],json.loads(before50)['units'])
         before49=(ROOT/'tests/fixtures/ntp-units-before186.json').read_bytes()
         self.assertEqual(len(json.loads(before49)['units']),49)
         self.assertEqual(json.loads(current)['units'][:49],json.loads(before49)['units'])
@@ -243,6 +247,11 @@ class FixedAutomationSafety(unittest.TestCase):
         for bad in [current+b' ',current.replace(b'physical-uplink-diagnosis',b'physical-uplink-tampered',1), current.replace(b'linux-one-off-jobs',b'linux-one-off-tampered',1)]:
             with self.assertRaises(AssertionError):
                 self.closed_original44_units(bad)
+
+        ere_title=b'Exact matching and trustworthy evidence'
+        self.assertEqual(current.count(ere_title),1)
+        with self.assertRaises(AssertionError):
+            self.closed_original44_units(current.replace(ere_title,b'Unreviewed ERE unit metadata',1))
 
         ntp_title=b'Configure and verify NTP client/server dependencies'
         self.assertEqual(current.count(ntp_title),1)

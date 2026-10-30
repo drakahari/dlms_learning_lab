@@ -15,6 +15,7 @@ mod debian_packages_lessons;
 mod dhcpv4;
 mod dhcpv4_lessons;
 mod dns_reverse;
+pub(in crate::ui) mod ere_evidence;
 pub(in crate::ui) mod etherchannel_lessons;
 pub(in crate::ui) mod file_backup_lessons;
 mod find_lessons;
@@ -369,6 +370,7 @@ impl LabApp {
         let immediate_stop = immediate_stop || optional_inputs::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || numeric_validation::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || loop_recovery::immediate_stop(self.smoke_stage);
+        let immediate_stop = immediate_stop || ere_evidence::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop =
             immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
@@ -700,6 +702,13 @@ impl LabApp {
             }
             n @ 72000..=72499 => {
                 let (advance, capture) = self.private_office_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 82000..=82718 => {
+                let (advance, capture) = self.ere_evidence_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

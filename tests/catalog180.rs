@@ -27,7 +27,8 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
         .len(),
         186
     );
-    assert_eq!(all.len(), 190);
+    assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),190);
+    assert_eq!(all.len(), 193);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| {
             one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
@@ -44,14 +45,15 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
         .len(),
         186
     );
-    assert_eq!(all.len(), 190);
+    assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),190);
+    assert_eq!(all.len(), 193);
     assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 57]
+        [57, 40, 36, 60]
     );
-    let scripts = all
+    let scripts = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all)
         .iter()
         .filter(|s| matches!(s.goal, Goal::Script { .. }))
         .collect::<Vec<_>>();
@@ -91,7 +93,9 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
     let old = registration::original_catalog(&all);
     let raw = include_bytes!("../scenarios/units-v1.json");
     let before = registration::before_units(raw).unwrap();
-    let units = course::bundled(&all).unwrap();
+    let current_units = course::bundled(&all).unwrap();
+    assert_eq!(current_units.len(), 51);
+    let units = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&current_units).to_vec();
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!(
         (
@@ -269,7 +273,7 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
         assert!(!p.favorites.contains(&source.id) && !restored.favorites.contains(&source.id));
         assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
-    for source in &all[186..] {
+    for source in &all[186..190] {
         assert!(
             matches!(source.initial, State::Ntp { .. }) && matches!(source.goal, Goal::Ntp { .. })
         );
@@ -280,6 +284,17 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
             !p.attempts.contains_key(&source.id) && !restored.attempts.contains_key(&source.id)
         );
         assert!(!p.favorites.contains(&source.id) && !restored.favorites.contains(&source.id));
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    for source in &all[190..] {
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        for profile in [&decoded, &p, &restored] {
+            assert!(!profile.attempts.contains_key(&source.id));
+            assert!(!profile.favorites.contains(&source.id));
+        }
         assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
     assert!(matches!(

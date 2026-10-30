@@ -10,6 +10,8 @@ use dlms_learning_lab::{
 };
 use serde_json::Value;
 use std::sync::OnceLock;
+#[path = "ere_registration.rs"]
+pub mod ere_registration;
 pub const IDS: [&str; 4] = [
     "ccna-ntp-client-chain",
     "ccna-ntp-cycle-repair",
@@ -36,6 +38,8 @@ fn recipe() -> &'static Value {
     })
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_ere = ere_registration::prefix_units(raw)?;
+    let raw = without_ere.as_deref().unwrap_or(raw);
     let r = recipe();
     if raw.len() as u64 != r["after_units50_bytes"].as_u64().ok_or("50length")?
         || digest::hash(raw) != r["after_units50_sha256"].as_str().ok_or("50pin")?
@@ -68,6 +72,8 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let without_ere = ere_registration::prefix_units(raw)?;
+    let raw = without_ere.as_deref().unwrap_or(raw);
     if raw.len() as u64 == recipe()["after_units50_bytes"].as_u64().unwrap()
         && digest::hash(raw) == recipe()["after_units50_sha256"].as_str().unwrap()
     {
@@ -333,6 +339,7 @@ fn same_scenario(a: &Scenario, b: &Scenario) {
     }
 }
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    let all = ere_registration::prefix_scenarios(all).unwrap_or(all);
     assert_eq!(all.len(), 190);
     let e = expected();
     for (a, (id, v)) in all[..186].iter().zip(&e.ids) {
@@ -348,6 +355,7 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..186]
 }
 pub fn prefix_scenarios(all: &[Scenario]) -> Option<&[Scenario]> {
+    let all = ere_registration::prefix_scenarios(all).unwrap_or(all);
     if all.len() == 190 {
         Some(before_scenarios(all))
     } else {
@@ -375,6 +383,7 @@ fn same_unit(a: &Unit, b: &Unit) {
     );
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = ere_registration::prefix_typed_units(all).unwrap_or(all);
     assert_eq!(all.len(), 50);
     let e = expected();
     assert_eq!(e.old_units.len(), 49);
@@ -385,6 +394,7 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..49]
 }
 pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
+    let all = ere_registration::prefix_typed_units(all).unwrap_or(all);
     if all.len() == 50 {
         Some(before_typed_units(all))
     } else {
@@ -392,6 +402,7 @@ pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
     }
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = ere_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 50);
     let e = expected();
     assert_eq!(&all[..49], &e.old_values);
@@ -399,6 +410,7 @@ pub fn before_values(all: &[Value]) -> &[Value] {
     &all[..49]
 }
 pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
+    let all = ere_registration::prefix_values(all).unwrap_or(all);
     if all.len() == 50 {
         Some(before_values(all))
     } else {
@@ -414,7 +426,12 @@ pub fn before_attempts_len(
     if all.len() == 186 {
         return 186;
     }
-    assert_eq!(all.len(), 190);
+    let normal190 = if all.len() == 193 {
+        ere_registration::before_attempts_len(all)
+    } else {
+        all.len()
+    };
+    assert_eq!(normal190, 190);
     let e = expected();
     for (id, version) in &e.ids {
         assert!(all.contains_key(id));

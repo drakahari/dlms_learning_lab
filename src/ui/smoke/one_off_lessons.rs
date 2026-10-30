@@ -93,7 +93,8 @@ fn sources() -> &'static Vec<Scenario> {
             182
         );
         assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).len(),186);
-        assert_eq!(all.len(),190);
+        assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),190);
+        assert_eq!(all.len(),193);
         assert_eq!(
             all[176..180]
                 .iter()
@@ -955,7 +956,8 @@ impl LabApp {
             (182, 48)
         );
         assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units).len()),(186,49));
-        assert_eq!((self.scenarios.len(), self.units.len()), (190, 50));
+        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&self.units).len()), (190, 50));
+        assert_eq!((self.scenarios.len(), self.units.len()), (193, 51));
         assert_eq!(
             self.scenarios[176..180]
                 .iter()

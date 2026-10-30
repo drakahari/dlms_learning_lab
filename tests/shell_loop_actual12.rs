@@ -228,7 +228,11 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
 fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() {
     let all = pack::bundled().unwrap();
     assert_eq!(ntp_registration::before_scenarios(&all).len(), 186);
-    assert_eq!(all.len(), 190);
+    assert_eq!(
+        ntp_registration::ere_registration::before_scenarios(&all).len(),
+        190
+    );
+    assert_eq!(all.len(), 193);
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();

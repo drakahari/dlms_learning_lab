@@ -12,10 +12,10 @@ mod combined;
 use dlms_learning_lab::developer_digest as digest;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
-#[path = "support/ntp_original_catalog.rs"]
-mod original;
+use ere::original190::before_ntp as original;
 use lvm_registration::ntp_registration as registration;
 use one_off_boundary::loop_registration::lvm_registration;
+use registration::ere_registration as ere;
 fn value<T: serde::Serialize + ?Sized>(a: &T) -> Value {
     serde_json::to_value(a).unwrap()
 }
@@ -26,7 +26,9 @@ fn prepared(s: &pack::Scenario) -> Attempt {
 }
 #[test]
 fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_tasks() {
-    let all = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 193);
+    let all = ere::before_scenarios(&current).to_vec();
     let old = original::load();
     assert_eq!((all.len(), old.len()), (190, 186));
     assert_eq!(value(&all[..186]), value(&old));
@@ -43,6 +45,11 @@ fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_t
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
         [57, 40, 36, 57]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| current.iter().filter(|s| s.track == t).count()),
+        [57, 40, 36, 60]
     );
     let scripts = all
         .iter()
@@ -69,16 +76,23 @@ fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_t
 }
 #[test]
 fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mutations() {
-    let all = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 193);
+    let all = ere::before_scenarios(&current).to_vec();
+    assert_eq!(all.len(), 190);
     let old = original::load();
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current_raw = include_bytes!("../scenarios/units-v1.json");
+    let checked50 = ere::before_units(current_raw).unwrap();
+    let raw = checked50.as_slice();
     let before = registration::before_units(raw).unwrap();
     assert_eq!(before, include_bytes!("fixtures/ntp-units-before186.json"));
     let r: Value =
         serde_json::from_str(include_str!("fixtures/catalog190-registration.json")).unwrap();
     assert_eq!(digest::hash(raw), r["after_units50_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units49_sha256"]);
-    let units = course::bundled(&all).unwrap();
+    let current_units = course::bundled(&current).unwrap();
+    assert_eq!(current_units.len(), 51);
+    let units = ere::before_typed_units(&current_units);
     let previous = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!((units.len(), previous.len()), (50, 49));
     assert_eq!(value(&units[..49]), value(&previous));
@@ -86,7 +100,7 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
     assert_eq!(units[49].labs, registration::IDS);
     assert_eq!(units[49].prerequisites, ["ipv4-foundations"]);
     assert_eq!(
-        value(registration::before_typed_units(&units)),
+        value(registration::before_typed_units(units)),
         value(&previous)
     );
     assert_eq!(
@@ -135,7 +149,9 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
 }
 #[test]
 fn source_inverse_never_masks_partial_extra_or_modified_new_tasks() {
-    let all = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 193);
+    let all = ere::before_scenarios(&current).to_vec();
     for mode in 0..6 {
         let mut bad = all.clone();
         match mode {

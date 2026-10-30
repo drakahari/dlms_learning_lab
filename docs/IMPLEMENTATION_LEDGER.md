@@ -4949,3 +4949,29 @@ Existing scopedFedora5233candidate remains evaluator13. No release publication.
 M527 coverage remains190/50 with the three ERE projects unregistered; no objective
 status is promoted. M528 post-documentation Python check passes all445 tests.
 The capability is ready for its coherent commit; normal193 registration follows.
+
+
+## Normal193 integration in progress —2026-10-30
+
+Capability e5f1e08 pushed. R5 registration and nativeR3 source actually applied;
+193labs/51units:57CCNA/40LPIC-1/36LPIC-2/60Bash;477scriptcases/60examples.
+M529–M543 exact successes, failures and narrowly preserved historical adapters
+are recorded in CHECKPOINT.md; native sourcepeer6123bbb8, two-module peers
+3212/453/88c7. M54210nativePASS1scale-transition inventoryFAIL, M543 same
+qualified readability testPASS after ordinary render settling. All row/clip/
+progress/20wheel assertions remain. Full/static/actualnative acceptance pending.
+The installed candidate remains190/5233/evaluator13. No completion promotion.
+
+M544446Python/M545alltargetClippy/M546retainedGNU24 PASS. M547 full222harnesses
+2,854PASS/3historical countFAIL/0ignored on unchanged1072inputs72406d37; raw
+log3de339de and RESULT retained.1599samples/min22923034624B/fullPSI0/swapout0/
+OOM0. Two exact physical source matrices and getopts old history count are
+extended with strict193→190/old186 preservation and new3IDs; Sourcepeers6319ad5c/
+3fc24be9, no weakened predicates/skips/production changes. M548 all23 focused
+PASS. Fullinclusive rerun and actual native screenshots remain pending.
+
+M549alltargetClippyPASS. M550 finalfullinclusive222harnesses2,857PASS/0FAIL/
+0ignored, reaped0;1072before66fb6113 exactafter, rawlog57a4a720.1633samples/
+min25317588992B/fullPSI0/swapout0/OOM0. Source193 implementation commit follows
+finalPython/coverage/privacy; installed actual native105/lifecycle/NFScold/
+startup remain pending. No scope or platform completion claim.

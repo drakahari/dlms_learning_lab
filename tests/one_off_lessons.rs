@@ -95,7 +95,11 @@ fn actual_reference(a: &mut Attempt, s: &pack::Scenario, actions: &Value) {
 fn four_distinct_registered_tasks_have_real_prerequisites_and_separate_teaching() {
     let old = pack::bundled().unwrap();
     assert_eq!(ntp_registration::before_scenarios(&old).len(), 186);
-    assert_eq!(old.len(), 190);
+    assert_eq!(
+        ntp_registration::ere_registration::before_scenarios(&old).len(),
+        190
+    );
+    assert_eq!(old.len(), 193);
     assert_eq!(
         serde_json::to_value(&old[176..180]).unwrap(),
         serde_json::to_value(lessons()).unwrap()

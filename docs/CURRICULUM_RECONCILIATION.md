@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main190 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main193 source, reconciled2026-10-30; final193inclusive2,857PASS/0FAIL/0ignored; installed native acceptance next; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -13,7 +13,7 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | CCNA | 57 | 15 | 64 | 47 | 0 |
 | LPIC-1 | 40 | 10 | 501 | 96 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
-| Bash/Shell | 57 | 16 | Separate path below | — | — |
+| Bash/Shell | 60 | 17 | Separate path below | — | — |
 
 All136 current parent objectives remain incomplete (92 Open,44 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
@@ -279,7 +279,7 @@ and projects, with prerequisite teaching before assessment:
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Two implemented assignments teach own-scope break/continue, unread-input handoff, first-success selection and independent job failures with22 graded cases. Broader conditional/regex forms and project-specific retry/lock behavior remain required where used; caller-loop and pipeline control escape remain unsupported. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
-| Text processing | Regex, deliberate sed/awk or equivalent documented utility capabilities; snapshot comparison, malformed-row recovery, log-analysis projects. Current literal filters and byte-field utilities do not cover these. |
+| Text processing | Three registered ERE selection/row-validation/incident-evidence projects use the bounded C-byte grep subset (installed native acceptance pending). BRE, deliberate sed/awk or equivalent documented processing, snapshot comparison and broader log-analysis work remain required; no full regex objective credit. |
 | Debugging and errors | Actual bounded tracing, useful error propagation, traps/cleanup and recovery; debugging and repair assignments, not only deliberately incorrect scripts. |
 | Safe file operations | Virtual directory/path semantics, safe temporary-file/rename behavior, validated mutation, deterministic clock and lock/retry behavior where the project depends on it. |
 | Substantial projects | Dry-run cleanup planning, verified backup/restore, idempotent configuration rollout, resumable batch processing; combine report generation/log analysis/input validation and preserve unrelated data. |
@@ -295,25 +295,25 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Preserve accepted186/evaluator13: inclusive2,715 Rust tests, all-target Clippy,
-   396 Python checks and actual68-capture Fedora storage flows. All182 predecessor
-   definitions/48 raw units and57 scripts/442 cases/57 examples remain exact.
-   Installed171 candidate acceptance is separate.
-2. Preserve the genuine evaluator13 baseline in SHELL_EVALUATOR13_BASELINE.md.
-   A future14 advance requires actual current-versus-genuine13 regression tests;
-   a sealed baseline alone is not migration acceptance.
-3. Test the reviewed HSRP and inode/link pure foundations before dependent content.
-   Integrate the reviewed four-task NTP unit with source-aware progress, runtime
-   alternatives/negatives and actual native flows. Source proposals earn no credit.
-4. Validate cooperative ERE shell integration, actual fixed24 utility comparisons
-   and genuine history before accepting its three reviewed text-evidence projects.
-   Keep all host reference work restricted to fixed disposable data.
-5. Complete reviewed HSRP/links native/source/persistence layers, then author and
-   validate meaningful content. The fifth-backup directory-selection proposal also
-   needs its ArtifactSet/content/progress/normal-native gates.
-6. Continue every remaining network/Linux/scripting assignment and capability in
-   the granular ledger. Current source fingerprints/future CCNA separation remain;
-   no arbitrary catalog quota, routine approval gate or stop after this milestone.
+1. Finish normal193 acceptance: preserve all190 prior definitions/50 raw units,
+   actual9–13 history,60scripts/477cases/60isolatedexamples and accepted workspace.
+   Capability14, full-outcome content/alternatives, fixed24GNU and focused native
+   tests pass. Initial3historical count failures are corrected with23focusedPASS;
+   finalinclusive2,857PASS/0FAIL/0ignored. Next inspect105actual native captures.
+   Stable installed190/5233 candidate remains separately identified.
+2. Apply only reviewed narrow evidence rows after actual native/full acceptance;
+   no complete objective or novice/platform credit. Preserve the sealed genuine13
+   baseline; a later15 advance needs actually observed and independently sealed
+   genuine14 evidence, never a source proposal or relabeled history.
+3. Gate reviewed GPT/ext4/swap, HSRP, links and Syslog native/source/persistence
+   layers before their separate authored packs are registered. Address identified
+   input-admission and ordinary guidance-click issues; source proposals earn no
+   implementation credit. Preserve current native/cadence/reference evidence.
+4. Continue remaining network/Linux/scripting capabilities and practical projects
+   in the granular ledger, including substantive debugging and safe automation.
+   Literal-trim15 and its two projects remain conditional source only. The fifth
+   backup directory-selection proposal still needs ArtifactSet/content/progress/
+   normal-native gates. No arbitrary catalog quota or routine approval gate.
 
 Full curriculum acceptance stays separate from Windows/macOS desktop,
 physical-device/screen-reader and novice acceptance. No release publication.

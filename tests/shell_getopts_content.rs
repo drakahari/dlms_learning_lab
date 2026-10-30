@@ -446,10 +446,20 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
         .len(),
         186
     );
+    let original190 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&old);
     assert_eq!(
-        old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        original190
+            .iter()
+            .map(|s| &s.id)
+            .collect::<BTreeSet<_>>()
+            .len(),
         190
     );
+    assert_eq!(
+        old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        193
+    );
+    assert_eq!(old[190..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::IDS);
     assert_eq!(
         old[..176]
             .iter()

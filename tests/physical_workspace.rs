@@ -272,9 +272,30 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
         .collect::<Vec<_>>();
     assert_eq!(previous.len(), 176);
-    assert_eq!(old.len(), 186);
+    let original190 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all);
+    assert_eq!(original190.len(), 190);
+    let original186 = original190
+        .iter()
+        .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(original186.len(), 186);
     assert_eq!(
-        old[182..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        serde_json::to_value(&old[..186]).unwrap(),
+        serde_json::to_value(&original186).unwrap()
+    );
+    assert_eq!(old.len(), 189);
+    assert_eq!(old[186..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::IDS);
+    assert!(
+        old[186..]
+            .iter()
+            .all(|s| matches!(s.initial, State::Script { .. })
+                && matches!(s.goal, engine::Goal::Script { .. }))
+    );
+    assert_eq!(
+        old[182..186]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         [
             "ccna-ntp-client-chain",
             "ccna-ntp-cycle-repair",
@@ -283,7 +304,7 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         ]
     );
     assert!(
-        old[182..]
+        old[182..186]
             .iter()
             .all(|s| matches!(s.initial, State::Ntp { .. })
                 && matches!(s.goal, engine::Goal::Ntp { .. }))

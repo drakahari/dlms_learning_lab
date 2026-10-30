@@ -93,7 +93,7 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
             .collect::<Vec<_>>(),
         IDS
     );
-    let scripts = all
+    let scripts = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all)
         .iter()
         .filter(|s| matches!(s.goal, Goal::Script { .. }))
         .collect::<Vec<_>>();
@@ -123,8 +123,13 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
     assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
-            .map(|t| all.iter().filter(|s| s.track == t).count()),
+            .map(|t| one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s| s.track == t).count()),
         [57, 40, 36, 57]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [57, 40, 36, 60]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

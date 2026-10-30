@@ -6,9 +6,8 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace,
 };
+use registration::ere_registration::original190::before_ntp as original;
 use serde_json::{Value, json};
-#[path = "support/ntp_original_catalog.rs"]
-mod original;
 #[path = "support/ntp_registration.rs"]
 mod registration;
 const DATA: &str = include_str!("../scenarios/ntp-client-server-v1.json");
@@ -61,7 +60,11 @@ fn combined() -> Vec<Scenario> {
         .collect::<Vec<_>>();
     let expected =
         pack::load_catalog(&packs.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
-    assert_eq!(value(&expected), value(&pack::bundled().unwrap()));
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 193);
+    let checked190 = registration::ere_registration::before_scenarios(&current);
+    assert_eq!(checked190.len(), 190);
+    assert_eq!(value(&expected), value(checked190));
     expected
 }
 fn profile(s: &Scenario, state: State) -> Progress {

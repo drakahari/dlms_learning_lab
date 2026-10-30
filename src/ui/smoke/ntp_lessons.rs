@@ -927,7 +927,8 @@ impl LabApp {
         match step {
             Step::Init => {
                 assert!(self.smoke && !self.synthetic && !self.developer);
-                assert_eq!((self.scenarios.len(), self.units.len()), (190, 50));
+                assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&self.units).len()),(190,50));
+                assert_eq!((self.scenarios.len(), self.units.len()), (193, 51));
                 let prior = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios);
                 let units = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units);
                 assert_eq!((prior.len(), units.len()), (186, 49));

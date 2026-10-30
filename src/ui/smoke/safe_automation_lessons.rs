@@ -235,11 +235,18 @@ impl LabApp {
             (176, 46)
         );
         assert_eq!(
-            self.scenarios
+            one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios)
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
             57
+        );
+        assert_eq!(
+            self.scenarios
+                .iter()
+                .filter(|s| s.track == "Bash/Shell")
+                .count(),
+            60
         );
         assert!(
             self.units

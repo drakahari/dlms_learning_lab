@@ -666,6 +666,10 @@ impl LabApp {
             {
                 stage
             } else if let Some(stage) =
+                Self::ere_evidence_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::loop_recovery_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage

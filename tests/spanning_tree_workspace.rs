@@ -931,17 +931,36 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         .chain(numeric_ids)
         .chain(["shell-loop-intake", "shell-loop-fallback"])
         .collect::<BTreeSet<_>>();
+    assert_eq!(expected_scripts.len(), 57);
+    let ere_ids = [
+        "shell-ere-event-view",
+        "shell-ere-inventory-review",
+        "shell-ere-incident-report",
+    ];
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.goal, Goal::Script { .. }) && !ere_ids.contains(&s.id.as_str()))
+            .map(|s| s.id.as_str())
+            .collect::<BTreeSet<_>>(),
+        expected_scripts
+    );
+    let current_expected = expected_scripts
+        .iter()
+        .copied()
+        .chain(ere_ids)
+        .collect::<BTreeSet<_>>();
     assert_eq!(
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .map(|s| s.id.as_str())
             .collect::<BTreeSet<_>>(),
-        expected_scripts
+        current_expected
     );
     for id in new_ids
         .into_iter()
         .chain(numeric_ids)
         .chain(["shell-loop-intake", "shell-loop-fallback"])
+        .chain(ere_ids)
     {
         let s = all.iter().find(|s| s.id == id).unwrap();
         let a = &p.attempts[id];
@@ -977,9 +996,15 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         original55_current, 54,
         "Original55 keep54 actual current runs and same unfinished draft"
     );
+    let original57_current=p.attempts.iter().filter(|(id,_)|expected_scripts.contains(id.as_str()))
+        .filter(|(_,a)|matches!(&a.state,State::Script{run:Some(r),..}if r.engine_revision==shell::EVALUATOR_REVISION)).count();
     assert_eq!(
-        current, 56,
-        "57 current scripts with the same one retained unfinished assignment"
+        original57_current, 56,
+        "Original57 preserve56 actual current runs and the same unfinished assignment"
+    );
+    assert_eq!(
+        current, 59,
+        "All60 scripts retain one unfinished original draft and include three genuinely executed ERE projects"
     );
     let prior = prior(&p, &original);
     let mut a = prepared(&s);

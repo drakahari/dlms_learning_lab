@@ -2,6 +2,8 @@
 //! or retained work. All executions here are explicit current in-process VM tests.
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -89,6 +91,7 @@ fn exact_closed_manifest_raw_bytes_and_typed_lessons_reject_unlisted_changes() {
 #[test]
 fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_fixtures() {
     let all = pack::bundled().unwrap();
+    assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s|matches!(s.goal,Goal::Script{..})).count(),57);
     let mut count = 0;
     let mut changed_defaults = Vec::new();
     for s in all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })) {
@@ -118,7 +121,7 @@ fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_f
         }
         count += 1;
     }
-    assert_eq!(count, 57);
+    assert_eq!(count, 60);
     assert_eq!(changed_defaults, ["shell-bundle", "shell-text-capstone"]);
 }
 

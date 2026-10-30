@@ -649,7 +649,13 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         old.iter()
             .filter(|s| !numeric_ids.contains(&s.id.as_str())
                 && s.id != "ccna-private-office-plan"
-                && !["shell-loop-intake", "shell-loop-fallback"].contains(&s.id.as_str()))
+                && !["shell-loop-intake", "shell-loop-fallback"].contains(&s.id.as_str())
+                && ![
+                    "shell-ere-event-view",
+                    "shell-ere-inventory-review",
+                    "shell-ere-incident-report"
+                ]
+                .contains(&s.id.as_str()))
             .count(),
         119,
         "Every original119 context-free assignment remains in the loop"
@@ -669,10 +675,33 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                 && s.teaching.is_some())
     );
     assert_eq!(
-        old.len(),
+        old.iter()
+            .filter(|s| ![
+                "shell-ere-event-view",
+                "shell-ere-inventory-review",
+                "shell-ere-incident-report"
+            ]
+            .contains(&s.id.as_str()))
+            .count(),
         125,
-        "all original123 plus two loop assignments are exercised by the same real wrapper loop"
+        "all original123 plus two loop assignments remain in the real wrapper loop"
     );
+    assert_eq!(
+        old.len(),
+        128,
+        "three ERE scripts also use the same context-free wrapper loop"
+    );
+    assert_eq!(
+        old[125..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "shell-ere-event-view",
+            "shell-ere-inventory-review",
+            "shell-ere-incident-report"
+        ]
+    );
+    assert!(old[125..].iter().all(
+        |s| matches!(s.initial, State::Script { .. }) && matches!(s.goal, Goal::Script { .. })
+    ));
     assert_eq!(
         old[113..116]
             .iter()
@@ -720,7 +749,10 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         "All original123 context-free entries retained"
     );
     assert_eq!(
-        old[123..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        old[123..125]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         ["shell-loop-intake", "shell-loop-fallback"]
     );
     assert!(

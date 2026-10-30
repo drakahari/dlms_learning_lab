@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, State},
     pack,
@@ -7,7 +9,9 @@ use dlms_learning_lab::{
 };
 #[test]
 fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
-    let labs = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.iter().filter(|s| s.teaching.is_some()).count(), 60);
+    let labs = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current);
     let edits = [
         ("Mina", "Rowan"),
         ("For:", "Recipient:"),
@@ -104,6 +108,31 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
             "{}",
             s.id
         );
+    }
+    let ere: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-ere-evidence-review.json")).unwrap();
+    for id in [
+        "shell-ere-event-view",
+        "shell-ere-inventory-review",
+        "shell-ere-incident-report",
+    ] {
+        let source = current.iter().find(|s| s.id == id).unwrap();
+        let lesson = source.teaching.as_ref().unwrap();
+        lesson.validate().unwrap();
+        assert_ne!(lesson.example, source.solution.join("\n"));
+        let row = ere["labs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|r| r["id"] == id)
+            .unwrap();
+        let changed = row["try_change"]["source"].as_str().unwrap();
+        let expected: shell::Case =
+            serde_json::from_value(row["try_change"]["expected"].clone()).unwrap();
+        let actual = shell::run(changed, &lesson.fixture);
+        assert!(expected.accepts(&actual));
+        assert_ne!(actual, shell::run(&lesson.example, &lesson.fixture));
+        assert_eq!(row["try_change"]["repair"], lesson.example);
     }
     let review: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/shell-command-vectors-review.json")).unwrap();

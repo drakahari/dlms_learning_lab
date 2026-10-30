@@ -77,15 +77,20 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
-            .map(|t| all.iter().filter(|s| s.track == t).count()),
+            .map(|t| one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s| s.track == t).count()),
         [57, 40, 36, 57]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [57, 40, 36, 60]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
-    let scripts = all
+    let scripts = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all)
         .iter()
         .filter_map(|s| {
             if let Goal::Script { cases } = &s.goal {

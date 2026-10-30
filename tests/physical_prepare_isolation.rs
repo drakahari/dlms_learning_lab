@@ -285,9 +285,33 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         &old_indices[..previous_indices.len()],
         previous_indices.as_slice()
     );
-    assert_eq!(old_indices.len(), 186);
-    assert_eq!(&old_indices[182..], &[186, 187, 188, 189]);
-    assert!(old_indices[182..].iter().all(|i| matches!(
+    let original190 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all);
+    assert_eq!(original190.len(), 190);
+    let original186 = original190
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| {
+            !matches!(
+                s.initial,
+                dlms_learning_lab::engine::State::PhysicalLink { .. }
+            )
+        })
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+    assert_eq!(original186.len(), 186);
+    assert_eq!(&old_indices[..186], original186.as_slice());
+    assert_eq!(old_indices.len(), 189);
+    assert_eq!(&old_indices[186..], &[190, 191, 192]);
+    assert_eq!(old_indices[186..].iter().map(|i| all[*i].id.as_str()).collect::<Vec<_>>(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::IDS);
+    assert!(old_indices[186..].iter().all(|i| matches!(
+        all[*i].initial,
+        dlms_learning_lab::engine::State::Script { .. }
+    ) && matches!(
+        all[*i].goal,
+        dlms_learning_lab::engine::Goal::Script { .. }
+    )));
+    assert_eq!(&old_indices[182..186], &[186, 187, 188, 189]);
+    assert!(old_indices[182..186].iter().all(|i| matches!(
         all[*i].initial,
         dlms_learning_lab::engine::State::Ntp { .. }
     ) && matches!(

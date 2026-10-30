@@ -227,7 +227,8 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
         (182, 48)
     );
     assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&a.scenarios).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&a.units).len()),(186,49));
-    assert_eq!((a.scenarios.len(), a.units.len()), (190, 50));
+    assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&a.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&a.units).len()), (190, 50));
+    assert_eq!((a.scenarios.len(), a.units.len()), (193, 51));
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();
     let mut physical = egui::vec2(1920., 1080.);

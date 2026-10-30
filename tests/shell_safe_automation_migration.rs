@@ -122,6 +122,22 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             source
         ));
     }
+    for id in [
+        "shell-ere-event-view",
+        "shell-ere-inventory-review",
+        "shell-ere-incident-report",
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(source, 0),
+            source
+        ));
+    }
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -130,6 +146,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "shell-ere-event-view",
+            "shell-ere-inventory-review",
+            "shell-ere-incident-report",
             "ccna-ntp-client-chain",
             "ccna-ntp-cycle-repair",
             "ccna-ntp-asymmetric-delivery",

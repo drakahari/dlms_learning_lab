@@ -149,10 +149,16 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     let originals = baseline["scripts"].as_array().unwrap();
     assert_eq!(originals.len(), 40);
     assert_eq!(
-        all.iter()
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
         57
+    );
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.goal, Goal::Script { .. }))
+            .count(),
+        60
     );
     let mut case_count = 0;
     for old in originals {
@@ -227,6 +233,19 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             source
         ));
     }
+    for id in [
+        "shell-ere-event-view",
+        "shell-ere-inventory-review",
+        "shell-ere-incident-report",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(!p.attempts.contains_key(id) && !p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
     let missing: BTreeSet<_> = all
         .iter()
         .filter(|s| !p.attempts.contains_key(&s.id))
@@ -235,6 +254,9 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "shell-ere-event-view",
+            "shell-ere-inventory-review",
+            "shell-ere-incident-report",
             "ccna-ntp-client-chain",
             "ccna-ntp-cycle-repair",
             "ccna-ntp-asymmetric-delivery",

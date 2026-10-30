@@ -61,7 +61,11 @@ fn catalog() -> &'static Vec<Scenario> {
             lvm_registration::ntp_registration::before_scenarios(&all).len(),
             186
         );
-        assert_eq!(all.len(), 190);
+        assert_eq!(
+            lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),
+            190
+        );
+        assert_eq!(all.len(), 193);
         assert_eq!(value(&all[180..182]), value(&authored()));
         bounded(all)
     })

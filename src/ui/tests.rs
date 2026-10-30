@@ -10,6 +10,7 @@ pub(in crate::ui) mod cron_workspace;
 mod debian_packages;
 mod dhcpv4;
 mod dhcpv4_lessons;
+mod ere_evidence_native;
 mod etherchannel_native;
 pub(in crate::ui) mod etherchannel_workspace;
 mod file_backup_lessons_native;

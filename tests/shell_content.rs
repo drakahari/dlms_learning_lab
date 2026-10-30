@@ -110,6 +110,26 @@ fn reviews() -> Vec<Review> {
         incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
         misconception: r["wrong"][0]["misconception"].as_str().unwrap().into(),
     }));
+    let ere: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-ere-evidence-review.json")).unwrap();
+    let additions = ere["labs"].as_array().unwrap();
+    assert_eq!(
+        additions
+            .iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-ere-event-view",
+            "shell-ere-inventory-review",
+            "shell-ere-incident-report"
+        ]
+    );
+    rows.extend(additions.iter().map(|r| Review {
+        id: r["id"].as_str().unwrap().into(),
+        alternate: r["alternatives"][0].as_str().unwrap().into(),
+        incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
+        misconception: r["wrong"][0]["reason"].as_str().unwrap().into(),
+    }));
     rows
 }
 fn quoted(value: &str) -> String {

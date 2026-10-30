@@ -225,11 +225,27 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 190);
+    assert_eq!(p.attempts.len(), 193);
+    for id in [
+        "shell-ere-event-view",
+        "shell-ere-inventory-review",
+        "shell-ere-incident-report",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        let a = &p.attempts[id];
+        assert_eq!(a.state, source.initial);
+        assert!(!progress::current_solved(a, source));
+    }
     assert_eq!(
         p.attempts
             .keys()
-            .filter(|id| !one_off_registration::IDS.contains(&id.as_str())
+            .filter(|id| ![
+                "shell-ere-event-view",
+                "shell-ere-inventory-review",
+                "shell-ere-incident-report"
+            ]
+            .contains(&id.as_str())
+                && !one_off_registration::IDS.contains(&id.as_str())
                 && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str())
                 && ![
                     "ccna-ntp-client-chain",

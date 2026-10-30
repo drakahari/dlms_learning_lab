@@ -90,7 +90,13 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         } else {
             current
         };
-        assert_eq!(all.iter().filter(|s| s.track == track).count(), current190);
+        assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s|s.track==track).count(),current190);
+        let current193 = if track == "Bash/Shell" {
+            current190 + 3
+        } else {
+            current190
+        };
+        assert_eq!(all.iter().filter(|s| s.track == track).count(), current193);
     }
 }
 #[test]

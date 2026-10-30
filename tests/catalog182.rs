@@ -85,16 +85,21 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 57]
+        [57, 40, 36, 60]
     );
+    let current190 =
+        registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all);
+    assert_eq!(current190.len(), 190);
     assert_eq!(
-        all.iter()
+        current190
+            .iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
         57
     );
     assert_eq!(
-        all.iter()
+        current190
+            .iter()
             .filter_map(|s| if let Goal::Script { cases } = &s.goal {
                 Some(cases.len())
             } else {
@@ -103,7 +108,10 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
             .sum::<usize>(),
         442
     );
-    assert_eq!(all.iter().filter(|s| s.teaching.is_some()).count(), 57);
+    assert_eq!(
+        current190.iter().filter(|s| s.teaching.is_some()).count(),
+        57
+    );
     for s in &all[180..182] {
         assert_eq!(s.version, 1);
         assert_eq!(s.unit, "shell-loop-recovery");
@@ -129,7 +137,20 @@ fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrec
     assert_eq!(digest::hash(raw), r["after_units48_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units47_sha256"]);
     let current50 = course::bundled(&all).unwrap();
-    assert_eq!((all.len(), current50.len()), (190, 50));
+    assert_eq!(
+        (
+            registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(
+                &all
+            )
+            .len(),
+            registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(
+                &current50
+            )
+            .len()
+        ),
+        (190, 50)
+    );
+    assert_eq!((all.len(), current50.len()), (193, 51));
     let roundtrip =
         course::load(&json!({"version":1,"units":current50}).to_string(), &all).unwrap();
     assert_eq!(v(&roundtrip), v(&current50));

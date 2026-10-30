@@ -39,8 +39,8 @@ It has only fixed outcomes or `--identity`; it accepts no source, filename,
 pattern, stdin, fixture, worktree or engine selector. The exact24 case runner and
 its seven-instruction slices remain unchanged.
 
-Its compiled identity now embeds a literal396-file conservative superset:
-all282 current `src` files,50 scenario files and59 assets, plus Cargo.toml/lock,
+At the observed r1 source revision, its compiled identity embeds a literal396-file conservative superset:
+all282 `src` files at that revision,50 scenario files and59 assets, plus Cargo.toml/lock,
 probe, digest helper and fixed fixture. Some included UI/test source is unused
 by this library example; its presence is provenance, not UI execution. The real
 library's scenario/theme data and non-test developer_digest are included. There
@@ -177,3 +177,23 @@ source/streams/profiles remain ignored. This is bounded utility fidelity evidenc
 not fullGNU/Bash conformance, curriculum193, native/platform/novice acceptance
 or an observed evaluator14-before15 migration baseline. Normal193/native content
 gates follow; this technical comparison is not a reason to stop implementation.
+
+
+## Later native QA source closure
+
+The normal193 native acceptance route adds exactly two later QA modules:
+`src/ui/smoke/ere_evidence.rs` and `src/ui/tests/ere_evidence_native.rs`.
+They were not compiled input bytes observed by the sealed r1 ELF. Current Python
+source-closure checks account for them as an explicit, disjoint two-file union
+with the original396 names, verifying both complete file sizes and SHA256 plus
+ordinary single-link files. This preserves a closed current roster without
+claiming398 inputs were compared with GNU or rewriting captured409-source data.
+
+The r1 collector, probe, COMPILED396, SOURCES409, approved control, ELF, raw results
+and retained snapshots remain unchanged. Its fresh prepare/capture source-roster
+guard must refuse either new QA file; a synthetic guard exercises that refusal
+before any child or control destination is created. Retained r1 verification
+continues using its exact retained snapshot, independent of later current source,
+unit registration, docs or QA files. Any future fresh comparison requires a new
+separately reviewed source closure, compiled probe and Root-approved controls.
+This native QA addition grants no new reference execution or fidelity claim.

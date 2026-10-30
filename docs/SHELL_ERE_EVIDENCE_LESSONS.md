@@ -1,11 +1,11 @@
-# Exact matching and trustworthy evidence — unregistered content proposal
+# Exact matching and trustworthy evidence
 
-This is authored source, not implemented or accepted curriculum coverage. It
-requires the separate evaluator14 ERE capability and genuine13 migration gates.
-No engine revision, catalog entry, unit registry, progress or existing lab is
-changed by this proposal. All prospective VM, loader, reference and native results
-remain null. Three distinct assignments form one progression; examples and
-numeric variants are not extra authored scenarios.
+Three original assignments are registered in the native catalog with full
+in-process grading, teaching and isolated examples. Evaluator14/history and
+fixed24 GNU gates pass; final inclusive has2,857PASS/0FAIL/0ignored. The
+105-phase installed native review remains pending, so objective evidence rows
+are not yet promoted. This is not complete regex, Bash or issuer coverage.
+Numeric variants are not extra authored scenarios.
 
 | Stage | Meaningful assignment | New skill | Existing prerequisites |
 | --- | --- | --- | --- |
@@ -117,3 +117,31 @@ function body. Redirecting the function call as a whole remains outside the
 simulator subset. The original unrun draft alternate using that unsupported
 form is retained unchanged in review data and explicitly tested for honest
 refusal and preservation; no graded case or expected outcome is removed.
+
+## Normal catalog registration
+
+The registration source adds these exact three reviewed projects to the normal
+catalog and the `shell-ere-evidence` unit. It preserves every prior190 authored
+scenario, all57 prior script/case/example objects, and all50 course units through
+closed full-source and raw/typed predecessor checks. The resulting catalog is
+193 authored labs in 51 units: CCNA 57, LPIC-1 40, LPIC-2 36 and Bash/Shell 60. The
+60 script assignments have477 graded cases and60 separate worked examples;
+extra guard cases remain supplemental tests and do not inflate either count.
+
+This is a conditional source milestone, pending actual evaluator14 capability,
+genuine13 migration, fixed24 GNU utility comparisons, content, inclusive checks
+and native acceptance. Existing genuine9–13 captures retain their original
+counts and results. Loading older progress never invents answers or completion
+for these projects. Windows/macOS runtime, physical-device accessibility,
+screen-reader and novice usability acceptance remain separate and pending.
+
+## Actual source verification —2026-10-30
+
+The earlier proposal and conditional sections retain historical intent. Current
+source is registered193/51 with60scripts/477gradedcases/60isolatedexamples.
+All35newgraded/7supplemental cases, references and two supported alternatives
+pass, including preserved-source refusal and current success invalidation.
+M550 finalinclusive2,857PASS/0FAIL/0ignored; M549alltargetClippy passes.
+Native headless real-event tests pass; actual installed105screen capture,
+novice/physical-device/screen-reader acceptance remain separate. See
+CATALOG193_MILESTONE.md for current artifacts and exact limits.

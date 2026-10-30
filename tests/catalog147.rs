@@ -264,8 +264,13 @@ fn original143_typed_fields_and36units_have_only_the_closed_nat_intro_exception(
     assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
-            .map(|t| all.iter().filter(|s| s.track == t).count()),
+            .map(|t| one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s| s.track == t).count()),
         [57, 40, 36, 57]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [57, 40, 36, 60]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

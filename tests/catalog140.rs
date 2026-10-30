@@ -272,7 +272,7 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147(
             ("Bash/Shell", 46)
         ])
     );
-    let scripts = all
+    let scripts = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all)
         .iter()
         .filter_map(|s| {
             if let Goal::Script { cases } = &s.goal {

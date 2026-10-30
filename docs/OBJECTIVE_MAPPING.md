@@ -4,14 +4,15 @@ Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://lea
 
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are182 narrowly evidenced Partial practice rows, one Supporting explanation
 row and1057 Open rows; no full-objective completion is asserted. Main source
-contains190 authored assignments/50 units (57CCNA,40LPIC-1,36LPIC-2,57Bash).
+contains193 authored assignments/51 units (57CCNA,40LPIC-1,36LPIC-2,60Bash).
 Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.
-All136 parents remain incomplete(92Open/44Partial). The inclusive Rust suite
-passes2,839 tests with0fail/0ignored after bounded shell capability14; Clippy and
-445Python checks pass. The three pattern projects remain unregistered and earn
-no coverage credit. Candidate5233a151bfe3 contains190
+All136 parents remain incomplete(92Open/44Partial). The final normal193 inclusive run passes2,857tests/222targets/0FAIL/0ignored;
+Clippy and446Python checks pass. M547's3 historical count failures are retained,
+with strict predecessor preservation and all23 focused corrections passing.
+Installed native acceptance of the3 new projects is next. Their proposed narrow
+evidence rows remain held until that gate. Candidate5233a151bfe3 contains190
 assignments with scoped installed NTP94, lifecycle, NFS cold and10-start evidence.
 Exact identities/limits remain separate in
 [CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md) and

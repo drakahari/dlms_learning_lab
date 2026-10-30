@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, State},
     ipv4, pack,
@@ -284,9 +286,16 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         }
         p.attempts.insert(s.id.clone(), a);
     }
-    assert_eq!((original_drafts, backup_drafts), (169, 4));
+    assert_eq!((original_drafts, backup_drafts), (172, 4));
+    assert_eq!((original_drafts - 3, backup_drafts), (169, 4));
+    for source in &labs[190..] {
+        assert!(matches!(source.initial, State::Script { .. }));
+        let a = &p.attempts[&source.id];
+        assert_eq!(a.workspace.as_ref().unwrap().command, "unfinished |");
+        assert!(!progress::current_solved(a, source));
+    }
     assert_eq!(
-        (original_drafts - 2, backup_drafts),
+        (original_drafts - 3 - 2, backup_drafts),
         (167, 4),
         "All original167generic and4backup drafts retained"
     );
@@ -295,7 +304,8 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     assert_eq!(one_off_drafts, 4);
     assert_eq!(lvm_drafts, 4);
     assert_eq!(ntp_drafts, 4);
-    assert_eq!(p.attempts.len(), 190);
+    assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_attempts_len(&p.attempts),190);
+    assert_eq!(p.attempts.len(), 193);
     assert_eq!(
         labs[176..180]
             .iter()
