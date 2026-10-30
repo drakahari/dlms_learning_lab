@@ -88,7 +88,7 @@ fn same_old_metadata(mut a: Value, mut b: Value) {
 #[test]
 #[ignore = "Requires immutable private actual11 COMPLETE and attestation; explicit guarded replay"]
 fn all52_genuine11_records384_cases52_examples_remain_exact_at_four_slices_under12() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let rows = authored();
     assert_eq!(rows.len(), 52);
@@ -139,7 +139,7 @@ fn all52_genuine11_records384_cases52_examples_remain_exact_at_four_slices_under
 #[ignore = "Requires immutable private actual11 COMPLETE and attestation; explicit guarded replay"]
 fn actual142_contexts_keep_all6_through11_records_metadata_raw_backup_and_receipts_until_explicit_run()
  {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let raw = evidence::observed("writer11-original.json");
     let original: Progress = serde_json::from_slice(&raw).unwrap();
@@ -188,13 +188,13 @@ fn actual142_contexts_keep_all6_through11_records_metadata_raw_backup_and_receip
     let caller_receipts = value(&p.migration_receipts);
     progress::save(&path, &p).unwrap();
     assert_eq!(value(&p.migration_receipts), caller_receipts);
-    let slot = path.with_extension("before-shell-v14.json");
+    let slot = path.with_extension("before-shell-v15.json");
     assert_eq!(std::fs::read(&slot).unwrap(), raw);
     let mut resumed = progress::load(&path, &all).unwrap();
     assert_eq!(value(&resumed), value(&p));
     assert_eq!(
         resumed.migration_receipts.as_ref().unwrap().shell,
-        vec![7, 8, 9, 10, 11, 14]
+        vec![7, 8, 9, 10, 11, 15]
     );
     let s = all.iter().find(|s| s.id == "shell-handover").unwrap();
     let Goal::Script { cases } = &s.goal else {
@@ -205,7 +205,7 @@ fn actual142_contexts_keep_all6_through11_records_metadata_raw_backup_and_receip
     a.state = State::Script {
         source: source.clone(),
         run: Some(Record {
-            engine_revision: 14,
+            engine_revision: 15,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(&source, c)).collect(),
         }),
@@ -221,7 +221,7 @@ fn actual142_contexts_keep_all6_through11_records_metadata_raw_backup_and_receip
         panic!()
     };
     *run = Some(Record {
-        engine_revision: 14,
+        engine_revision: 15,
         source: source.clone(),
         results: cases.iter().map(|c| shell::run(source, c)).collect(),
     });
@@ -281,7 +281,7 @@ fn authentic_two_assignment_and_practice_drafts_stay_exact_and_only_saved_work_i
         } = &a.state
         {
             scripts += 1;
-            assert_eq!(r.engine_revision, 14);
+            assert_eq!(r.engine_revision, 15);
             assert_eq!(&r.source, source);
             assert!(progress::current_solved(a, s));
             assert_eq!(histories(a, false), histories_before[id]);
@@ -301,7 +301,7 @@ fn authentic_two_assignment_and_practice_drafts_stay_exact_and_only_saved_work_i
                 .unwrap();
             assert_eq!(l.example_source, prior.example_source);
             assert_eq!(l.view, prior.view);
-            assert_eq!(l.example_revision, 14);
+            assert_eq!(l.example_revision, 15);
             assert_eq!(
                 l.example_result,
                 Some(shell::run(
@@ -322,14 +322,14 @@ fn authentic_two_assignment_and_practice_drafts_stay_exact_and_only_saved_work_i
     let restored = backup::restore(&target, &candidate, &all).unwrap();
     assert_eq!(std::fs::read(restored.safety_copy.unwrap()).unwrap(), raw);
     assert_eq!(
-        std::fs::read(target.with_extension("before-shell-v14.json")).unwrap(),
+        std::fs::read(target.with_extension("before-shell-v15.json")).unwrap(),
         raw
     );
     let loaded = progress::load(&target, &all).unwrap();
     assert_eq!(value(&loaded), value(&candidate.progress));
     assert_eq!(
         loaded.migration_receipts.unwrap().shell,
-        vec![7, 8, 9, 10, 11, 14]
+        vec![7, 8, 9, 10, 11, 15]
     );
 }
 
@@ -345,7 +345,7 @@ fn occupied12_backup_retains_actual11_main_raw_slot_and_unstamped_caller() {
     let receipts = value(&p.migration_receipts);
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
-    let slot = path.with_extension("before-shell-v14.json");
+    let slot = path.with_extension("before-shell-v15.json");
     std::fs::write(&path, &raw).unwrap();
     std::fs::write(&slot, &other).unwrap();
     let error = progress::save(&path, &p).expect_err("Never overwrite another raw backup");

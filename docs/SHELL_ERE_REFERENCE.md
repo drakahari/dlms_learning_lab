@@ -238,3 +238,14 @@ all frozen collector/probe/capture/history pins remain intact. The new route is
 a fixed private-source fixture until normal registration is separately accepted;
 its proposed actions/captures are UNRUN, not GNU fidelity or normal-course credit.
 No new reference execution is granted by this current-roster QA layer.
+
+Evaluator15 source note: literal_trim.rs is a later product input, separate from the two native QA and five storage-workspace extensions. The sealed evaluator14 r1 remains396 compiled/409 retained inputs. Fresh r1 prepare must refuse later files; retained verification uses its own captured source. No old observation is relabeled15.
+
+
+The literal15 capability now has separate actual fixed32 Bash comparison evidence
+(M639f3ae032c/M640/independent25aced2e). It does not relabel the sealed14 ERE
+396/409 observations. The original source-stage descriptions above retain their
+then-prospective scope; normal197 storage registration and installed acceptance
+are separately recorded in CATALOG197_MILESTONE.md. Retained verify still uses
+its own original compiler/source snapshots; current extra paths cannot authorize
+fresh execution by an old collector.

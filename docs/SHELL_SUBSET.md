@@ -361,9 +361,10 @@ pending matching and prevents later script commands; earlier redirection effects
 may already exist, and stopped runs do not receive assignment credit. Scalar
 locale selectors only accept C/POSIX; they are not general environment export.
 
-This source batch adds no authored lessons or objective credit. Actual capability14
-acceptance, all prior57-script compatibility, genuine13 migration and native Stop
-verification remain pending until recorded separately.
+The original capability14 source proposal added no authored lessons or objective
+credit. Its actual acceptance and later193 scripting/native/history milestones
+are recorded in CATALOG193_MILESTONE.md and BEFORE15_CAPTURE.md; the following
+evaluator15 evidence is separate.
 
 
 The extended `grep -E` file operand accepts a single `./` prefix before an
@@ -371,3 +372,23 @@ ordinary flat virtual filename, including `./-` for the file literally named
 `-`. Bare `-` still means the finite stdin snapshot. Parent traversal, nested
 paths and repeated `./` prefixes remain unsupported. This local extension does
 not change the historical literal `grep -F` or shared virtual-path grammar.
+
+
+## Literal prefix/suffix removal — evaluator15
+
+After the evaluator14 baseline was accepted and sealed, evaluator15 adds `${name#literal}` and `${name%literal}` for readable named
+scalars and positional1–9. It removes one matching literal prefix/suffix without
+changing the parameter; nonmatch/empty literal retains the value and unset/empty
+parameters expand to empty. Entire double quotes preserve one result; bare
+results keep existing splitting/globbing. VALUE is never parsed as shell source.
+
+This deliberately excludes general patterns, `##`/`%%`, nested/dynamic WORD,
+inner quotes/escapes, leading tilde, controls, parentheses/braces, special targets
+and arrays. Ordinary UTF8 literal text/spaces match byte-exactly. The older four
+default/alternate operators still parse first and retain literal #/% in WORD.
+Unsupported new grammar fails at compile admission; an indexed value behind an
+admitted name fails at runtime, so earlier valid simulated commands may already
+have run. Memory/expansion/instruction/ERE counters and Stop bounds do not change.
+This narrow capability passes11core groups plus all prior scripting/history
+regressions and32actual fixed GNU Bash comparisons. It adds no authored scenario
+or full Bash/issuer coverage; see LITERAL_TRIM_REFERENCE.md.

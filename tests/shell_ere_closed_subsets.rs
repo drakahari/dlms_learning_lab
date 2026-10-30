@@ -16,7 +16,7 @@ fn case() -> Case {
 }
 #[test]
 fn actual_full_script_extended_selection_does_not_enter_cron_or_oneoff_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let c = case();
     let source = "grep -E '^WARN$'";
     assert!(c.accepts(&shell::run(source, &c)));
@@ -67,4 +67,25 @@ fn quoted_grep_looking_text_is_data_in_both_schedulers_not_a_hidden_utility() {
     assert!(c.accepts(&one.outcome));
     assert_eq!(cron.outcome.files, c.files);
     assert_eq!(one.outcome.files, c.files);
+}
+
+#[test]
+fn literal_trim_is_full_vm_only_and_cannot_enter_either_scheduling_subset() {
+    let mut c = case();
+    c.stdout = "WARN\n".into();
+    c.env.insert("v".into(), "preWARN".into());
+    let source = "echo \"${v#pre}\"";
+    assert!(c.accepts(&shell::run(source, &c)));
+    for text in [source, "echo \"${v#pre}\" > keep"] {
+        assert!(shell::cron::prepare(text).is_err());
+        assert!(shell::cron::start(text, &c).is_err());
+        assert!(shell::one_off::validate(text).is_err());
+        assert!(shell::one_off::start(text, &c).is_err());
+    }
+    let plain = "echo \"$v\"";
+    assert!(shell::cron::prepare(plain).is_ok());
+    assert!(shell::cron::start(plain, &c).is_ok());
+    assert!(shell::one_off::validate(plain).is_ok());
+    assert!(shell::one_off::start(plain, &c).is_ok());
+    assert_eq!(c.files, c.after);
 }

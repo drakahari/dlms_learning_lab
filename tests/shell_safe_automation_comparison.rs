@@ -284,7 +284,7 @@ fn verify_identity(baseline: &proof::Baseline, row: &Value, authored: &Value) {
 #[test]
 #[ignore = "Requires exact accepted private public9 COMPLETE; explicit MAIN-guarded current14 comparison only"]
 fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabeling() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let baseline = proof::Baseline::open();
     for (name, raw) in [
         (

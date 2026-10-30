@@ -62,7 +62,7 @@ fn texts(all: &[Scenario]) -> Vec<String> {
 fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
-        assert_eq!(shell::EVALUATOR_REVISION, 14);
+        assert_eq!(shell::EVALUATOR_REVISION, 15);
         let all = pack::bundled().unwrap();
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
         assert_eq!(all.len(), 197);
@@ -347,7 +347,7 @@ fn actual_run_edit_invalidation_retry_save_resume_and_selected_reset_preserve_ot
             .as_ref()
             .unwrap()
             .shell
-            .contains(&14)
+            .contains(&15)
     );
     let before = full(&resumed);
     let visited = resumed.attempts[&first.id].visited;

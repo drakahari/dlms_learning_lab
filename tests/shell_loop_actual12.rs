@@ -75,7 +75,7 @@ fn same_metadata(mut a: Value, mut b: Value) {
 #[test]
 #[ignore = "Requires immutable private genuine12 before13 data and seals; explicit guarded replay"]
 fn all55_actual12_records420_cases55_examples_match_at_four_cooperative_slices() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let raw = evidence::observed("actual12-authored.jsonl");
     let rows: Vec<Authored> = raw
@@ -128,7 +128,7 @@ fn all55_actual12_records420_cases55_examples_match_at_four_cooperative_slices()
 #[ignore = "Requires immutable private genuine12 before13 data and seals; explicit guarded replay"]
 fn actual145_contexts_keep_all_records_receipts_and_non_script_attempts_without_inventing_answers()
 {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
@@ -178,14 +178,14 @@ fn actual145_contexts_keep_all_records_receipts_and_non_script_attempts_without_
     assert_eq!(v(&p), caller);
     assert_eq!(v(&p.migration_receipts), receipts);
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v14.json")).unwrap(),
+        std::fs::read(path.with_extension("before-shell-v15.json")).unwrap(),
         raw
     );
     let loaded = progress::load(&path, &all).unwrap();
     assert_eq!(v(&loaded), caller);
     assert_eq!(
         loaded.migration_receipts.unwrap().shell,
-        vec![7, 8, 9, 10, 11, 12, 14]
+        vec![7, 8, 9, 10, 11, 12, 15]
     );
 }
 #[test]
@@ -215,12 +215,12 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
         assert_eq!(v(&resumed.attempts[id]), v(&old.attempts[id]));
     }
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v14.json")).unwrap(),
+        std::fs::read(path.with_extension("before-shell-v15.json")).unwrap(),
         raw
     );
     assert_eq!(
         resumed.migration_receipts.unwrap().shell,
-        vec![7, 8, 9, 10, 11, 12, 14]
+        vec![7, 8, 9, 10, 11, 12, 15]
     );
 }
 

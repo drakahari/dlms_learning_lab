@@ -40,7 +40,7 @@ fn sliced(source: &str, case: &Case, slice: usize) -> Outcome {
 }
 #[test]
 fn frozen35_proposals_have34_supported_results_and_one_explicit_real_syntax_failure() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let fixed: Vec<Fixed> = serde_json::from_str(include_str!(
         "fixtures/bash-parameter-defaults-reference.json"
     ))
@@ -150,7 +150,6 @@ fn arrays_special_targets_and_other_parameter_operators_remain_honest_failures()
         "printf '%s' \"${value?required}\" > keep.txt",
         "printf '%s' \"${value:?required}\" > keep.txt",
         "printf '%s' \"${#value}\" > keep.txt",
-        "printf '%s' \"${value%tail}\" > keep.txt",
         "printf '%s' \"${value:1}\" > keep.txt",
     ] {
         let c = case();
@@ -276,4 +275,35 @@ fn repeat_execution_is_bounded_and_stop_stays_ungraded() {
     let before = vm.outcome.clone();
     vm.tick(64);
     assert_eq!(vm.outcome, before);
+}
+
+// Explicit evaluator15 feature amendment: the identical former negative is now
+// admitted literal suffix removal. Historical sources/observations stay intact.
+#[test]
+fn literal_suffix_removal_reclassifies_only_its_previous_unsupported_vector() {
+    let source = "printf '%s' \"${value%tail}\" > keep.txt";
+    for (value, expected) in [
+        (None, ""),
+        (Some("detail"), "de"),
+        (Some("other"), "other"),
+        (Some("tailtail"), "tail"),
+    ] {
+        let mut c = case();
+        if let Some(value) = value {
+            c.env.insert("value".into(), value.into());
+        }
+        let result = shell::run(source, &c);
+        let mut files = c.files.clone();
+        files.insert("/work/keep.txt".into(), expected.into());
+        assert_eq!(
+            result,
+            Outcome {
+                stdout: String::new(),
+                stderr: String::new(),
+                status: 0,
+                files,
+                error: None,
+            }
+        );
+    }
 }

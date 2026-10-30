@@ -23,7 +23,7 @@ fn recipe() -> Value {
 }
 #[test]
 fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immutable() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let old = registration::before_scenarios(&all);
     assert_eq!(old.len(), 180);

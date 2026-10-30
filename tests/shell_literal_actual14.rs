@@ -49,7 +49,7 @@ fn histories(a: &progress::Attempt, primary: bool) -> std::collections::BTreeMap
 #[test]
 #[ignore = "Requires independently sealed genuine14; Root guarded explicit run only"]
 fn genuine60_records477_cases60_examples_remain_real_source_bound_at_current14() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14); // future15 needs explicit reviewed CURRENT marker change
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let observed = rows();
     assert_eq!(observed.len(), 60);
@@ -62,6 +62,7 @@ fn genuine60_records477_cases60_examples_remain_real_source_bound_at_current14()
         assert_eq!(cases, &row.cases);
         assert_eq!(s.solution.join("\n"), row.source);
         assert_eq!(row.record.engine_revision, 14);
+        assert!(!row.record.current());
         assert_eq!(row.record.source, row.source);
         assert_eq!(row.record.results.len(), cases.len());
         for (c, old) in cases.iter().zip(&row.record.results) {
@@ -80,7 +81,7 @@ fn genuine60_records477_cases60_examples_remain_real_source_bound_at_current14()
 #[test]
 #[ignore = "Requires independently sealed genuine14 original/draft profiles"]
 fn all_prior_records_multiplicity_two_unfinished_contexts_and_90_nonscript_attempts_stay_exact() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     for (role, total) in [("original", 426usize), ("drafts", 416usize)] {
         let raw = evidence::observed(&format!("writer14-{role}.json"));
@@ -172,5 +173,81 @@ fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
             assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
             assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));
         }
+    }
+}
+
+#[test]
+#[ignore = "Requires sealed genuine14; actual15 rerun, private save and explicit historical preservation"]
+fn genuine14_remains_legacy_until_actual15_rerun_and_save_keeps_every_other_attempt() {
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
+    let all = pack::bundled().unwrap();
+    let id = "shell-ere-event-view";
+    let s = all.iter().find(|s| s.id == id).unwrap();
+    let Goal::Script { cases } = &s.goal else {
+        panic!()
+    };
+    for role in ["original", "drafts"] {
+        let raw = evidence::observed(&format!("writer14-{role}.json"));
+        let old: Progress = serde_json::from_slice(&raw).unwrap();
+        let mut p = progress::decode(&raw, &all).unwrap();
+        assert_eq!(value(&p), value(&old));
+        assert!(!progress::current_solved(&p.attempts[id], s));
+        let prior = histories(&p.attempts[id], true);
+        let a = p.attempts.get_mut(id).unwrap();
+        workspace::prepare(a);
+        assert_eq!(histories(a, true), prior);
+        let source = s.solution.join("\n");
+        let results = cases
+            .iter()
+            .map(|c| shell::run(&source, c))
+            .collect::<Vec<_>>();
+        assert!(cases.iter().zip(&results).all(|(c, r)| c.accepts(r)));
+        let actual = Record {
+            engine_revision: 15,
+            source: source.clone(),
+            results,
+        };
+        a.state = State::Script {
+            source,
+            run: Some(actual.clone()),
+        };
+        assert!(progress::current_solved(a, s));
+        let mut expected = prior;
+        *expected
+            .entry(serde_json::to_string(&actual).unwrap())
+            .or_insert(0) += 1;
+        assert_eq!(histories(a, true), expected);
+        for (other, before) in &old.attempts {
+            if other != id {
+                assert_eq!(value(&p.attempts[other]), value(before));
+            }
+        }
+        let mut before = value(&old);
+        let mut after = value(&p);
+        before["attempts"].as_object_mut().unwrap().remove(id);
+        after["attempts"].as_object_mut().unwrap().remove(id);
+        assert_eq!(before, after);
+        assert_eq!(value(&p.migration_receipts), value(&old.migration_receipts));
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("progress.json");
+        std::fs::write(&path, &raw).unwrap();
+        let caller = value(&p);
+        let receipt = value(&p.migration_receipts);
+        progress::save_with_catalog(&path, &p, &all).unwrap();
+        assert_eq!(value(&p), caller);
+        assert_eq!(value(&p.migration_receipts), receipt);
+        assert_eq!(
+            std::fs::read(path.with_extension("before-shell-v15.json")).unwrap(),
+            raw
+        );
+        let resumed = progress::load(&path, &all).unwrap();
+        assert_eq!(value(&resumed), caller);
+        let mut expected_receipt = receipt;
+        expected_receipt["shell"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!(15));
+        assert_eq!(value(&resumed.migration_receipts), expected_receipt);
+        assert!(progress::current_solved(&resumed.attempts[id], s));
     }
 }

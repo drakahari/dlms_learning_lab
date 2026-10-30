@@ -663,10 +663,10 @@ impl LabApp {
     }
     fn ere_evidence_inner(&mut self, ctx: &egui::Context, stage: usize) -> (bool, Option<String>) {
         const {
-            assert!(shell::EVALUATOR_REVISION == 14);
+            assert!(shell::EVALUATOR_REVISION == 15);
         }
         assert!(self.smoke && self._smoke_profile.is_some());
-        assert_eq!(shell::EVALUATOR_REVISION, 14);
+        assert_eq!(shell::EVALUATOR_REVISION, 15);
         // Admit the complete current source on EVERY callback, then reuse only
         // these immutable checked predecessors for the older authority proofs.
         let checked193 = disk_registration::before_scenarios(&self.scenarios);

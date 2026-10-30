@@ -19,7 +19,23 @@ with followup_task. Do not re-enter egui Context inside ctx.data closures.
 
 ## Current source and verified installed application
 
-Source integrates197 authored assignments/52 units, evaluator14:
+Actual source capability15 is now accepted after M631 reviewed application.
+M632 library+55scripting integrations+prototype finishes607PASS/1newfixtureFAIL;
+M633 fixes only Cron percent escaping and passes all11core groups, no engine
+restriction relaxed. M634506Python/M635Clippy PASS. M636probe23450f30+408sources
+immediately retained. M637432pin proposedbbb23347/peerb294c140, flag-only
+approvalc00126f8 precede M639actual32GNU/VM15 whole-tuple matches f3ae032c.
+M640retainedverify and independent raw25aced2e PASS. Eight exclusions unexecuted.
+No extra Source/Pack/new content was staged before that capture. Current catalog
+remains197/52. Installed553 stays VERIFIED197/evaluator14; no new15 candidate.
+Documentation status now changes one included SHELL_SUBSET input AFTER capture;
+retained source/ELF/observations stay immutable, interpreter/fixtures unchanged.
+Next: document/check/commit this capability milestone, then apply corrected
+literal-contentR5/7groups before normal199 registration and native verification.
+Private application: m631-literal15-accepted197-main-application/APPLIED.json.
+
+Catalog remains197 authored assignments/52 units; current source evaluator15,
+verified installed553 evaluator14:
 
 | Track | Labs | Units |
 | --- | ---: | ---: |
@@ -104,9 +120,10 @@ M616 all-target Clippy-Dwarnings and M618 coverage pass.
 
 1. M627 all487Python and M629coverage189/1/1050 pass after doc-only updates.
    Commit/push evidence separately from candidate553; never silently repack it.
-2. Apply the independently reviewed literal15 capability/reference fresh source
-   union only after preserving these doc/CSV deltas. Actual capability/history/
-   fixed32Bash comparison gates precede the new two-project content R5.
+2. Literal15 capability/reference are already applied/accepted: do NOT reapply.
+   Apply corrected two-project contentR5 with a fresh current-source receipt, run
+   all7 content groups and isolated examples/alternatives/wrong-case tests, then
+   integrate normal199 only with strict197/52 preservation and native acceptance.
 3. Continue HSRP, links, syslog, RPM and remaining curriculum in reviewed tested
    batches. A delivered197 candidate is not a reason to stop implementation.
 
@@ -126,7 +143,8 @@ profile, all old duplicates/records,90 nonScript Attempts and two unfinished
 Attempts. New GPT contexts remain absent. BEFORE15_CAPTURE.md has full hashes.
 Do not recapture, relabel or select an old engine through a Cargo feature.
 
-All following are SOURCE-REVIEWED, UNAPPLIED/UNRUN, not curriculum credit.
+Except the already APPLIED/VERIFIED literal capability/reference noted above,
+following content/families remain SOURCE-REVIEWED, UNAPPLIED/UNRUN, not credit.
 Exact current proposals live under .build-artifacts/reviews/:
 
 - Literal15 capability bash-literal15-current197-source-r4 (743c1e4e), fixed

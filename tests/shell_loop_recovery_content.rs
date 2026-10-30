@@ -56,7 +56,7 @@ fn bounded(all: Vec<Scenario>) -> Vec<Scenario> {
 fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
-        assert_eq!(shell::EVALUATOR_REVISION, 14);
+        assert_eq!(shell::EVALUATOR_REVISION, 15);
         let all = pack::bundled().unwrap();
         assert_eq!(
             lvm_registration::ntp_registration::before_scenarios(&all).len(),
@@ -386,7 +386,7 @@ fn actual_runs_edit_invalidation_retry_save_resume_and_selected_reset_keep_other
             .as_ref()
             .unwrap()
             .shell
-            .contains(&14)
+            .contains(&15)
     );
     let before = full(&resumed);
     let visited = resumed.attempts[&first.id].visited;

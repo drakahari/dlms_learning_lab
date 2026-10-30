@@ -787,8 +787,8 @@ fn actual9_private_profile_nat_addition_preserves_full_old_histories_target_byte
     evidence::exact(&loaded.attempts[&s.id], &selected);
     let mut expected = original["migration_receipts"].clone();
     let versions = expected["shell"].as_array_mut().unwrap();
-    if versions.last() != Some(&serde_json::json!(14)) {
-        versions.push(serde_json::json!(14));
+    if versions.last() != Some(&serde_json::json!(15)) {
+        versions.push(serde_json::json!(15));
     }
     evidence::exact(&loaded.migration_receipts.as_ref().unwrap(), &expected);
     assert_eq!(loaded.attempts.len(), 134);

@@ -596,7 +596,7 @@ impl LabApp {
         stage: usize,
     ) -> (bool, Option<String>) {
         const {
-            assert!(shell::EVALUATOR_REVISION == 14);
+            assert!(shell::EVALUATOR_REVISION == 15);
         }
         assert!(self.smoke && self._smoke_profile.is_some());
         assert!((BASE..=BASE + 2 * STRIDE + LAST).contains(&stage));

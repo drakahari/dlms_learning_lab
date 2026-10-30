@@ -1,0 +1,600 @@
+{
+  "schema_version": 1,
+  "kind": "fixed-literal32-reference-r1",
+  "scope": "Only literal shortest prefix/suffix; not general patterns or full Bash",
+  "environment": "C locale, stripped startup environment, private empty PATH, fixed flat disposable files",
+  "host_execution": null,
+  "source_identity": null,
+  "cases": [
+    {
+      "id": "prefix-once",
+      "vm_source": "v=prealpha; printf '%s\\n' \"${v#pre}\"",
+      "source": "v=prealpha; printf '%s\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "alpha\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "suffix-once",
+      "vm_source": "v=name.log.log; printf '%s\\n' \"${v%.log}\"",
+      "source": "v=name.log.log; printf '%s\\n' \"${v%.log}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "name.log\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "prefix-no-match",
+      "vm_source": "v=alpha; printf '%s\\n' \"${v#pre}\"",
+      "source": "v=alpha; printf '%s\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "alpha\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "suffix-no-match",
+      "vm_source": "v=alpha; printf '%s\\n' \"${v%.log}\"",
+      "source": "v=alpha; printf '%s\\n' \"${v%.log}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "alpha\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-prefix-word",
+      "vm_source": "v=alpha; printf '%s\\n' \"${v#}\"",
+      "source": "v=alpha; printf '%s\\n' \"${v#}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "alpha\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-suffix-word",
+      "vm_source": "v=alpha; printf '%s\\n' \"${v%}\"",
+      "source": "v=alpha; printf '%s\\n' \"${v%}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "alpha\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "unset-value",
+      "vm_source": "printf '<%s>\\n' \"${v#pre}\"",
+      "source": "printf '<%s>\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "<>\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-value",
+      "vm_source": "v=; printf '<%s>\\n' \"${v%tail}\"",
+      "source": "v=; printf '<%s>\\n' \"${v%tail}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "<>\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "whole-removal-quoted-empty",
+      "vm_source": "v=pre; printf '<%s>\\n' \"${v#pre}\"",
+      "source": "v=pre; printf '<%s>\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "<>\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "positional-one-space-equals",
+      "vm_source": "printf '%s\\n' \"${1#--name=}\"",
+      "source": "printf '%s\\n' \"${1#--name=}\"",
+      "args": [
+        "--name=two words=x"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "two words=x\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "positional-two",
+      "vm_source": "printf '%s\\n' \"${2%.tmp}\"",
+      "source": "printf '%s\\n' \"${2%.tmp}\"",
+      "args": [
+        "unused",
+        "two words.tmp"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "two words\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "command-looking-data",
+      "vm_source": "printf '%s\\n' \"${1#pre}\"",
+      "source": "printf '%s\\n' \"${1#pre}\"",
+      "args": [
+        "pre$(not-code);*.log"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "$(not-code);*.log\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "literal-newline-data",
+      "vm_source": "printf '<%s>\\n' \"${1#pre}\"",
+      "source": "printf '<%s>\\n' \"${1#pre}\"",
+      "args": [
+        "prea\nb\n"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "<a\nb\n>\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "utf8-prefix",
+      "vm_source": "v=é-été; printf '%s\\n' \"${v#é-}\"",
+      "source": "v=é-été; printf '%s\\n' \"${v#é-}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "été\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "utf8-suffix",
+      "vm_source": "v=café.é; printf '%s\\n' \"${v%.é}\"",
+      "source": "v=café.é; printf '%s\\n' \"${v%.é}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "café\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "bare-default-ifs",
+      "vm_source": "v=$1; for item in ${v#pre}; do printf '<%s>\\n' \"$item\"; done",
+      "source": "v=$1; for item in ${v#pre}; do printf '<%s>\\n' \"$item\"; done",
+      "args": [
+        "prea b\tc\n"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "<a>\n<b>\n<c>\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "bare-empty-removal",
+      "vm_source": "v=pre; for item in ${v#pre}; do echo bad; done; echo end",
+      "source": "v=pre; for item in ${v#pre}; do echo bad; done; echo end",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "end\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "bare-result-glob",
+      "vm_source": "v='pre*.log'; for item in ${v#pre}; do printf '%s\\n' \"$item\"; done",
+      "source": "v='pre*.log'; for item in ${v#pre}; do printf '%s\\n' \"$item\"; done",
+      "args": [],
+      "stdin": "",
+      "files": {
+        "a.log": "A\n",
+        "b.log": "B\n",
+        "keep.txt": "KEEP\n"
+      },
+      "expected": {
+        "stdout": "a.log\nb.log\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "a.log": "A\n",
+          "b.log": "B\n",
+          "keep.txt": "KEEP\n"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "quoted-result-no-glob",
+      "vm_source": "v='pre*.log'; printf '%s\\n' \"${v#pre}\"",
+      "source": "v='pre*.log'; printf '%s\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {
+        "a.log": "A\n",
+        "b.log": "B\n",
+        "keep.txt": "KEEP\n"
+      },
+      "expected": {
+        "stdout": "*.log\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "a.log": "A\n",
+          "b.log": "B\n",
+          "keep.txt": "KEEP\n"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "bare-result-unmatched-glob",
+      "vm_source": "v='pre*.missing'; printf '%s\\n' ${v#pre}",
+      "source": "v='pre*.missing'; printf '%s\\n' ${v#pre}",
+      "args": [],
+      "stdin": "",
+      "files": {
+        "a.log": "A\n",
+        "b.log": "B\n",
+        "keep.txt": "KEEP\n"
+      },
+      "expected": {
+        "stdout": "*.missing\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "a.log": "A\n",
+          "b.log": "B\n",
+          "keep.txt": "KEEP\n"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "function-positional-scope",
+      "vm_source": "f() { printf '%s\\n' \"${1#pre}\"; }; f preinner; printf '%s\\n' \"${1#pre}\"",
+      "source": "f() { printf '%s\\n' \"${1#pre}\"; }; f preinner; printf '%s\\n' \"${1#pre}\"",
+      "args": [
+        "preouter"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "inner\nouter\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "local-name-scope",
+      "vm_source": "v=preouter; f() { local v=preinner; printf '%s\\n' \"${v#pre}\"; }; f; printf '%s\\n' \"${v#pre}\"",
+      "source": "v=preouter; f() { local v=preinner; printf '%s\\n' \"${v#pre}\"; }; f; printf '%s\\n' \"${v#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "inner\nouter\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "old-default-parser-first",
+      "vm_source": "printf '%s\\n' \"${v:-pre#name%tail}\"",
+      "source": "printf '%s\\n' \"${v:-pre#name%tail}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "pre#name%tail\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "argument-count-unchanged",
+      "vm_source": "printf '%s:%s\\n' \"$#\" \"${1#pre}\"",
+      "source": "printf '%s:%s\\n' \"$#\" \"${1#pre}\"",
+      "args": [
+        "preone",
+        "two"
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "2:one\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "arithmetic-borrowed-trim",
+      "vm_source": "v=pre7; printf '%s\\n' \"$(( ${v#pre} + 1 ))\"",
+      "source": "v=pre7; printf '%s\\n' \"$(( ${v#pre} + 1 ))\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "8\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "prefix-output-path",
+      "vm_source": "dest=preresult.txt; printf saved > \"${dest#pre}\"",
+      "source": "dest=preresult.txt; printf saved > \"${dest#pre}\"",
+      "args": [],
+      "stdin": "",
+      "files": {
+        "result.txt": "old",
+        "keep.txt": "KEEP"
+      },
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "result.txt": "saved",
+          "keep.txt": "KEEP"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "suffix-output-path",
+      "vm_source": "dest=result.txt.tmp; printf 'a\\nb' > \"${dest%.tmp}\"",
+      "source": "dest=result.txt.tmp; printf 'a\\nb' > \"${dest%.tmp}\"",
+      "args": [],
+      "stdin": "",
+      "files": {
+        "result.txt": "old",
+        "keep.txt": "KEEP"
+      },
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "result.txt": "a\nb",
+          "keep.txt": "KEEP"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "function-status",
+      "vm_source": "f() { v=prevalue; printf '%s\\n' \"${v#pre}\"; return 7; }; f",
+      "source": "f() { v=prevalue; printf '%s\\n' \"${v#pre}\"; return 7; }; f",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "value\n",
+        "stderr": "",
+        "status": 7,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "stderr-and-status",
+      "vm_source": "v=preerror; printf '%s\\n' \"${v#pre}\" >&2; exit 3",
+      "source": "v=preerror; printf '%s\\n' \"${v#pre}\" >&2; exit 3",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "error\n",
+        "status": 3,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "literal-word-space",
+      "vm_source": "v='two words-value'; printf '%s\\n' \"${v#two words-}\"",
+      "source": "v='two words-value'; printf '%s\\n' \"${v#two words-}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "value\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "literal-word-hash-percent",
+      "vm_source": "v='a#b%c'; printf '%s:%s\\n' \"${v#a#}\" \"${v%#b%c}\"",
+      "source": "v='a#b%c'; printf '%s:%s\\n' \"${v#a#}\" \"${v%#b%c}\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "b%c:a\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "source-value-not-mutated",
+      "vm_source": "v=prevalue; printf '%s:%s\\n' \"${v#pre}\" \"$v\"",
+      "source": "v=prevalue; printf '%s:%s\\n' \"${v#pre}\" \"$v\"",
+      "args": [],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "value:prevalue\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    }
+  ],
+  "vm_only": [
+    {
+      "id": "word-glob",
+      "source": "printf \"%s\" \"${v#p*}\"",
+      "reason": "WORD patterns outside literal subset",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "longest-prefix",
+      "source": "printf \"%s\" \"${v##pre}\"",
+      "reason": "Longest removal excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "dynamic-word",
+      "source": "printf \"%s\" \"${v#$other}\"",
+      "reason": "Dynamic WORD excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "nested-word",
+      "source": "printf \"%s\" \"${v#${other}}\"",
+      "reason": "Nested WORD excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "quoted-word",
+      "source": "printf \"%s\" \"${v#'pre'}\"",
+      "reason": "Quote syntax inside WORD excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "escaped-word",
+      "source": "printf \"%s\" \"${v#p\\re}\"",
+      "reason": "Escape syntax inside WORD excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "array-target",
+      "source": "printf \"%s\" \"${a[0]#pre}\"",
+      "reason": "Array targets excluded",
+      "observed": null,
+      "executed": false
+    },
+    {
+      "id": "special-target",
+      "source": "printf \"%s\" \"${@#pre}\"",
+      "reason": "Special and aggregate targets excluded",
+      "observed": null,
+      "executed": false
+    }
+  ]
+}

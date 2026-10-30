@@ -49,12 +49,15 @@ pub(super) fn arithmetic_end(chars: &[char], start: usize) -> Result<usize, Stri
 
 /// Skip a parameter span. The read-only default/alternate extension validates
 /// its literal WORD while compiling, before any commands or redirects run.
+/// Literal prefix/suffix removal is validated only after that older grammar.
 pub(super) fn parameter_end(chars: &[char], start: usize) -> Result<usize, String> {
     let mut i = start + 2;
     while i < chars.len() {
         if chars[i] == '}' {
             let key = chars[start + 2..i].iter().collect::<String>();
-            super::parameters::parse(&key)?;
+            if super::parameters::parse(&key)?.is_none() {
+                super::literal_trim::parse(&key)?;
+            }
             return Ok(i + 1);
         }
         if body_start(chars, i).is_some() {

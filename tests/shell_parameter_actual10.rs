@@ -88,7 +88,7 @@ fn records(p: &Progress) -> BTreeMap<String, Vec<Record>> {
 #[test]
 #[ignore = "Requires immutable private actual10 capture, run through MAIN guard explicitly"]
 fn all49_original_records350_cases49_examples_remain_exact_under12_at_four_slices() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let old = authored();
     assert_eq!(old.len(), 49);
@@ -136,7 +136,7 @@ fn all49_original_records350_cases49_examples_remain_exact_under12_at_four_slice
 #[test]
 #[ignore = "Requires immutable private actual10 capture, run through MAIN guard explicitly"]
 fn genuine35_keep_original10_results_classify33_new_supported_one_invalid_one_literal_control() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let rows: Vec<Proposal> =
         serde_json::from_slice(&evidence::observed("actual10-parameters.json")).unwrap();
     assert_eq!(rows.len(), 35);
@@ -182,7 +182,7 @@ fn genuine35_keep_original10_results_classify33_new_supported_one_invalid_one_li
 #[ignore = "Requires immutable private actual10 capture, run through MAIN guard explicitly"]
 fn actual139_contexts_keep_drafts_all_histories_receipts_and_exact_raw10_backup_until_explicit_run()
 {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = pack::bundled().unwrap();
     let raw = evidence::observed("writer10-original.json");
     let original: Progress = serde_json::from_slice(&raw).unwrap();
@@ -249,13 +249,13 @@ fn actual139_contexts_keep_drafts_all_histories_receipts_and_exact_raw10_backup_
     let path = directory.path().join("progress.json");
     std::fs::write(&path, &raw).unwrap();
     progress::save(&path, &p).unwrap();
-    let slot = path.with_extension("before-shell-v14.json");
+    let slot = path.with_extension("before-shell-v15.json");
     assert_eq!(std::fs::read(&slot).unwrap(), raw);
     let mut resumed = progress::load(&path, &all).unwrap();
     assert_eq!(snapshot(&resumed), snapshot(&p));
     assert_eq!(
         resumed.migration_receipts.as_ref().unwrap().shell,
-        vec![7, 8, 9, 10, 14]
+        vec![7, 8, 9, 10, 15]
     );
     let id = "shell-handover";
     let s = all.iter().find(|s| s.id == id).unwrap();
@@ -267,7 +267,7 @@ fn actual139_contexts_keep_drafts_all_histories_receipts_and_exact_raw10_backup_
     a.state = State::Script {
         source: source.clone(),
         run: Some(Record {
-            engine_revision: 14,
+            engine_revision: 15,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(&source, c)).collect(),
         }),
@@ -357,7 +357,7 @@ fn actual_unfinished10_drafts_survive_and_backup_rechecks_only_after_explicit_in
             let Goal::Script { cases } = &s.goal else {
                 panic!()
             };
-            assert_eq!(r.engine_revision, 14);
+            assert_eq!(r.engine_revision, 15);
             assert_eq!(&r.source, source);
             assert_eq!(
                 r.results,
@@ -376,7 +376,7 @@ fn actual_unfinished10_drafts_survive_and_backup_rechecks_only_after_explicit_in
             let prior = before.script_learning.as_ref().unwrap();
             assert_eq!(l.example_source, prior.example_source);
             assert_eq!(l.view, prior.view);
-            assert_eq!(l.example_revision, 14);
+            assert_eq!(l.example_revision, 15);
             assert_eq!(
                 l.example_result,
                 Some(shell::run(
@@ -405,14 +405,14 @@ fn actual_unfinished10_drafts_survive_and_backup_rechecks_only_after_explicit_in
     let result = backup::restore(&target, &candidate, &all).unwrap();
     assert_eq!(std::fs::read(result.safety_copy.unwrap()).unwrap(), raw);
     assert_eq!(
-        std::fs::read(target.with_extension("before-shell-v14.json")).unwrap(),
+        std::fs::read(target.with_extension("before-shell-v15.json")).unwrap(),
         raw
     );
     let restored = progress::load(&target, &all).unwrap();
     assert_eq!(snapshot(&restored), snapshot(&candidate.progress));
     assert_eq!(
         restored.migration_receipts.unwrap().shell,
-        vec![7, 8, 9, 10, 14]
+        vec![7, 8, 9, 10, 15]
     );
 }
 
@@ -429,7 +429,7 @@ fn occupied12_backup_refuses_changed10_bytes_without_stamping_caller_or_replacin
     let receipts = snapshot(&p.migration_receipts);
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
-    let slot = path.with_extension("before-shell-v14.json");
+    let slot = path.with_extension("before-shell-v15.json");
     std::fs::write(&path, &original).unwrap();
     std::fs::write(&slot, &other).unwrap();
     let error =

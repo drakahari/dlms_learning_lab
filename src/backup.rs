@@ -525,7 +525,7 @@ mod actual9_safe_automation_child_cancellation {
     #[test]
     #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
     fn actual9_preview_cancel_with_active_child_preserves_exact_input_target_and_all_history() {
-        assert_eq!(shell::EVALUATOR_REVISION, 14);
+        assert_eq!(shell::EVALUATOR_REVISION, 15);
         let raw = evidence::original9();
         let mut value: serde_json::Value = serde_json::from_slice(&raw).unwrap();
         value["attempts"]["shell-arguments"]["state"]["source"] = serde_json::json!(

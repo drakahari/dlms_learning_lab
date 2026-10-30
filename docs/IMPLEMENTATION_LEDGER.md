@@ -5149,3 +5149,45 @@ from the same two credited rows, retaining four integration-test paths and
 separate actual UI evidence in CATALOG197_MILESTONE.md. The verifier is unchanged;
 M629 coverage passes189Partial/1Supporting/1050Open/197registered, no draft IDs.
 Only documentation/CSV changes follow source553; no candidate is repacked.
+
+
+## Trial evaluator15 applied after accepted197 —2026-10-30
+
+M631 exact34capR5(d9f08a7c)+7referenceR6(fa6d4263), peer811e4a45, apply after
+actual197acceptance. All1070unowned old inputs protected;408 compiled-proof
+entries exact. No extra Source/Pack/new curriculum; catalog197/52 remains.
+M632 library+55scripting integrations+prototype completes607PASS/1FAIL/0ignored
+across57targets: all old valid reference/alternate and genuine9–14/history groups
+pass. Sole new-core failure uses raw printf percent in Cron's positive control;
+existing percent-input restriction correctly refuses it, also masking negatives.
+M633 reviewed fixture-only correction0cfc036a/peer08415abf uses Cron escaping
+plus separate one-off plain strings; asserts correct parameter guard, unchanged
+100tick/done/fullprevalue(noLF)/file-retention loop. Other10 core bodies exact.
+No engine policy/time/resource/reference fixtures changed; actual rerun follows.
+
+M633actual11corePASS0.20s; M634506Python/M635all-targetClippy-DwarningsPASS.
+M636build22,701,808B23450f30 probe immediately retained with408compiler inputs,
+all exact. M637zero-subject-child preparation432pins/41,215,653B proposedbbb23347;
+Root whole-pin/fixed32 read and independentb294c140 precede flag-onlyapproval
+c00126f8. M639actual VM15identity+32hostBuiltinrecipes MATCHED32 manifestf3ae032c;
+8 exclusions unexecuted. M640retainedverifyPASS; Rootall32raw/fullfiles/614pins
+and independent25aced2e confirm617retainedfiles,35childstreams/statuses, ELF/SHA/
+source identity and genuine14seals. No mismatch, replay or learner-host execution.
+
+This accepts narrow literal #/% semantics, not new authored labs or native/full
+Bash/issuer conformance. Catalog197/52,60scripts477cases60examples unchanged.
+Original GNU/core source/ELF/control/raw observations retained privately; no data
+or recordings in Git. Current SHELL_SUBSET acceptance wording changes one
+embedded documentation input AFTER capture; actual interpreter/fixture bytes
+stay exact and retained verify remains grounded in its captured snapshot.
+Next: static doc gates/capability commit, then correctedliteralR5content7groups
+and strict normal199 integration, then queued HSRP/links/syslog/snapshot/RPM.
+The verified installed553/197 stillruns14 and remains unchanged; no public release.
+
+Post-acceptance M641506Python, M642actualretained32verify (no subjects) and
+M643all-targetClippy-DwarningsPASS. Retained verify still succeeds after current
+documentation changes; captured617files/614outputpins/probe/source are immutable.
+M644 coverage confirms unchanged197registered/189Partial/1Supporting/1050Open.
+No new authored scenario/normalcatalog or issuer credit from this language change.
+The capability commit follows these scoped checks; a full inclusive rerun remains
+a later integrated-content gate, not falsely reported as current15UI acceptance.

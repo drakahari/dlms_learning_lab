@@ -82,7 +82,7 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
         442
     );
     assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 57);
-    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 14);
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 15);
     for s in &all[176..180] {
         assert_eq!(s.version, 1);
         assert_eq!(s.unit, "linux-one-off-jobs");

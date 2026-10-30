@@ -16,7 +16,7 @@ fn case() -> Case {
 }
 #[test]
 fn full_script_ownloops_work_but_cron_and_oneoff_still_reject_their_control_syntax() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let c = case();
     for source in [
         "for item in a b; do break; done; printf 'done\\n'",

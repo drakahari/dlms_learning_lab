@@ -42,7 +42,7 @@ struct Row {
 
 #[test]
 fn fixed48_authored_class_controls_are_slice_independent_and_preserve_files() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let fixed: Fixed =
         serde_json::from_str(include_str!("fixtures/shell-case-class-inputs-v12.json")).unwrap();
     assert_eq!(fixed.rows.len(), 48);

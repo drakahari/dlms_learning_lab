@@ -111,7 +111,7 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
         442
     );
     assert_eq!(scripts.iter().filter(|s| s.teaching.is_some()).count(), 57);
-    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 14);
+    assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 15);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| {
             one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)

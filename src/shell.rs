@@ -7,6 +7,7 @@ mod execution;
 mod getopts;
 mod globbing;
 mod grep;
+mod literal_trim;
 mod loop_control;
 pub mod one_off;
 mod parameters;
@@ -25,7 +26,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 14;
+pub const EVALUATOR_REVISION: u32 = 15;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1669,6 +1670,21 @@ impl Vm {
                     parameters::Target::Named(name) => match self.env.get(name) {
                         Some(Value::Scalar(value)) => Some(value.as_str()),
                         Some(Value::Indexed(_)) => return Err("Unsupported default/alternate operator on an indexed array; use an ordinary scalar or positional argument".into()),
+                        None => None,
+                    },
+                    parameters::Target::Positional(index) => self.args.get(index).map(String::as_str),
+                };
+                let value = expression.select(current);
+                bounded_expansion_bytes(0, value.len())?;
+                self.charge_expansion(value.len())?;
+                self.append_expansion(&mut result, &mut memory, value)?;
+                continue;
+            }
+            if let Some(expression) = literal_trim::parse(&key)? {
+                let current = match expression.target {
+                    parameters::Target::Named(name) => match self.env.get(name) {
+                        Some(Value::Scalar(value)) => Some(value.as_str()),
+                        Some(Value::Indexed(_)) => return Err("Unsupported literal removal on an indexed array; use an ordinary scalar or positional argument".into()),
                         None => None,
                     },
                     parameters::Target::Positional(index) => self.args.get(index).map(String::as_str),

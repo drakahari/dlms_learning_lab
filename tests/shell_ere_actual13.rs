@@ -111,7 +111,7 @@ fn save(raw: &[u8], p: &Progress, all: &[pack::Scenario]) -> Progress {
     assert_eq!(value(p), caller);
     assert_eq!(value(&p.migration_receipts), receipts);
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v14.json")).unwrap(),
+        std::fs::read(path.with_extension("before-shell-v15.json")).unwrap(),
         raw
     );
     let loaded = progress::load(&path, all).unwrap();
@@ -122,14 +122,14 @@ fn save(raw: &[u8], p: &Progress, all: &[pack::Scenario]) -> Progress {
     expected_receipts["shell"]
         .as_array_mut()
         .unwrap()
-        .push(serde_json::json!(14));
+        .push(serde_json::json!(15));
     assert_eq!(value(&loaded.migration_receipts), expected_receipts);
     loaded
 }
 #[test]
 #[ignore = "Requires fixed sealed genuine13 observations; explicit guarded current14 replay"]
 fn all57_actual13_records442_cases57_examples_match_at_four_cooperative_slices() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = all();
     let rows = rows();
     assert_eq!(rows.len(), 57);
@@ -180,7 +180,7 @@ fn all57_actual13_records442_cases57_examples_match_at_four_cooperative_slices()
 #[ignore = "Requires fixed genuine13 original147 context profile and all retained seals"]
 fn original147_contexts366_record_occurrences_and90_non_script_attempts_are_preserved_until_real_rerun()
  {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = all();
     let raw = evidence::observed("writer13-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
@@ -256,13 +256,13 @@ fn original147_contexts366_record_occurrences_and90_non_script_attempts_are_pres
     assert_eq!(multisets(&resumed), before);
     assert_eq!(
         resumed.migration_receipts.unwrap().shell,
-        [7, 8, 9, 10, 11, 12, 13, 14]
+        [7, 8, 9, 10, 11, 12, 13, 15]
     );
 }
 #[test]
 #[ignore = "Requires fixed genuine13 draft147 profile; whole unfinished Attempts are authoritative"]
 fn genuine_unfinished_assignment_and_practice_drafts_keep_all358_records_and_entire_attempts() {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = all();
     let raw = evidence::observed("writer13-drafts.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
@@ -470,7 +470,7 @@ fn current193_absent_non_script_identities_never_gain_answers_favorites_or_maste
 #[ignore = "Requires genuine13 data; all new14 records are obtained from actual current VM execution"]
 fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_it_and_reset_is_selected()
  {
-    assert_eq!(shell::EVALUATOR_REVISION, 14);
+    assert_eq!(shell::EVALUATOR_REVISION, 15);
     let all = all();
     let raw = evidence::observed("writer13-original.json");
     let mut p = progress::decode(&raw, &all).unwrap();
@@ -498,7 +498,7 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
     assert_eq!(l.example_revision, 13);
     let example = lesson.example.clone();
     l.example_source = example.clone();
-    l.example_revision = 14;
+    l.example_revision = 15;
     l.example_result = Some(sliced(&example, &lesson.fixture, 7));
     assert!(lesson.fixture.accepts(l.example_result.as_ref().unwrap()));
     l.view = script_teaching::View::Example;
@@ -506,7 +506,7 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
     assert_eq!(records(a), saved_history);
     let source = s.solution.join("\n");
     let record = Record {
-        engine_revision: 14,
+        engine_revision: 15,
         source: source.clone(),
         results: cases.iter().map(|c| sliced(&source, c, 7)).collect(),
     };
@@ -525,7 +525,7 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
     a.state = State::Script {
         source: wrong.into(),
         run: Some(Record {
-            engine_revision: 14,
+            engine_revision: 15,
             source: wrong.into(),
             results: cases.iter().map(|c| sliced(wrong, c, 1)).collect(),
         }),
@@ -535,7 +535,7 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
     a.state = State::Script {
         source: source.clone(),
         run: Some(Record {
-            engine_revision: 14,
+            engine_revision: 15,
             source: source.clone(),
             results: cases.iter().map(|c| sliced(&source, c, 32)).collect(),
         }),
@@ -566,7 +566,7 @@ fn only_real_current_run_and_separate_practice_refresh_credit_then_edits_break_i
         .as_ref()
         .unwrap();
     assert_eq!(l.view, script_teaching::View::Introduction);
-    assert_eq!(l.example_revision, 14);
+    assert_eq!(l.example_revision, 15);
     assert!(l.example_result.is_none());
     assert!(!progress::current_solved(&p.attempts[id], s));
     assert_eq!(p.clock, clock);
