@@ -1,4 +1,4 @@
-//! Fullscript13 never silently expands the narrower scheduling execution contracts.
+//! Fullscript14 never silently expands the narrower scheduling execution contracts.
 use dlms_learning_lab::shell::{self, Case};
 use std::collections::BTreeMap;
 fn case() -> Case {
@@ -16,7 +16,7 @@ fn case() -> Case {
 }
 #[test]
 fn full_script_ownloops_work_but_cron_and_oneoff_still_reject_their_control_syntax() {
-    assert_eq!(shell::EVALUATOR_REVISION, 13);
+    assert_eq!(shell::EVALUATOR_REVISION, 14);
     let c = case();
     for source in [
         "for item in a b; do break; done; printf 'done\\n'",

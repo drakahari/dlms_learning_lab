@@ -476,3 +476,96 @@ fn fixed_reference_recipe_predictions_are_explicit_and_observations_remain_absen
     }
     assert_eq!((supported, excluded), (34, 8));
 }
+
+#[test]
+fn cooperative_cursor_matches_all_fixed_supported_cases_across_tiny_slices() {
+    use std::sync::Arc;
+    let fixed: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/ere-fixed-reference.json")).unwrap();
+    for row in fixed["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|r| r["partition"] == "supported")
+    {
+        let pattern = row["pattern"].as_str().unwrap();
+        let line = row["line"].as_str().unwrap();
+        let expected = row["expected_match"].as_bool().unwrap();
+        for slice in [1, 7, 64] {
+            let regex = Regex::compile(pattern).unwrap();
+            assert!(Regex::compile_storage_bound() >= regex.retained_bytes());
+            assert!(Regex::compile_charge(pattern.len()).unwrap() > 0);
+            let admitted = regex.cursor_storage_bound(line.len()).unwrap();
+            let mut cursor: ere::Cursor = regex.into_cursor(Arc::<str>::from(line)).unwrap();
+            assert_eq!(cursor.input(), line);
+            assert!(cursor.retained_bytes() <= admitted);
+            cursor.start_line(0..line.len()).unwrap();
+            let mut budget = Budget::default();
+            let mut done = None;
+            for _ in 0..=ere::MAX_WORK {
+                let before = budget.spent();
+                done = cursor.advance(slice, &mut budget).unwrap();
+                assert!(budget.spent() - before <= slice);
+                if done.is_some() {
+                    break;
+                }
+            }
+            assert_eq!(done, Some(expected), "{} slice{slice}", row["id"]);
+        }
+    }
+}
+#[test]
+fn cooperative_owned_snapshot_utf8_ranges_and_shared_limits_fail_without_false_matches() {
+    use std::sync::Arc;
+    let mut original = "é\nok\n".to_string();
+    let input: Arc<str> = Arc::from(original.as_str());
+    let weak = Arc::downgrade(&input);
+    let mut cursor = Regex::compile("^..$")
+        .unwrap()
+        .into_cursor(input.clone())
+        .unwrap();
+    original.clear();
+    assert_eq!(cursor.input(), "é\nok\n");
+    assert!(cursor.start_line(1..2).is_err());
+    cursor.start_line(0..2).unwrap();
+    assert!(cursor.start_line(3..5).is_err());
+    let mut budget = Budget::new(300).unwrap();
+    budget.consume(1).unwrap();
+    while cursor.advance(1, &mut budget).unwrap().is_none() {}
+    let before = budget.spent();
+    cursor.start_line(3..5).unwrap();
+    while cursor.advance(7, &mut budget).unwrap().is_none() {}
+    assert!(budget.spent() > before);
+    drop(cursor);
+    drop(input);
+    assert!(weak.upgrade().is_none());
+    for text in ["a\0b", "a\nb"] {
+        let mut c = Regex::compile("")
+            .unwrap()
+            .into_cursor(Arc::<str>::from(text))
+            .unwrap();
+        c.start_line(0..text.len()).unwrap();
+        assert_eq!(
+            c.advance(64, &mut Budget::default()).unwrap_err().kind,
+            ErrorKind::Unsupported
+        );
+    }
+    let mut c = Regex::compile("((a?)*)*b")
+        .unwrap()
+        .into_cursor(Arc::<str>::from("aaaaaaaa"))
+        .unwrap();
+    c.start_line(0..8).unwrap();
+    assert_eq!(
+        c.advance(64, &mut Budget::new(3).unwrap())
+            .unwrap_err()
+            .kind,
+        ErrorKind::Limit
+    );
+    assert!(Regex::compile_charge(513).is_err());
+    assert!(
+        Regex::compile(".")
+            .unwrap()
+            .into_cursor(Arc::<str>::from("x".repeat(262145)))
+            .is_err()
+    );
+}

@@ -1146,7 +1146,7 @@ impl LabApp {
                     46,
                     "Exact normal unit source boundary"
                 );
-                assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 13);
+                assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 14);
                 assert_eq!(
                     self.scenarios
                         .iter()

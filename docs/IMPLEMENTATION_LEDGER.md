@@ -4874,3 +4874,78 @@ Post-verification docs-only M507424PythonPASS/M508coverage190/50PASS, whitespace
 and exact seven-text-path privacy checks PASS. Candidate remains built from5233;
 a later documentation commit does not change its executable identity. Continue
 actual ERE14 application/gates next; no release or completion claim.
+
+
+### Trial14 applied; actual capability/history/content gates
+
+Guarded45 application on d5b35d8 retains1020unowned files exact, journal97caa495;
+normalcatalog190/50 unchanged, trial evaluator14. M509all4 ownership/StopPASS.
+M510pure18PASS/utility13PASS2FAIL reveals literalfile './-' routed to forbidden
+shared slash grammar. New-E-only oneleading './' normalization preserves shared
+path/F/regex/accounting/limits; adds1 fulltuple/stdin/traversal guard to exact15
+original utilityprefix. M51118pure+16utilityPASS, then closed-subset testraw%Cron
+premise fails correctly. Preserved original fullVM/OneOff positive plusraw%Cron
+negative and escaped%-Cron variant fixes premise. M51218/16/3PASS, no warnings.
+Root5-path sourcee3c2112a/peera75f9fd6; exactoneCoregrep pinf38a3872 applied.
+
+M513actual13 all13groups/actual11 all6PASS. Content6PASS6FAIL, failure-only M514
+fulltuple diagnostic identifies an authored alternate with explicitly unsupported
+whole-function redirect. Currentalternate now uses commandredirsinsidebody with
+explicitdestination arg. RetainedR1 exact original program,35graded/7supplemental
+cases and allnegativecontrols/reference untouched; strictpinnedblock-derivation
+replacesonlycontradictorycurrent==badoldsourcepremise and adds oldunsupported
+fulltuple/filepreservationnegative. Sourcea140d122/peer2fc89581. M51513content+
+11actual12+6actual10PASS. Later Rustfmt only; finalfocused/static work remains.
+
+M516alltargetClippy currentlyfails probeE0583: direct shellpath import resolves
+nestedmods atwrongdirectory and omits crate::cron. Actuallibrary/closedcompiled
+source remedy is source-only in review; no productmodulelayout/stubengine/cap
+change or referencecapture authorized. Full/static/current14 acceptance, actual
+fixedGNU24, registration193/native/candidate stillpending. Source-only tests and
+failed compilation are not reference observations or new authoredlabcredit.
+
+M517442PythonPASS. M518product/library/testsClippyPASS excludes the broken
+example and is explicitly not alltarget acceptance. Proposed fixedprobe uses
+actuallibrary+closed396source/13,705,793B conservative superset; no new dependency,
+productmodulelayout or byte/deadline/process cap. Source scope d6b65335 frozen
+before code; complete retained-source verification/exactentrycount/sourcepins
+must pass review and actual gates before anyGNU observation claim.
+
+
+Fixed-probe source642ecb56/peerc517288f is applied: actuallibrary import,396closed
+conservative compiledinputs/409retained inputs, oldfnmain exact and old18guards
+prefix plus3. Exactinventorycount608 replaces impossible256cardinalitypremise;
+byte/process/timeout/output/memory caps unchanged. Oldtransport/child/approval
+functions and24fixture/fulltuples/6reason-only exclusions exact. M519thenfails
+onlynewCursorre-export unused inOLDpureexample; transparentpublictypealias keeps
+same Cursor and allimpl/storage/work with no warning suppression/skippedtarget
+or historicalproducer change. Source1abac18c/peerf591f705; correspondingonlyERE
+COREpin e054 updated. M520alltargetClippyPASS; M521445PythonPASS. Actualprobe
+build/identity/fulltrialinclusive/Rootprepare-approval/GNU24capture+independent
+verification remain pending. No reference observations or newcatalogcredit.
+
+
+### Accepted bounded capability14; normal193 integration next
+
+M522 completes221harnesses2,839PASS0FAIL0ignored, all1065inputs44f27341 unchanged;
+receipt1819d2a5.1746memorysamples/min21780701184B/fullPSImax0.18/swapout0/OOM0.
+M523normalexamplebuildPASS. M524zerochildprepare e2348075 contains416 exactpins;
+Root9606b91c+independentd0f2f8b0 verify currentfiles/compiler/ELF/source. Root
+changesonlyreviewedflag tocreateapproved783ee820. M525 actualheldidentityVM14/
+396compiledsuperset matches, then24 GNU stdout/stderr/status/file tuples MATCH;
+manifest276c9982. M526retained verificationPASS. Independent rawreviewdb079bcb/
+attestationde3ec31c checksall550outputs/409sources/ELF/approval and24tuples:
+19status0/5expected1, five fileinstances preserved. Sixreason-only exclusions
+remain unexecuted. Retainedprobe21,934,272B3435cdb6;553files55dirs36,643,252B.
+Old9–13 producers/sources/observations stayexact; no before15baseline invented.
+
+Commit/push capability14+unregistered authoredsource milestone afterdocs/privacy
+checks, then immediately normal193R5. It has sourceACK58b501b2/7ce41390,55/5scope;
+only2owned content afterimages rebased; correctedfixture staysprotected, all35/
+7/reference/example outcomes preserved. Normalregistration/runtime/native/full
+acceptance stillpending; sourcecatalog190/50 unchanged, no extra curriculumcredit.
+Existing scopedFedora5233candidate remains evaluator13. No release publication.
+
+M527 coverage remains190/50 with the three ERE projects unregistered; no objective
+status is promoted. M528 post-documentation Python check passes all445 tests.
+The capability is ready for its coherent commit; normal193 registration follows.

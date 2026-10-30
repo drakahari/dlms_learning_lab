@@ -6,6 +6,7 @@ pub mod cron;
 mod execution;
 mod getopts;
 mod globbing;
+mod grep;
 mod loop_control;
 pub mod one_off;
 mod parameters;
@@ -24,7 +25,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 13;
+pub const EVALUATOR_REVISION: u32 = 14;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -46,6 +47,7 @@ fn variable_names_within_limit(names: &BTreeSet<&str>) -> bool {
             <= MAX_ORDINARY_NAMES
 }
 const MAX_EXPANSION_WORK: usize = 1_000_000;
+const MAX_REGEX_WORK: usize = 1_000_000;
 /// Persistable diagnostics are bounded at creation, not only when rendering.
 fn diagnostic(mut text: String) -> String {
     if text.len() > 1000 {
@@ -1361,6 +1363,7 @@ pub struct Vm {
     frame_executed: bool,
     steps: usize,
     expansion_work: Cell<usize>,
+    regex_work: Cell<usize>,
     env: BTreeMap<String, Value>,
     scanner: getopts::Scanner,
     pipefail: bool,
@@ -1415,6 +1418,7 @@ impl Vm {
             frame_executed: false,
             steps: 0,
             expansion_work: Cell::new(0),
+            regex_work: Cell::new(0),
             env: case
                 .env
                 .iter()
@@ -1487,6 +1491,15 @@ impl Vm {
         self.outcome.error = Some(diagnostic(message));
         self.outcome.status = 2;
         self.done = true;
+    }
+    // One work ledger for every new ERE utility call/line/capture, never reset by
+    // loop/function/substitution/pipeline context changes. Old expansion accounting
+    // and semantic instruction ticks are intentionally unchanged.
+    fn charge_regex(&self, units: usize) -> Result<(), String> {
+        let next=self.regex_work.get().checked_add(units).filter(|v|*v<=MAX_REGEX_WORK)
+            .ok_or("Regular-expression work limit reached (1,000,000 bounded units across this run); simplify input or Stop")?;
+        self.regex_work.set(next);
+        Ok(())
     }
     /// Charge all expansion paths, including preflight and arithmetic callbacks, before copying.
     fn charge_expansion(&self, bytes: usize) -> Result<(), String> {

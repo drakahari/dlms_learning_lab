@@ -40,7 +40,7 @@ fn sliced(source: &str, case: &Case, slice: usize) -> Outcome {
 }
 #[test]
 fn frozen35_proposals_have34_supported_results_and_one_explicit_real_syntax_failure() {
-    assert_eq!(shell::EVALUATOR_REVISION, 13);
+    assert_eq!(shell::EVALUATOR_REVISION, 14);
     let fixed: Vec<Fixed> = serde_json::from_str(include_str!(
         "fixtures/bash-parameter-defaults-reference.json"
     ))

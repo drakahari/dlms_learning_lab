@@ -282,9 +282,9 @@ fn verify_identity(baseline: &proof::Baseline, row: &Value, authored: &Value) {
 }
 
 #[test]
-#[ignore = "Requires exact accepted private public9 COMPLETE; explicit MAIN-guarded current13 comparison only"]
+#[ignore = "Requires exact accepted private public9 COMPLETE; explicit MAIN-guarded current14 comparison only"]
 fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabeling() {
-    assert_eq!(shell::EVALUATOR_REVISION, 13);
+    assert_eq!(shell::EVALUATOR_REVISION, 14);
     let baseline = proof::Baseline::open();
     for (name, raw) in [
         (
@@ -530,7 +530,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
         ])
     );
     baseline.unchanged();
-    let summary = json!({"kind":"actual13-comparison-test-summary","actual_evaluator_revision":shell::EVALUATOR_REVISION,"accepted_before9_manifest_sha256":proof::MANIFEST_SHA,"baseline_rows":1570,"named_outcome_rows":1520,"input_vectors":380,"unchanged_vectors":357,"intentionally_changed_fixed_vectors":23,"supported_fixed_cases":26,"excluded_fixed_cases":2,"stop_ticks":SLICES.map(|slice|stop_ticks[&slice]),"delta_hashes":delta_hashes,"compiled_shell_source_sha256":proof::sha(include_bytes!("../src/shell.rs")),"compiled_execution_source_sha256":proof::sha(include_bytes!("../src/shell/execution.rs")),"compiled_capture_source_sha256":proof::sha(include_bytes!("../src/shell/capture.rs")),"claims":"In-process opt-in comparison only; historical9 rows not relabeled; no new saved Records/profile/native/Bash capture or COMPLETE is produced"});
+    let summary = json!({"kind":"actual14-comparison-test-summary","actual_evaluator_revision":shell::EVALUATOR_REVISION,"accepted_before9_manifest_sha256":proof::MANIFEST_SHA,"baseline_rows":1570,"named_outcome_rows":1520,"input_vectors":380,"unchanged_vectors":357,"intentionally_changed_fixed_vectors":23,"supported_fixed_cases":26,"excluded_fixed_cases":2,"stop_ticks":SLICES.map(|slice|stop_ticks[&slice]),"delta_hashes":delta_hashes,"compiled_shell_source_sha256":proof::sha(include_bytes!("../src/shell.rs")),"compiled_execution_source_sha256":proof::sha(include_bytes!("../src/shell/execution.rs")),"compiled_capture_source_sha256":proof::sha(include_bytes!("../src/shell/capture.rs")),"claims":"In-process opt-in comparison only; historical9 rows not relabeled; no new saved Records/profile/native/Bash capture or COMPLETE is produced"});
     let text = serde_json::to_string(&summary).unwrap();
     assert!(text.len() <= 16 * 1024);
     eprintln!("{text}");

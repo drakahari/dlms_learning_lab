@@ -104,7 +104,7 @@ fn bounded_catalog(pack: &Pack) -> Result<Vec<Scenario>, String> {
 fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
-        assert_eq!(shell::EVALUATOR_REVISION, 13);
+        assert_eq!(shell::EVALUATOR_REVISION, 14);
         let old = originals();
         let current = pack::bundled().unwrap();
         assert_eq!(one_off_boundary::before_len(&current), 176);

@@ -174,3 +174,6 @@ pub mod ntp_workspace;
 pub mod hsrp;
 /// Bounded inode/link VFS; separate from the existing file model.
 pub mod links;
+
+/// Original bounded C-byte ERE engine; utilities remain simulated.
+pub mod ere;

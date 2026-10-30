@@ -11,7 +11,7 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 - `|`, `&&`, `||`; pipeline status is the last stage by default. Explicit `set -o pipefail` selects the rightmost nonzero stage status, or0 if all stages succeed; `set +o pipefail` restores the default. Pipeline variable/option changes are isolated; virtual file writes and first-stage stdin consumption persist. A first-stage redirected or explicit file input leaves the caller’s finite stdin untouched. No other `set` forms or `set -e`.
 - `if …; then …; [else …;] fi`, `for name in words; do …; done`, `while …; do …; done`, nesting within the limits below.
 - Text redirects `<`, `>`, `>>`, `2>`, `2>>`, `>&2`, `1>&2`, `2>&1`, evaluated left to right. Redirected paths must expand to exactly one word. Only a single trailing input redirect on while loops is supported, as specified below; other compound-command redirects remain unsupported.
-- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat [--] [PATH]` (one optional file; absent or `-` reads finite input); `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); `read -r NAME` (one variable, default whitespace trimming, EOF status) and the narrowly scoped literal `IFS= read -r NAME` described below; `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true` and `false` without arguments, `:` (discards successfully prepared arguments), `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
+- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat [--] [PATH]` (one optional file; absent or `-` reads finite input); `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); explicit `grep -E` with optional `-v`, `-n`, `-q`, one bounded ASCII ERE and one optional virtual file or finite stdin (details below); `read -r NAME` (one variable, default whitespace trimming, EOF status) and the narrowly scoped literal `IFS= read -r NAME` described below; `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true` and `false` without arguments, `:` (discards successfully prepared arguments), `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
 - The first `#!/bin/bash` or `#!/bin/sh` line is a comment, not a process launcher. No startup files or inherited host environment. Each test starts with its declared environment, arguments, stdin and virtual files. Each Run starts fresh; editor work remains saved.
 
 ## Honest exclusions
@@ -325,3 +325,49 @@ charged to the unchanged256KiB virtual memory limit; new control scans use the
 existing expansion-work allowance. Instruction/output/source/work limits and
 cooperative Stop stay unchanged. No host process, file, service or network access
 is introduced. Current normal catalog stays unchanged by this capability.
+
+
+## Extended-expression selection (capability14)
+
+`grep -E PATTERN [PATH]` selects complete input lines using the deliberately bounded
+expression grammar in [ERE_SUBSET.md](ERE_SUBSET.md). Put all options before the
+pattern: `-v` selects lines that do not match; `-n` prefixes original line numbers;
+`-q` prints nothing and returns success at the first selected line. Options may
+be combined, for example `grep -Env '^(WARN|ERROR):' events`. Use `--` before the
+pattern for a dash-leading pattern or filename. At most one file is supported;
+omitting it or supplying `-` reads the finite input. An actual file named `-` can
+be addressed as `./-`. The old literal `grep -F` interface remains unchanged.
+
+Matching uses C/POSIX encoded bytes, not Unicode characters; `^.$` does not match
+the two UTF-8 bytes of `é`. Patterns must be ASCII. LF alone separates records;
+CR and Unicode separator bytes are ordinary data. Selected unterminated final
+records receive LF in output. Empty input has no records. Status is0 when at
+least one record is selected,1 when none is selected, and2 for a missing virtual
+file or malformed supported expression. These status2 diagnostics are defined
+simulator messages, not byte-for-byte GNU messages. Unsupported syntax/options
+or resource limits produce an honest simulator error and cannot earn success.
+
+The simulator acquires one immutable finite snapshot. It reports acquisition
+errors before matching; it does not model GNU multi-file read-error suppression
+with `-q`. Successful stdin selection consumes the supplied snapshot, including
+quiet selection; portable residual-input offsets and GNU buffering are not taught.
+Shell redirection still occurs first, so writing over the same file being read
+truncates it before selection. `-e`, multiple files/patterns, BRE, recursive search,
+case folding, binary modes and other GNU flags remain unsupported.
+
+Work, memory and output remain bounded across the entire script, including loops
+and substitutions. Matching yields to the UI between short advances. Stop drops
+pending matching and prevents later script commands; earlier redirection effects
+may already exist, and stopped runs do not receive assignment credit. Scalar
+locale selectors only accept C/POSIX; they are not general environment export.
+
+This source batch adds no authored lessons or objective credit. Actual capability14
+acceptance, all prior57-script compatibility, genuine13 migration and native Stop
+verification remain pending until recorded separately.
+
+
+The extended `grep -E` file operand accepts a single `./` prefix before an
+ordinary flat virtual filename, including `./-` for the file literally named
+`-`. Bare `-` still means the finite stdin snapshot. Parent traversal, nested
+paths and repeated `./` prefixes remain unsupported. This local extension does
+not change the historical literal `grep -F` or shared virtual-path grammar.

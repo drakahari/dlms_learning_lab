@@ -68,7 +68,7 @@ struct Oracle {
 
 #[test]
 fn actual28_bash_observations_have_exact_supported_and_excluded_classification() {
-    assert_eq!(shell::EVALUATOR_REVISION, 13);
+    assert_eq!(shell::EVALUATOR_REVISION, 14);
     let oracle: Oracle = serde_json::from_str(include_str!(
         "fixtures/automation-bash539-observations.json"
     ))

@@ -9,8 +9,9 @@ Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.
 All136 parents remain incomplete(92Open/44Partial). The inclusive Rust suite
-passes2,789 tests with0fail/0ignored; a subsequent equivalent test-only style edit
-passes its focused regression and static checks. Candidate5233a151bfe3 contains190
+passes2,839 tests with0fail/0ignored after bounded shell capability14; Clippy and
+445Python checks pass. The three pattern projects remain unregistered and earn
+no coverage credit. Candidate5233a151bfe3 contains190
 assignments with scoped installed NTP94, lifecycle, NFS cold and10-start evidence.
 Exact identities/limits remain separate in
 [CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md) and

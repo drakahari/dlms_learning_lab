@@ -2924,7 +2924,7 @@ mod actual9_before10_writer_acceptance {
     #[test]
     #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
     fn actual9_copy_races_do_not_overwrite_and_compare_exact_raw_bytes() {
-        assert_eq!(crate::shell::EVALUATOR_REVISION, 13);
+        assert_eq!(crate::shell::EVALUATOR_REVISION, 14);
         let raw = evidence::original9();
         for same in [false, true] {
             let dir = tempfile::tempdir().unwrap();

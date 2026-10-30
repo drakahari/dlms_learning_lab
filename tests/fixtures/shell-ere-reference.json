@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "kind": "fixed-unobserved-ere-utility-recipes",
+  "scope": "24 known utility argv recipes, never learner input; future collector must be separately closed/reviewed/approved",
+  "environment": {
+    "LC_ALL": "C",
+    "LANG": "C"
+  },
+  "host_execution": null,
+  "source_identity": null,
+  "cases": [
+    {
+      "id": "groups-numbered",
+      "vm_source": "'grep' '-En' '^(ERROR|WARN): [0-9]{2}$'",
+      "argv": [
+        "grep",
+        "-En",
+        "^(ERROR|WARN): [0-9]{2}$"
+      ],
+      "stdin": "INFO: 00\nERROR: 42\nWARN: 03\nERROR: nope\n",
+      "files": {},
+      "expected": {
+        "stdout": "2:ERROR: 42\n3:WARN: 03\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "separate-order",
+      "vm_source": "'grep' '-n' '-E' '^WARN$'",
+      "argv": [
+        "grep",
+        "-n",
+        "-E",
+        "^WARN$"
+      ],
+      "stdin": "INFO\nWARN\n",
+      "files": {},
+      "expected": {
+        "stdout": "2:WARN\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "invert-numbered-final-lf",
+      "vm_source": "'grep' '-Evn' '^keep$'",
+      "argv": [
+        "grep",
+        "-Evn",
+        "^keep$"
+      ],
+      "stdin": "drop\nkeep\nlast",
+      "files": {},
+      "expected": {
+        "stdout": "1:drop\n3:last\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-line",
+      "vm_source": "'grep' '-E' '^$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^$"
+      ],
+      "stdin": "\nfilled\n",
+      "files": {},
+      "expected": {
+        "stdout": "\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-pattern-final-lf",
+      "vm_source": "'grep' '-E' ''",
+      "argv": [
+        "grep",
+        "-E",
+        ""
+      ],
+      "stdin": "last",
+      "files": {},
+      "expected": {
+        "stdout": "last\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "empty-input",
+      "vm_source": "'grep' '-E' ''",
+      "argv": [
+        "grep",
+        "-E",
+        ""
+      ],
+      "stdin": "",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "invert-empty-pattern",
+      "vm_source": "'grep' '-Ev' ''",
+      "argv": [
+        "grep",
+        "-Ev",
+        ""
+      ],
+      "stdin": "anything\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "quiet-selected",
+      "vm_source": "'grep' '-Enq' '^yes$'",
+      "argv": [
+        "grep",
+        "-Enq",
+        "^yes$"
+      ],
+      "stdin": "no\nyes\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "quiet-not-selected",
+      "vm_source": "'grep' '-Eq' '^yes$'",
+      "argv": [
+        "grep",
+        "-Eq",
+        "^yes$"
+      ],
+      "stdin": "no\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "quiet-inverted",
+      "vm_source": "'grep' '-Evq' '^yes$'",
+      "argv": [
+        "grep",
+        "-Evq",
+        "^yes$"
+      ],
+      "stdin": "no\nyes\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "utf8-two-bytes",
+      "vm_source": "'grep' '-En' '^..$'",
+      "argv": [
+        "grep",
+        "-En",
+        "^..$"
+      ],
+      "stdin": "é\na\n",
+      "files": {},
+      "expected": {
+        "stdout": "1:é\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "utf8-not-one-byte",
+      "vm_source": "'grep' '-E' '^.$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^.$"
+      ],
+      "stdin": "é\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "cr-ordinary",
+      "vm_source": "'grep' '-E' '^a$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^a$"
+      ],
+      "stdin": "a\r\n",
+      "files": {},
+      "expected": {
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "unicode-separator-ordinary",
+      "vm_source": "'grep' '-En' '^a.b$'",
+      "argv": [
+        "grep",
+        "-En",
+        "^a.b$"
+      ],
+      "stdin": "a b\na b\n",
+      "files": {},
+      "expected": {
+        "stdout": "2:a b\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "ascii-class",
+      "vm_source": "'grep' '-E' '^[[:digit:]]{2}$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^[[:digit:]]{2}$"
+      ],
+      "stdin": "42\n٤٢\n4x\n",
+      "files": {},
+      "expected": {
+        "stdout": "42\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "negated-bracket",
+      "vm_source": "'grep' '-En' '^[^0-9]+$'",
+      "argv": [
+        "grep",
+        "-En",
+        "^[^0-9]+$"
+      ],
+      "stdin": "letters\n42\né\n",
+      "files": {},
+      "expected": {
+        "stdout": "1:letters\n3:é\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "literal-punctuation",
+      "vm_source": "'grep' '-E' '^a\\.b$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^a\\.b$"
+      ],
+      "stdin": "a.b\naxb\n",
+      "files": {},
+      "expected": {
+        "stdout": "a.b\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "nullable-cycle",
+      "vm_source": "'grep' '-E' '^(a?)*b$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^(a?)*b$"
+      ],
+      "stdin": "b\naaab\naaa\n",
+      "files": {},
+      "expected": {
+        "stdout": "b\naaab\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "upper-repeat",
+      "vm_source": "'grep' '-E' '^a{2,3}$'",
+      "argv": [
+        "grep",
+        "-E",
+        "^a{2,3}$"
+      ],
+      "stdin": "a\naa\naaa\naaaa\n",
+      "files": {},
+      "expected": {
+        "stdout": "aa\naaa\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "dash-leading-pattern",
+      "vm_source": "'grep' '-En' '--' '^-bad$'",
+      "argv": [
+        "grep",
+        "-En",
+        "--",
+        "^-bad$"
+      ],
+      "stdin": "-bad\ngood\n",
+      "files": {},
+      "expected": {
+        "stdout": "1:-bad\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "dash-leading-file",
+      "vm_source": "'grep' '-En' '--' '^-bad$' '-records'",
+      "argv": [
+        "grep",
+        "-En",
+        "--",
+        "^-bad$",
+        "-records"
+      ],
+      "stdin": "unused\n",
+      "files": {
+        "-records": "-bad\ngood\n",
+        "keep": "untouched\n"
+      },
+      "expected": {
+        "stdout": "1:-bad\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "-records": "-bad\ngood\n",
+          "keep": "untouched\n"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "literal-dash-file",
+      "vm_source": "'grep' '-E' '^dash$' './-'",
+      "argv": [
+        "grep",
+        "-E",
+        "^dash$",
+        "./-"
+      ],
+      "stdin": "unused\n",
+      "files": {
+        "-": "dash\n"
+      },
+      "expected": {
+        "stdout": "dash\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "-": "dash\n"
+        }
+      },
+      "observed": null
+    },
+    {
+      "id": "finite-stdin-dash",
+      "vm_source": "'grep' '-E' '^stdin$' '-'",
+      "argv": [
+        "grep",
+        "-E",
+        "^stdin$",
+        "-"
+      ],
+      "stdin": "stdin\nother\n",
+      "files": {},
+      "expected": {
+        "stdout": "stdin\n",
+        "stderr": "",
+        "status": 0,
+        "files": {}
+      },
+      "observed": null
+    },
+    {
+      "id": "virtual-source-preserved",
+      "vm_source": "'grep' '-Ev' '^INFO' 'events'",
+      "argv": [
+        "grep",
+        "-Ev",
+        "^INFO",
+        "events"
+      ],
+      "stdin": "unused\n",
+      "files": {
+        "events": "INFO okay\nWARN issue",
+        "keep": "protected\n"
+      },
+      "expected": {
+        "stdout": "WARN issue\n",
+        "stderr": "",
+        "status": 0,
+        "files": {
+          "events": "INFO okay\nWARN issue",
+          "keep": "protected\n"
+        }
+      },
+      "observed": null
+    }
+  ],
+  "vm_only": [
+    {
+      "id": "recognized-malformed",
+      "source": "grep -E '['",
+      "reason": "Simulated Syntax ERE stderr wording is deliberately different from GNU diagnostics; test utility status2 and meaningful independent diagnostics, not cross-tool byte equality."
+    },
+    {
+      "id": "unsupported-backref",
+      "source": "grep -E '(a)\\1'",
+      "reason": "Unsupported ERE grammar is a simulator diagnostic, not a claim GNU rejects backreferences."
+    },
+    {
+      "id": "work-limit",
+      "source": "grep -E '^(a?)*z$'",
+      "reason": "Simulator-wide bounded work, Stop and instruction accounting are VM guarantees, not GNU limits."
+    },
+    {
+      "id": "quiet-residual-stdin",
+      "source": "grep -Eq yes; cat",
+      "reason": "The simulator consumes one acquired finite snapshot; GNU buffering/portable residual stdin is not claimed equivalent."
+    },
+    {
+      "id": "missing-file-diagnostic",
+      "source": "grep -Eq '' missing",
+      "reason": "Both return2, but simulated virtual-file wording is intentionally defined separately from GNU filesystem diagnostics."
+    },
+    {
+      "id": "non-C-selector",
+      "source": "LANG=unsupported\ngrep -E '.'",
+      "reason": "Simulated scalar selectors are not general environment export; only externally fixed C/POSIX oracle environment is compared."
+    }
+  ]
+}

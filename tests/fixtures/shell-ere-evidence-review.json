@@ -1,0 +1,3640 @@
+{
+  "status": "SOURCE PROPOSAL ONLY; UNREGISTERED UNRUN UNGRADED",
+  "required_evaluator": 14,
+  "capability_manifest": "e1571f74861a8ccb8aa6acee24c3ad18307a6ae97747aa88144a4bf5b8d6bd3c",
+  "references_checked": "2026-10-29",
+  "unit_proposal": {
+    "id": "shell-ere-evidence",
+    "track": "Bash/Shell",
+    "title": "Exact matching and trustworthy evidence",
+    "summary": "Read patterns, diagnose malformed records and publish a guarded two-source incident report.",
+    "prerequisites": [
+      "shell-text",
+      "shell-numeric-validation",
+      "shell-loop-recovery"
+    ],
+    "labs": [
+      "shell-ere-event-view",
+      "shell-ere-inventory-review",
+      "shell-ere-incident-report"
+    ]
+  },
+  "labs": [
+    {
+      "id": "shell-ere-event-view",
+      "reference": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n",
+      "alternatives": [
+        "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\nrule='^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'\ngrep -nE -- \"$rule\" \"$1\"\n",
+        "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\nnumber=0\nselected=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'; then\n    printf '%s:%s\\n' \"$number\" \"$line\"\n    selected=yes\n  fi\ndone < \"$1\"\nif test \"$selected\" = yes; then exit 0; fi\nexit 1\n"
+      ],
+      "expected_reference_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expected_alternative_rows": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "wrong": [
+        {
+          "name": "Find a fragment instead of a complete record",
+          "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}' \"$1\"\n",
+          "must_fail_case_names": [
+            "Anchors reject plausible fragments"
+          ],
+          "reason": "An incident-looking substring is not a valid whole record."
+        },
+        {
+          "name": "Always report successful filtering",
+          "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\nexit 0\n",
+          "must_fail_case_names": [
+            "No matches is one not an error",
+            "Empty file has no selected records"
+          ],
+          "reason": "No-match status1 is useful information, not success or a syntax error."
+        }
+      ],
+      "partial": {
+        "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^FAIL:[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n",
+        "must_pass_case_names": [
+          "Anchors reject plausible fragments"
+        ],
+        "must_fail_case_names": [
+          "Failures amid normal records"
+        ],
+        "reason": "Failure records alone omit independently required denial events."
+      },
+      "hardcoded_first_case": {
+        "source": "printf '%s' '2:FAIL:api:503\n3:DENY:edge-2:403\n'\nprintf '%s' '' >&2\nexit 0\n",
+        "must_pass_case_names": [
+          "Failures amid normal records"
+        ],
+        "must_fail_case_names": [
+          "Anchors reject plausible fragments",
+          "Group alternatives and ASCII spelling",
+          "No matches is one not an error",
+          "Empty file has no selected records",
+          "Keep source numbering and terminate selected final line",
+          "Non-ASCII newline-like and control data remain ordinary",
+          "Quoted leading-dash file and shell-looking text",
+          "ASCII letters after first allow both cases",
+          "Missing file",
+          "Stdin marker refused even with supplied input",
+          "Argument count first"
+        ]
+      },
+      "try_change": {
+        "source": "grep -En -- '^(OPEN|HOLD):[a-z]{2,3}$' cards.txt\n",
+        "expected": {
+          "name": "Different cards example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          },
+          "stdout": "1:OPEN:ab\n3:HOLD:cd\n4:OPEN:abc\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          }
+        },
+        "repair": "grep -En -- '^(OPEN|HOLD):[a-z]{2}$' cards.txt\n"
+      },
+      "guards": [],
+      "actual_results": null,
+      "retained_R1": {
+        "scenario": {
+          "id": "shell-ere-event-view",
+          "version": 1,
+          "track": "Bash/Shell",
+          "unit": "shell-ere-evidence",
+          "topic": "Regular expressions and evidence",
+          "title": "Select whole events without losing evidence",
+          "summary": "Build an exact event filter while preserving source line numbers and files.",
+          "objective": "Accept exactly one existing named virtual file argument. Reject the literal - (stdin marker). Wrong argument count prints “Usage: event-view FILE”; - prints “Choose a named input file.”; a missing file prints “Input file is missing.”, each on stderr with newline and status 2 in that priority. Select only complete lines of LEVEL:ID:CODE where LEVEL is FAIL or DENY, ID starts with one ASCII lowercase letter followed by 0–7 ASCII letters, digits or hyphens, and CODE is exactly three ASCII digits. Print original line number, colon, original line and newline. Preserve all files. Return 0 if anything matched, 1 if not; print nothing for no matches. Case is significant. CR, spaces, non-ASCII identifiers and extra fields are not silently stripped.",
+          "difficulty": "Intermediate",
+          "minutes": 25,
+          "steps": [
+            "Understand the task",
+            "Build and investigate",
+            "Review the result"
+          ],
+          "guide": [
+            {
+              "title": "Understand the task",
+              "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+              "action": "Keep the full assignment visible. Open the introduction or separate runnable example whenever useful.",
+              "commands": []
+            },
+            {
+              "title": "Build and investigate",
+              "why": "A matching fragment is not necessarily a valid complete record. Output, status and unchanged files all matter.",
+              "action": "Write the whole script and Run. Read the selected failing case, then edit and retry.",
+              "commands": []
+            },
+            {
+              "title": "Review the result",
+              "why": "Cases include misleading fragments and valid boundary records, not only the first sample.",
+              "action": "Use optional progressive hints or the worked explanation when requested. Challenge keeps the same independent task.",
+              "commands": []
+            }
+          ],
+          "explanation": "Anchor the record policy, preserve the original evidence and use status deliberately. This is one supported solution; equivalent supported scripts pass.\n\nWorked solution, available on request:\nif test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n",
+          "hints": [
+            "Start by sketching one complete record with ^ and $. Group the two level words before the common colon.",
+            "An ID is one lowercase letter followed by a separate repeated class. Do not let * stand for an arbitrary suffix.",
+            "Use -n to retain source numbering. Preserve grep’s no-match status rather than always exiting 0."
+          ],
+          "sources": [
+            "https://www.gnu.org/software/grep/manual/html_node/Regular-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Character-Classes-and-Bracket-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+            "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+          ],
+          "simplifications": "Offline simulated UTF-8 files and in-process scripts only. This unit uses the disclosed C-locale byte-oriented ERE subset through grep -E with -n, -v and -q; it is not full GNU grep, BRE, Unicode matching, sed or all of LPIC-1 103.7. ASCII patterns/classes intentionally reject non-ASCII identifiers. Quoting protects the pattern from shell expansion; it does not make arbitrary code safe. Inputs are finite snapshots, not a real event stream. Output and execution remain bounded. Examples are ungraded and use separate drafts/files. No host commands/files/services/network.",
+          "initial": {
+            "kind": "Script",
+            "source": "# Write your full assignment here. Use Run to test it.\n"
+          },
+          "goal": {
+            "kind": "Script",
+            "cases": [
+              {
+                "name": "Failures amid normal records",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "INFO:web:200\nFAIL:api:503\nDENY:edge-2:403\n"
+                },
+                "stdout": "2:FAIL:api:503\n3:DENY:edge-2:403\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "INFO:web:200\nFAIL:api:503\nDENY:edge-2:403\n"
+                }
+              },
+              {
+                "name": "Anchors reject plausible fragments",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "prefixFAIL:web:500\nFAIL:web:500 trailing\nFAIL:web:50\nFAIL:web:5000\nFAIL:web:500\n"
+                },
+                "stdout": "5:FAIL:web:500\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "prefixFAIL:web:500\nFAIL:web:500 trailing\nFAIL:web:50\nFAIL:web:5000\nFAIL:web:500\n"
+                }
+              },
+              {
+                "name": "Group alternatives and ASCII spelling",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:a:000\nDENY:a1-b2c3d:999\nWARN:web:500\nFAIL:Web:500\nFAIL:abcdefghi:500\n"
+                },
+                "stdout": "1:FAIL:a:000\n2:DENY:a1-b2c3d:999\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:a:000\nDENY:a1-b2c3d:999\nWARN:web:500\nFAIL:Web:500\nFAIL:abcdefghi:500\n"
+                }
+              },
+              {
+                "name": "No matches is one not an error",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "INFO:web:200\n# FAIL:web:500\n"
+                },
+                "stdout": "",
+                "stderr": "",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "INFO:web:200\n# FAIL:web:500\n"
+                }
+              },
+              {
+                "name": "Empty file has no selected records",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": ""
+                },
+                "stdout": "",
+                "stderr": "",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": ""
+                }
+              },
+              {
+                "name": "Keep source numbering and terminate selected final line",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "\nFAIL:db:501\n\nDENY:proxy:401"
+                },
+                "stdout": "2:FAIL:db:501\n4:DENY:proxy:401\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "\nFAIL:db:501\n\nDENY:proxy:401"
+                }
+              },
+              {
+                "name": "Non-ASCII newline-like and control data remain ordinary",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:café:500\nFAIL:web:500\r\nFAIL:app:501 DENY:app:403\nDENY:z9:403\n"
+                },
+                "stdout": "4:DENY:z9:403\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:café:500\nFAIL:web:500\r\nFAIL:app:501 DENY:app:403\nDENY:z9:403\n"
+                }
+              },
+              {
+                "name": "Quoted leading-dash file and shell-looking text",
+                "args": [
+                  "-source log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/-source log": "FAIL:a:501\nFAIL:$(x):502\n"
+                },
+                "stdout": "1:FAIL:a:501\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/-source log": "FAIL:a:501\nFAIL:$(x):502\n"
+                }
+              },
+              {
+                "name": "ASCII letters after first allow both cases",
+                "args": [
+                  "events.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:aB9:500\nDENY:z-Y:403\n"
+                },
+                "stdout": "1:FAIL:aB9:500\n2:DENY:z-Y:403\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/events.log": "FAIL:aB9:500\nDENY:z-Y:403\n"
+                }
+              },
+              {
+                "name": "Missing file",
+                "args": [
+                  "missing.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                },
+                "stdout": "",
+                "stderr": "Input file is missing.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                }
+              },
+              {
+                "name": "Stdin marker refused even with supplied input",
+                "args": [
+                  "-"
+                ],
+                "stdin": "FAIL:web:500\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                },
+                "stdout": "",
+                "stderr": "Choose a named input file.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                }
+              },
+              {
+                "name": "Argument count first",
+                "args": [],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                },
+                "stdout": "",
+                "stderr": "Usage: event-view FILE\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n"
+                }
+              }
+            ]
+          },
+          "solution": [
+            "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n"
+          ],
+          "prerequisites": [
+            "shell-pipeline-status",
+            "shell-pipelines",
+            "shell-text-capstone"
+          ],
+          "teaching": {
+            "prerequisite_note": "Use quoted arguments, printf, test, if, redirection and exit status from earlier scripting units. This lesson introduces extended regular expressions (ERE), not a new shell language.",
+            "concepts": [
+              {
+                "title": "A shape rule instead of exact text",
+                "text": "A regular expression describes text to select. grep -F looks for literal text; grep -E reads a pattern. Put the pattern in single quotes so the shell passes it unchanged. Shell case patterns and ERE are different: [0-9]* in ERE means zero or more digits, not a digit followed by arbitrary text."
+              },
+              {
+                "title": "Choose a complete record",
+                "text": "A normal grep search can find a fragment anywhere. ^ marks the start of one line and $ its end. ^OPEN: matches a beginning; ^OPEN:ab$ matches only that complete line. grep reads lines, not a multi-line record."
+              },
+              {
+                "title": "Choose characters and amounts",
+                "text": "[a-z] means one ASCII lowercase letter; [0-9] means one ASCII digit; [[:digit:]] is a named ASCII digit class here. [[:alnum:]] includes ASCII digits and letters in both cases. {2} means exactly two of the item before it; {1,3} means one through three. + means one or more, * zero or more, and ? zero or one. A dot . means any one byte, not a literal dot; write \\. for a literal dot."
+              },
+              {
+                "title": "Group a choice",
+                "text": "(OPEN|HOLD) means either whole word. Parentheses group the choice; | separates alternatives. Keep shared anchors outside a group when the whole choice must fit one line: ^(OPEN|HOLD):[a-z]{2}$."
+              },
+              {
+                "title": "Keep evidence and interpret status",
+                "text": "-n prefixes selected lines with their original line number and a colon; skipped lines still count. grep returns 0 if it selected anything, 1 for no selected lines, and 2 for a recognized pattern/read error. A selected final line gets a newline even if the source had none. -- ends options; the following quoted pattern and filename remain separate arguments. A literal - is still the stdin marker after --, so this named-file assignment rejects it."
+              }
+            ],
+            "example": "grep -En -- '^(OPEN|HOLD):[a-z]{2}$' cards.txt\n",
+            "inputs": "cards.txt contains OPEN:ab, closed:xy, HOLD:cd and OPEN:abc on four separate lines. This is a different format and separate draft from the assignment.",
+            "try_change": "Change {2} to {2,3} and Run. OPEN:abc is now selected as line 4. Restore {2} to return to the original example.",
+            "fixture": {
+              "name": "Different cards example",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "1:OPEN:ab\n3:HOLD:cd\n",
+              "stderr": "",
+              "status": 0,
+              "after": {
+                "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            }
+          },
+          "retry_guidance": "Compare the selected case’s expected and actual output, status and files. Check anchors before broadening a pattern; an empty successful report differs from a no-match filter. Retry without changing the supplied inputs."
+        },
+        "review_lab": {
+          "id": "shell-ere-event-view",
+          "reference": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n",
+          "alternatives": [
+            "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\nrule='^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'\ngrep -nE -- \"$rule\" \"$1\"\n",
+            "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\nnumber=0\nselected=no\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'; then\n    printf '%s:%s\\n' \"$number\" \"$line\"\n    selected=yes\n  fi\ndone < \"$1\"\nif test \"$selected\" = yes; then exit 0; fi\nexit 1\n"
+          ],
+          "expected_reference_rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "expected_alternative_rows": [
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          ],
+          "wrong": [
+            {
+              "name": "Find a fragment instead of a complete record",
+              "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}' \"$1\"\n",
+              "must_fail_case_names": [
+                "Anchors reject plausible fragments"
+              ],
+              "reason": "An incident-looking substring is not a valid whole record."
+            },
+            {
+              "name": "Always report successful filtering",
+              "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\nexit 0\n",
+              "must_fail_case_names": [
+                "No matches is one not an error",
+                "Empty file has no selected records"
+              ],
+              "reason": "No-match status1 is useful information, not success or a syntax error."
+            }
+          ],
+          "partial": {
+            "source": "if test \"$#\" -ne 1; then\n  printf 'Usage: event-view FILE\\n' >&2\n  exit 2\nfi\nif test \"$1\" = -; then\n  printf 'Choose a named input file.\\n' >&2\n  exit 2\nfi\nif test -f \"$1\"; then true\nelse\n  printf 'Input file is missing.\\n' >&2\n  exit 2\nfi\ngrep -En -- '^FAIL:[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$1\"\n",
+            "must_pass_case_names": [
+              "Anchors reject plausible fragments"
+            ],
+            "must_fail_case_names": [
+              "Failures amid normal records"
+            ],
+            "reason": "Failure records alone omit independently required denial events."
+          },
+          "hardcoded_first_case": {
+            "source": "printf '%s' '2:FAIL:api:503\n3:DENY:edge-2:403\n'\nprintf '%s' '' >&2\nexit 0\n",
+            "must_pass_case_names": [
+              "Failures amid normal records"
+            ],
+            "must_fail_case_names": [
+              "Anchors reject plausible fragments",
+              "Group alternatives and ASCII spelling",
+              "No matches is one not an error",
+              "Empty file has no selected records",
+              "Keep source numbering and terminate selected final line",
+              "Non-ASCII newline-like and control data remain ordinary",
+              "Quoted leading-dash file and shell-looking text",
+              "ASCII letters after first allow both cases",
+              "Missing file",
+              "Stdin marker refused even with supplied input",
+              "Argument count first"
+            ]
+          },
+          "try_change": {
+            "source": "grep -En -- '^(OPEN|HOLD):[a-z]{2,3}$' cards.txt\n",
+            "expected": {
+              "name": "Different cards example",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "1:OPEN:ab\n3:HOLD:cd\n4:OPEN:abc\n",
+              "stderr": "",
+              "status": 0,
+              "after": {
+                "/work/cards.txt": "OPEN:ab\nclosed:xy\nHOLD:cd\nOPEN:abc\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            },
+            "repair": "grep -En -- '^(OPEN|HOLD):[a-z]{2}$' cards.txt\n"
+          },
+          "guards": [],
+          "actual_results": null
+        }
+      },
+      "new_peer_counterexamples": []
+    },
+    {
+      "id": "shell-ere-inventory-review",
+      "reference": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+      "alternatives": [
+        "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Evq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  else\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+        "acceptable() {\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'\n}\nnumber=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if acceptable \"$line\"; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n"
+      ],
+      "expected_reference_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expected_alternative_rows": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "wrong": [
+        {
+          "name": "One final good record erases earlier problems",
+          "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Mixed inventory recovers after mistakes"
+          ],
+          "reason": "Overall status describes all assessed rows, not the final message."
+        },
+        {
+          "name": "Character bracket confused with word choice",
+          "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:[lab|store]:(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+          "must_fail_case_names": [
+            "Minimal and maximum identifiers with digits and hyphens"
+          ],
+          "reason": "A bracket chooses one character, not an entire zone word."
+        },
+        {
+          "name": "ID9 — independently identified graded boundary",
+          "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,8}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+          "must_fail_case_names": [
+            "First forbidden ID length still allows later valid row"
+          ],
+          "reason": "Off-by-one permits forbidden nine-character inventory IDs; all supplied longer invalid IDs have length11."
+        }
+      ],
+      "partial": {
+        "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+        "must_pass_case_names": [
+          "Minimal and maximum identifiers with digits and hyphens"
+        ],
+        "must_fail_case_names": [
+          "Mixed inventory recovers after mistakes"
+        ],
+        "reason": "Counting invalid rows without their required diagnostic hides which record needs repair."
+      },
+      "hardcoded_first_case": {
+        "source": "printf '%s' 'Valid: web:lab:up\nValid: db:store:down\nValid count: 2\nInvalid count: 1\n'\nprintf '%s' 'Invalid line 2: wrong\n' >&2\nexit 1\n",
+        "must_pass_case_names": [
+          "Mixed inventory recovers after mistakes"
+        ],
+        "must_fail_case_names": [
+          "Minimal and maximum identifiers with digits and hyphens",
+          "Every choice must be anchored",
+          "Case zones and states are explicit",
+          "Empty and nonterminated records are assessed",
+          "No rows is a valid empty inventory",
+          "Unicode and shell-looking data are diagnosed not executed",
+          "All invalid keeps summary and status",
+          "Final valid row without LF",
+          "Later ASCII letters allow upper case"
+        ]
+      },
+      "try_change": {
+        "source": "for tag in 'A-12' 'A-07' 'b-34'; do\n  if printf '%s\\n' \"$tag\" | grep -Eq -- '^[A-Z]-[0-9]{2}$'; then\n    printf 'Ready: %s\\n' \"$tag\"\n  else\n    printf 'Review: %s\\n' \"$tag\" >&2\n  fi\ndone\n",
+        "expected": {
+          "name": "Different stock tags",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          },
+          "stdout": "Ready: A-12\nReady: A-07\n",
+          "stderr": "Review: b-34\n",
+          "status": 0,
+          "after": {
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          }
+        },
+        "repair": "for tag in 'A-12' 'A-7' 'b-34'; do\n  if printf '%s\\n' \"$tag\" | grep -Eq -- '^[A-Z]-[0-9]{2}$'; then\n    printf 'Ready: %s\\n' \"$tag\"\n  else\n    printf 'Review: %s\\n' \"$tag\" >&2\n  fi\ndone\n"
+      },
+      "guards": [],
+      "actual_results": null,
+      "retained_R1": {
+        "scenario": {
+          "id": "shell-ere-inventory-review",
+          "version": 1,
+          "track": "Bash/Shell",
+          "unit": "shell-ere-evidence",
+          "topic": "Regular expressions and evidence",
+          "title": "Review every inventory row",
+          "summary": "Explain malformed records, continue checking and return an honest summary.",
+          "objective": "Read supplied standard input one whole line at a time, including a nonterminated final line. A valid record is ID:ZONE:STATE: ID starts with one ASCII lowercase letter and then 0–7 ASCII letters, digits or hyphens; ZONE is lab or store; STATE is up or down. Print “Valid: LINE” for each valid line on stdout. For each invalid line, including blank lines, print “Invalid line N: LINE” on stderr; N counts every physical input line starting at 1. Continue after errors. Finish stdout with “Valid count: V” and “Invalid count: I”, each on its own line. All messages end in newline. Return 0 if I is zero, otherwise 1. Do not strip spaces, CR, case or non-ASCII data. Preserve inventory-copy.txt and every other file. Empty input has zero counts and succeeds.",
+          "difficulty": "Intermediate",
+          "minutes": 25,
+          "steps": [
+            "Understand the task",
+            "Build and investigate",
+            "Review the result"
+          ],
+          "guide": [
+            {
+              "title": "Understand the task",
+              "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+              "action": "Keep the full assignment visible. Open the introduction or separate runnable example whenever useful.",
+              "commands": []
+            },
+            {
+              "title": "Build and investigate",
+              "why": "A matching fragment is not necessarily a valid complete record. Output, status and unchanged files all matter.",
+              "action": "Write the whole script and Run. Read the selected failing case, then edit and retry.",
+              "commands": []
+            },
+            {
+              "title": "Review the result",
+              "why": "Cases include misleading fragments and valid boundary records, not only the first sample.",
+              "action": "Use optional progressive hints or the worked explanation when requested. Challenge keeps the same independent task.",
+              "commands": []
+            }
+          ],
+          "explanation": "Anchor the record policy, preserve the original evidence and use status deliberately. This is one supported solution; equivalent supported scripts pass.\n\nWorked solution, available on request:\nnumber=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+          "hints": [
+            "Keep a line counter, valid count and invalid count separately. Whole-row anchors prevent prefix/suffix fragments from passing.",
+            "Use grep -Eq in an if so matching controls one row’s branch without printing an extra copy.",
+            "Final status belongs to the combined invalid count, not the last row or last printf."
+          ],
+          "sources": [
+            "https://www.gnu.org/software/grep/manual/html_node/Regular-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Character-Classes-and-Bracket-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+            "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+          ],
+          "simplifications": "Offline simulated UTF-8 files and in-process scripts only. This unit uses the disclosed C-locale byte-oriented ERE subset through grep -E with -n, -v and -q; it is not full GNU grep, BRE, Unicode matching, sed or all of LPIC-1 103.7. ASCII patterns/classes intentionally reject non-ASCII identifiers. Quoting protects the pattern from shell expansion; it does not make arbitrary code safe. Inputs are finite snapshots, not a real event stream. Output and execution remain bounded. Examples are ungraded and use separate drafts/files. No host commands/files/services/network.",
+          "initial": {
+            "kind": "Script",
+            "source": "# Write your full assignment here. Use Run to test it.\n"
+          },
+          "goal": {
+            "kind": "Script",
+            "cases": [
+              {
+                "name": "Mixed inventory recovers after mistakes",
+                "args": [],
+                "stdin": "web:lab:up\nwrong\ndb:store:down\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "web:lab:up\nwrong\ndb:store:down\n"
+                },
+                "stdout": "Valid: web:lab:up\nValid: db:store:down\nValid count: 2\nInvalid count: 1\n",
+                "stderr": "Invalid line 2: wrong\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "web:lab:up\nwrong\ndb:store:down\n"
+                }
+              },
+              {
+                "name": "Minimal and maximum identifiers with digits and hyphens",
+                "args": [],
+                "stdin": "a:lab:up\na-1b2c3d:store:down\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "a:lab:up\na-1b2c3d:store:down\n"
+                },
+                "stdout": "Valid: a:lab:up\nValid: a-1b2c3d:store:down\nValid count: 2\nInvalid count: 0\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "a:lab:up\na-1b2c3d:store:down\n"
+                }
+              },
+              {
+                "name": "Every choice must be anchored",
+                "args": [],
+                "stdin": "prefix web:lab:up\nweb:lab:up suffix\nweb:lab:up:extra\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "prefix web:lab:up\nweb:lab:up suffix\nweb:lab:up:extra\n"
+                },
+                "stdout": "Valid count: 0\nInvalid count: 3\n",
+                "stderr": "Invalid line 1: prefix web:lab:up\nInvalid line 2: web:lab:up suffix\nInvalid line 3: web:lab:up:extra\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "prefix web:lab:up\nweb:lab:up suffix\nweb:lab:up:extra\n"
+                }
+              },
+              {
+                "name": "Case zones and states are explicit",
+                "args": [],
+                "stdin": "web:Lab:up\nweb:lab:UP\nweb:office:up\nweb:store:down\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "web:Lab:up\nweb:lab:UP\nweb:office:up\nweb:store:down\n"
+                },
+                "stdout": "Valid: web:store:down\nValid count: 1\nInvalid count: 3\n",
+                "stderr": "Invalid line 1: web:Lab:up\nInvalid line 2: web:lab:UP\nInvalid line 3: web:office:up\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "web:Lab:up\nweb:lab:UP\nweb:office:up\nweb:store:down\n"
+                }
+              },
+              {
+                "name": "Empty and nonterminated records are assessed",
+                "args": [],
+                "stdin": "\nweb:lab:up\ninvalid",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "\nweb:lab:up\ninvalid"
+                },
+                "stdout": "Valid: web:lab:up\nValid count: 1\nInvalid count: 2\n",
+                "stderr": "Invalid line 1: \nInvalid line 3: invalid\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "\nweb:lab:up\ninvalid"
+                }
+              },
+              {
+                "name": "No rows is a valid empty inventory",
+                "args": [],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": ""
+                },
+                "stdout": "Valid count: 0\nInvalid count: 0\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": ""
+                }
+              },
+              {
+                "name": "Unicode and shell-looking data are diagnosed not executed",
+                "args": [],
+                "stdin": "café:lab:up\n$(touch x):lab:up\nweb:lab:up\r\nvalid9:store:down\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "café:lab:up\n$(touch x):lab:up\nweb:lab:up\r\nvalid9:store:down\n"
+                },
+                "stdout": "Valid: valid9:store:down\nValid count: 1\nInvalid count: 3\n",
+                "stderr": "Invalid line 1: café:lab:up\nInvalid line 2: $(touch x):lab:up\nInvalid line 3: web:lab:up\r\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "café:lab:up\n$(touch x):lab:up\nweb:lab:up\r\nvalid9:store:down\n"
+                }
+              },
+              {
+                "name": "All invalid keeps summary and status",
+                "args": [],
+                "stdin": "bad\nno:shape\nlongerthan8:lab:up\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "bad\nno:shape\nlongerthan8:lab:up\n"
+                },
+                "stdout": "Valid count: 0\nInvalid count: 3\n",
+                "stderr": "Invalid line 1: bad\nInvalid line 2: no:shape\nInvalid line 3: longerthan8:lab:up\n",
+                "status": 1,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "bad\nno:shape\nlongerthan8:lab:up\n"
+                }
+              },
+              {
+                "name": "Final valid row without LF",
+                "args": [],
+                "stdin": "node1:lab:down",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "node1:lab:down"
+                },
+                "stdout": "Valid: node1:lab:down\nValid count: 1\nInvalid count: 0\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "node1:lab:down"
+                }
+              },
+              {
+                "name": "Later ASCII letters allow upper case",
+                "args": [],
+                "stdin": "nOde-2:lab:up\n",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "nOde-2:lab:up\n"
+                },
+                "stdout": "Valid: nOde-2:lab:up\nValid count: 1\nInvalid count: 0\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/inventory-copy.txt": "nOde-2:lab:up\n"
+                }
+              }
+            ]
+          },
+          "solution": [
+            "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n"
+          ],
+          "prerequisites": [
+            "shell-ere-event-view",
+            "shell-numeric-intake",
+            "shell-functions",
+            "shell-eof"
+          ],
+          "teaching": {
+            "prerequisite_note": "Complete the earlier exact event-selection lesson and the whole-line read/count lessons. You already know functions, integer counters and if. This lesson uses matching as a decision while preserving each original row.",
+            "concepts": [
+              {
+                "title": "Turn selection into a yes-or-no decision",
+                "text": "grep -q is quiet: it prints no selected text, but its status still answers the question. if runs the next command and takes its first branch for status 0. Pipe one preserved line from printf into grep -Eq; printf uses a fixed %s format, not the row as code or a format."
+              },
+              {
+                "title": "Reject the opposite when useful",
+                "text": "-v reverses selection. With -q it quietly reports whether a nonmatching line exists. This is useful for preflight checks. Do not confuse grep status 1 (no selected line) with a broken program; decide what no match means for your task."
+              },
+              {
+                "title": "A range is not a collection of words",
+                "text": "[a-z] chooses one character. (lab|store) chooses one of two words; [lab|store] would choose only one character from the bracket contents. Keep parentheses around a complete word choice and anchors around the complete record."
+              },
+              {
+                "title": "Keep going without hiding mistakes",
+                "text": "Count physical input lines even when a row is invalid. Print each reason to stderr, keep checking later rows, and report separate valid/invalid totals. Finish with status 1 if any row needed attention; one later good row must not erase that fact."
+              },
+              {
+                "title": "Keep a final line even without a newline",
+                "text": "IFS= read -r line preserves spaces and backslashes. read may store a final line but report end-of-input; || test -n \"$line\" lets the loop process that retained text. A blank line still arrives successfully and must be assessed, not silently skipped."
+              }
+            ],
+            "example": "for tag in 'A-12' 'A-7' 'b-34'; do\n  if printf '%s\\n' \"$tag\" | grep -Eq -- '^[A-Z]-[0-9]{2}$'; then\n    printf 'Ready: %s\\n' \"$tag\"\n  else\n    printf 'Review: %s\\n' \"$tag\" >&2\n  fi\ndone\n",
+            "inputs": "The example checks three stock tags in a fixed list. It uses no inventory assignment records and changes no files.",
+            "try_change": "Change A-7 to A-07 and Run: it now meets the two-digit format and moves to stdout. Restore A-7 to reproduce the original example.",
+            "fixture": {
+              "name": "Different stock tags",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "Ready: A-12\n",
+              "stderr": "Review: A-7\nReview: b-34\n",
+              "status": 0,
+              "after": {
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            }
+          },
+          "retry_guidance": "Compare the selected case’s expected and actual output, status and files. Check anchors before broadening a pattern; an empty successful report differs from a no-match filter. Retry without changing the supplied inputs."
+        },
+        "review_lab": {
+          "id": "shell-ere-inventory-review",
+          "reference": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+          "alternatives": [
+            "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Evq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  else\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+            "acceptable() {\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'\n}\nnumber=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if acceptable \"$line\"; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n"
+          ],
+          "expected_reference_rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "expected_alternative_rows": [
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          ],
+          "wrong": [
+            {
+              "name": "One final good record erases earlier problems",
+              "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nexit 0\n",
+              "must_fail_case_names": [
+                "Mixed inventory recovers after mistakes"
+              ],
+              "reason": "Overall status describes all assessed rows, not the final message."
+            },
+            {
+              "name": "Character bracket confused with word choice",
+              "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:[lab|store]:(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+              "must_fail_case_names": [
+                "Minimal and maximum identifiers with digits and hyphens"
+              ],
+              "reason": "A bracket chooses one character, not an entire zone word."
+            }
+          ],
+          "partial": {
+            "source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,7}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+            "must_pass_case_names": [
+              "Minimal and maximum identifiers with digits and hyphens"
+            ],
+            "must_fail_case_names": [
+              "Mixed inventory recovers after mistakes"
+            ],
+            "reason": "Counting invalid rows without their required diagnostic hides which record needs repair."
+          },
+          "hardcoded_first_case": {
+            "source": "printf '%s' 'Valid: web:lab:up\nValid: db:store:down\nValid count: 2\nInvalid count: 1\n'\nprintf '%s' 'Invalid line 2: wrong\n' >&2\nexit 1\n",
+            "must_pass_case_names": [
+              "Mixed inventory recovers after mistakes"
+            ],
+            "must_fail_case_names": [
+              "Minimal and maximum identifiers with digits and hyphens",
+              "Every choice must be anchored",
+              "Case zones and states are explicit",
+              "Empty and nonterminated records are assessed",
+              "No rows is a valid empty inventory",
+              "Unicode and shell-looking data are diagnosed not executed",
+              "All invalid keeps summary and status",
+              "Final valid row without LF",
+              "Later ASCII letters allow upper case"
+            ]
+          },
+          "try_change": {
+            "source": "for tag in 'A-12' 'A-07' 'b-34'; do\n  if printf '%s\\n' \"$tag\" | grep -Eq -- '^[A-Z]-[0-9]{2}$'; then\n    printf 'Ready: %s\\n' \"$tag\"\n  else\n    printf 'Review: %s\\n' \"$tag\" >&2\n  fi\ndone\n",
+            "expected": {
+              "name": "Different stock tags",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "Ready: A-12\nReady: A-07\n",
+              "stderr": "Review: b-34\n",
+              "status": 0,
+              "after": {
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            },
+            "repair": "for tag in 'A-12' 'A-7' 'b-34'; do\n  if printf '%s\\n' \"$tag\" | grep -Eq -- '^[A-Z]-[0-9]{2}$'; then\n    printf 'Ready: %s\\n' \"$tag\"\n  else\n    printf 'Review: %s\\n' \"$tag\" >&2\n  fi\ndone\n"
+          },
+          "guards": [],
+          "actual_results": null
+        }
+      },
+      "new_peer_counterexamples": [
+        {
+          "id": "ID9",
+          "lab": "shell-ere-inventory-review",
+          "finding": "Off-by-one permits forbidden nine-character inventory IDs; all supplied longer invalid IDs have length11.",
+          "exact_wrong_source": "number=0\nvalid=0\ninvalid=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number + 1))\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[[:lower:]][[:alnum:]-]{0,8}:(lab|store):(up|down)$'; then\n    printf 'Valid: %s\\n' \"$line\"\n    valid=$((valid + 1))\n  else\n    printf 'Invalid line %s: %s\\n' \"$number\" \"$line\" >&2\n    invalid=$((invalid + 1))\n  fi\ndone\nprintf 'Valid count: %s\\nInvalid count: %s\\n' \"$valid\" \"$invalid\"\nif test \"$invalid\" -eq 0; then exit 0; fi\nexit 1\n",
+          "wrong_source_pin": {
+            "bytes": 477,
+            "sha256": "9d1db20b2e9d3353e9804521ccfd04977c5b9d9ff0ed5758bb146acbe9be545b"
+          },
+          "original_graded_case_names": [
+            "Mixed inventory recovers after mistakes",
+            "Minimal and maximum identifiers with digits and hyphens",
+            "Every choice must be anchored",
+            "Case zones and states are explicit",
+            "Empty and nonterminated records are assessed",
+            "No rows is a valid empty inventory",
+            "Unicode and shell-looking data are diagnosed not executed",
+            "All invalid keeps summary and status",
+            "Final valid row without LF",
+            "Later ASCII letters allow upper case"
+          ],
+          "predicted_original_pass_mask": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "proposed_graded_case": {
+            "name": "First forbidden ID length still allows later valid row",
+            "args": [],
+            "stdin": "abcdefghi:lab:up\na:store:down\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/inventory-copy.txt": "abcdefghi:lab:up\na:store:down\n"
+            },
+            "stdout": "Valid: a:store:down\nValid count: 1\nInvalid count: 1\n",
+            "stderr": "Invalid line 1: abcdefghi:lab:up\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/inventory-copy.txt": "abcdefghi:lab:up\na:store:down\n"
+            }
+          },
+          "predicted_wrong_outcome_on_proposed_case": {
+            "stdout": "Valid: abcdefghi:lab:up\nValid: a:store:down\nValid count: 2\nInvalid count: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/inventory-copy.txt": "abcdefghi:lab:up\na:store:down\n"
+            }
+          },
+          "actual": null
+        }
+      ]
+    },
+    {
+      "id": "shell-ere-incident-report",
+      "reference": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+      "alternatives": [
+        "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -qvE -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -nE -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+        "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\npublish() {\n  printf 'Incident evidence\\n' > \"$3\"\n  for input in \"$1\" \"$2\"; do\n    printf 'Source: %s\\n' \"$input\" >> \"$3\"\n    grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\n  done\n}\npublish \"$1\" \"$2\" \"$3\"\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n"
+      ],
+      "expected_reference_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expected_alternative_rows": [
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      ],
+      "wrong": [
+        {
+          "name": "Destroy report before checking second source",
+          "source": "printf '' > \"$3\"\nif test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Malformed second source preserves old report",
+            "Missing second preserves existing report"
+          ],
+          "reason": "A correct-looking error message cannot recover the report already truncated."
+        },
+        {
+          "name": "Ignore malformed records and publish selected fragments",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Malformed second source preserves old report",
+            "Malformed first source wins error priority"
+          ],
+          "reason": "Filtering hides malformed rows unless the complete source is validated first."
+        },
+        {
+          "name": "Treat a multi-line filename as independent valid lines",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Embedded input newline is not a second valid name",
+            "Embedded destination newline must not create a second path"
+          ],
+          "reason": "grep evaluates individual lines: a valid-looking line does not validate the entire scalar filename."
+        },
+        {
+          "name": "NAME12 — independently identified graded boundary",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,7}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,7}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Allowed twelve-character input and report stems"
+          ],
+          "reason": "Copying the eight-character event ID ceiling to filenames wrongly refuses allowed9–12-character stems; no positive stem exceeds8."
+        },
+        {
+          "name": "INFO — independently identified graded boundary",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^INFO:.*$|^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Malformed first INFO source wins before malformed second"
+          ],
+          "reason": "Treating INFO as unvalidated background permits malformed records; graded malformed sources are bad/prefixFAIL, while malformedINFO exists only in an ungraded supplemental control."
+        },
+        {
+          "name": "Validate only the second source",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Malformed first INFO source wins before malformed second"
+          ],
+          "reason": "Every current graded input that reaches preflight has valid first-source contents; checking only second therefore gives identical branch/status/file results. Erroring filename/arity cases are decided before preflight."
+        },
+        {
+          "name": "Validate first source strictly but ignore malformed second INFO",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  rule='^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'\n  if test \"$input\" = \"$2\"; then rule='^$|^INFO:.*$|^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'; fi\n  if grep -Evq -- \"$rule\" \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Malformed INFO record in second source preserves report"
+          ],
+          "reason": "First source is validated strictly, catching new graded INFO-first. Second source alone permits INFO:anything; other graded malformed SECOND is prefixFAIL, still rejected. Every other graded source is valid or a prior name/arity refusal."
+        },
+        {
+          "name": "Reject valid digits and hyphens in filename stems",
+          "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Maximum names retain duplicate and final-line source evidence"
+          ],
+          "reason": "All graded positive basename stems are now letters-only. Original hyphen/digit filename positive was displaced to supplemental during consolidation; a letters-only ERE therefore rejects a specified valid class yet can complete current grading."
+        }
+      ],
+      "partial": {
+        "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+        "must_fail_case_names": [
+          "Two sources keep separate evidence numbering",
+          "No incidents still publishes both empty sections"
+        ],
+        "reason": "A successful first-source report is incomplete without the independent second-source section."
+      },
+      "hardcoded_first_case": {
+        "source": "printf '%s' 'Incident evidence\nSource: front.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n' > 'incident.report'\nprintf '%s' 'Published: incident.report\n'\nprintf '%s' '' >&2\nexit 0\n",
+        "must_pass_case_names": [
+          "Two sources keep separate evidence numbering"
+        ],
+        "must_fail_case_names": [
+          "Blank separators and final selected line",
+          "Malformed second source preserves old report",
+          "Malformed first source wins error priority",
+          "Missing second preserves existing report",
+          "Output cannot alias source",
+          "Repeated source refused",
+          "Relative traversal and option-shaped input rejected",
+          "Usage before any file operation",
+          "Embedded input newline is not a second valid name",
+          "Embedded destination newline must not create a second path"
+        ]
+      },
+      "try_change": {
+        "source": "if grep -Evq -- '^(PACK|WAIT):[A-Z]{2}$' parcels.txt; then\n  printf 'Review parcels first\\n' >&2\n  exit 2\nfi\ngrep -En -- '^PACK:' parcels.txt > preview.txt\nprintf 'Preview ready\\n'\n",
+        "expected": {
+          "name": "Different parcel preflight",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+            "/work/preview.txt": "Old preview\n",
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          },
+          "stdout": "",
+          "stderr": "Review parcels first\n",
+          "status": 2,
+          "after": {
+            "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+            "/work/preview.txt": "Old preview\n",
+            "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+          }
+        },
+        "repair": "if grep -Evq -- '^(PACK|HOLD):[A-Z]{2}$' parcels.txt; then\n  printf 'Review parcels first\\n' >&2\n  exit 2\nfi\ngrep -En -- '^PACK:' parcels.txt > preview.txt\nprintf 'Preview ready\\n'\n"
+      },
+      "guards": [
+        {
+          "name": "Repeated event evidence is not deduplicated",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:x:501\nFAIL:x:501\n",
+            "/work/back.log": "FAIL:x:501\n",
+            "/work/incident.report": ""
+          },
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:x:501\nFAIL:x:501\n",
+            "/work/back.log": "FAIL:x:501\n",
+            "/work/incident.report": "Incident evidence\nSource: front.log\n1:FAIL:x:501\n2:FAIL:x:501\nSource: back.log\n1:FAIL:x:501\n"
+          }
+        },
+        {
+          "name": "CR and non-ASCII are not normalized",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:café:200\n",
+            "/work/back.log": "FAIL:b:500\r\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:café:200\n",
+            "/work/back.log": "FAIL:b:500\r\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Two sources keep separate evidence numbering",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/incident.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/incident.report": "Incident evidence\nSource: front.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+          }
+        },
+        {
+          "name": "Malformed first source wins error priority",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "bad\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "bad\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Allowed twelve-character input and report stems",
+          "args": [
+            "abcdefghijkl.log",
+            "back.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+          }
+        },
+        {
+          "name": "Blank separators and final selected line",
+          "args": [
+            "east-1.log",
+            "west2.log",
+            "out-2.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n"
+          },
+          "stdout": "Published: out-2.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n",
+            "/work/out-2.report": "Incident evidence\nSource: east-1.log\n2:DENY:a-1:999\nSource: west2.log\n3:FAIL:abcd1234:501\n"
+          }
+        },
+        {
+          "name": "Maximum names retain duplicate and final-line source evidence",
+          "args": [
+            "abcdefghijkl.log",
+            "mnopqrstuvwx.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnopqrstuvwx.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+          }
+        }
+      ],
+      "actual_results": null,
+      "retained_R1": {
+        "scenario": {
+          "id": "shell-ere-incident-report",
+          "version": 1,
+          "track": "Bash/Shell",
+          "unit": "shell-ere-evidence",
+          "topic": "Regular expressions and evidence",
+          "title": "Publish validated incident evidence",
+          "summary": "Preflight complete source logs before replacing a report; keep each source’s identity and line numbers.",
+          "objective": "Accept FIRST SECOND REPORT as exactly three arguments. Inputs must be distinct simple basenames: one ASCII lowercase letter, then 0–11 lowercase letters, digits or hyphens, then literal .log. REPORT uses the same name rule with .report. Check argument count, both input-name spellings in argument order, destination spelling, distinct inputs, then each input’s existence and content in argument order. Guard errors on stderr/status 2 are exactly: “Usage: incident-report FIRST SECOND REPORT”, “Choose simple .log input names.”, “Choose a simple .report destination.”, “Choose two distinct input files.”, “Missing input: NAME”, “Malformed input: NAME”. A valid source line is blank or LEVEL:ID:CODE; LEVEL is INFO, FAIL or DENY; ID starts lowercase then 0–7 ASCII letters, digits or hyphens; CODE is three ASCII digits. No stripping or case conversion. Validate BOTH complete inputs before any write. On guard failure preserve every file. On success replace REPORT with “Incident evidence”, then for each input in argument order a “Source: NAME” line and its FAIL/DENY original numbered lines (N:LINE). Preserve duplicates; an incident-free source still gets its heading. All report lines end in newline. Print “Published: REPORT” on stdout and exit 0 even with no incidents. Preserve inputs and unrelated files.",
+          "difficulty": "Intermediate",
+          "minutes": 25,
+          "steps": [
+            "Understand the task",
+            "Build and investigate",
+            "Review the result"
+          ],
+          "guide": [
+            {
+              "title": "Understand the task",
+              "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+              "action": "Keep the full assignment visible. Open the introduction or separate runnable example whenever useful.",
+              "commands": []
+            },
+            {
+              "title": "Build and investigate",
+              "why": "A matching fragment is not necessarily a valid complete record. Output, status and unchanged files all matter.",
+              "action": "Write the whole script and Run. Read the selected failing case, then edit and retry.",
+              "commands": []
+            },
+            {
+              "title": "Review the result",
+              "why": "Cases include misleading fragments and valid boundary records, not only the first sample.",
+              "action": "Use optional progressive hints or the worked explanation when requested. Challenge keeps the same independent task.",
+              "commands": []
+            }
+          ],
+          "explanation": "Anchor the record policy, preserve the original evidence and use status deliberately. This is one supported solution; equivalent supported scripts pass.\n\nWorked solution, available on request:\nif test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "hints": [
+            "Use one whole-row format to validate and a separate incident selector after validation. Preserve empty source sections and original physical numbering.",
+            "Quiet -v selection detects any bad row. Do not redirect to the report until BOTH input validations finish.",
+            "Input and output name suffixes are disjoint in this task. Reject dot/slash/control/option-shaped spellings before opening anything; finish status 0 after a valid empty report."
+          ],
+          "sources": [
+            "https://www.gnu.org/software/grep/manual/html_node/Regular-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Character-Classes-and-Bracket-Expressions.html",
+            "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+            "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+          ],
+          "simplifications": "Offline simulated UTF-8 files and in-process scripts only. This unit uses the disclosed C-locale byte-oriented ERE subset through grep -E with -n, -v and -q; it is not full GNU grep, BRE, Unicode matching, sed or all of LPIC-1 103.7. ASCII patterns/classes intentionally reject non-ASCII identifiers. Quoting protects the pattern from shell expansion; it does not make arbitrary code safe. Inputs are finite snapshots, not a real event stream. Output and execution remain bounded. Examples are ungraded and use separate drafts/files. No host commands/files/services/network.",
+          "initial": {
+            "kind": "Script",
+            "source": "# Write your full assignment here. Use Run to test it.\n"
+          },
+          "goal": {
+            "kind": "Script",
+            "cases": [
+              {
+                "name": "Two sources keep separate evidence numbering",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:web:200\nFAIL:web:500\n",
+                  "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+                  "/work/incident.report": "Previous report stays until validation.\n"
+                },
+                "stdout": "Published: incident.report\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:web:200\nFAIL:web:500\n",
+                  "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+                  "/work/incident.report": "Incident evidence\nSource: front.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+                }
+              },
+              {
+                "name": "No incidents still publishes both empty sections",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:000\n\n",
+                  "/work/back.log": "",
+                  "/work/incident.report": "Previous report stays until validation.\n"
+                },
+                "stdout": "Published: incident.report\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:000\n\n",
+                  "/work/back.log": "",
+                  "/work/incident.report": "Incident evidence\nSource: front.log\nSource: back.log\n"
+                }
+              },
+              {
+                "name": "Blank separators and final selected line",
+                "args": [
+                  "east-1.log",
+                  "west2.log",
+                  "out-2.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/east-1.log": "\nDENY:a-1:999",
+                  "/work/west2.log": "\n\nFAIL:abcd1234:501\n"
+                },
+                "stdout": "Published: out-2.report\n",
+                "stderr": "",
+                "status": 0,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/east-1.log": "\nDENY:a-1:999",
+                  "/work/west2.log": "\n\nFAIL:abcd1234:501\n",
+                  "/work/out-2.report": "Incident evidence\nSource: east-1.log\n2:DENY:a-1:999\nSource: west2.log\n3:FAIL:abcd1234:501\n"
+                }
+              },
+              {
+                "name": "Malformed second source preserves old report",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:501\n",
+                  "/work/back.log": "prefixFAIL:b:500\n",
+                  "/work/incident.report": "Published earlier.\n"
+                },
+                "stdout": "",
+                "stderr": "Malformed input: back.log\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:501\n",
+                  "/work/back.log": "prefixFAIL:b:500\n",
+                  "/work/incident.report": "Published earlier.\n"
+                }
+              },
+              {
+                "name": "Malformed first source wins error priority",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "bad\n",
+                  "/work/back.log": "bad\n",
+                  "/work/incident.report": "Published earlier.\n"
+                },
+                "stdout": "",
+                "stderr": "Malformed input: front.log\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "bad\n",
+                  "/work/back.log": "bad\n",
+                  "/work/incident.report": "Published earlier.\n"
+                }
+              },
+              {
+                "name": "Missing second preserves existing report",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:200\n",
+                  "/work/incident.report": "Keep missing-case report.\n"
+                },
+                "stdout": "",
+                "stderr": "Missing input: back.log\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:200\n",
+                  "/work/incident.report": "Keep missing-case report.\n"
+                }
+              },
+              {
+                "name": "Output cannot alias source",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "front.log"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:500\n",
+                  "/work/back.log": "INFO:b:200\n"
+                },
+                "stdout": "",
+                "stderr": "Choose a simple .report destination.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:500\n",
+                  "/work/back.log": "INFO:b:200\n"
+                }
+              },
+              {
+                "name": "Repeated source refused",
+                "args": [
+                  "front.log",
+                  "front.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:500\n",
+                  "/work/incident.report": "Keep repeated-source report.\n"
+                },
+                "stdout": "",
+                "stderr": "Choose two distinct input files.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "FAIL:a:500\n",
+                  "/work/incident.report": "Keep repeated-source report.\n"
+                }
+              },
+              {
+                "name": "Relative traversal and option-shaped input rejected",
+                "args": [
+                  "../front.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep unsafe-name report.\n"
+                },
+                "stdout": "",
+                "stderr": "Choose simple .log input names.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep unsafe-name report.\n"
+                }
+              },
+              {
+                "name": "Usage before any file operation",
+                "args": [],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/incident.report": "Keep usage report.\n"
+                },
+                "stdout": "",
+                "stderr": "Usage: incident-report FIRST SECOND REPORT\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/incident.report": "Keep usage report.\n"
+                }
+              },
+              {
+                "name": "Embedded input newline is not a second valid name",
+                "args": [
+                  "front.log\nother.log",
+                  "back.log",
+                  "incident.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep newline-input report.\n"
+                },
+                "stdout": "",
+                "stderr": "Choose simple .log input names.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep newline-input report.\n"
+                }
+              },
+              {
+                "name": "Embedded destination newline must not create a second path",
+                "args": [
+                  "front.log",
+                  "back.log",
+                  "incident.report\nother.report"
+                ],
+                "stdin": "",
+                "env": {},
+                "files": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:200\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep newline-destination report.\n"
+                },
+                "stdout": "",
+                "stderr": "Choose a simple .report destination.\n",
+                "status": 2,
+                "after": {
+                  "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                  "/work/front.log": "INFO:a:200\n",
+                  "/work/back.log": "INFO:b:200\n",
+                  "/work/incident.report": "Keep newline-destination report.\n"
+                }
+              }
+            ]
+          },
+          "solution": [
+            "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n"
+          ],
+          "prerequisites": [
+            "shell-ere-inventory-review",
+            "shell-text-capstone",
+            "shell-numeric-publication",
+            "shell-capture-handover"
+          ],
+          "teaching": {
+            "prerequisite_note": "Use the two earlier ERE lessons, quoted filename guards, functions, redirects and status from safe publication lessons. The two inputs and report are finite virtual files. No locks, real mail, concurrency or crash-safe publication is modeled.",
+            "concepts": [
+              {
+                "title": "Validation comes before selection",
+                "text": "A broad incident filter can hide malformed records as if they never existed. First verify that every nonblank record has the agreed shape, including INFO records; only then select FAIL and DENY. The example uses parcel records instead of logs."
+              },
+              {
+                "title": "Quiet inverted selection finds a bad row",
+                "text": "grep -Evq returns 0 when at least one row does not fit the whole format. That means refuse publication. A completely empty file has no bad rows; empty separator lines are allowed only because this task says so. Group alternatives with their own ^ and $ when admitting an empty line."
+              },
+              {
+                "title": "Names also need an explicit policy",
+                "text": "The assignment chooses simple basenames with different .log and .report suffixes. A literal dot needs \\. in an ERE. grep checks lines, so reject any newline in a filename before using it to validate a single name. The earlier shell case pattern *[!a-z0-9.-]* finds any character outside lowercase letters, digits, dot and hyphen, including a newline; put hyphen last so it stays literal. This is a character guard, not the complete filename shape. Reject unsafe names before test, reads or >. The suffix rule prevents report/input collisions; it is a task-specific policy, not a universal filesystem security check."
+              },
+              {
+                "title": "An ordinary no-match is still useful evidence",
+                "text": "One valid log can contain no incidents. Its section heading must still appear. A grep returning 1 must not erase the other source’s incidents or make the whole validated report fail. Exit 0 explicitly after successful publication."
+              },
+              {
+                "title": "Know what this protects",
+                "text": "> replaces an existing destination as soon as that redirection runs. Complete all predictable input checks first. This exercise protects against its listed preflight failures; it does not model atomic rename, disk failure, locks, simultaneous writers or real-time log changes."
+              }
+            ],
+            "example": "if grep -Evq -- '^(PACK|HOLD):[A-Z]{2}$' parcels.txt; then\n  printf 'Review parcels first\\n' >&2\n  exit 2\nfi\ngrep -En -- '^PACK:' parcels.txt > preview.txt\nprintf 'Preview ready\\n'\n",
+            "inputs": "parcels.txt has HOLD:AB then PACK:CD. preview.txt starts with Old preview. These separate example files never replace assignment work.",
+            "try_change": "Change the allowed word HOLD in the pattern to WAIT and Run. Preflight now prints Review parcels first, returns 2 and preserves Old preview. Restore HOLD and retry.",
+            "fixture": {
+              "name": "Different parcel preflight",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+                "/work/preview.txt": "Old preview\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "Preview ready\n",
+              "stderr": "",
+              "status": 0,
+              "after": {
+                "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+                "/work/preview.txt": "2:PACK:CD\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            }
+          },
+          "retry_guidance": "Compare the selected case’s expected and actual output, status and files. Check anchors before broadening a pattern; an empty successful report differs from a no-match filter. Retry without changing the supplied inputs."
+        },
+        "review_lab": {
+          "id": "shell-ere-incident-report",
+          "reference": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "alternatives": [
+            "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -qvE -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -nE -- '^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+            "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\npublish() {\n  printf 'Incident evidence\\n'\n  for input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\"\n  grep -En -- '^(FAIL|DENY):' \"$input\"\n  done\n}\npublish \"$1\" \"$2\" > \"$3\"\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n"
+          ],
+          "expected_reference_rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "expected_alternative_rows": [
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ]
+          ],
+          "wrong": [
+            {
+              "name": "Destroy report before checking second source",
+              "source": "printf '' > \"$3\"\nif test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+              "must_fail_case_names": [
+                "Malformed second source preserves old report",
+                "Missing second preserves existing report"
+              ],
+              "reason": "A correct-looking error message cannot recover the report already truncated."
+            },
+            {
+              "name": "Ignore malformed records and publish selected fragments",
+              "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+              "must_fail_case_names": [
+                "Malformed second source preserves old report",
+                "Malformed first source wins error priority"
+              ],
+              "reason": "Filtering hides malformed rows unless the complete source is validated first."
+            },
+            {
+              "name": "Treat a multi-line filename as independent valid lines",
+              "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+              "must_fail_case_names": [
+                "Embedded input newline is not a second valid name",
+                "Embedded destination newline must not create a second path"
+              ],
+              "reason": "grep evaluates individual lines: a valid-looking line does not validate the entire scalar filename."
+            }
+          ],
+          "partial": {
+            "source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Two sources keep separate evidence numbering",
+              "No incidents still publishes both empty sections"
+            ],
+            "reason": "A successful first-source report is incomplete without the independent second-source section."
+          },
+          "hardcoded_first_case": {
+            "source": "printf '%s' 'Incident evidence\nSource: front.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n' > 'incident.report'\nprintf '%s' 'Published: incident.report\n'\nprintf '%s' '' >&2\nexit 0\n",
+            "must_pass_case_names": [
+              "Two sources keep separate evidence numbering"
+            ],
+            "must_fail_case_names": [
+              "Blank separators and final selected line",
+              "Malformed second source preserves old report",
+              "Malformed first source wins error priority",
+              "Missing second preserves existing report",
+              "Output cannot alias source",
+              "Repeated source refused",
+              "Relative traversal and option-shaped input rejected",
+              "Usage before any file operation",
+              "Embedded input newline is not a second valid name",
+              "Embedded destination newline must not create a second path"
+            ]
+          },
+          "try_change": {
+            "source": "if grep -Evq -- '^(PACK|WAIT):[A-Z]{2}$' parcels.txt; then\n  printf 'Review parcels first\\n' >&2\n  exit 2\nfi\ngrep -En -- '^PACK:' parcels.txt > preview.txt\nprintf 'Preview ready\\n'\n",
+            "expected": {
+              "name": "Different parcel preflight",
+              "args": [],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+                "/work/preview.txt": "Old preview\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              },
+              "stdout": "",
+              "stderr": "Review parcels first\n",
+              "status": 2,
+              "after": {
+                "/work/parcels.txt": "HOLD:AB\nPACK:CD\n",
+                "/work/preview.txt": "Old preview\n",
+                "/work/example-notes.txt": "Unrelated notes stay unchanged.\n"
+              }
+            },
+            "repair": "if grep -Evq -- '^(PACK|HOLD):[A-Z]{2}$' parcels.txt; then\n  printf 'Review parcels first\\n' >&2\n  exit 2\nfi\ngrep -En -- '^PACK:' parcels.txt > preview.txt\nprintf 'Preview ready\\n'\n"
+          },
+          "guards": [
+            {
+              "name": "Repeated event evidence is not deduplicated",
+              "args": [
+                "front.log",
+                "back.log",
+                "incident.report"
+              ],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                "/work/front.log": "FAIL:x:501\nFAIL:x:501\n",
+                "/work/back.log": "FAIL:x:501\n",
+                "/work/incident.report": ""
+              },
+              "stdout": "Published: incident.report\n",
+              "stderr": "",
+              "status": 0,
+              "after": {
+                "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                "/work/front.log": "FAIL:x:501\nFAIL:x:501\n",
+                "/work/back.log": "FAIL:x:501\n",
+                "/work/incident.report": "Incident evidence\nSource: front.log\n1:FAIL:x:501\n2:FAIL:x:501\nSource: back.log\n1:FAIL:x:501\n"
+              }
+            },
+            {
+              "name": "CR and non-ASCII are not normalized",
+              "args": [
+                "front.log",
+                "back.log",
+                "incident.report"
+              ],
+              "stdin": "",
+              "env": {},
+              "files": {
+                "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                "/work/front.log": "INFO:café:200\n",
+                "/work/back.log": "FAIL:b:500\r\n",
+                "/work/incident.report": "Published earlier.\n"
+              },
+              "stdout": "",
+              "stderr": "Malformed input: front.log\n",
+              "status": 2,
+              "after": {
+                "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+                "/work/front.log": "INFO:café:200\n",
+                "/work/back.log": "FAIL:b:500\r\n",
+                "/work/incident.report": "Published earlier.\n"
+              }
+            }
+          ],
+          "actual_results": null
+        }
+      },
+      "new_peer_counterexamples": [
+        {
+          "id": "NAME12",
+          "lab": "shell-ere-incident-report",
+          "finding": "Copying the eight-character event ID ceiling to filenames wrongly refuses allowed9–12-character stems; no positive stem exceeds8.",
+          "exact_wrong_source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,7}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,7}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "wrong_source_pin": {
+            "bytes": 1068,
+            "sha256": "889a2d9330216bb34fedfc4c17969faf9307b001228357c2a1665de96d218c39"
+          },
+          "original_graded_case_names": [
+            "Two sources keep separate evidence numbering",
+            "No incidents still publishes both empty sections",
+            "Blank separators and final selected line",
+            "Malformed second source preserves old report",
+            "Malformed first source wins error priority",
+            "Missing second preserves existing report",
+            "Output cannot alias source",
+            "Repeated source refused",
+            "Relative traversal and option-shaped input rejected",
+            "Usage before any file operation",
+            "Embedded input newline is not a second valid name",
+            "Embedded destination newline must not create a second path"
+          ],
+          "predicted_original_pass_mask": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "proposed_graded_case": {
+            "name": "Allowed twelve-character input and report stems",
+            "args": [
+              "abcdefghijkl.log",
+              "back.log",
+              "abcdefghijkl.report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+              "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+              "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+            },
+            "stdout": "Published: abcdefghijkl.report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+              "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+              "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+            }
+          },
+          "predicted_wrong_outcome_on_proposed_case": {
+            "stdout": "",
+            "stderr": "Choose simple .log input names.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+              "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+              "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+            }
+          },
+          "actual": null,
+          "current_graded_case": {
+            "name": "Maximum names retain duplicate and final-line source evidence",
+            "args": [
+              "abcd-efgh12j.log",
+              "mnop-qrst34x.log",
+              "abcd-efgh12j.report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+              "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+              "/work/abcd-efgh12j.report": "Previous report stays until validation.\n"
+            },
+            "stdout": "Published: abcd-efgh12j.report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+              "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+              "/work/abcd-efgh12j.report": "Incident evidence\nSource: abcd-efgh12j.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnop-qrst34x.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+            }
+          },
+          "predicted_wrong_current_outcome": {
+            "stdout": "",
+            "stderr": "Choose simple .log input names.\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+              "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+              "/work/abcd-efgh12j.report": "Previous report stays until validation.\n"
+            }
+          }
+        },
+        {
+          "id": "INFO",
+          "lab": "shell-ere-incident-report",
+          "finding": "Treating INFO as unvalidated background permits malformed records; graded malformed sources are bad/prefixFAIL, while malformedINFO exists only in an ungraded supplemental control.",
+          "exact_wrong_source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^INFO:.*$|^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+          "wrong_source_pin": {
+            "bytes": 1075,
+            "sha256": "3da0ee1e0fe1fd89eee756d34028ea73c937e260326ca2bc674dc3edcc63903a"
+          },
+          "original_graded_case_names": [
+            "Two sources keep separate evidence numbering",
+            "No incidents still publishes both empty sections",
+            "Blank separators and final selected line",
+            "Malformed second source preserves old report",
+            "Malformed first source wins error priority",
+            "Missing second preserves existing report",
+            "Output cannot alias source",
+            "Repeated source refused",
+            "Relative traversal and option-shaped input rejected",
+            "Usage before any file operation",
+            "Embedded input newline is not a second valid name",
+            "Embedded destination newline must not create a second path"
+          ],
+          "predicted_original_pass_mask": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "proposed_graded_case": {
+            "name": "Malformed INFO record in second source preserves report",
+            "args": [
+              "front.log",
+              "back.log",
+              "incident.report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "FAIL:a:501\n",
+              "/work/back.log": "INFO:broken\n",
+              "/work/incident.report": "Published earlier.\n"
+            },
+            "stdout": "",
+            "stderr": "Malformed input: back.log\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "FAIL:a:501\n",
+              "/work/back.log": "INFO:broken\n",
+              "/work/incident.report": "Published earlier.\n"
+            }
+          },
+          "predicted_wrong_outcome_on_proposed_case": {
+            "stdout": "Published: incident.report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "FAIL:a:501\n",
+              "/work/back.log": "INFO:broken\n",
+              "/work/incident.report": "Incident evidence\nSource: front.log\n1:FAIL:a:501\nSource: back.log\n"
+            }
+          },
+          "actual": null,
+          "current_graded_case": {
+            "name": "Malformed first INFO source wins before malformed second",
+            "args": [
+              "front.log",
+              "back.log",
+              "incident.report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "INFO:broken\n",
+              "/work/back.log": "bad\n",
+              "/work/incident.report": "Published earlier.\n"
+            },
+            "stdout": "",
+            "stderr": "Malformed input: front.log\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "INFO:broken\n",
+              "/work/back.log": "bad\n",
+              "/work/incident.report": "Published earlier.\n"
+            }
+          },
+          "predicted_wrong_current_outcome": {
+            "stdout": "",
+            "stderr": "Malformed input: back.log\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+              "/work/front.log": "INFO:broken\n",
+              "/work/back.log": "bad\n",
+              "/work/incident.report": "Published earlier.\n"
+            }
+          }
+        }
+      ],
+      "retained_R2_cases": [
+        {
+          "name": "Allowed twelve-character input and report stems",
+          "args": [
+            "abcdefghijkl.log",
+            "back.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+          }
+        },
+        {
+          "name": "No incidents still publishes both empty sections",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Incident evidence\nSource: front.log\nSource: back.log\n"
+          }
+        },
+        {
+          "name": "Blank separators and final selected line",
+          "args": [
+            "east-1.log",
+            "west2.log",
+            "out-2.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n"
+          },
+          "stdout": "Published: out-2.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n",
+            "/work/out-2.report": "Incident evidence\nSource: east-1.log\n2:DENY:a-1:999\nSource: west2.log\n3:FAIL:abcd1234:501\n"
+          }
+        },
+        {
+          "name": "Malformed second source preserves old report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Malformed INFO record in second source preserves report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Missing second preserves existing report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          },
+          "stdout": "",
+          "stderr": "Missing input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          }
+        },
+        {
+          "name": "Output cannot alias source",
+          "args": [
+            "front.log",
+            "back.log",
+            "front.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          }
+        },
+        {
+          "name": "Repeated source refused",
+          "args": [
+            "front.log",
+            "front.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose two distinct input files.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          }
+        },
+        {
+          "name": "Relative traversal and option-shaped input rejected",
+          "args": [
+            "../front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          }
+        },
+        {
+          "name": "Usage before any file operation",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: incident-report FIRST SECOND REPORT\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          }
+        },
+        {
+          "name": "Embedded input newline is not a second valid name",
+          "args": [
+            "front.log\nother.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          }
+        },
+        {
+          "name": "Embedded destination newline must not create a second path",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report\nother.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          }
+        }
+      ],
+      "second_only_counterexample": {
+        "status": "SOURCE_MATHEMATICAL_PREDICTION_NOT_VM_EXECUTION",
+        "exact_wrong_source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+        "source_pin": {
+          "bytes": 1065,
+          "sha256": "4b9e6ffc4e769809dd7d1b7786c8795167cf49f65e18da8159ecfcf2a88e737d"
+        },
+        "current_R2_case_names": [
+          "Allowed twelve-character input and report stems",
+          "No incidents still publishes both empty sections",
+          "Blank separators and final selected line",
+          "Malformed second source preserves old report",
+          "Malformed INFO record in second source preserves report",
+          "Missing second preserves existing report",
+          "Output cannot alias source",
+          "Repeated source refused",
+          "Relative traversal and option-shaped input rejected",
+          "Usage before any file operation",
+          "Embedded input newline is not a second valid name",
+          "Embedded destination newline must not create a second path"
+        ],
+        "predicted_current_R2_pass_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "why": "Every current graded input that reaches preflight has valid first-source contents; checking only second therefore gives identical branch/status/file results. Erroring filename/arity cases are decided before preflight.",
+        "old_R1_graded_witness_now_only_supplemental": {
+          "name": "Malformed first source wins error priority",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "bad\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "bad\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        "wrong_prediction_on_old_witness": {
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "bad\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        "suggested_replacement_graded_INFO_case": {
+          "name": "Malformed first INFO source wins before malformed second",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        "wrong_prediction_on_replacement": {
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        "actual": null
+      },
+      "retained_R3_cases": [
+        {
+          "name": "Allowed twelve-character input and report stems",
+          "args": [
+            "abcdefghijkl.log",
+            "back.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "DENY:db:403\nINFO:db:200\n",
+            "/work/abcdefghijkl.log": "INFO:web:200\nFAIL:web:500\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n2:FAIL:web:500\nSource: back.log\n1:DENY:db:403\n"
+          }
+        },
+        {
+          "name": "No incidents still publishes both empty sections",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Incident evidence\nSource: front.log\nSource: back.log\n"
+          }
+        },
+        {
+          "name": "Blank separators and final selected line",
+          "args": [
+            "east-1.log",
+            "west2.log",
+            "out-2.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n"
+          },
+          "stdout": "Published: out-2.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/east-1.log": "\nDENY:a-1:999",
+            "/work/west2.log": "\n\nFAIL:abcd1234:501\n",
+            "/work/out-2.report": "Incident evidence\nSource: east-1.log\n2:DENY:a-1:999\nSource: west2.log\n3:FAIL:abcd1234:501\n"
+          }
+        },
+        {
+          "name": "Malformed second source preserves old report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Malformed first INFO source wins before malformed second",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Missing second preserves existing report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          },
+          "stdout": "",
+          "stderr": "Missing input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          }
+        },
+        {
+          "name": "Output cannot alias source",
+          "args": [
+            "front.log",
+            "back.log",
+            "front.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          }
+        },
+        {
+          "name": "Repeated source refused",
+          "args": [
+            "front.log",
+            "front.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose two distinct input files.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          }
+        },
+        {
+          "name": "Relative traversal and option-shaped input rejected",
+          "args": [
+            "../front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          }
+        },
+        {
+          "name": "Usage before any file operation",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: incident-report FIRST SECOND REPORT\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          }
+        },
+        {
+          "name": "Embedded input newline is not a second valid name",
+          "args": [
+            "front.log\nother.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          }
+        },
+        {
+          "name": "Embedded destination newline must not create a second path",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report\nother.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          }
+        }
+      ],
+      "strict_first_lax_second_counterexample": {
+        "status": "SOURCE_MATHEMATICAL_PREDICTION_NOT_VM_EXECUTION",
+        "exact_wrong_source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z0-9-]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z0-9-]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  rule='^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'\n  if test \"$input\" = \"$2\"; then rule='^$|^INFO:.*$|^(FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$'; fi\n  if grep -Evq -- \"$rule\" \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+        "source_pin": {
+          "bytes": 1193,
+          "sha256": "823c60f1f55cb2490b6498935b7a44b689798fbad736b3d08bee8a692aef986f"
+        },
+        "predicted_R3_current_pass_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_case_names": [
+          "Allowed twelve-character input and report stems",
+          "No incidents still publishes both empty sections",
+          "Blank separators and final selected line",
+          "Malformed second source preserves old report",
+          "Malformed first INFO source wins before malformed second",
+          "Missing second preserves existing report",
+          "Output cannot alias source",
+          "Repeated source refused",
+          "Relative traversal and option-shaped input rejected",
+          "Usage before any file operation",
+          "Embedded input newline is not a second valid name",
+          "Embedded destination newline must not create a second path"
+        ],
+        "why": "First source is validated strictly, catching new graded INFO-first. Second source alone permits INFO:anything; other graded malformed SECOND is prefixFAIL, still rejected. Every other graded source is valid or a prior name/arity refusal.",
+        "lost_R2_graded_second_INFO_case_now_supplemental": {
+          "name": "Malformed INFO record in second source preserves report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        "wrong_outcome_on_second_INFO": {
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Incident evidence\nSource: front.log\n1:FAIL:a:501\nSource: back.log\n"
+          }
+        },
+        "bounded_consolidation_proposal": {
+          "name": "Maximum names retain duplicate and final-line source evidence",
+          "args": [
+            "abcdefghijkl.log",
+            "mnopqrstuvwx.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnopqrstuvwx.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+          }
+        },
+        "proposed_current_arrangement": "Enrich NAME12 positive with blank/unterminated/duplicate/IDboundary source rows, use freed old blank/final-line Case2 slot for exact INFO-second; keep INFO-first/bad-second priority Case4 and malformed-prefixFAIL-second Case3. Preserve every exact old Case object in current or supplemental/replay, no MAX_CASES increase.",
+        "actual": null
+      },
+      "retained_R4_cases": [
+        {
+          "name": "Maximum names retain duplicate and final-line source evidence",
+          "args": [
+            "abcdefghijkl.log",
+            "mnopqrstuvwx.log",
+            "abcdefghijkl.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcdefghijkl.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcdefghijkl.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnopqrstuvwx.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcdefghijkl.report": "Incident evidence\nSource: abcdefghijkl.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnopqrstuvwx.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+          }
+        },
+        {
+          "name": "No incidents still publishes both empty sections",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: incident.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:000\n\n",
+            "/work/back.log": "",
+            "/work/incident.report": "Incident evidence\nSource: front.log\nSource: back.log\n"
+          }
+        },
+        {
+          "name": "Malformed INFO record in second source preserves report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "INFO:broken\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Malformed second source preserves old report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:501\n",
+            "/work/back.log": "prefixFAIL:b:500\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Malformed first INFO source wins before malformed second",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          },
+          "stdout": "",
+          "stderr": "Malformed input: front.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:broken\n",
+            "/work/back.log": "bad\n",
+            "/work/incident.report": "Published earlier.\n"
+          }
+        },
+        {
+          "name": "Missing second preserves existing report",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          },
+          "stdout": "",
+          "stderr": "Missing input: back.log\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/incident.report": "Keep missing-case report.\n"
+          }
+        },
+        {
+          "name": "Output cannot alias source",
+          "args": [
+            "front.log",
+            "back.log",
+            "front.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/back.log": "INFO:b:200\n"
+          }
+        },
+        {
+          "name": "Repeated source refused",
+          "args": [
+            "front.log",
+            "front.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose two distinct input files.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "FAIL:a:500\n",
+            "/work/incident.report": "Keep repeated-source report.\n"
+          }
+        },
+        {
+          "name": "Relative traversal and option-shaped input rejected",
+          "args": [
+            "../front.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep unsafe-name report.\n"
+          }
+        },
+        {
+          "name": "Usage before any file operation",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          },
+          "stdout": "",
+          "stderr": "Usage: incident-report FIRST SECOND REPORT\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/incident.report": "Keep usage report.\n"
+          }
+        },
+        {
+          "name": "Embedded input newline is not a second valid name",
+          "args": [
+            "front.log\nother.log",
+            "back.log",
+            "incident.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-input report.\n"
+          }
+        },
+        {
+          "name": "Embedded destination newline must not create a second path",
+          "args": [
+            "front.log",
+            "back.log",
+            "incident.report\nother.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a simple .report destination.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/front.log": "INFO:a:200\n",
+            "/work/back.log": "INFO:b:200\n",
+            "/work/incident.report": "Keep newline-destination report.\n"
+          }
+        }
+      ],
+      "filename_class_counterexample": {
+        "status": "SOURCE_MATHEMATICAL_PREDICTIONS_ONLY",
+        "exact_wrong_source": "if test \"$#\" -ne 3; then\n  printf 'Usage: incident-report FIRST SECOND REPORT\\n' >&2\n  exit 2\nfi\nsimple_name() {\n  case \"$1\" in ''|*[!a-z0-9.-]*) return 1 ;; esac\n  printf '%s\\n' \"$1\" | grep -Eq -- \"$2\"\n}\nfor input in \"$1\" \"$2\"; do\n  if simple_name \"$input\" '^[a-z][a-z]{0,11}\\.log$'; then true\n  else printf 'Choose simple .log input names.\\n' >&2; exit 2\n  fi\ndone\nif simple_name \"$3\" '^[a-z][a-z]{0,11}\\.report$'; then true\nelse printf 'Choose a simple .report destination.\\n' >&2; exit 2\nfi\nif test \"$1\" = \"$2\"; then\n  printf 'Choose two distinct input files.\\n' >&2\n  exit 2\nfi\nfor input in \"$1\" \"$2\"; do\n  if test -f \"$input\"; then true\n  else printf 'Missing input: %s\\n' \"$input\" >&2; exit 2\n  fi\n  if grep -Evq -- '^$|^(INFO|FAIL|DENY):[[:lower:]][[:alnum:]-]{0,7}:[0-9]{3}$' \"$input\"; then\n    printf 'Malformed input: %s\\n' \"$input\" >&2\n    exit 2\n  fi\ndone\nprintf 'Incident evidence\\n' > \"$3\"\nfor input in \"$1\" \"$2\"; do\n  printf 'Source: %s\\n' \"$input\" >> \"$3\"\n  grep -En -- '^(FAIL|DENY):' \"$input\" >> \"$3\"\ndone\nprintf 'Published: %s\\n' \"$3\"\nexit 0\n",
+        "source_pin": {
+          "bytes": 1062,
+          "sha256": "f1b6d8993994d30fcd313296f00b249d5ac364447b27bc6ff36b0a559ca2f1ef"
+        },
+        "predicted_R4_current_pass_mask": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "reason": "All graded positive basename stems are now letters-only. Original hyphen/digit filename positive was displaced to supplemental during consolidation; a letters-only ERE therefore rejects a specified valid class yet can complete current grading.",
+        "proposed_name_only_corrected_graded_case": {
+          "name": "Maximum names retain duplicate and final-line source evidence",
+          "args": [
+            "abcd-efgh12j.log",
+            "mnop-qrst34x.log",
+            "abcd-efgh12j.report"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcd-efgh12j.report": "Previous report stays until validation.\n"
+          },
+          "stdout": "Published: abcd-efgh12j.report\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcd-efgh12j.report": "Incident evidence\nSource: abcd-efgh12j.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnop-qrst34x.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+          }
+        },
+        "wrong_prediction_on_corrected_case": {
+          "stdout": "",
+          "stderr": "Choose simple .log input names.\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+            "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+            "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+            "/work/abcd-efgh12j.report": "Previous report stays until validation.\n"
+          }
+        },
+        "actual": null
+      },
+      "current_consolidated_case": {
+        "name": "Maximum names retain duplicate and final-line source evidence",
+        "args": [
+          "abcd-efgh12j.log",
+          "mnop-qrst34x.log",
+          "abcd-efgh12j.report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+          "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+          "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+          "/work/abcd-efgh12j.report": "Previous report stays until validation.\n"
+        },
+        "stdout": "Published: abcd-efgh12j.report\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "Unrelated notes stay unchanged.\n",
+          "/work/abcd-efgh12j.log": "\nINFO:web:200\nFAIL:a:000\nFAIL:a:000",
+          "/work/mnop-qrst34x.log": "\nDENY:a-1:999\n\nFAIL:abcd1234:501\n",
+          "/work/abcd-efgh12j.report": "Incident evidence\nSource: abcd-efgh12j.log\n3:FAIL:a:000\n4:FAIL:a:000\nSource: mnop-qrst34x.log\n2:DENY:a-1:999\n4:FAIL:abcd1234:501\n"
+        }
+      }
+    }
+  ],
+  "scope": [
+    "103.7 ERE construction/selection support only; no BRE/sed/fullobjective coverage",
+    "105.2 practical controlled report project support only; no real mail/ownership/interpreter/locking guarantee"
+  ],
+  "actual_observations": null,
+  "original_pack_pins": [
+    {
+      "path": "scenarios/shell-arrays-v1.json",
+      "bytes": 43401,
+      "sha256": "43bae8b5651f8b63de711396034fe74b763485e4baf95d9b13e75ec989a66ff6"
+    },
+    {
+      "path": "scenarios/shell-capture-v1.json",
+      "bytes": 67211,
+      "sha256": "cd22ad53457785ef648b5423c0400502d6b09bb2f265d75ca8813ad589d6da25"
+    },
+    {
+      "path": "scenarios/shell-case-v1.json",
+      "bytes": 59145,
+      "sha256": "ecbe8e382b00cf0e02e650d3f819715f66b6838fa61b115f071777ffd29f9184"
+    },
+    {
+      "path": "scenarios/shell-command-vectors-v1.json",
+      "bytes": 62589,
+      "sha256": "8852a3609ce90da2b1607a698edc86db9112d7168a79f6f6cd9eac3f4773c4cc"
+    },
+    {
+      "path": "scenarios/shell-composition-v1.json",
+      "bytes": 33572,
+      "sha256": "f452a4c0d4a17a7b4e17f13d1740922ea0ffedc29f111f00b756e6de5e9dfb98"
+    },
+    {
+      "path": "scenarios/shell-counts-v1.json",
+      "bytes": 46139,
+      "sha256": "f87220e67cfa547135befd9952716174cbd7aee652cbed4bd2a20ab5fe3e36b9"
+    },
+    {
+      "path": "scenarios/shell-file-batches-v1.json",
+      "bytes": 38010,
+      "sha256": "782886fbc19e32323d666f801c467e59d53cbde6e3eaf984f531f828cc460a9b"
+    },
+    {
+      "path": "scenarios/shell-getopts-v1.json",
+      "bytes": 68751,
+      "sha256": "62e46d2f1a2f4b81e53b97998b4b121eae2e808484099dfa21210f8ed4e342b5"
+    },
+    {
+      "path": "scenarios/shell-loop-recovery-v1.json",
+      "bytes": 38654,
+      "sha256": "3ff10a2e55b6263c29a92ec82e83aab5953ea3301b20c2631991832e100aa02b"
+    },
+    {
+      "path": "scenarios/shell-numeric-validation-v1.json",
+      "bytes": 56375,
+      "sha256": "f27c3ba1cb8a03297f294522377b0e341bf921a13d9bf41bc39057a91e7939cb"
+    },
+    {
+      "path": "scenarios/shell-optional-inputs-v1.json",
+      "bytes": 54461,
+      "sha256": "30d72ae7cb0bbeabcc9c4a1e0268103c50ce58355198f69afe7cd6e5a61d5678"
+    },
+    {
+      "path": "scenarios/shell-reusable-v1.json",
+      "bytes": 36112,
+      "sha256": "cbb8df4b6b83bfbb83d29af01fac55942a9a97e0ce101b5cc58cf1ac49aa4caf"
+    },
+    {
+      "path": "scenarios/shell-safe-automation-v1.json",
+      "bytes": 48326,
+      "sha256": "675a81721bdf3225e31c1074c799292236ee7012e73e3e1b133d28f95848c147"
+    },
+    {
+      "path": "scenarios/shell-scope-v1.json",
+      "bytes": 33253,
+      "sha256": "c5804a45bc660089f67448bb043c998c9ff72d216aaaada7d06fe7bed5fb9d1d"
+    },
+    {
+      "path": "scenarios/shell-text-v1.json",
+      "bytes": 41724,
+      "sha256": "b1e9e087124102161bd6ae53552afb850c0b39bac4893c75eb2ba94251679bfb"
+    },
+    {
+      "path": "scenarios/shell-unit-v1.json",
+      "bytes": 46290,
+      "sha256": "a211d4717fd091f571f11cbecfdeb4c5a5a24f378afdd8de4ef95e613bee8d75"
+    }
+  ],
+  "existing_scripts": [
+    "shell-array-intake",
+    "shell-array-priority",
+    "shell-array-package",
+    "shell-array-handover",
+    "shell-capture-preview",
+    "shell-capture-evidence",
+    "shell-capture-decision",
+    "shell-capture-handover",
+    "shell-case-interface",
+    "shell-case-routing",
+    "shell-case-publication",
+    "shell-command-options",
+    "shell-command-dispatch",
+    "shell-command-plan",
+    "shell-streams",
+    "shell-pipelines",
+    "shell-eof",
+    "shell-batch-audit",
+    "shell-number-records",
+    "shell-order-total",
+    "shell-pack-items",
+    "shell-count-capstone",
+    "shell-file-manifest",
+    "shell-collect-errors",
+    "shell-file-batch-capstone",
+    "shell-options-report",
+    "shell-options-jobs",
+    "shell-options-publication",
+    "shell-loop-intake",
+    "shell-loop-fallback",
+    "shell-numeric-retry",
+    "shell-numeric-intake",
+    "shell-numeric-publication",
+    "shell-optional-policy",
+    "shell-optional-report",
+    "shell-optional-handover",
+    "shell-functions",
+    "shell-return",
+    "shell-shift",
+    "shell-bundle",
+    "shell-preserve-lines",
+    "shell-pipeline-status",
+    "shell-safe-handover",
+    "shell-local-heading",
+    "shell-scope-review",
+    "shell-scope-capstone",
+    "shell-cut-inventory",
+    "shell-sort-manifest",
+    "shell-uniq-counts",
+    "shell-text-capstone",
+    "shell-handover",
+    "shell-arguments",
+    "shell-input",
+    "shell-validation",
+    "shell-report",
+    "shell-loop",
+    "shell-capstone"
+  ],
+  "existing_script_count": 57,
+  "existing_case_count": 442,
+  "existing_example_count": 57,
+  "original_units_sha256": "33802a6dca68aa6a7f78e045a7dc581409660b80b56eda75a36eb99ea8e007f9",
+  "parent_R1_manifest_sha256": "c4785b42576ad106a66a316b3f710749ec91885d61100d9e98138cc22734a3df",
+  "independent_R1_counterexamples_sha256": "732c3310564d7a35e316a2190361706afc5407bca5ffb3e623335b174dddf2b8",
+  "parent_R2_manifest_sha256": "b0837495a400143cf1980967870f3b8b9134371e00d91a59dd01a3789317e951",
+  "independent_R2_counterexample_sha256": "1996884e934dc8d01b993278ccaf6e016c0c8af65d77404672e3e701a7df7715"
+}

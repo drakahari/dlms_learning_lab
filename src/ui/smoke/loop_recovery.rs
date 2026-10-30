@@ -580,10 +580,10 @@ impl LabApp {
     }
     fn loop_recovery_inner(&mut self, ctx: &egui::Context, stage: usize) -> (bool, Option<String>) {
         const {
-            assert!(shell::EVALUATOR_REVISION == 13);
+            assert!(shell::EVALUATOR_REVISION == 14);
         }
         assert!(self.smoke && self._smoke_profile.is_some());
-        assert_eq!(shell::EVALUATOR_REVISION, 13);
+        assert_eq!(shell::EVALUATOR_REVISION, 14);
         assert_eq!(
             (
                 one_off_boundary::loop_registration::lvm_registration::before_scenarios(

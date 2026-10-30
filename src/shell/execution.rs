@@ -49,6 +49,7 @@ enum CommandPhase {
     Redirect,
     Target(String, Words),
     Execute,
+    Grep(Box<grep::Task>),
 }
 struct CommandTask {
     command: Command,
@@ -84,6 +85,7 @@ impl CommandTask {
                 .map_or(0, |(input, _, _, _)| input.len())
             + match &self.phase {
                 CommandPhase::Arguments(words) | CommandPhase::Locals(words) => words.bytes(),
+                CommandPhase::Grep(task) => task.bytes(),
                 CommandPhase::Assignment(key, words) | CommandPhase::Target(key, words) => {
                     key.len() + words.bytes()
                 }
@@ -342,6 +344,25 @@ impl CommandTask {
                     self.phase = CommandPhase::Target(op, words);
                 }
             }
+            CommandPhase::Grep(mut task) => {
+                let retained = task.bytes();
+                if task.advance(vm)? {
+                    if task.stdin {
+                        vm.input_pos = vm.input.len();
+                    }
+                    let (out, err, status) = (*task).finish();
+                    // Returned strings still own their reserved allocations while input is
+                    // restored and output is emitted. Outer pending reconciliation
+                    // releases this charge after those locals/this command drop.
+                    vm.rebase_pending(retained, out.capacity() + err.capacity())?;
+                    self.restore_input(vm)?;
+                    vm.outcome.status = status;
+                    vm.emit(&self.stdout, &out)?;
+                    vm.emit(&self.stderr, &err)?;
+                    return Ok(Some(String::new()));
+                }
+                self.phase = CommandPhase::Grep(task);
+            }
             CommandPhase::Execute => {
                 let control = self
                     .args
@@ -375,6 +396,16 @@ impl CommandTask {
                         // Real transfer waits until this command's temporary input
                         // binding is restored; deeper loop bindings may then unwind.
                         (String::new(), String::new(), 0)
+                    } else if self.args.first().is_some_and(|cmd| cmd == "grep")
+                        && grep::extended(&self.args[1..])
+                    {
+                        match grep::Task::start(vm, &self.args[1..])? {
+                            grep::Start::Pending(task) => {
+                                self.phase = CommandPhase::Grep(task);
+                                return Ok(None);
+                            }
+                            grep::Start::Complete(out, err, status) => (out, err, status),
+                        }
                     } else {
                         vm.builtin(&self.args, self.read_mode)?
                     }
@@ -845,5 +876,105 @@ mod tests {
         }
         assert_eq!(vm.input, "parent\n");
         assert!(vm.outcome.files.contains_key("/work/output.txt"));
+    }
+
+    #[test]
+    fn extended_selection_completion_keeps_reserved_output_charged_through_emission() {
+        let mut c = fixture();
+        c.stdin = "keep\n".into();
+        c.env.clear();
+        c.files.clear();
+        let mut vm = Vm::new("", &c).unwrap();
+        let program = compile("grep -E '^keep$'").unwrap();
+        let Code::Pipe(commands) = &program.code[0] else {
+            panic!("Parsed command required")
+        };
+        let mut command = CommandTask::new(commands[0].clone(), Dest::Out, Dest::Err);
+        let mut saw_pending = false;
+        let mut completed = false;
+        for _ in 0..10_000 {
+            vm.pending_bytes.set(command.bytes());
+            saw_pending |= matches!(command.phase, CommandPhase::Grep(_));
+            if command.advance(&mut vm, false).unwrap().is_some() {
+                completed = true;
+                break;
+            }
+        }
+        assert!(saw_pending && completed);
+        assert_eq!(vm.outcome.stdout, "keep\n");
+        assert_eq!(vm.outcome.error, None);
+        // Even a five-byte result owns the admitted32KiB output allocation at
+        // completion. A len-only rebase fails this independent ownership check.
+        assert_eq!(vm.pending_bytes.get(), command.bytes() + MAX_OUTPUT);
+        let without_retained = vm.memory_bytes().checked_sub(MAX_OUTPUT).unwrap();
+        let fits_only_if_capacity_is_forgotten = MAX_TEXT - without_retained;
+        assert!(
+            vm.reserve_memory(fits_only_if_capacity_is_forgotten)
+                .is_err()
+        );
+        let admitted = MAX_TEXT - vm.memory_bytes();
+        assert!(vm.reserve_memory(admitted).is_ok());
+        assert!(vm.reserve_memory(admitted + 1).is_err());
+        // The ordinary outer pipeline actually releases that temporary charge.
+        let mut complete = Vm::new("grep -E '^keep$'", &c).unwrap();
+        for _ in 0..10_000 {
+            if complete.done() {
+                break;
+            }
+            complete.tick(1);
+        }
+        assert!(complete.done());
+        assert_eq!(complete.outcome.error, None);
+        assert_eq!(complete.outcome.stdout, "keep\n");
+        assert_eq!(complete.pending_bytes.get(), 0);
+    }
+    #[test]
+    fn stop_reaches_real_pending_nfa_after_framing_and_validation_without_later_publication() {
+        let input = "x".repeat(20_000);
+        let mut c = fixture();
+        c.stdin.clear();
+        c.env.clear();
+        c.files = BTreeMap::from([
+            ("/work/input".into(), input.clone()),
+            ("/work/report".into(), "protected\n".into()),
+        ]);
+        let mut vm = Vm::new(
+            "grep -E '^z$' input; printf 'must not publish\\n' > report",
+            &c,
+        )
+        .unwrap();
+        let after_framing_and_validation =
+            crate::ere::Regex::compile_charge("^z$".len()).unwrap() + 2 * input.len() + 64;
+        let mut reached = false;
+        for _ in 0..10_000 {
+            vm.tick(1);
+            let pending = matches!(vm.pending.as_ref(),Some(Pending::Pipeline(p)) if matches!(p.active.as_ref().map(|c|&c.phase),Some(CommandPhase::Grep(_))));
+            if pending && vm.regex_work.get() > after_framing_and_validation {
+                reached = true;
+                break;
+            }
+            if vm.done() {
+                break;
+            }
+        }
+        assert!(
+            reached,
+            "Stop premise must be real suspended NFA work, not compilation/framing or a finished command"
+        );
+        assert!(!vm.done());
+        assert!(vm.regex_work.get() < MAX_REGEX_WORK);
+        vm.stop();
+        assert!(vm.done());
+        assert!(vm.pending.is_none());
+        assert_eq!(vm.pending_bytes.get(), 0);
+        assert!(
+            vm.outcome
+                .error
+                .as_ref()
+                .is_some_and(|e| e.contains("Stopped"))
+        );
+        assert_eq!(vm.outcome.status, 2);
+        assert_eq!(vm.outcome.stdout, "");
+        assert_eq!(vm.outcome.files, c.files);
     }
 }

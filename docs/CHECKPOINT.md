@@ -55,18 +55,77 @@ All source still clean5233 during these checks. Full identities/checksums/limits
 are in CATALOG190_MILESTONE.md; not all190 native flows or every historical
 startup failure are accepted. No new curriculum count or release.
 
-Next finish docs-only consistency/privacy checks, commit/push then IMMEDIATELY
-apply reviewed ERE14 fixed45 via source-only guarded tool after confirming no
-active marker. Root sourceACK4d7226ef and read-only check pass on current5233;
-owned30before/15new still exact,1020unowned staycurrent. Follow HANDOFF.md actual
-capability/history/reference gates before normal193R4 integration. Continue the
-remaining mapped curriculum without routine owner approval or stopping at this
-Fedora package.
+Docs-only verification commitd5b35d8 is pushed. Guarded fixed45 ERE application
+is ACTUALLY APPLIED on that base: journal
+`.build-artifacts/reviews/shell-ere14-main190-application-r1/applications/97caa49502671bcea259f4d1adce23b24b44811fb6c48452ef2cda7f29831dfc/APPLIED.json`.
+30oldbefore/15new checked; all1020 unowned files retained. Main is DIRTY with validated evaluator14/normal190 capability code; coherent
+commit still pending. The three new projects remain unregistered. Do NOT apply45 again
+or run the immutable13 producer. Stable installed candidate remains5233/eval13.
+
+Actual trial gates: M509all4 execution ownership/Stop PASS. M510pure18PASS,
+utility13PASS2FAIL because `./-` was incorrectly passed to flat path validation.
+A new-E-only single `./` file prefix normalization fixes that while bare `-`
+remains stdin; shared path/F/matcher/accounting/limits stay exact. Original15
+tests remain full byte prefix, plus1 complete stdin/file/traversal guard.
+M511pure18/utility16PASS, then a new scheduling test exposes its own wrong raw%
+Cron premise. It now preserves original fullVM/OneOff source and adds raw%Cron
+refusal plus correctly escaped Cron variant, without changing Cron semantics.
+M51218pure/16utility/3closed-subset PASS. Remedy sourcee3c2112a/peera75f9fd6;
+reference one-grep COREpin amendmentf38a3872 applied, no observations invented.
+
+M513actual13 all13groups and actual11 all6PASS; content6PASS6FAIL. M514 diagnostic
+finds only an authored alternate using unsupported whole-function redirection.
+Corrected current alternate redirects individual commands inside its body and
+passes the destination explicitly. Original retainedR1 source remains exact;
+strict pinned one-block derivation replaces only that impossible source-equality
+premise, plus original unsupported/fulltuple/file-preservation negative. No
+case/reference/grade/cap change. Remedya140d122/peer2fc89581. M515all13content,
+11actual12 and6actual10 PASS; all35graded/7supplemental cases remain, no new credit.
+Only subsequent Rustfmt text changes exist; final static/focused gates pending.
+
+The probe compilation defect is repaired in Main: source642ecb56/peerc517288f
+imports ACTUAL library, embeds396 closed conservative source inputs (13,751,403B
+before the transparent alias below), retains409 inputs and derives608 inventory
+entries from553files+55dirs. Byte/process/deadline/output/memory limits unchanged;
+no oldproducer/helper/sourcebaseline modified. Original18Pythonguards remain a
+full prefix plus3 new. M519 then exposes the old standalone pure example's unused
+newCursor re-export. A transparent public type alias names exactly the same
+struct/methods/storage/work, no suppressions/skips; only correspondingERE COREpin
+changes. Source1abac18c/peerf591f705. M520 ALLTARGETClippy-DwarningsPASS;
+M521445PythonPASS. Product matcher/oldF/path/sharedcounters retain exact behavior
+except the deliberate new-E flat path addition already tested.
+
+M522 final inclusive PASSES2,839tests/221harnesses/0FAIL/0ignored; all1065
+inputs44f27341 exact, receipt1819d2a5/log1d6a2336.1746samples/min21780701184B/
+fullPSImax0.18/swapout0/OOM0. M523 normal actual-library probe build PASS.
+M524 zero-child prepare416pins is e2348075; Rootstreamed allpins (9606b91c),
+independent exactcontrol d0f2f8b0. Rootflag-onlyAPPROVED783ee820 follows those
+reviews. M525 actual heldVM14 identity/396inputs then24GNU fulltuple comparisons
+MATCHED24, exit0; manifest276c9982. M526 retainedverify PASS, no replay. Independent
+all550outputs/409source/fullraw24/memory/ELF readback db079bcb, attestationde3ec31c:
+19status0/5expected1, fivefileinstances unchanged;6reason-only exclusions NOT
+executed. Retainedprobe21,934,272B/3435cdb6; total553files55dirs36,643,252B.
+This accepts bounded capability14 and oldhistory compatibility, NOT193 content,
+completeGNU/Bash, newbaseline14-before15, otherplatform or novice acceptance.
+
+Next docs-only checks/privacy then commit/push the coherent capability14 milestone,
+including the unregistered authoredsources without counting them. Then IMMEDIATELY
+apply normal193R5 e6e8090d:55paths/5new, only2ownedcontentafterimages rebased on
+Root fixes, other53exactR4. SourceACKs58b501b2/7ce41390. Corrected6c2169f0 fixture
+is protected/current, not overwritten. Run actual normal193 compatibility/content/
+UI/full/static/native193 gates before counting3 newlabs. Native193 sourceR2 still
+needs currentRoot14/193 rebase (b38/f1, supportedpublication/diagnostic/probe).
+No routine approval or stopping at this capability/candidate. Corecomponent code
+current14/normal190 is tested; stable installed candidate remains5233/evaluator13.
+R4 registration peerad45c421 preserves b38/f1 but MUST also rebase Root current
+content-test/fixture corrections; never overwrite these with stale afterimages.
+Continue substantive remaining curriculum without routine owner approval.
 
 ## Current accepted development milestone:190
 
 190 authored assignments/50units:57CCNA/15,40LPIC-1/10,36LPIC-2/9,57Bash/16.
-Evaluator13;57scripts/442gradedcases/57separateexamples. Four distinct NTP tasks
+Source evaluator14 after the capability gates;57scripts/442gradedcases/57separateexamples.
+Stable installed5233 remains evaluator13. Four distinct NTP tasks
 are integrated, all186 prior definitions/49units remain preserved. See
 CATALOG190_MILESTONE.md, NTP_CLIENT_SERVER_LESSONS.md and NTP_SUBSET.md. No private
 proposal, generated numerical variation or synthetic catalog entry is counted.
@@ -138,10 +197,10 @@ must survive future composition. Unowned files stay current at application.
 
 | Work | Reviewed source | Actual status |
 | --- | --- | --- |
-| ERE14 VM integration | `shell-ere14-capability-source-r2` /e1571f74 |peer37afdf1e;19groups UNRUN; owned-capacity/globalwork/cooperativeStop required |
-| Genuine13/current14 consumers | `shell-ere14-consumer-source-r1` /12dde423 |peer7142f99c;25paths/15groups UNRUN |
-| Fixed ERE24 utility reference | `shell-ere24-reference-source-r1` /7e566bc9 |peer29d62169;18guards/24GNU comparisons UNRUN; six reason-only exclusions are not observed passes |
-| ERE authored3 | `shell-ere-unit-source-r5` /f4e367eb |peer9871ce30;35graded/7supplemental/11groups UNRUN, unregistered |
+| ERE14 VM integration | `shell-ere14-capability-source-r2` /e1571f74 plus Root remedies |APPLIEDtrial14; M5094/M51218+16+3PASS; full/static/reference acceptance still pending |
+| Genuine13/current14 consumers | `shell-ere14-consumer-source-r1` /12dde423 |APPLIED; M513actual13/11 andM515actual12/10PASS with helper groups; whole-current acceptance pending |
+| Fixed ERE24 utility reference | actual-library repair642ecb56 +alias1abac18c |M52524MATCHED/M526verify +independentdb079bcb; six reason-only exclusions not executed; source/ELF/snapshot retained |
+| ERE authored3 | `shell-ere-unit-source-r5` /f4e367eb plus Root supported-alternate fix |M51513groupsPASS;35graded/7supplemental exact, UNREGISTERED/no catalog credit |
 | ERE14 current190 composition | `shell-ere14-current190-composition-r1` /8d1ec56f |45paths/15new, peera1dd87c0; substitute owned catalog182 amendment `shell-ere14-current190-owned-catalog182-r2` /1c12ec22 over Root0cd0996c; preserve all later unowned UI/QA/docs |
 | ERE normal193 | `shell-ere-normal193-source-r4` /eb1193cd |55paths/5new, prospective groups UNRUN; narrow currentcadence b38/f1 rebase peerad45c421; other53 afterimages exactR3; projected60scripts477cases60examples |
 | ERE native193 | `shell-ere-native193-source-r2` /93e5495d |five paths/2new,441phases105shots/11groups UNRUN; peers5260a66d/969c6da9; current Root rebase mandatory |
@@ -176,9 +235,14 @@ current identities above. Olderf242/171 failures/evidence remain preserved.
 Historical long Physical native143 termination cause stays unproved; the fixed
 TERM/HUP cleanup and confirmed NTP driver wait cause do not prove its cause.
 
-Other source work remains unaccepted: GPT normal contractR2d81cb70/implementation
-WIP; Syslog normal contractad772400/implementation WIP. Pure19+19 actual core
-gates are pending. No placeholders/new native families count as authored labs.
+Other source work remains unaccepted: GPT normal31-path proposal81a1bea2,
+contractR3typedreference910aa97c,41groupsUNRUN, independent peer pending. Syslog
+normal26-path proposal a464e55b is KNOWN to need wholeAttempt/freshcontext
+admission around UI/hint changes; R2 remedy pending, do not applyR1. Its46pure+
+backend/native groups remainUNRUN. No new native family or private fixture counts
+as an authored lab. Literal-trim15 source905630f6 remains conditional on accepted
+actual14/193 and separately sealed genuine14 baseline; no advance is authorized
+from its source ACK alone.
 
 Windows/macOS runtime, physical-device, screen-reader and novice acceptance are
 pending until actually performed. macOS redistribution still lacks the original

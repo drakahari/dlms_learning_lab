@@ -1,6 +1,8 @@
-# Bounded ERE foundation — not yet a learner command
+# Bounded ERE foundation and proposed utility integration
 
-This original pure Rust module prepares boolean regular-expression line matching.
+The original pure Rust foundation prepares boolean regular-expression line matching.
+The following opening sections describe that independently tested foundation;
+the final section specifies the separate capability14 integration batch.
 It is not connected to the shell, a terminal, a new lab, saved progress or the
 normal catalog. No evaluator revision changes. Existing `grep -F` retains its
 literal behavior. No complete POSIX, BRE, GNU grep or LPIC-1 objective coverage is
@@ -114,3 +116,50 @@ learner interpreter or a simulated utility. Its34 fixed GNU comparison predictio
 and eight explicit exclusions have no actual observations yet; a guarded
 development comparison is being prepared. No certification objective, lesson,
 saved-result migration or responsive-Stop acceptance is inferred from this core.
+
+
+## Capability14 integration batch (not yet accepted)
+
+The proposed explicit `grep -E` wrapper is documented in SHELL_SUBSET.md. It
+returns whole original lines, so it never slices output at a byte match. The
+original synchronous Regex/Matcher implementations and old literal-F body remain
+unchanged; an additional owned Cursor uses the same compiled graph, an immutable
+UTF-8 snapshot and validated LF-free line ranges. It yields after at most64 work
+units; the existing VM permits at most32 preparation advances per tick. Every
+input byte, frontier/state/epsilon step and record-framing operation spends a
+shared budget. Nullable cycles have per-position visited sets. Fixed-size bitmap
+clearing is bounded independently. Stop drops the owned graph, scratch and input.
+
+The VM has one1,000,000-unit ERE allowance across all calls, lines, functions,
+pipelines and substitutions. Its existing2,000 semantic-instruction,256KiB memory
+and32KiB output limits remain unchanged. Compilation is synchronous under the
+existing512-byte/256-node/16,384-visit/128KiB bounds. It is conservatively precharged
+using at most256 parser/mask units per pattern byte plus the admitted compiler
+visits/nodes; `compile_work()` is a partial compiler metric, not a measured count
+of every parser operation. Compiler allocation and retained graph/snapshot/scratch/
+boxed-task/output capacity are admitted before allocation. No new dependency or
+host filesystem/process/network API is introduced.
+
+Twenty-four new fixed utility recipes have predictions only; GNU observations
+remain null. Six explicit VM-only boundaries distinguish supported utility
+outcomes from simulator resource/error/residual-input guarantees. They do not
+replace the earlier34 supported/eight excluded pure-foundation recipes or their
+evidence. A future independently reviewed closed collector must compare stdout,
+stderr, status and virtual-file preservation using only fixed C-locale disposable
+fixtures; this batch does not execute GNU or authorize learner-host execution.
+
+Primary GNU Grep3.12 manual sources were checked2026-10-29: the full manual and
+Exit Status page describe final-LF output and the `-q` error exception. Root
+independently accessed those official web pages; direct fetches by this author
+timed out. The installed official primary Info manual was read locally,
+SHA25627d126caa28a6185038ad22af12f7f994dce957ae2fa6f349ac2aa06496af635.
+Only paraphrased semantics and original fixtures/code are used. Full GNU/POSIX
+conformance, complete LPIC103.7 coverage and new learner mastery are not claimed.
+
+
+Capability14 acceptance2026-10-30: the integrated cooperative utility passes the
+fullinclusive2,839-test run and24fixed full VM/GNU outcome comparisons, with
+independent retained-stream/source/ELF verification. Resource/Stop/migration and
+negative-path tests remain separate from GNU matching. Exact evidence/limits are
+in SHELL_ERE_REFERENCE.md; no fullGNU/Bash, native193 or curriculum credit follows
+from matcher or utility success alone.

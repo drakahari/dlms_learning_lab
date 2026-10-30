@@ -1,6 +1,9 @@
 //! Pure bounded C-byte ERE boolean line matching. No I/O or evaluator integration.
 //! This deliberately excludes captures, backreferences and unspecified extensions.
 use std::fmt;
+#[path = "ere/cooperative.rs"]
+mod cooperative;
+pub type Cursor = cooperative::Cursor;
 
 pub const MAX_PATTERN: usize = 512;
 pub const MAX_NODES: usize = 256;
