@@ -42,13 +42,26 @@ alltargetClippy-DwarningsPASS; M500424PythonPASS; M501coverage190/50PASS. The
 inclusive run precedes that equivalent test-only style edit; no false source
 byte-equivalence is asserted.
 
-Next commit/push the scoped fix, rebuild a clean Fedora candidate and run the
-actual installed94-capture route. M485 lifecycle,
-M486tenstarts and M488NFS cold remain exactf242 identities, not automatically
-acceptance of a later package. Do not mark the repaired candidate accepted early.
-Then continue ERE14 actual capability/history/reference gates, normal193 and
-remaining mapped curriculum without routine owner approval. No new authored
-lab has been counted during this driver repair.
+Driver fix5233a15 is committed/pushed. M502 clean Fedora candidate build and
+M503 actual upgradef242→5233/install/uninstall/reinstall/progress PASS. M504 actual
+installed1389actions94files (76unique) PASS, reaped1215exit0; receipt4d8ef30f.
+All14 failed-before shared images are byte-identical, confirming no UI redesign.
+Root originals and independent8after/2before sample5a05bbed find no material
+selected-target blocker;200%narrow uses scrolling and elided device choices.
+M505 actual NFS cold writer461016/reader461498 both exit0; full observed profile
+c86f3c68 exact, separate unfinished drafts/current files/mounts/prefs and native
+repair/regrade preserved. M50610/10 installed Wayland starts PASS; receipta25c9429.
+All source still clean5233 during these checks. Full identities/checksums/limits
+are in CATALOG190_MILESTONE.md; not all190 native flows or every historical
+startup failure are accepted. No new curriculum count or release.
+
+Next finish docs-only consistency/privacy checks, commit/push then IMMEDIATELY
+apply reviewed ERE14 fixed45 via source-only guarded tool after confirming no
+active marker. Root sourceACK4d7226ef and read-only check pass on current5233;
+owned30before/15new still exact,1020unowned staycurrent. Follow HANDOFF.md actual
+capability/history/reference gates before normal193R4 integration. Continue the
+remaining mapped curriculum without routine owner approval or stopping at this
+Fedora package.
 
 ## Current accepted development milestone:190
 
@@ -100,9 +113,9 @@ OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md.
 
 ## Next work — continue without routine approval
 
-1. Accepted190 content isf242519. M496 inclusive/M498 poststyle/M499Clippy/
-   M500Python/M501coverage pass for the cadence repair. Commit/push the fix and
-   finish actual rebuilt installed NTP route checks before candidate acceptance. Do not reimplement the accepted workspaces.
+1. Accepted190 content isf242519; current verified scoped Fedora candidate is
+   5233a15. M496/M498-506 pass as above. Complete docs-only checkpoint then
+   proceed directly to actual ERE14 gates; do not re-run accepted UI design work. Do not reimplement the accepted workspaces.
 2. Continue actual ERE14 foundation/history/utility gates below. Core/source ACKs
    and sealed13 evidence do not prove new evaluator behavior. Then integrate the
    three distinct ERE projects through reviewed normal193/native193, test actual
@@ -112,8 +125,8 @@ OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md.
    capabilities/content in substantive batches, not arbitrary lab-count targets.
 4. Prepare useful clean Fedora candidates and verify actual installed upgrade,
    progress preservation, long routes, NFS two-process cold reopening and repeated
-   startup. A candidate does not complete the curriculum. Installed171 remains the last fully accepted package; the190 candidate has
-   passed lifecycle/startup/NFS cold but its NTP route is not accepted; see below. Do not publish releases.
+   startup. A candidate does not complete the curriculum. Scoped installed190/5233 is verified as below; full-product/platform acceptance
+   remains open. Do not publish releases.
 
 ## Source queue — not runtime or curriculum credit
 
@@ -130,7 +143,7 @@ must survive future composition. Unowned files stay current at application.
 | Fixed ERE24 utility reference | `shell-ere24-reference-source-r1` /7e566bc9 |peer29d62169;18guards/24GNU comparisons UNRUN; six reason-only exclusions are not observed passes |
 | ERE authored3 | `shell-ere-unit-source-r5` /f4e367eb |peer9871ce30;35graded/7supplemental/11groups UNRUN, unregistered |
 | ERE14 current190 composition | `shell-ere14-current190-composition-r1` /8d1ec56f |45paths/15new, peera1dd87c0; substitute owned catalog182 amendment `shell-ere14-current190-owned-catalog182-r2` /1c12ec22 over Root0cd0996c; preserve all later unowned UI/QA/docs |
-| ERE normal193 | `shell-ere-normal193-source-r3` /db2cfae0 |55paths/5new, seven prospective groups UNRUN; peer4856eaf1; mandatory narrow rebase preserves later cadence driverb38/testf1; projected60scripts477cases60examples |
+| ERE normal193 | `shell-ere-normal193-source-r4` /eb1193cd |55paths/5new, prospective groups UNRUN; narrow currentcadence b38/f1 rebase peerad45c421; other53 afterimages exactR3; projected60scripts477cases60examples |
 | ERE native193 | `shell-ere-native193-source-r2` /93e5495d |five paths/2new,441phases105shots/11groups UNRUN; peers5260a66d/969c6da9; current Root rebase mandatory |
 | HSRP pure | `hsrp-foundation-source-r1` /b7adcb80 |18groups PASS/M444 and fullM481; committed71aa25a; no authored credit |
 | HSRP normal capability | `hsrp-workspace-source-r3` /6f10a907 |peer64eaa772;19groups UNRUN, explicit down/return/source/rawpacket guards; rebase before apply |
@@ -143,7 +156,7 @@ must survive future composition. Unowned files stay current at application.
 | GPT/ext4/swap pure | `partition-filesystem-source-r2` /9cae6ea4 |peer73cc4f2e;4paths/3new/19groups UNRUN; public environment predicate fails closed; no Goal/UI/MBR/activation coverage |
 | Syslog pure | `syslog-foundation-source-r1` /a5b1a4d8 |3new paths/19groups UNRUN, no export/Goal/UI; peere513e3ab source ACK; current-policy probes distinct from history |
 | Future actual14-before15 capture | `bash-literal-trim-before15-source-r2` /75775231 |9paths/7new/32mock+2history groups UNRUN, sealsNone; peer5e0f73e7 closes NEW3 defaults/foreign-field/426-416 whole-record verifier gap; final193 source rebase required, no baseline credit |
-| Future literal trim | `bash-literal-trim-next-source-r1` /444a02b0 checkpoint |borrowed helper/5groups UNRUN; no VM15 wiring; actual14/193/sealed baseline must precede advance |
+| Future literal trim | `bash-literal-trim-capability-source-r1` /905630f6 |six-path conditional193 VM15 source/19groups UNRUN, no current consumer closure or credit; actual14/193/sealed baseline must precede advance |
 
 ## Immutable evidence and platform limits
 
@@ -154,31 +167,18 @@ exact. Do not recapture old9–13 producers or relabel a source proposal as migr
 acceptance. PureERE M411 already matches34GNU cases/eight honest exclusions
 (manifest528033a6); that is not actualVM14 utility/curriculum acceptance.
 
-Current accepted Fedora installed candidate is171/44units,065032d0a90b:
-`dist/dlms-learning-lab-0.1.0-g065032d0a90b-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
-Its lifecycle/NFS two-process cold/ten Wayland starts keep their exact historical
-identity. New190 candidate built cleanf242519 (M484) is available at
-`dist/dlms-learning-lab-0.1.0-gf2425193e3bd-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
-ELF SHAeff2de4369eadf3f446ddc15b22e97ccc54e6da26845e0d113b0d7673222e0d1;
-archivec15004fa40be8d37f5e697a7424ebf46a0e9a4f835561be5ba12fe75bdb74fc4.
-M485 actual private install/171-to190 upgrade/uninstall/reinstall/progress retention
-PASS. M486 ten installed native Wayland starts PASS. M487 rejected a launcher
-symlink before GUI; M488 correctly selected its real ordinary ELF and passed NFS
-two-process cold reopening: distinctPIDs254118/254478 exit0,75.747s/30.662s;
-writer-observed/reader-loaded18f3d1b2 exact, current repairs/regrading PASS.
-No personal profile or host NFS was used.
+Current scoped verified Fedora installed candidate is190/50units,5233a151bfe3:
+`dist/dlms-learning-lab-0.1.0-g5233a151bfe3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
+ELF80242c1500d4c300d90b2430c06724fec92c468ad709d810b053b153dab155ce;
+archive04f982da507f75cee0e233dc931491b6591873a25a1a624851e3d525209298e1.
+M503lifecycle/M504NTP94/M505NFS cold/M506tenWayland starts PASS, all distinct exact
+current identities above. Olderf242/171 failures/evidence remain preserved.
+Historical long Physical native143 termination cause stays unproved; the fixed
+TERM/HUP cleanup and confirmed NTP driver wait cause do not prove its cause.
 
-M489 installed NTP94 route FAIL, exit101 after14 captures:80185 Click(Back),
-phase0/polls301. Retained log/source/candidate/screens and failure receipt99087dfc
-under ignoredreviews/installed190-m489-failure. No marker/owned descendants remain.
-71memory samples/currentPSI0/swapout0/OOM0. Development M480 passing is not
-substituted for installed acceptance. M492 actual diagnostic now proves the intentional150ms wait exhausts300polls
-after141ms. M494/M495 establish actual regression red/green without changing
-the task/grade or weakening wall-time/visibility limits. Inclusive/static and poststyle regression pass;
-rebuilt installed route checks remain pending; thisf242 candidate is not
-accepted for that flow. Older long
-Physical native143 termination cause is unproved; new wrapper TERM/HUP cleanup
-is fixed, but do not call it the demonstrated cause of that historical failure.
+Other source work remains unaccepted: GPT normal contractR2d81cb70/implementation
+WIP; Syslog normal contractad772400/implementation WIP. Pure19+19 actual core
+gates are pending. No placeholders/new native families count as authored labs.
 
 Windows/macOS runtime, physical-device, screen-reader and novice acceptance are
 pending until actually performed. macOS redistribution still lacks the original

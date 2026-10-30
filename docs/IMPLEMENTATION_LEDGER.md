@@ -4839,3 +4839,38 @@ M501coverage190registered/50units and no unregistered credited IDs PASS. Four-pa
 source/test/checkpoint/ledger scope; no curriculum, progress schema, grade, layout,
 dependency, theme, reference-source or historical observation change. Commit/push,
 then clean candidate build and actual installed94/NFS/startup/lifecycle gates.
+
+
+### Scoped installed190/5233 acceptance and continued curriculum
+
+Driver fix5233a15 committed/pushed after inclusive2789/poststyle regression/
+Clippy/424Python/coverage/privacy gates. M502 builds clean5233 with223Linux
+notices/source packages, ELF76188480B/80242c15, archive46285100B/04f982da.
+M503 actual upgradef242/install/uninstall/reinstall/content/desktop/progress PASS.
+M504 installed1389actions/94files PASS,reaped1215exit0; receipt4d8ef30f.76unique
+PNGs,74narrow/20wide; all14 shared failed-before images byte-identical. Root four
+NTP originals plus current NFS and independent8after/2before5a05bbed find no
+material selected-target issue. Ordinary200%narrow scrolling/dropdownellipsis
+and duplicate wide layout/dependency images are explicit, not every94/all28 or
+novice/device/reader acceptance. No workspace redesign or grading change.
+
+M505 fully exited NFS writer461016/reader46149875.666s/30.687s restore complete
+observedc86f3c68, including separate unfinished assignment/example drafts, files/
+mounts/favorite/preferences, then repair and regrade both goals. M50610/10
+Wayland protocol/ready/update/capture starts PASS,0.965–1.017s includes pacing;
+receipta25c9429. Root source stays clean5233 and ordinary ELF80242 unchanged.
+M504memory528/min25515909120B/fullPSImax0.18/swapout1/OOM0; M502min22365065216B/
+fullPSImax0.3/swapout0/OOM0, no sustained threshold stop. Not a memory guarantee.
+
+README/install/checklist/matrix/checkpoint now identify scoped candidate190;
+older171 andf242 identities are retained. All136objectiveparents still incomplete,
+no credit/status/count promotion. macOS originaldispatchnotice rechecked against
+pinned upstream tree/issue18 on2026-10-30, unresolved without invented attribution;
+no messages sent. Windows/macOS desktop, reader/device/novice and full curriculum
+remain open. No release publication. Finish docs-only checks/commit then continue
+actual ERE14/193 and remaining scope, not a stopping point.
+
+Post-verification docs-only M507424PythonPASS/M508coverage190/50PASS, whitespace
+and exact seven-text-path privacy checks PASS. Candidate remains built from5233;
+a later documentation commit does not change its executable identity. Continue
+actual ERE14 application/gates next; no release or completion claim.

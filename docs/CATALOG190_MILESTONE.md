@@ -1,6 +1,6 @@
 # Native time-service development milestone
 
-Verified2026-10-29. This is190 authored assignments across50 units, not complete
+Development verified2026-10-29; installed scope added2026-10-30. This is190 authored assignments across50 units, not complete
 curriculum, full NTP/IOS conformance or an installed release. Counts by track:
 
 | Track | Assignments | Units |
@@ -91,11 +91,73 @@ overlapping references now contain182 Partial/1 Supporting/1057 Open; all136
 parents remain incomplete(92Open/44Partial). No future-v2.0 or LPIC time-service
 credit is inherited. The full matrix remains [OBJECTIVE_MAPPING.md](OBJECTIVE_MAPPING.md).
 
-The available installed Fedora candidate is still171/065032d0a90b, with its own
-lifecycle/NFS two-process cold/startup evidence. New installed packaging and cold
-reopening require separate verification. Warm raw/portable resume and native
-keyboard events are tested here; physical-device, screen-reader, novice and
-Windows/macOS runtime acceptance remain pending. No public release is published.
+The later installed190 candidate is5233a151bfe3, with the exact scope below.
+Earlier171/065032d0a90b retains its historical identity. Physical-device,
+screen-reader, novice and Windows/macOS runtime acceptance remain pending.
+No public release is published.
 
 Continue the reviewed remaining curriculum after this milestone. Source-only
 HSRP, links, ERE and other proposals are not counted until integrated and tested.
+
+
+## Installed Fedora candidate5233a15
+
+Clean source `5233a151bfe312082159e351477cfb3d2a750e12`,190labs/50units,
+evaluator13. No lesson, grade, progress schema, theme, layout or dependency change
+was made by its native-driver repair. Open:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g5233a151bfe3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+ELF76188480B SHA256
+`80242c1500d4c300d90b2430c06724fec92c468ad709d810b053b153dab155ce`.
+Archive46285100B SHA256
+`04f982da507f75cee0e233dc931491b6591873a25a1a624851e3d525209298e1`.
+Linux223 dependency notices/source inventory and Rust notice5647be07 pass;
+this does not resolve the macOS original dispatch notice gate.
+
+M489 installedf242 first failed an automated Back step after14 captures. M492
+optimized diagnostic proves301polls elapsed141ms while still inside an intentional
+150ms scroll-settlement wait. It was an acceptance-driver cadence defect, not a
+demonstrated learner navigation, grading, progress or Wayland startup failure.
+M494 executes the new real-event regression and fails its intended4-versus3
+work-poll invariant. Only three logic hunks then exclude deliberate wait frames
+from active work and request delayed repaint. Same300active-attempt/15s wall/
+20wheel/visibility checks remain. Original tests and1389actions/94names stay exact.
+M495 all3 route/regression groups PASS115.28s; peers55ecaee1/4a8932f3 preserve
+assertions, including the subsequent equivalent test-only let-chain.
+
+| Gate | Actual result |
+| --- | --- |
+| Inclusive Rust M496 |216harnesses,2,789PASS/0FAIL/0ignored; all1050 source inputs exact, receipt1d3eb619 |
+| Final style/static |Only equivalent newtest let-chain afterfull; same regression M498PASS, productiondriver unchanged; M499alltargetClippy-Dwarnings/M500424Python/M501coveragePASS |
+| Clean candidate M502 |Build/revision/checksums/notices PASS; no release |
+| Installed lifecycle M503 |Upgradef242→5233, outside-checkout identity/content/desktop metadata, uninstall/reinstall and exact original-nine synthetic progress4b74228e PASS |
+| Installed NTP M504 |All4 ordinary tasks, separate examples/experiments, wrong/partial/reference/two alternatives, invalidation/reset/cancel/warm resume/native keyboard/paste and20scale-theme-width settings PASS;1389actions94PNGfiles |
+| NFS cold M505 |Distinct native writer461016/reader461498 fully exit0,75.666s/30.687s; complete observed profilec86f3c68 restored exactly; repair/regrade both goals PASS |
+| Startup M506 |10/10 serialized Wayland protocol/ready/first-update/capture checks PASS, no timeout/truncation;0.965–1.017s includes pacing |
+
+M504 receipt4d8ef30f retains all94PNG hashes:74narrow946×929/20wide1920×1080,
+76unique images. All14 shared failed-before frames are byte-identical after;
+this is a driver timing repair, not a visual redesign. Root views four original
+NTP frames plus current NFS result; independent5a05bbed views8after/2before.
+Selected100/150/200% Light/Dark task/error/requested-help/field/focus/card views
+have no material blocking defect.200%narrow uses ordinary outer scrolling;
+device picker labels may elide and the dependency capture reveals the complete
+cards. Surrounding viewport clipping is not asserted to be simultaneous visibility
+of the complete task and every tool. Not every94PNG/all28themes was individually
+viewed. Private PNGs, profiles, raw logs and manifests remain ignored.
+
+M504 memory528samples/min25515909120B/fullPSImax0.18/swapout1page/OOM0.
+M4961552samples/min24441061376B/fullPSI0/swapout9pages/OOM0; M502 minimum
+22365065216B/fullPSImax0.3/swapout0/OOM0. No sustained threshold refusal/stop or
+heavy overlap; these observations do not reserve memory or attribute all system
+activity to this project. All work uses the shared disk-backed two-job/two-thread
+runner. NFS/startup receipt a25c9429 remains separate from M504's identity.
+
+These are scoped Fedora technical checks. They do not accept every190lab native
+flow, cure every historical intermittent failure, complete the curriculum, or
+supply Windows/macOS runtime, signing/notarization, physical-device, screen-reader
+or novice acceptance. No release publication. Continue ERE14/193 and remaining
+mapped curriculum; reviewed private proposals are not implemented lab credit.

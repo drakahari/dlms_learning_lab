@@ -9,10 +9,11 @@ Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.
 All136 parents remain incomplete(92Open/44Partial). The inclusive Rust suite
-passes2,788 tests with0fail/0ignored; static and actual native gates are separated
-in [CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md). Candidate065032d0a90b still
-contains171 assignments, with its separate installed lifecycle/NFS cold/startup
-identity. See [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
+passes2,789 tests with0fail/0ignored; a subsequent equivalent test-only style edit
+passes its focused regression and static checks. Candidate5233a151bfe3 contains190
+assignments with scoped installed NTP94, lifecycle, NFS cold and10-start evidence.
+Exact identities/limits remain separate in
+[CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md) and
 [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
