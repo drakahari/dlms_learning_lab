@@ -3,8 +3,8 @@
 Three original assignments are registered in the native catalog with full
 in-process grading, teaching and isolated examples. Evaluator14/history and
 fixed24 GNU gates pass; final inclusive has2,857PASS/0FAIL/0ignored. The
-105-phase installed native review remains pending, so objective evidence rows
-are not yet promoted. This is not complete regex, Bash or issuer coverage.
+105-phase installed native review passes; five narrow103.7 evidence rows
+are now Partial, with broader requirements still Open. This is not complete regex, Bash or issuer coverage.
 Numeric variants are not extra authored scenarios.
 
 | Stage | Meaningful assignment | New skill | Existing prerequisites |
@@ -142,6 +142,6 @@ source is registered193/51 with60scripts/477gradedcases/60isolatedexamples.
 All35newgraded/7supplemental cases, references and two supported alternatives
 pass, including preserved-source refusal and current success invalidation.
 M550 finalinclusive2,857PASS/0FAIL/0ignored; M549alltargetClippy passes.
-Native headless real-event tests pass; actual installed105screen capture,
-novice/physical-device/screen-reader acceptance remain separate. See
+Native real-event tests and actual installed105screen capture pass.
+Novice/physical-device/screen-reader acceptance remain separate. See
 CATALOG193_MILESTONE.md for current artifacts and exact limits.

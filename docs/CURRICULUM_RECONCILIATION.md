@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main193 source, reconciled2026-10-30; final193inclusive2,857PASS/0FAIL/0ignored; installed native acceptance next; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main193 source, reconciled2026-10-30; final193inclusive2,857PASS/0FAIL/0ignored; installed193 scoped acceptance passed; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -11,11 +11,11 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 57 | 15 | 64 | 47 | 0 |
-| LPIC-1 | 40 | 10 | 501 | 96 | 1 |
+| LPIC-1 | 40 | 10 | 496 | 101 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
 | Bash/Shell | 60 | 17 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (92 Open,44 Partial).
+All136 current parent objectives remain incomplete (91 Open,45 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -279,7 +279,7 @@ and projects, with prerequisite teaching before assessment:
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Two implemented assignments teach own-scope break/continue, unread-input handoff, first-success selection and independent job failures with22 graded cases. Broader conditional/regex forms and project-specific retry/lock behavior remain required where used; caller-loop and pipeline control escape remain unsupported. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
-| Text processing | Three registered ERE selection/row-validation/incident-evidence projects use the bounded C-byte grep subset (installed native acceptance pending). BRE, deliberate sed/awk or equivalent documented processing, snapshot comparison and broader log-analysis work remain required; no full regex objective credit. |
+| Text processing | Three registered ERE selection/row-validation/incident-evidence projects use the bounded C-byte grep subset (installed193105phase review passed). BRE, deliberate sed/awk or equivalent documented processing, snapshot comparison and broader log-analysis work remain required; no full regex objective credit. |
 | Debugging and errors | Actual bounded tracing, useful error propagation, traps/cleanup and recovery; debugging and repair assignments, not only deliberately incorrect scripts. |
 | Safe file operations | Virtual directory/path semantics, safe temporary-file/rename behavior, validated mutation, deterministic clock and lock/retry behavior where the project depends on it. |
 | Substantial projects | Dry-run cleanup planning, verified backup/restore, idempotent configuration rollout, resumable batch processing; combine report generation/log analysis/input validation and preserve unrelated data. |
@@ -295,13 +295,14 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Finish normal193 acceptance: preserve all190 prior definitions/50 raw units,
+1. Preserve accepted normal193: preserve all190 prior definitions/50 raw units,
    actual9–13 history,60scripts/477cases/60isolatedexamples and accepted workspace.
    Capability14, full-outcome content/alternatives, fixed24GNU and focused native
    tests pass. Initial3historical count failures are corrected with23focusedPASS;
-   finalinclusive2,857PASS/0FAIL/0ignored. Next inspect105actual native captures.
-   Stable installed190/5233 candidate remains separately identified.
-2. Apply only reviewed narrow evidence rows after actual native/full acceptance;
+   finalinclusive2,857PASS/0FAIL/0ignored, installed105captures/lifecycle/NFScold/
+   10startsPASS. Available193/baa66bd candidate and earlier190/5233 evidence
+   remain separately identified.
+2. Preserve the5new narrow103.7 Partial rows after actual native/full acceptance;
    no complete objective or novice/platform credit. Preserve the sealed genuine13
    baseline; a later15 advance needs actually observed and independently sealed
    genuine14 evidence, never a source proposal or relabeled history.

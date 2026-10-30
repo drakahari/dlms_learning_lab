@@ -44,13 +44,63 @@ current source adds2explicitly pinned native QA files to its closed source check
 fresh old-r1 capture still refuses changed source. Retained sources, executable,
 controls and observations are immutable. See SHELL_ERE_REFERENCE.md.
 
-## Fedora candidate acceptance — pending
+## Installed Fedora candidate baa66bd
 
-Implementation commit, clean candidate build, installed lifecycle/upgrade,
-105actual scripting capture phases, NFS two-process cold reopening and repeated
-Wayland starts are next. No new installed acceptance is claimed yet. The verified
-fallback remains190/5233a151bfe3; CATALOG190_MILESTONE.md gives its exact path,
-checksums,94NTP captures, lifecycle/NFS cold/10-start results and limitations.
+Source `baa66bdad7e58f5d153e67887c597f3f17f952e1`, evaluator14, clean build.
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gbaa66bdad7e5-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+- ELF76,754,112B SHA256 `47aaac64b66ccf9e374362699b3cc778d0dd90472dd3515603f34c4dabce228a`.
+- Archive46,400,368B SHA256 `6b8c310b5f6fc83f8eb738b8420fbe15b7e519692a02e71533682bcbcabf6826`.
+- Linux223dependency notices/source bundles plus unchanged Rust/fonts and28theme
+  notices remain included; Rust notice5647be07. No release publication.
+
+M553 clean candidate build passes (4m37s compilation).283memorysamples/min20.65GiB/
+fullPSImax0.18/swapout0/OOM0. M554 upgrades5233→baa, validates actual installed
+ELF/content/desktop identity, uninstalls/reinstalls and retains exact synthetic
+original-nine progress bytes4b74228e. No personal profile is used.
+
+M555 runs the ACTUAL installed regular ELF through all3 new projects:105PNGfiles,
+96unique, exact closed names;441logical action route and20 observed settings at
+100/115/125/150/200%, Light/Dark,946×929 windowed and1920×1080 fullscreen. It
+covers intro, separate example/change/repair, meaningful assignment, wrong/partial/
+reference/twoalternatives, selected-case pass under overall failure, current edit
+invalidation, keyboard/Undo/Redo, syntax/unsupported/limit feedback, realRunStop,
+whole raw/portable/receipt warmContinue, resetCancel/Confirm and normal3cards.
+Sixteen extra capstone200% slices establish all essential wrapped task rows are
+reachable through actual scrolling. Driver pass is reaped0; logc18e9d1b and
+inventory1fab0ee4.365memorysamples/min25239674880B/fullPSI0/swapout0/OOM0.
+
+Root reviewed6 originals and an independent reviewer17 distinct originals,
+including first/second/capstone task/feedback and100/150/200 light/dark widths.
+No selected material blocker; this is not manual review of all105, a novice study
+or physical-device/accessibility acceptance. Original peer receipts535e5bfd/
+dc2b6c33 preserve exact selected filenames/hashes. Floating edge scrollbars and
+partial viewport-edge rows remain visible at200%; overlapping slices show the
+full task, including its final preservation requirement above the bar. No text
+was shrunk. Existing NFS jargon such as "context" remains a later copy-polish item.
+
+M556 actual NFS cold processes writer646635(75.595s) and reader647011(30.689s),
+both0. The68,237B writer observation and reader load are byteequal SHA256
+`48e558e745b1ac13b97ba6c78b626ac7de00124a098e893644c2fdc13aa3a762`.
+Separate unfinished assignment/example exports, mounts/files, favorites/preferences
+and the complete observed profile survive; the reader repairs through editors
+and regrades both goals. Root viewed the150%Light repaired result.
+
+M557 ten serialized native Wayland starts pass ready/update/capture without
+protocol/log truncation, timeout or error.0.965–1.016s includes deliberate harness
+pacing and is not startup-performance benchmarking. A finite sample does not
+explain every historical intermittent failure; Physical143's old cause remains
+unproved. Earlier190/5233NTP94 keeps its original evidence/identity.
+
+The archive contains its source-time README, whose quick-start section still
+names the previous190 candidate. The binary and embedded catalog are193; from
+inside this extracted directory use `./dlms-learning-lab`, or the exact command
+above. The repository guide is corrected now; a generated package-specific
+quick-start is being prepared for the next candidate. Original archive/evidence
+are preserved, never silently repacked or reidentified.
 
 ## Boundaries
 
@@ -60,7 +110,7 @@ the disclosed bounded C-byte ERE grep subset, not fullGNU/Bash, BRE, sed or
 Unicode matching. No host learner execution, new dependency, release or installer
 publication. All28themes and existing progress remain.
 
-Proposed narrow103.7 coverage rows stay held until actual native acceptance.
+Five narrow103.7 evidence rows become Partial after actual native acceptance.
 All136 complete issuer parent objectives remain incomplete; the granular matrix
 records remaining work. Windows/macOS desktop, physical-device, screen-reader
 and novice acceptance remain pending. macOS dispatch notice resolution remains

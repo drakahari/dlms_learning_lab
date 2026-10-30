@@ -1,22 +1,22 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop learning application for networking, Linux administration and scripting. **193 authored assignments in 51 units:** 57 CCNA, 40 LPIC-1, 36 LPIC-2 and 60 Bash/Shell. The latest scripting unit practices text-pattern selection, complete-row validation and preserving incident evidence. The inclusive Rust suite passes 2,857 tests; installed native acceptance is next. See [the193 milestone](docs/CATALOG193_MILESTONE.md). The available 190-lab Fedora candidate retains its [scoped installation and native verification](docs/CATALOG190_MILESTONE.md). All 28 themes and the approved native workspaces remain. **This is not full exam coverage.** Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop learning application for networking, Linux administration and scripting. **193 authored assignments in 51 units:** 57 CCNA, 40 LPIC-1, 36 LPIC-2 and 60 Bash/Shell. The latest scripting unit practices text-pattern selection, complete-row validation and preserving incident evidence. The inclusive Rust suite passes 2,857 tests; the installed Fedora candidate passes the three new scripting flows, NFS cold reopening and ten native starts. See [the193 milestone](docs/CATALOG193_MILESTONE.md). The available 193-lab Fedora candidate has [scoped installation and native verification](docs/CATALOG193_MILESTONE.md). All 28 themes and the approved native workspaces remain. **This is not full exam coverage.** Independent of DLMS_next and the old dlms_lab.
 
 [Learner guide](docs/LEARNER_GUIDE.md): choosing a course, separate practice,
 checking and retrying, saved work, backups and appearance.
 
-## Open the190-lab Fedora candidate
+## Open the193-lab Fedora candidate
 
-The current local Fedora candidate is `5233a151bfe3`:190 labs/50 units.
-Installation/upgrade/uninstall/reinstall, all four NTP tasks/94 captures, NFS
-two-process cold reopening and ten serialized Wayland starts pass. These are
-scoped technical checks, not full-curriculum, novice or other-platform acceptance.
-See [verification and checksums](docs/CATALOG190_MILESTONE.md#installed-fedora-candidate5233a15).
+The current local Fedora candidate is `baa66bdad7e5`:193 labs/51 units.
+Installation/upgrade/uninstall/reinstall,105 scripting captures, NFS two-process
+cold reopening and ten serialized Wayland starts pass. These are scoped technical
+checks, not full-curriculum, novice or other-platform acceptance.
+See [verification and checksums](docs/CATALOG193_MILESTONE.md#installed-fedora-candidate-baa66bd).
 No development tools are needed to open it. This command works from your home
 directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g5233a151bfe3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gbaa66bdad7e5-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate

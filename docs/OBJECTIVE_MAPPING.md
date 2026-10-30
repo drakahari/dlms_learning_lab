@@ -2,20 +2,21 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are182 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1057 Open rows; no full-objective completion is asserted. Main source
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are187 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1052 Open rows; no full-objective completion is asserted. Main source
 contains193 authored assignments/51 units (57CCNA,40LPIC-1,36LPIC-2,60Bash).
 Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.
-All136 parents remain incomplete(92Open/44Partial). The final normal193 inclusive run passes2,857tests/222targets/0FAIL/0ignored;
+All136 parents remain incomplete(91Open/45Partial). The final normal193 inclusive run passes2,857tests/222targets/0FAIL/0ignored;
 Clippy and446Python checks pass. M547's3 historical count failures are retained,
 with strict predecessor preservation and all23 focused corrections passing.
-Installed native acceptance of the3 new projects is next. Their proposed narrow
-evidence rows remain held until that gate. Candidate5233a151bfe3 contains190
-assignments with scoped installed NTP94, lifecycle, NFS cold and10-start evidence.
+Installed193 candidate baa66bd passes105 captures for the3 new projects,
+lifecycle, NFS cold and10starts. Five narrow103.7 rows now become Partial,
+with wider regex behavior explicitly Open. Earlier5233/190NTP94 evidence stays
+historical at its original binary identity.
 Exact identities/limits remain separate in
-[CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md) and
+[CATALOG193_MILESTONE.md](CATALOG193_MILESTONE.md) and
 [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
@@ -373,3 +374,18 @@ Five remaining204.3 Open rows now name their actual missing capability rather
 than incorrectly saying the entire LVM model is absent. Issuer fingerprints and
 source positions remain unchanged; the official4.5/204.3 page was rechecked
 2026-10-29. See LVM_GROWTH_LESSONS.md and CATALOG186_MILESTONE.md.
+
+
+Accepted normal193 ERE coverage amendment after full-current and actual installed
+native unit gates: three Bash assignments support
+narrow Partial LPIC-1v5.0 103.7 parent/K1/K3/K4/T1 practice. They teach bounded
+C-byte ERE construction, anchors/classes/repetition/groups/alternation and
+status-aware supplied-file selection; K4 covers file contents only. Existing
+105.2/K3 Partial evidence gains ERE-based decisions and preflight reporting.
+BRE and its comparison with ERE, regex editing/substitution, recursive search,
+egrep/fgrep aliases, sed and regex(7) manual use stay Open. No full objective,
+LPIC-specific lab count, general GNU/POSIX conformance or platform/novice
+acceptance is implied. All issuer fingerprints, source positions and the
+2026-10-22 inventory check date remain unchanged. The official LPI v5.0 scope
+was consulted on2026-10-30; these are overlapping scoped evidence rows. See
+SHELL_ERE_EVIDENCE_LESSONS.md, ERE_SUBSET.md and SHELL_ERE_REFERENCE.md.

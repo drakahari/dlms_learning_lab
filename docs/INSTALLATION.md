@@ -4,38 +4,37 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current local Fedora candidate: **5233a151bfe3**,190 labs/50 units
-(57CCNA,40LPIC-1,36LPIC-2,57Bash). Source
-`5233a151bfe312082159e351477cfb3d2a750e12`. Packaging is not curriculum or
-platform completion. Open from any terminal directory:
+Current local Fedora candidate: **baa66bdad7e5**,193labs/51units
+(57CCNA,40LPIC-1,36LPIC-2,60Bash). Source
+`baa66bdad7e58f5d153e67887c597f3f17f952e1`. Open from any terminal directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g5233a151bfe3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gbaa66bdad7e5-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-The actual installed executable passes upgrade fromf242519, identity/content/
-checksum and desktop-entry validation, uninstall/reinstall and exact synthetic
-original-nine progress-byte retention. Four complete NTP tasks pass1389actions/
-94capturefiles (76unique images), with wrong/partial/alternate work, current
-invalidation, separate examples, reset/warm resume, keyboard and20 observed
-scale/theme/width settings. Two fully exited NFS processes restore separate
-unfinished assignment/example drafts, mounts/files, favorites/preferences and
-whole observed progress, then repair and regrade both goals. Ten serialized
-Wayland starts pass ready/first-update/capture without timeout(0.965–1.017s,
-including deliberate test pacing, not startup performance measurements).
+The actual installed executable passes upgrade5233→baa, identity/content/checksum,
+desktop validation, uninstall/reinstall and exact synthetic original-nine progress
+retention. All3 new scripting assignments pass105capture phases and observed
+100/115/125/150/200% Light/Dark, wide/narrow settings. NFS fully exits and reopens
+in a second process, preserving separate drafts/mounts/files/preferences and then
+repairing/regrading. Ten serialized Wayland starts pass with no timeout/error.
 
-ELF76188480B SHA256
-`80242c1500d4c300d90b2430c06724fec92c468ad709d810b053b153dab155ce`.
-Archive46285100B SHA256
-`04f982da507f75cee0e233dc931491b6591873a25a1a624851e3d525209298e1`.
-See [the190 milestone](CATALOG190_MILESTONE.md#installed-fedora-candidate5233a15)
-for exact bounded evidence, original failed driver diagnosis and source identity.
-A finite startup test cannot rule out every intermittent failure; the historical
-long Physical143 termination cause remains unproved. Actual Windows/macOS,
-novice, physical-device and screen-reader acceptance remain pending. No release
-is published. Earlier171 evidence remains historical at
-[FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md); older candidates
-and diagnostics are retained.
+ELF76,754,112B SHA256
+`47aaac64b66ccf9e374362699b3cc778d0dd90472dd3515603f34c4dabce228a`.
+Archive46,400,368B SHA256
+`6b8c310b5f6fc83f8eb738b8420fbe15b7e519692a02e71533682bcbcabf6826`.
+See [the193 milestone](CATALOG193_MILESTONE.md#installed-fedora-candidate-baa66bd)
+for exact scope/screens/limits. The archive README still contains its older
+source-time190 quick-start; inside this extracted folder use `./dlms-learning-lab`.
+The binary is193; no old artifact is silently replaced. Package-specific launch
+instructions are being corrected for the next candidate.
+
+These are scoped technical checks, not full curriculum or platform completion.
+A finite startup sample does not rule out every intermittent failure; the old
+Physical143 cause remains unproved. Windows/macOS runtime, novice,
+physical-device and screen-reader acceptance remain pending. No release is
+published. Earlier190/5233NTP94 evidence remains at CATALOG190_MILESTONE.md;
+other older candidates/diagnostics are retained.
 
 ### Historical154-lab installed milestone
 
