@@ -4806,3 +4806,36 @@ archived then restored byte-exact to accepted Main4fdc7f46. Conditional remedy
 pending. All workers pause, no active command/unfinished marker remains. No new
 labs, runtime acceptance, release or cleanup. CHECKPOINT.md records exact first
 resume command target and subsequent ERE14/curriculum work.
+
+
+### Resumed optimized native cadence repair
+
+M491 missing-execute-bit preflight refusal launches noGUI; M490copyfile had not
+preserved mode. Owner-executable permission restored, ELF47995e37 unchanged.
+M492 retained optimized diagnostic reproduces80185Back,301polls after141ms,
+10.44ms before intentional wheel deadline. Back is present; all evidence retained
+in6cbc69e0. This establishes an acceptance-driver timing defect, not an assumed
+learner/workspace/grading/progress/Wayland failure.
+
+Source split8999f15d preserves all original route/test bytes and same1389/94.
+M493 bareexact0test is not acceptance. M494 qualified actual1regression fails
+at intended wait-poll4vs3 invariant after realStart/assignment/clippedBack/wheel
+setup. Only three remedy logic hunks then exclude deliberate waiting from active
+polls and use delayed repaint. Same test is unchanged. M495 all3nativegroups
+PASS115.28s, including400fastframe/profile invariant and complete normalroute.
+Same300activeattempt/15swall/20wheel/visibility checks remain. All existing labs,
+models, grading and savedprogress formats unchanged. Inclusive/static and actual
+rebuilt installed route gates must still pass before candidate acceptance.
+
+
+M496 fullinclusive finishes216harnesses2,789PASS0FAIL0ignored; wrapper reaped0,
+all1050source inputs9ea71ce1 unchanged; receipt1d3eb619/logd031a948.1552memory
+samples/min24441061376B/fullPSI0/swapout9pages/OOM0. M497Clippy fails only newtest
+nested-if style. The equivalent let-chain retains all assertions and short-circuit
+semantics, independent peer4a8932f3; productiondriverb38 remains exact. M498 same
+actual regression PASS afterstyle(testf1b7f4bd). The fullrun is explicitly prestyle,
+not falsely byte-identical. M499 alltargetClippy-DwarningsPASS, M500424PythonPASS,
+M501coverage190registered/50units and no unregistered credited IDs PASS. Four-path
+source/test/checkpoint/ledger scope; no curriculum, progress schema, grade, layout,
+dependency, theme, reference-source or historical observation change. Commit/push,
+then clean candidate build and actual installed94/NFS/startup/lifecycle gates.

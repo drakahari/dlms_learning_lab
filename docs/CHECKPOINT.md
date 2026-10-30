@@ -1,6 +1,6 @@
 # Continue the complete Learning Lab application
 
-Updated2026-10-29. The owner authorizes continued implementation of the complete
+Updated2026-10-30. The owner authorizes continued implementation of the complete
 agreed CCNA, LPIC-1, LPIC-2 and Bash/Shell curriculum through reviewed, tested,
 committed/pushed milestones. A progress report, small batch or Fedora package is
 not a stopping point. Work only here; no release publication or unrelated-project
@@ -14,38 +14,41 @@ NVMe-backed artifacts are mandatory. Source-only workers must not mutate Main or
 run heavy commands. Use followup_task to wake a completed reviewer; send_message
 only queues a message. No GPU/swap/services/model/desktop changes or cleanup.
 
-## Owner-requested overnight pause —2026-10-29
+## Active continuation —2026-10-30
 
-Paused after completing/reaping the sole running build. No build/native/test
-process, active-command or unfinished-child marker remains. All source-only
-workers are paused. No new curriculum was integrated in this resumption.
-Accepted implementation remainsf242519/190labs; the unverified diagnostic source
-was retained privately and restored byte-exact to accepted Main. Only checkpoint
-and ledger documentation changed. No release was published.
+Owner resumed after the safe overnight pause44c22f0. M490 retained optimized
+failure-only diagnostic (47995e37/source0be486cd) was not run overnight. M491
+first refused its missing executable permission before GUI; restoring onlyu+x
+left ELF bytes exact. M492 then reproduced the installed80185 Back failure:
+301polls in0.141324758s while now70.538441381 was still before the intentional
+wheel deadline70.548882212. Wheels1/stable0/nogeometry, Back present. This proves
+a native acceptance-driver cadence defect, not a demonstrated learner grading,
+layout, progress or Wayland startup defect. Failure receipt6cbc69e0 retained.
 
-M490 optimized diagnostic build PASS,exit0,6m20s; native diagnostic NOT RUN.
-Retained ELF `.build-artifacts/reviews/ntp-installed-diagnostic-m490/dlms-learning-lab`
-76273472B/SHA47995e37cfd62a424f182080670b9402928a7554ec24d3e3e231624ed5da51d2;
-all1050 actual source inputs0be486cd/source archive70532c91 retained there.
-Receiptd294e2cf.381memory samples/min22821171200B/fullPSIavg10max0/OOMdelta0;
-system-wide swapout2063pages, not attributed solely to this build.
+Reviewed split8999f15d first adds only diagnostics/read-only test helpers and
+one real400-fast-frame regression; original two native tests/1389actions/94names
+stay exact. M493 bare-name --exact selected0 tests and is NOT regression evidence.
+M494 qualified actual1test fails at the intended active-poll invariant4vs3.
+Only then REMEDY1 applies three cadence hunks: deliberate wheel waiting requests
+repaint after its remaining deadline and does not consume active work polls.
+Strict300active-attempt/15s wall/20wheel and all geometry/profile checks remain.
+M495 all3 native groups PASS115.28s, including full real-event route and identical
+red/green regression. M496 fullinclusive216harnesses2,789PASS0FAIL0ignored, all1050
+inputs9ea71ce1 unchanged; receipt1d3eb619.1552memory samples/min24441061376B/
+fullPSI0/swapout9pages/OOM0. M497 Clippy finds one newtest nestedif style warning;
+only equivalent let-chain changes test723a9717→f1b7f4bd, peer4a8932f3. Production
+driverb38cdfb2 stays exact. M498 actual same regression PASS poststyle. M499
+alltargetClippy-DwarningsPASS; M500424PythonPASS; M501coverage190/50PASS. The
+inclusive run precedes that equivalent test-only style edit; no false source
+byte-equivalence is asserted.
 
-First resume action: use MAIN runner with `DLMS_SMOKE_STAGE=ntp-lessons` to run
-that retained optimized diagnostic, not the ordinary target ELF or restored
-Main source. Retain actual elapsed/wheel-deadline/geometry failure facts. The
-conditional remedy `installed190-ntp-cadence-remedy-source-r1` /37999dc4 is
-UNAPPLIED/UNRUN: excludes deliberate deadline waiting from active workpolls,
-uses delayed repaint, preserves300active-poll/15s/20wheel/visibility limits, and
-adds a real400-fast-frame/scroll/Back/profile regression. Independently review,
-prove the regression, then rerun optimized/full/installed validation before
-acceptance. Do not assume the suspected cause is confirmed. Current accepted
-Main driver is4fdc7f46; diagnostic afterimagec4c5b7a1 remains private.
-
-Then continue reviewed ERE14 actual capability/history/reference gates and
-normal193 integration, followed by mapped remaining curriculum. Bash reviewer
-prepared a current-owned45 application preflight; GPT normal workspace is only
-planning at `partition-filesystem-workspace-paused-checkpoint-r1`, not code or
-coverage. No routine owner approval is required to resume this authorized work.
+Next commit/push the scoped fix, rebuild a clean Fedora candidate and run the
+actual installed94-capture route. M485 lifecycle,
+M486tenstarts and M488NFS cold remain exactf242 identities, not automatically
+acceptance of a later package. Do not mark the repaired candidate accepted early.
+Then continue ERE14 actual capability/history/reference gates, normal193 and
+remaining mapped curriculum without routine owner approval. No new authored
+lab has been counted during this driver repair.
 
 ## Current accepted development milestone:190
 
@@ -97,9 +100,9 @@ OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md.
 
 ## Next work — continue without routine approval
 
-1. Accepted190 is committed/pushed asf242519. Post-doc424Python and coverage
-   passed. Finish the installed optimized NTP route failure below before accepting
-   the new candidate. Do not reimplement the accepted workspaces.
+1. Accepted190 content isf242519. M496 inclusive/M498 poststyle/M499Clippy/
+   M500Python/M501coverage pass for the cadence repair. Commit/push the fix and
+   finish actual rebuilt installed NTP route checks before candidate acceptance. Do not reimplement the accepted workspaces.
 2. Continue actual ERE14 foundation/history/utility gates below. Core/source ACKs
    and sealed13 evidence do not prove new evaluator behavior. Then integrate the
    three distinct ERE projects through reviewed normal193/native193, test actual
@@ -127,7 +130,7 @@ must survive future composition. Unowned files stay current at application.
 | Fixed ERE24 utility reference | `shell-ere24-reference-source-r1` /7e566bc9 |peer29d62169;18guards/24GNU comparisons UNRUN; six reason-only exclusions are not observed passes |
 | ERE authored3 | `shell-ere-unit-source-r5` /f4e367eb |peer9871ce30;35graded/7supplemental/11groups UNRUN, unregistered |
 | ERE14 current190 composition | `shell-ere14-current190-composition-r1` /8d1ec56f |45paths/15new, peera1dd87c0; substitute owned catalog182 amendment `shell-ere14-current190-owned-catalog182-r2` /1c12ec22 over Root0cd0996c; preserve all later unowned UI/QA/docs |
-| ERE normal193 | `shell-ere-normal193-source-r3` /db2cfae0 |55paths/5new, seven prospective groups UNRUN; four R1 consumer findings fixed in R2, current1389/94 rebase peer4856eaf1; projected60scripts477cases60examples |
+| ERE normal193 | `shell-ere-normal193-source-r3` /db2cfae0 |55paths/5new, seven prospective groups UNRUN; peer4856eaf1; mandatory narrow rebase preserves later cadence driverb38/testf1; projected60scripts477cases60examples |
 | ERE native193 | `shell-ere-native193-source-r2` /93e5495d |five paths/2new,441phases105shots/11groups UNRUN; peers5260a66d/969c6da9; current Root rebase mandatory |
 | HSRP pure | `hsrp-foundation-source-r1` /b7adcb80 |18groups PASS/M444 and fullM481; committed71aa25a; no authored credit |
 | HSRP normal capability | `hsrp-workspace-source-r3` /6f10a907 |peer64eaa772;19groups UNRUN, explicit down/return/source/rawpacket guards; rebase before apply |
@@ -169,11 +172,11 @@ M489 installed NTP94 route FAIL, exit101 after14 captures:80185 Click(Back),
 phase0/polls301. Retained log/source/candidate/screens and failure receipt99087dfc
 under ignoredreviews/installed190-m489-failure. No marker/owned descendants remain.
 71memory samples/currentPSI0/swapout0/OOM0. Development M480 passing is not
-substituted for installed acceptance. Source review finds immediate repaint during
-an intentional150ms wheel wait can consume a frame-count budget in an optimized
-build; actual cause is still under investigation. Preserve wall-time/visibility
-checks and add a deterministic regression, then rerun the actual optimized and
-installed routes. Candidate is not yet accepted for this flow. Older long
+substituted for installed acceptance. M492 actual diagnostic now proves the intentional150ms wait exhausts300polls
+after141ms. M494/M495 establish actual regression red/green without changing
+the task/grade or weakening wall-time/visibility limits. Inclusive/static and poststyle regression pass;
+rebuilt installed route checks remain pending; thisf242 candidate is not
+accepted for that flow. Older long
 Physical native143 termination cause is unproved; new wrapper TERM/HUP cleanup
 is fixed, but do not call it the demonstrated cause of that historical failure.
 

@@ -435,3 +435,239 @@ fn ntp_normal190_real_events_complete_all_tasks_and_every_capture_phase_without_
         assert!(progress::current_solved(&a.progress.attempts[id], s));
     }
 }
+
+/// Isolate native cadence from learner data: only real normal Start/assignment
+/// clicks and outer wheels prepare an actually clipped Back control. The test
+/// selects an existing QA Back phase, never installs learner state or progress.
+#[test]
+fn ntp_native_wheel_wait_does_not_spend_work_polls_at_fast_frame_cadence() {
+    fn cadence_frame(
+        ctx: &egui::Context,
+        a: &mut LabApp,
+        time: f64,
+        events: Vec<egui::Event>,
+        drive: bool,
+    ) {
+        let mut events = events;
+        events.append(&mut a.pending_events);
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(760., 560.),
+                )),
+                time: Some(time),
+                events,
+                ..Default::default()
+            },
+            |ctx| {
+                a.render(ctx);
+                if drive {
+                    a.started = Instant::now() - std::time::Duration::from_secs(1);
+                    a.smoke_tick(ctx);
+                }
+            },
+        );
+    }
+    fn click_cadence(ctx: &egui::Context, a: &mut LabApp, time: &mut f64, r: egui::Rect) {
+        *time += 0.05;
+        cadence_frame(
+            ctx,
+            a,
+            *time,
+            vec![egui::Event::PointerMoved(r.center())],
+            false,
+        );
+        *time += 0.05;
+        cadence_frame(
+            ctx,
+            a,
+            *time,
+            [true, false]
+                .into_iter()
+                .map(|pressed| egui::Event::PointerButton {
+                    pos: r.center(),
+                    button: egui::PointerButton::Primary,
+                    pressed,
+                    modifiers: Default::default(),
+                })
+                .collect(),
+            false,
+        );
+        for _ in 0..3 {
+            *time += 0.05;
+            cadence_frame(ctx, a, *time, vec![], false);
+        }
+    }
+    fn reveal_cadence(
+        ctx: &egui::Context,
+        a: &mut LabApp,
+        time: &mut f64,
+        target: fn(&LabApp) -> egui::Rect,
+    ) -> egui::Rect {
+        for _ in 0..20 {
+            let r = target(a);
+            let root = a
+                .metrics
+                .main_viewport
+                .unwrap()
+                .intersect(ctx.content_rect());
+            if smoke::smoke_control_visible(r, root, ctx.pixels_per_point()) {
+                return r;
+            }
+            let point = egui::pos2(root.left() + 2., root.center().y);
+            *time += 0.05;
+            cadence_frame(ctx, a, *time, vec![egui::Event::PointerMoved(point)], false);
+            *time += 0.05;
+            cadence_frame(
+                ctx,
+                a,
+                *time,
+                vec![egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(
+                        0.,
+                        (root.center().y - r.center().y)
+                            .clamp(-root.height() * 0.75, root.height() * 0.75),
+                    ),
+                    modifiers: Default::default(),
+                }],
+                false,
+            );
+            for _ in 0..10 {
+                *time += 0.05;
+                cadence_frame(ctx, a, *time, vec![], false);
+            }
+        }
+        panic!("The actual cadence setup target must be reachable within20 real wheels");
+    }
+    let (ctx, mut a) = app();
+    a.filter.track = "CCNA".into();
+    a.filter.unit = "ntp-client-server".into();
+    let mut time = 0.;
+    for _ in 0..3 {
+        time += 0.05;
+        cadence_frame(&ctx, &mut a, time, vec![], false);
+    }
+    let start = reveal_cadence(&ctx, &mut a, &mut time, |a| {
+        let at = a
+            .metrics
+            .card_verification
+            .iter()
+            .position(|r| r.0 == "ccna-ntp-client-chain")
+            .unwrap();
+        a.metrics.card_actions[at].0
+    });
+    click_cadence(&ctx, &mut a, &mut time, start);
+    assert_eq!(a.scenarios[a.selected.unwrap()].id, "ccna-ntp-client-chain");
+    let assignment = reveal_cadence(&ctx, &mut a, &mut time, |a| {
+        a.metrics
+            .ntp
+            .controls
+            .iter()
+            .find(|r| r.0 == "assignment")
+            .unwrap()
+            .1
+    });
+    click_cadence(&ctx, &mut a, &mut time, assignment);
+    let full =
+        serde_json::json!({"portable":a.progress,"caller_receipts":a.progress.migration_receipts});
+    let mut clipped = false;
+    for _ in 0..20 {
+        let root = a
+            .metrics
+            .main_viewport
+            .unwrap()
+            .intersect(ctx.content_rect());
+        if a.metrics.back.unwrap().bottom() < root.top() {
+            clipped = true;
+            break;
+        }
+        time += 0.05;
+        cadence_frame(
+            &ctx,
+            &mut a,
+            time,
+            vec![egui::Event::PointerMoved(egui::pos2(
+                root.left() + 2.,
+                root.center().y,
+            ))],
+            false,
+        );
+        time += 0.05;
+        cadence_frame(
+            &ctx,
+            &mut a,
+            time,
+            vec![egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: egui::vec2(0., -root.height() * 0.75),
+                modifiers: Default::default(),
+            }],
+            false,
+        );
+        for _ in 0..10 {
+            time += 0.05;
+            cadence_frame(&ctx, &mut a, time, vec![], false);
+        }
+    }
+    assert!(
+        clipped,
+        "Preparation must genuinely move Back above its visible clip using real wheels"
+    );
+    assert_eq!(
+        serde_json::json!({"portable":a.progress,"caller_receipts":a.progress.migration_receipts}),
+        full
+    );
+    a.smoke = true;
+    a.smoke_stage = route::first_back_stage();
+    let stage = a.smoke_stage;
+    let mut observed = None;
+    for _ in 0..20 {
+        time += 0.000_001;
+        cadence_frame(&ctx, &mut a, time, vec![], true);
+        if let Some((wheels, until, polls)) = route::wheel_wait_observation(&ctx)
+            && wheels > 0
+            && until > time
+        {
+            observed = Some((until, polls));
+            break;
+        }
+    }
+    let (until, polls) =
+        observed.expect("The real driver must issue a reveal wheel and enter its150ms wait");
+    for _ in 0..400 {
+        time += 0.000_001;
+        assert!(
+            time < until,
+            "All400 extra root frames intentionally precede the observed wheel deadline"
+        );
+        cadence_frame(&ctx, &mut a, time, vec![], true);
+        assert_eq!(a.smoke_stage, stage);
+        assert_eq!(
+            route::wheel_wait_observation(&ctx).unwrap().2,
+            polls,
+            "Waiting is not another work attempt"
+        );
+        assert_eq!(
+            serde_json::json!({"portable":a.progress,"caller_receipts":a.progress.migration_receipts}),
+            full
+        );
+    }
+    for _ in 0..240 {
+        time += 0.05;
+        cadence_frame(&ctx, &mut a, time, vec![], true);
+        if a.selected.is_none() {
+            break;
+        }
+    }
+    assert!(
+        a.selected.is_none(),
+        "After real time advances, the unchanged bounded driver must reveal and actually click Back"
+    );
+    assert_eq!(
+        serde_json::json!({"portable":a.progress,"caller_receipts":a.progress.migration_receipts}),
+        full
+    );
+    assert_eq!(a.progress.attempts.len(), 1);
+}

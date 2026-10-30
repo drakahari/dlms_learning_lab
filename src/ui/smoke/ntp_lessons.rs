@@ -756,7 +756,7 @@ impl LabApp {
         let (r, clip) = self.ntp_target(ctx, t);
         let tolerance = 1. / ctx.pixels_per_point();
         if now < q.wheel_until {
-            ctx.request_repaint();
+            ctx.request_repaint_after(std::time::Duration::from_secs_f64(q.wheel_until - now));
             return false;
         }
         let same = q.geometry.is_some_and(|old| {
@@ -886,14 +886,38 @@ impl LabApp {
             q.wheels = 0;
             q.geometry_item = 0;
         }
-        q.polls += 1;
+        let waiting_for_wheel = now < q.wheel_until;
+        if !waiting_for_wheel {
+            q.polls += 1;
+        }
         assert!(
             q.polls <= 300 && now - q.began < 15.,
-            "NTP native stage budget: {stage}, {:?}, phase{}, polls{}",
+            "NTP native stage budget: {stage}, {:?}, phase{}, polls{}, elapsed{}, now{}, wheel_until{}, wheels{}, stable{}, geometry{:?}, back{:?}, main{:?}, scroll{:?}, content{:?}, pointer{:?}, pointer_delta{:?}, selected{:?}",
             plan().get(stage - FIRST),
             q.phase,
-            q.polls
+            q.polls,
+            now - q.began,
+            now,
+            q.wheel_until,
+            q.wheels,
+            q.stable,
+            q.geometry,
+            self.metrics.back,
+            self.metrics.main_viewport,
+            self.metrics.main_scroll_offset,
+            self.metrics.main_content_size,
+            ctx.input(|i| i.pointer.hover_pos()),
+            ctx.input(|i| i.pointer.delta()),
+            self.selected
         );
+        // A deliberate smooth-wheel deadline is not another geometry/click
+        // attempt. Fast optimized frames must not consume all300 work polls
+        // while waiting150ms; the original15-second wall bound still applies.
+        if waiting_for_wheel {
+            ctx.request_repaint_after(std::time::Duration::from_secs_f64(q.wheel_until - now));
+            ctx.data_mut(|d| d.insert_temp(key(), q));
+            return (false, None);
+        }
         let step = plan()
             .get(stage - FIRST)
             .expect("Closed NTP stage inventory")
@@ -1220,4 +1244,20 @@ impl LabApp {
         ctx.data_mut(|d| d.insert_temp(key(), q));
         (advance, shot)
     }
+}
+
+#[cfg(test)]
+pub(in crate::ui) fn first_back_stage() -> usize {
+    FIRST
+        + plan()
+            .iter()
+            .position(|s| matches!(s, Step::Click(Target::Back)))
+            .unwrap()
+}
+#[cfg(test)]
+pub(in crate::ui) fn wheel_wait_observation(ctx: &egui::Context) -> Option<(usize, f64, usize)> {
+    ctx.data(|d| {
+        d.get_temp::<Qa>(key())
+            .map(|q| (q.wheels, q.wheel_until, q.polls))
+    })
 }
