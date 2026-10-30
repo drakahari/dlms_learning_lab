@@ -7,6 +7,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     script_teaching, workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
@@ -25,15 +26,28 @@ fn fresh(s: &Scenario) -> Attempt {
 fn complete190_sources_and57_case_objects_remain_before_three_real_normal_projects() {
     let all = pack::bundled().unwrap();
     let old = registration::original190::load();
-    assert_eq!((all.len(), old.len()), (193, 190));
+    assert_eq!(
+        (disk_registration::before_scenarios(&all).len(), old.len()),
+        (193, 190)
+    );
+    assert_eq!(all.len(), 197);
     assert_eq!(value(registration::before_scenarios(&all)), value(&old));
     assert_eq!(value(&all[..190]), value(&old));
     let authored: pack::Pack =
         serde_json::from_str(include_str!("../scenarios/shell-ere-evidence-v1.json")).unwrap();
-    assert_eq!(value(&all[190..]), value(&authored.scenarios));
+    assert_eq!(value(&all[190..193]), value(&authored.scenarios));
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [57, 44, 36, 60]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| disk_registration::before_scenarios(
+            &all
+        )
+        .iter()
+        .filter(|s| s.track == t)
+        .count()),
         [57, 40, 36, 60]
     );
     let scripts = all
@@ -54,10 +68,13 @@ fn complete190_sources_and57_case_objects_remain_before_three_real_normal_projec
         477
     );
     assert_eq!(
-        all[190..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all[190..193]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         registration::IDS
     );
-    for s in &all[190..] {
+    for s in &all[190..193] {
         assert_eq!(s.unit, "shell-ere-evidence");
         assert_eq!(s.track, "Bash/Shell");
         assert!(s.teaching.is_some() && matches!(s.goal, Goal::Script { .. }));
@@ -71,16 +88,22 @@ fn complete190_sources_and57_case_objects_remain_before_three_real_normal_projec
 }
 #[test]
 fn closed51_to50_raw_and_full_typed_inverse_keeps_all_predecessors_and_rejects_mutations() {
-    let all = pack::bundled().unwrap();
+    let current197 = pack::bundled().unwrap();
+    assert_eq!(current197.len(), 197);
+    let all = disk_registration::before_scenarios(&current197).to_vec();
     let old = registration::original190::load();
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let raw52 = include_bytes!("../scenarios/units-v1.json");
+    let raw51 = disk_registration::before_units(raw52).unwrap();
+    let raw = raw51.as_slice();
     let before = registration::before_units(raw).unwrap();
     assert_eq!(before, include_bytes!("fixtures/ere-units-before190.json"));
     let recipe: Value =
         serde_json::from_str(include_str!("fixtures/catalog193-registration.json")).unwrap();
     assert_eq!(digest::hash(raw), recipe["after_units51_sha256"]);
     assert_eq!(digest::hash(&before), recipe["before_units50_sha256"]);
-    let units = course::bundled(&all).unwrap();
+    let current52 = course::bundled(&current197).unwrap();
+    assert_eq!(current52.len(), 52);
+    let units = disk_registration::before_typed_units(&current52).to_vec();
     let previous = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!((units.len(), previous.len()), (51, 50));
     assert_eq!(
@@ -141,7 +164,10 @@ fn closed51_to50_raw_and_full_typed_inverse_keeps_all_predecessors_and_rejects_m
 }
 #[test]
 fn exact_source_inverse_refuses_partial_extra_old_version_and_changed_teaching_or_case_objects() {
-    let all = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 197);
+    let all = disk_registration::before_scenarios(&current).to_vec();
+    assert_eq!(all.len(), 193);
     for mode in 0..8 {
         let mut bad = all.clone();
         match mode {
@@ -190,10 +216,21 @@ fn count_only_predecessor_validates_every_current_key_new_state_and_version_with
     for s in &all {
         p.attempts.insert(s.id.clone(), Attempt::new(s, 1));
     }
+    assert_eq!(disk_registration::before_attempts_len(&p.attempts), 193);
+    assert_eq!(p.attempts.len(), 197);
     assert_eq!(registration::before_attempts_len(&p.attempts), 190);
     assert_eq!(ntp_registration::before_attempts_len(&p.attempts), 186);
+    let current_map = value(&p.attempts);
+    let mut old: Progress = serde_json::from_value(value(&p)).unwrap();
+    for id in disk_registration::IDS {
+        let removed = old.attempts.remove(id).unwrap();
+        assert!(matches!(removed.state, State::PartitionFs { .. }));
+    }
+    assert_eq!(old.attempts.len(), 193);
+    assert_eq!(registration::before_attempts_len(&old.attempts), 190);
+    assert_eq!(value(&p.attempts), current_map);
     for mode in 0..4 {
-        let mut bad: Progress = serde_json::from_value(value(&p)).unwrap();
+        let mut bad: Progress = serde_json::from_value(value(&old)).unwrap();
         match mode {
             0 => {
                 let a = bad.attempts.remove(&all[190].id).unwrap();
@@ -238,7 +275,7 @@ fn all_three_normal_introduction_example_and_assignment_drafts_roundtrip_separat
         clock: 41,
         ..Default::default()
     };
-    for s in &all[190..] {
+    for s in &all[190..193] {
         let mut a = fresh(s);
         let before = value(&a.state);
         let learning = a
@@ -269,7 +306,7 @@ fn all_three_normal_introduction_example_and_assignment_drafts_roundtrip_separat
     assert_eq!(value(&p), before);
     let resumed = progress::load(&file, &all).unwrap();
     assert_eq!(value(&resumed), before);
-    for s in &all[190..] {
+    for s in &all[190..193] {
         let a = &resumed.attempts[&s.id];
         assert!(a.challenge);
         assert!(!progress::current_solved(a, s));

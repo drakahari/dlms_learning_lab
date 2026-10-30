@@ -1,4 +1,5 @@
 //! Normal catalog registration; private capability/content fixtures do not earn credit.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 use dlms_learning_lab::{course, pack};
@@ -96,7 +97,15 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         } else {
             current190
         };
-        assert_eq!(all.iter().filter(|s| s.track == track).count(), current193);
+        assert_eq!(
+            disk_registration::before_scenarios(&all)
+                .iter()
+                .filter(|s| s.track == track)
+                .count(),
+            current193
+        );
+        let current197 = current193 + if track == "LPIC-1" { 4 } else { 0 };
+        assert_eq!(all.iter().filter(|s| s.track == track).count(), current197);
     }
 }
 #[test]

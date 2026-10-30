@@ -2,11 +2,13 @@
 
 Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines completion; it is not a release-readiness claim. Evidence and commits belong in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Open work remains open until demonstrated.
 
+Current source:197 assignments/52 units (57CCNA/44LPIC-1/36LPIC-2/60Bash). The four storage additions pass scoped registration/content/history and complete normal/private control routes. The full inclusive Rust suite passes2,935 tests; installed-candidate acceptance is pending; no new objective credit is applied. References below to193 describe the last accepted milestone.
+
 | ID | Acceptance requirement | Status |
 | --- | --- | --- |
 | C1 | Current official objective versions, dates and source links verified; announced future blueprints separate | Objective snapshot2026-10-22; official version boundaries rechecked2026-10-29; finer authoring references record their own dates; see CURRICULUM.md |
 | C2 | Every active objective and listed subobjective maps to practical coverage, supporting teaching, or a specific justified fidelity limitation; configure/troubleshoot requirements need actual modeled practice | Open; 165-row planning index plus1240-reference granular evidence/gap ledger; most required behavior remains absent, see OBJECTIVE_MAPPING.md |
-| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;193 source-integrated assignments/51units (57CCNA/40LPIC-1/36LPIC-2/60Bash). Final193inclusive2,857PASS/0FAIL/0ignored; all23 focused corrections pass. Clippy/446Python and24retainedGNU checks pass; installed193 passes105scripting captures, lifecycle, NFS cold and10starts. Scoped installed193 and older190/NTP94 evidence remain separately identified; see CATALOG193_MILESTONE.md. All136 full parent objectives and novice acceptance remain incomplete |
+| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;197 source-integrated assignments/52units (57CCNA/44LPIC-1/36LPIC-2/60Bash). M612 fullinclusive2,935PASS/0FAIL/0ignored; installed197 acceptance pending. The preceding193 milestone had2,857PASS/0FAIL/0ignored; all23 focused corrections pass. Clippy/446Python and24retainedGNU checks pass; installed193 passes105scripting captures, lifecycle, NFS cold and10starts. Scoped installed193 and older190/NTP94 evidence remain separately identified; see CATALOG193_MILESTONE.md. All136 full parent objectives and novice acceptance remain incomplete |
 | S1 | Implement required networking/Linux/shell capabilities before dependent content; typed state and multiple deterministic behavior cases, alternate solutions and plausible negative tests | Open; subset and capability gaps remain |
 | S2 | Learner input stays inside bounded in-process simulation; test resource/path/malformed-input limits and responsive Stop; controlled disposable reference comparisons only | Existing boundary implemented; independent review and extension regression work open |
 | G1 | Examples cannot award assignment credit; edits invalidate success; objective expansion never fabricates learner answers/mastery | Implemented baseline; audit all extensions |
@@ -19,7 +21,7 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | R2 | Actual OS clean install/reopen/upgrade/uninstall acceptance, not just CI/cross-build | Fedora scoped installed-candidate lifecycle/flows verified; full-product acceptance remains open; Windows/macOS desktop environments unavailable here |
 | R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | MIT approved 2026-10-22; target notice/source bundle implemented; macOS dispatch notice, signing decisions and platform acceptance remain open |
 
-The current source catalog has193assignments/51units (15CCNA,10LPIC-1,
+The preceding verified source milestone had193assignments/51units (15CCNA,10LPIC-1,
 9LPIC-2,17Bash). Three new scripting projects are registered; fullinclusive passes2,857tests
 with0FAIL/0ignored. Installed193/baa66bd scoped verification is recorded in
 CATALOG193_MILESTONE.md; earlier190/5233 evidence remains separate. All136 full parents remain incomplete;

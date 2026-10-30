@@ -12,6 +12,22 @@ fn scenario(id: &str) -> pack::Scenario {
         .unwrap()
 }
 fn solution(s: &pack::Scenario) -> State {
+    if let engine::Goal::PartitionFs { definition } = &s.goal {
+        let mut attempt = Attempt::new(s, 0);
+        dlms_learning_lab::partition_fs_workspace::binding::prepare(&mut attempt, s).unwrap();
+        for operation in &definition.reference {
+            dlms_learning_lab::partition_fs_workspace::binding::apply(
+                &mut attempt,
+                s,
+                operation,
+                false,
+            )
+            .unwrap();
+        }
+        dlms_learning_lab::partition_fs_workspace::binding::context(&attempt, s).unwrap();
+        assert!(progress::current_solved(&attempt, s), "{}", s.id);
+        return attempt.state;
+    }
     let mut state = s.initial.clone();
     for cmd in &s.solution {
         engine::execute_for_goal(&mut state, &s.goal, cmd).unwrap();
@@ -205,6 +221,12 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     for s in &labs {
         let mut a = Attempt::new(s, 3);
         a.state = solution(s);
+        if matches!(s.goal, engine::Goal::PartitionFs { .. }) {
+            // Keep the native workspace metadata, as an actual saved disk attempt does.
+            dlms_learning_lab::partition_fs_workspace::binding::prepare(&mut a, s).unwrap();
+            dlms_learning_lab::partition_fs_workspace::binding::context(&a, s).unwrap();
+            assert!(progress::current_solved(&a, s), "{}", s.id);
+        }
         a.step = 1.min(s.steps.len() - 1);
         a.hints = 1;
         a.challenge = true;
@@ -233,6 +255,45 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
         &labs[1].goal
     ));
     assert!(q.favorites.contains(&labs[0].id));
+    let disk_sources = labs
+        .iter()
+        .filter(|s| matches!(s.initial, State::PartitionFs { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        disk_sources
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "lpic1-disk-safe-gap",
+            "lpic1-disk-hints-versus-content",
+            "lpic1-disk-eligible-media",
+            "lpic1-disk-delivery",
+        ]
+    );
+    let mut q = q;
+    for source in disk_sources {
+        assert!(progress::current_solved(&q.attempts[&source.id], source));
+        let mut expected = serde_json::to_value(&q).unwrap();
+        let receipts = serde_json::to_value(&q.migration_receipts).unwrap();
+        let mut fresh = Attempt::new(source, q.attempts[&source.id].visited);
+        dlms_learning_lab::partition_fs_workspace::binding::prepare(&mut fresh, source).unwrap();
+        expected["attempts"][&source.id] = serde_json::to_value(&fresh).unwrap();
+        q.attempts.insert(source.id.clone(), fresh);
+        assert!(!progress::current_solved(&q.attempts[&source.id], source));
+        progress::save_with_catalog(&path, &q, &labs).unwrap();
+        q = progress::load(&path, &labs).unwrap();
+        assert_eq!(serde_json::to_value(&q).unwrap(), expected);
+        assert_eq!(
+            serde_json::to_value(&q.migration_receipts).unwrap(),
+            receipts
+        );
+        dlms_learning_lab::partition_fs_workspace::binding::context(
+            &q.attempts[&source.id],
+            source,
+        )
+        .unwrap();
+    }
 }
 #[test]
 fn corrupt_or_future_progress_is_preserved() {
@@ -347,7 +408,24 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let (State::Ntp { simulation }, engine::Goal::Ntp { definition }) =
+        if matches!(a.state, State::PartitionFs { .. }) {
+            assert!(engine::solved(&a.state, &s.goal));
+            let review: serde_json::Value =
+                serde_json::from_str(include_str!("fixtures/disk-preparation-review.json"))
+                    .unwrap();
+            let row = review["labs"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|row| row["id"].as_str() == Some(s.id.as_str()))
+                .unwrap();
+            let damage: dlms_learning_lab::partition_fs_workspace::Operation =
+                serde_json::from_value(row["damage_after_reference"]["operation"].clone()).unwrap();
+            dlms_learning_lab::partition_fs_workspace::binding::apply(&mut a, s, &damage, false)
+                .unwrap();
+            dlms_learning_lab::partition_fs_workspace::binding::context(&a, s).unwrap();
+            assert!(!progress::current_solved(&a, s), "{}", s.id);
+        } else if let (State::Ntp { simulation }, engine::Goal::Ntp { definition }) =
             (&mut a.state, &s.goal)
         {
             let client = definition.targets[0].client;

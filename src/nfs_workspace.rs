@@ -1684,7 +1684,30 @@ mod attempt_projection_tests {
     // Library-unit scope cannot import the UI-owned historical boundary. Keep
     // its complete new-source equality here; external catalog190 guards retain
     // the independent recipe/pack hashes and raw/full-typed unit inverse.
+    fn disk_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../tests/fixtures/catalog197-registration.json"
+        ))
+        .unwrap();
+        let new: pack::Pack =
+            serde_json::from_str(include_str!("../scenarios/disk-preparation-v1.json")).unwrap();
+        assert_eq!(all.len(), 197);
+        assert_eq!(new.scenarios.len(), 4);
+        assert_eq!(
+            all[..193]
+                .iter()
+                .map(|s| serde_json::json!({"id":s.id,"version":s.version}))
+                .collect::<Vec<_>>(),
+            *recipe["before_ids"].as_array().unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&all[193..]).unwrap(),
+            serde_json::to_value(&new.scenarios).unwrap()
+        );
+        &all[..193]
+    }
     fn ere_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let all = disk_predecessor(all);
         let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
             "../tests/fixtures/catalog193-registration.json"
         ))
@@ -1834,7 +1857,8 @@ mod attempt_projection_tests {
         let mut all = pack::bundled().unwrap();
         assert_eq!(ntp_predecessor(&all).len(), 186);
         assert_eq!(ere_predecessor(&all).len(), 190);
-        assert_eq!(all.len(), 193);
+        assert_eq!(disk_predecessor(&all).len(), 193);
+        assert_eq!(all.len(), 197);
         let new: crate::pack::Pack =
             serde_json::from_str(include_str!("../scenarios/linux-one-off-v1.json")).unwrap();
         assert_eq!(
@@ -1845,6 +1869,27 @@ mod attempt_projection_tests {
         let s = scenario();
         all.push(s.clone());
         let mut p = progress::decode(&raw, &all).unwrap();
+        let disk_ids = [
+            "lpic1-disk-safe-gap",
+            "lpic1-disk-hints-versus-content",
+            "lpic1-disk-eligible-media",
+            "lpic1-disk-delivery",
+        ];
+        assert_eq!(
+            all[193..197]
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            disk_ids
+        );
+        for source in &all[193..197] {
+            let mut fresh = Attempt::new(source, 1);
+            crate::partition_fs_workspace::binding::prepare(&mut fresh, source).unwrap();
+            crate::partition_fs_workspace::binding::context(&fresh, source).unwrap();
+            assert!(!progress::current_solved(&fresh, source));
+            assert!(!p.attempts.contains_key(&source.id));
+            assert!(!p.favorites.contains(&source.id));
+        }
         let old = serde_json::to_value(&p.attempts).unwrap();
         let mut a = Attempt::new(&s, 17);
         teach::prepare(&mut a, &s, true).unwrap();
@@ -1862,6 +1907,10 @@ mod attempt_projection_tests {
             raw
         );
         let loaded = progress::load(&path, &all).unwrap();
+        for id in disk_ids {
+            assert!(!loaded.attempts.contains_key(id));
+            assert!(!loaded.favorites.contains(id));
+        }
         let mut old_loaded = serde_json::to_value(&loaded.attempts).unwrap();
         old_loaded.as_object_mut().unwrap().remove(&s.id);
         assert!(old_loaded == old);

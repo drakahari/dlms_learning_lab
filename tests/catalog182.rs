@@ -6,6 +6,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt},
     shell,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
 #[path = "../src/ui/one_off_boundary.rs"]
@@ -83,9 +84,18 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
     );
     assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| disk_registration::before_scenarios(
+            &all
+        )
+        .iter()
+        .filter(|s| s.track == t)
+        .count()),
+        [57, 40, 36, 60]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 60]
+        [57, 44, 36, 60]
     );
     let current190 =
         registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all);
@@ -150,7 +160,14 @@ fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrec
         ),
         (190, 50)
     );
-    assert_eq!((all.len(), current50.len()), (193, 51));
+    assert_eq!(
+        (
+            disk_registration::before_scenarios(&all).len(),
+            disk_registration::before_typed_units(&current50).len()
+        ),
+        (193, 51)
+    );
+    assert_eq!((all.len(), current50.len()), (197, 52));
     let roundtrip =
         course::load(&json!({"version":1,"units":current50}).to_string(), &all).unwrap();
     assert_eq!(v(&roundtrip), v(&current50));

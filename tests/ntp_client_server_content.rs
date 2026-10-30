@@ -7,6 +7,7 @@ use dlms_learning_lab::{
     workspace,
 };
 use registration::ere_registration::original190::before_ntp as original;
+use registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 #[path = "support/ntp_registration.rs"]
 mod registration;
@@ -61,7 +62,8 @@ fn combined() -> Vec<Scenario> {
     let expected =
         pack::load_catalog(&packs.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
+    assert_eq!(current.len(), 197);
     let checked190 = registration::ere_registration::before_scenarios(&current);
     assert_eq!(checked190.len(), 190);
     assert_eq!(value(&expected), value(checked190));

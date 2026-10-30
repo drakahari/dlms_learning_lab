@@ -1,6 +1,17 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop learning application for networking, Linux administration and scripting. **193 authored assignments in 51 units:** 57 CCNA, 40 LPIC-1, 36 LPIC-2 and 60 Bash/Shell. The latest scripting unit practices text-pattern selection, complete-row validation and preserving incident evidence. The inclusive Rust suite passes 2,857 tests; the installed Fedora candidate passes the three new scripting flows, NFS cold reopening and ten native starts. See [the193 milestone](docs/CATALOG193_MILESTONE.md). The available 193-lab Fedora candidate has [scoped installation and native verification](docs/CATALOG193_MILESTONE.md). All 28 themes and the approved native workspaces remain. **This is not full exam coverage.** Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop application for networking, Linux administration
+and scripting. The current source contains **197 authored assignments in 52 units**:
+57 CCNA, 44 LPIC-1, 36 LPIC-2 and 60 Bash/Shell. The full inclusive Rust suite passes
+2,935 tests with zero failures or ignored tests. The four new disk-preparation
+assignments still need packaged Fedora acceptance.
+
+The latest verified Fedora candidate remains **193 labs/51 units, `baa66bdad7e5`**.
+Its installation, scripting flows, NFS cold reopening, startup results and
+checksums retain their identity in [the193 milestone](docs/CATALOG193_MILESTONE.md).
+All 28 themes and the approved native workspaces remain. **This is not full exam
+coverage.** Windows/macOS runtime, screen-reader, physical-device and novice
+acceptance remain pending. Independent of DLMS_next and the old dlms_lab.
 
 [Learner guide](docs/LEARNER_GUIDE.md): choosing a course, separate practice,
 checking and retrying, saved work, backups and appearance.

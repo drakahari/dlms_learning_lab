@@ -1,6 +1,7 @@
 //! Fixed ordinary-course native acceptance route. No progress/grade/focus injection.
 use super::*;
 use dlms_learning_lab::{ntp_workspace as work, script_teaching::View};
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 use std::{collections::BTreeMap, sync::OnceLock};
 pub(in crate::ui) const FIRST: usize = 80000;
@@ -928,7 +929,14 @@ impl LabApp {
             Step::Init => {
                 assert!(self.smoke && !self.synthetic && !self.developer);
                 assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&self.units).len()),(190,50));
-                assert_eq!((self.scenarios.len(), self.units.len()), (193, 51));
+                assert_eq!(
+                    (
+                        disk_registration::before_scenarios(&self.scenarios).len(),
+                        disk_registration::before_typed_units(&self.units).len()
+                    ),
+                    (193, 51)
+                );
+                assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
                 let prior = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios);
                 let units = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units);
                 assert_eq!((prior.len(), units.len()), (186, 49));

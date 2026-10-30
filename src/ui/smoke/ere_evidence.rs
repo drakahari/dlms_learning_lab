@@ -1,6 +1,7 @@
 //! Closed native-only normal-course acceptance. All script effects occur through
 //! actual editor events and Run/Stop; no State/Record or solved result is installed.
 use super::*;
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 pub(in crate::ui) const BASE: usize = 82000;
 const STRIDE: usize = 250;
 pub(in crate::ui) const LAST: usize = 218;
@@ -666,22 +667,25 @@ impl LabApp {
         }
         assert!(self.smoke && self._smoke_profile.is_some());
         assert_eq!(shell::EVALUATOR_REVISION, 14);
+        // Admit the complete current source on EVERY callback, then reuse only
+        // these immutable checked predecessors for the older authority proofs.
+        let checked193 = disk_registration::before_scenarios(&self.scenarios);
+        let checked51 = disk_registration::before_typed_units(&self.units);
         assert_eq!(
             (
-                one_off_boundary::loop_registration::lvm_registration::before_scenarios(
-                    &self.scenarios
-                )
-                .len(),
+                one_off_boundary::loop_registration::lvm_registration::before_scenarios(checked193)
+                    .len(),
                 one_off_boundary::loop_registration::lvm_registration::before_typed_units(
-                    &self.units
+                    checked51
                 )
                 .len()
             ),
             (182, 48)
         );
-        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units).len()),(186,49));
-        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&self.units).len()), (190, 50));
-        assert_eq!((self.scenarios.len(), self.units.len()), (193, 51));
+        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(checked193).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(checked51).len()),(186,49));
+        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(checked193).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(checked51).len()), (190, 50));
+        assert_eq!((checked193.len(), checked51.len()), (193, 51));
+        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
         assert_eq!(
             self.scenarios[190..193]
                 .iter()

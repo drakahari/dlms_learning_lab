@@ -1,0 +1,1265 @@
+{
+  "status": "Mathematical source predictions only; no engine/native execution or curriculum credit",
+  "unit_proposal": {
+    "id": "linux-disk-preparation",
+    "track": "LPIC-1",
+    "title": "Prepare disks, filesystems and swap safely",
+    "summary": "Read supplied media and retained data, allocate bounded GPT extents where needed, distinguish partition hints from actual ext4/swap initialization, and complete a protected multi-disk delivery.",
+    "prerequisites": [
+      "linux-file-foundations"
+    ],
+    "labs": [
+      "lpic1-disk-safe-gap",
+      "lpic1-disk-hints-versus-content",
+      "lpic1-disk-eligible-media",
+      "lpic1-disk-delivery"
+    ]
+  },
+  "labs": [
+    {
+      "id": "lpic1-disk-safe-gap",
+      "reference": [
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "staging",
+          "start": 20480,
+          "end": 36863,
+          "type_hint": "linux_data"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vda2",
+          "format": "ext4",
+          "label": "export",
+          "uuid": null
+        }
+      ],
+      "alternatives": [
+        [
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vda",
+            "name": "staging",
+            "start": 20480,
+            "end": 45055,
+            "type_hint": "linux_data"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vda2",
+            "format": "ext4",
+            "label": "export",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ca"
+          }
+        ],
+        [
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vda",
+            "name": "staging",
+            "start": 40960,
+            "end": 61439,
+            "type_hint": "linux_data"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vda2",
+            "format": "ext4",
+            "label": "export",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000d4"
+          }
+        ]
+      ],
+      "positive_expected": [
+        true,
+        true
+      ],
+      "wrong_and_partial": [
+        {
+          "name": "unchanged",
+          "operations": [],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "hint_only",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 36863,
+              "type_hint": "linux_data"
+            }
+          ],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_label",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 36863,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "wrong",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "undersized",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 28671,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "export",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "unaligned",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20481,
+              "end": 36864,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "export",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_content",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 36863,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "export",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "extra_after_success",
+          "operations": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 36863,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "export",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "extra",
+              "start": 65536,
+              "end": 67583,
+              "type_hint": "linux_data"
+            }
+          ],
+          "expected_rows": [
+            true,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage_after_reference": {
+        "operation": {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "extra",
+          "start": 65536,
+          "end": 67583,
+          "type_hint": "linux_data"
+        },
+        "expected_rows": [
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "refusals_on_initial": [
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vda"
+        },
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "overlap",
+          "start": 4096,
+          "end": 8191,
+          "type_hint": "linux_data"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vda1",
+          "format": "ext4",
+          "label": "lost",
+          "uuid": null
+        }
+      ],
+      "actual": null
+    },
+    {
+      "id": "lpic1-disk-hints-versus-content",
+      "reference": [
+        {
+          "kind": "format",
+          "partition": "/dev/vda1",
+          "format": "ext4",
+          "label": "capture",
+          "uuid": null
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vda2",
+          "format": "swap",
+          "label": "paging",
+          "uuid": null
+        }
+      ],
+      "alternatives": [
+        [
+          {
+            "kind": "format",
+            "partition": "/dev/vda2",
+            "format": "swap",
+            "label": "paging",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000dd"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vda1",
+            "format": "ext4",
+            "label": "capture",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000de"
+          }
+        ],
+        [
+          {
+            "kind": "format",
+            "partition": "/dev/vda1",
+            "format": "ext4",
+            "label": "capture",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000e7"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vda2",
+            "format": "swap",
+            "label": "paging",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000e8"
+          }
+        ]
+      ],
+      "positive_expected": [
+        true,
+        true,
+        true
+      ],
+      "wrong_and_partial": [
+        {
+          "name": "unchanged",
+          "operations": [],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "data_only",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "capture",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            true,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "swap_only",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "paging",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "swapped_formats",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "swap",
+              "label": "capture",
+              "uuid": null
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "paging",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_labels",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "wrong",
+              "uuid": null
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "wrong",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "extra_after_success",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "capture",
+              "uuid": null
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "paging",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "extra",
+              "start": 65536,
+              "end": 67583,
+              "type_hint": "linux_data"
+            }
+          ],
+          "expected_rows": [
+            true,
+            true,
+            false
+          ],
+          "actual": null
+        },
+        {
+          "name": "changed_spare",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "capture",
+              "uuid": null
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "paging",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            }
+          ],
+          "expected_rows": [
+            true,
+            true,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage_after_reference": {
+        "operation": {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "extra",
+          "start": 65536,
+          "end": 67583,
+          "type_hint": "linux_data"
+        },
+        "expected_rows": [
+          true,
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "refusals_on_initial": [
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vda"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vda3",
+          "format": "ext4",
+          "label": "lost",
+          "uuid": null
+        },
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "overlap",
+          "start": 4096,
+          "end": 8191,
+          "type_hint": "linux_data"
+        }
+      ],
+      "actual": null
+    },
+    {
+      "id": "lpic1-disk-eligible-media",
+      "reference": [
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vdb"
+        },
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vdb",
+          "name": "records",
+          "start": 2048,
+          "end": 18431,
+          "type_hint": "linux_data"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vdb1",
+          "format": "ext4",
+          "label": "records",
+          "uuid": null
+        },
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vdb",
+          "name": "overflow",
+          "start": 20480,
+          "end": 24575,
+          "type_hint": "linux_swap"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vdb2",
+          "format": "swap",
+          "label": "overflow",
+          "uuid": null
+        }
+      ],
+      "alternatives": [
+        [
+          {
+            "kind": "create_gpt",
+            "disk": "/dev/vdb"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdb",
+            "name": "overflow",
+            "start": 2048,
+            "end": 10239,
+            "type_hint": "linux_swap"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdb1",
+            "format": "swap",
+            "label": "overflow",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000f3"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdb",
+            "name": "records",
+            "start": 12288,
+            "end": 45055,
+            "type_hint": "linux_data"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdb2",
+            "format": "ext4",
+            "label": "records",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000f5"
+          }
+        ],
+        [
+          {
+            "kind": "create_gpt",
+            "disk": "/dev/vdb"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdb",
+            "name": "records",
+            "start": 4096,
+            "end": 28671,
+            "type_hint": "linux_data"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdb",
+            "name": "overflow",
+            "start": 32768,
+            "end": 38911,
+            "type_hint": "linux_swap"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdb2",
+            "format": "swap",
+            "label": "overflow",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000fe"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdb1",
+            "format": "ext4",
+            "label": "records",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-0000000000ff"
+          }
+        ]
+      ],
+      "positive_expected": [
+        true,
+        true,
+        true
+      ],
+      "wrong_and_partial": [
+        {
+          "name": "unchanged",
+          "operations": [],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "table_only",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            }
+          ],
+          "expected_rows": [
+            false,
+            false,
+            false
+          ],
+          "actual": null
+        },
+        {
+          "name": "data_only",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "ext4",
+              "label": "records",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            true,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "hints_only",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "overflow",
+              "start": 20480,
+              "end": 24575,
+              "type_hint": "linux_swap"
+            }
+          ],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_data_label",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "ext4",
+              "label": "wrong",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "overflow",
+              "start": 20480,
+              "end": 24575,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb2",
+              "format": "swap",
+              "label": "overflow",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "undersized_swap",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "ext4",
+              "label": "records",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "overflow",
+              "start": 20480,
+              "end": 22527,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb2",
+              "format": "swap",
+              "label": "overflow",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            true,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "extra_after_success",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "ext4",
+              "label": "records",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "overflow",
+              "start": 20480,
+              "end": 24575,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb2",
+              "format": "swap",
+              "label": "overflow",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "extra",
+              "start": 32768,
+              "end": 34815,
+              "type_hint": "linux_data"
+            }
+          ],
+          "expected_rows": [
+            true,
+            true,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage_after_reference": {
+        "operation": {
+          "kind": "add_partition",
+          "disk": "/dev/vdb",
+          "name": "extra",
+          "start": 32768,
+          "end": 34815,
+          "type_hint": "linux_data"
+        },
+        "expected_rows": [
+          true,
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "refusals_on_initial": [
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vda"
+        },
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vdc"
+        },
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vdd"
+        }
+      ],
+      "actual": null
+    },
+    {
+      "id": "lpic1-disk-delivery",
+      "reference": [
+        {
+          "kind": "format",
+          "partition": "/dev/vda1",
+          "format": "ext4",
+          "label": "dispatch",
+          "uuid": null
+        },
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vdb"
+        },
+        {
+          "kind": "add_partition",
+          "disk": "/dev/vdb",
+          "name": "reserve",
+          "start": 2048,
+          "end": 10239,
+          "type_hint": "linux_swap"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vdb1",
+          "format": "swap",
+          "label": "reserve",
+          "uuid": null
+        }
+      ],
+      "alternatives": [
+        [
+          {
+            "kind": "create_gpt",
+            "disk": "/dev/vdc"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdc",
+            "name": "reserve",
+            "start": 4096,
+            "end": 16383,
+            "type_hint": "linux_swap"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdc1",
+            "format": "swap",
+            "label": "reserve",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-000000000107"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vda1",
+            "format": "ext4",
+            "label": "dispatch",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-000000000108"
+          }
+        ],
+        [
+          {
+            "kind": "format",
+            "partition": "/dev/vda1",
+            "format": "ext4",
+            "label": "dispatch",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-00000000010f"
+          },
+          {
+            "kind": "create_gpt",
+            "disk": "/dev/vdb"
+          },
+          {
+            "kind": "add_partition",
+            "disk": "/dev/vdb",
+            "name": "reserve",
+            "start": 8192,
+            "end": 24575,
+            "type_hint": "linux_swap"
+          },
+          {
+            "kind": "format",
+            "partition": "/dev/vdb1",
+            "format": "swap",
+            "label": "reserve",
+            "uuid": "bbbbbbbb-bbbb-4bbb-8bbb-000000000112"
+          }
+        ]
+      ],
+      "positive_expected": [
+        true,
+        true,
+        true
+      ],
+      "wrong_and_partial": [
+        {
+          "name": "unchanged",
+          "operations": [],
+          "expected_rows": [
+            false,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "existing_only",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "dispatch",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            true,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "new_only",
+          "operations": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "reserve",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_filesystem",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "swap",
+              "label": "dispatch",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "reserve",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            false,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "wrong_swap_label",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "dispatch",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "wrong",
+              "uuid": null
+            }
+          ],
+          "expected_rows": [
+            true,
+            false,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "name": "extra_after_success",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "dispatch",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "reserve",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "extra",
+              "start": 65536,
+              "end": 67583,
+              "type_hint": "linux_data"
+            }
+          ],
+          "expected_rows": [
+            true,
+            true,
+            false
+          ],
+          "actual": null
+        },
+        {
+          "name": "touch_unused_spare",
+          "operations": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "dispatch",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "reserve",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdc"
+            }
+          ],
+          "expected_rows": [
+            true,
+            true,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage_after_reference": {
+        "operation": {
+          "kind": "add_partition",
+          "disk": "/dev/vda",
+          "name": "extra",
+          "start": 65536,
+          "end": 67583,
+          "type_hint": "linux_data"
+        },
+        "expected_rows": [
+          true,
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "refusals_on_initial": [
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vda"
+        },
+        {
+          "kind": "format",
+          "partition": "/dev/vda2",
+          "format": "ext4",
+          "label": "lost",
+          "uuid": null
+        },
+        {
+          "kind": "create_gpt",
+          "disk": "/dev/vdd"
+        }
+      ],
+      "actual": null
+    }
+  ],
+  "actual": null,
+  "normal_registration": false
+}

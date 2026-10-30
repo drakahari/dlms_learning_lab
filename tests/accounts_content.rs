@@ -702,6 +702,23 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
                 a.workspace.as_ref().unwrap().command.is_empty(),
                 "Native physical config never borrows a terminal draft"
             );
+        } else if matches!(a.state, State::PartitionFs { .. }) {
+            use dlms_learning_lab::partition_fs_workspace as disk;
+            disk::binding::prepare(&mut a, s).unwrap();
+            let State::PartitionFs { simulation } = &a.state else {
+                unreachable!()
+            };
+            let selected = simulation.assignment_editor.selected.clone();
+            let mut draft = simulation.assignment_editor.drafts[&selected].clone();
+            draft.name = "unsubmitted".into();
+            draft.start = "unfinished".into();
+            disk::binding::set_draft(&mut a, s, &selected, draft, false).unwrap();
+            disk::binding::context(&a, s).unwrap();
+            assert!(
+                a.workspace.as_ref().unwrap().command.is_empty(),
+                "Native disk drafts never borrow a terminal command"
+            );
+            assert!(!progress::current_solved(&a, s));
         } else {
             a.workspace.as_mut().unwrap().command = format!("Retained draft for {}", s.id);
         }

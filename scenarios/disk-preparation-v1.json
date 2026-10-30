@@ -1,0 +1,3011 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-disk-safe-gap",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Prepare virtual GPT, ext4 and swap",
+      "unit": "linux-disk-preparation",
+      "title": "Prepare an export area beside retained evidence",
+      "summary": "Use a safe aligned gap in an existing GPT disk; allocation and formatting are separate decisions.",
+      "objective": "On /dev/vda add exactly one new partition named staging, 8–12 MiB inclusive, with a Linux data hint and an aligned start. Initialize its actual content as ext4 with label export. Preserve the supplied archive partition and /keep.txt, every other disk and all unrequested space; do not create GPT again or add extra partitions.",
+      "retry_guidance": "Compare every required row with the applied table and actual signatures. Drafts do not change applied state. If a valid wrong allocation or format cannot be removed in this subset, reset this assignment and replay; do not mistake simulator refusal for real disk protection.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Inspect supplied media and required outcomes.",
+        "Use the native configuration fields and explicit actions; keep protected data unchanged.",
+        "Check every current requirement and preservation row."
+      ],
+      "guide": [],
+      "explanation": "The native reference is one valid configuration, not a required command order or UUID. The model grades named extents, actual signatures, capacity, alignment and preservation. It never executes commands on your computer.",
+      "hints": [
+        "The archive ends at 18431. Pick an aligned start outside it; do not replace its GPT.",
+        "A valid 8 MiB range contains 16384 sectors. Count both endpoints, and inspect which slot was allocated.",
+        "A Linux data hint is not ext4. Initialize the new applied partition with label export; also check the preservation row."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-104.1_Create_partitions_and_filesystems",
+        "https://www.gnu.org/software/parted/manual/html_node/mkpart.html",
+        "https://raw.githubusercontent.com/tytso/e2fsprogs/master/misc/mke2fs.8.in",
+        "https://raw.githubusercontent.com/util-linux/util-linux/master/disk-utils/mkswap.8.adoc"
+      ],
+      "simplifications": "Simulation-only 512-byte-sector GPT with up to 16 modeled slots; ext4 uses fixed 4 KiB capacity accounting, swap initialization uses fixed 4 KiB pages. No real device access, MBR/logical partitions, delete, resize, overwrite, mount, fstab, swap activation or complete parted/mkfs/mkswap emulation. Native buttons establish outcomes, not full named-tool syntax coverage.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "archive",
+                        "start": 2048,
+                        "end": 18431,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                          "blocks": 2048,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Birch evidence retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "staging",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 8388608,
+                  "maximum_bytes": 12582912,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "export"
+                  }
+                }
+              ]
+            },
+            "example_initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "archive",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000065",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Aspen practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [
+                {
+                  "name": "sample",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 3145728,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "sample"
+                  }
+                }
+              ]
+            }
+          },
+          "current": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "archive",
+                      "start": 2048,
+                      "end": 18431,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Birch evidence retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "archive",
+                      "start": 2048,
+                      "end": 10239,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000065",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Aspen practice retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdf": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdg": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "archive",
+                      "start": 2048,
+                      "end": 18431,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Birch evidence retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [
+              {
+                "name": "staging",
+                "eligible_disks": [
+                  "/dev/vda"
+                ],
+                "type_hint": "linux_data",
+                "minimum_bytes": 8388608,
+                "maximum_bytes": 12582912,
+                "aligned_start": true,
+                "content": {
+                  "kind": "ext4",
+                  "label": "export"
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vda",
+              "name": "staging",
+              "start": 20480,
+              "end": 36863,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "ext4",
+              "label": "export",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.",
+            "concepts": [
+              {
+                "title": "Read the supplied media first",
+                "text": "A disk is the whole supplied virtual device. A partition is one named range inside its table. Read the status: Read-only, In use or Existing data to preserve means it is not spare writable media. The applied disk table and retained file details are inspection facts, not draft fields."
+              },
+              {
+                "title": "Inclusive sectors and alignment",
+                "text": "Here each sector holds 512 bytes and 1 MiB is 1048576 bytes. A range includes both ends, so bytes=(end-start+1)*512. Each supplied alignment is 2048 sectors: choose a start divisible by 2048. GPT reserves sectors 0..33 and the final 33 sectors; the last usable sector on these 131072-sector disks is 131038. No extent may overlap another."
+              },
+              {
+                "title": "A type hint is not content",
+                "text": "Linux data and Linux swap are partition type hints. Adding a partition chooses an extent and a hint; it does not create a filesystem or swap signature. Choose the actual partition number shown in the applied table, then explicitly initialize blank content as ext4 or swap. A name or a hint alone cannot pass a content requirement."
+              },
+              {
+                "title": "Labels, UUIDs and preservation",
+                "text": "A label is a short human-readable name for the actual filesystem or swap area. A UUID is an identity; any valid unique identity satisfies these tasks. Leave the UUID field blank for this simulator's persistent deterministic generator, or provide an explicit lowercase UUID. Existing nonblank signatures and file contents must remain unchanged."
+              },
+              {
+                "title": "Drafts, applied state and honest recovery",
+                "text": "Fields are unapplied drafts. Add, Create GPT and Initialize content are explicit native actions. Check evaluates the applied configuration against every required row and preservation rule. A correct applied result stays correct when an unfinished draft is edited. This subset cannot delete, resize, overwrite or undo a valid allocation: use Reset practice, or reset the affected assignment, then replay the intended actions. Inspect protection before committing."
+              },
+              {
+                "title": "Preparation is not activation",
+                "text": "The tools are simulator controls, not commands executed on your computer. ext4 creation here models a 4 KiB-block capacity and identity, not a real filesystem image. Swap initialization prepares a header; activating it with swapon, mounting filesystems and editing fstab are outside this model. Real formatting can destroy data and these simulator refusals are not general real-tool safeguards."
+              }
+            ],
+            "description": "Aspen practice has a 4 MiB archive on /dev/vde1. Add sample in a different free interval, 3–5 MiB, then initialize /dev/vde2 as ext4 with label sample. The smaller sample and its separate /keep.txt are ungraded. After success, add extra at 20480..22527 to see preservation fail.",
+            "fixture": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "archive",
+                        "start": 2048,
+                        "end": 10239,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000065",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Aspen practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "sample",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 3145728,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "sample"
+                  }
+                }
+              ]
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "add_partition",
+                  "disk": "/dev/vde",
+                  "name": "sample",
+                  "start": 12288,
+                  "end": 18431,
+                  "type_hint": "linux_data"
+                },
+                "explanation": "Fill the exact name, inclusive sector range and hint, then use Add partition using draft. Inspect the actual allocated number before formatting."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde2",
+                  "format": "ext4",
+                  "label": "sample",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              }
+            ],
+            "try_change": "After the practice passes, apply the described extra allocation. Check again: required content may remain correct while preservation fails. Use Reset practice and manually replay the worked native actions; do not look for delete or disk undo.",
+            "experiment": {
+              "kind": "add_partition",
+              "disk": "/dev/vde",
+              "name": "extra",
+              "start": 20480,
+              "end": 22527,
+              "type_hint": "linux_data"
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use the explicitly listed native worked actions below; select actual applied partition numbers. Other allowed extents, operation order, eligible media and valid unique UUIDs can also meet the objective."
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation"
+      ]
+    },
+    {
+      "id": "lpic1-disk-hints-versus-content",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Prepare virtual GPT, ext4 and swap",
+      "unit": "linux-disk-preparation",
+      "title": "Finish a correctly allocated handoff",
+      "summary": "Distinguish partition type hints from actual ext4 and swap initialization.",
+      "objective": "Keep the existing GPT layout unchanged. Initialize the blank capture partition /dev/vda1 as ext4 with label capture, and the blank paging partition /dev/vda2 as swap with label paging. Preserve /dev/vda3, its /keep.txt, all other disks and every partition extent. Creating another partition or merely pointing at the supplied hints is incomplete. No mounting or swap activation is required.",
+      "retry_guidance": "Compare every required row with the applied table and actual signatures. Drafts do not change applied state. If a valid wrong allocation or format cannot be removed in this subset, reset this assignment and replay; do not mistake simulator refusal for real disk protection.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Inspect supplied media and required outcomes.",
+        "Use the native configuration fields and explicit actions; keep protected data unchanged.",
+        "Check every current requirement and preservation row."
+      ],
+      "guide": [],
+      "explanation": "The native reference is one valid configuration, not a required command order or UUID. The model grades named extents, actual signatures, capacity, alignment and preservation. It never executes commands on your computer.",
+      "hints": [
+        "Read the Actual content column. Both correct-looking hints still describe blank content.",
+        "Choose the actual supplied partition number before each initialization: capture and paging have different formats.",
+        "Check labels as well as signatures. Leave the GPT, archive and spare disks exactly as supplied; activation is outside this task."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-104.1_Create_partitions_and_filesystems",
+        "https://www.gnu.org/software/parted/manual/html_node/mkpart.html",
+        "https://raw.githubusercontent.com/tytso/e2fsprogs/master/misc/mke2fs.8.in",
+        "https://raw.githubusercontent.com/util-linux/util-linux/master/disk-utils/mkswap.8.adoc"
+      ],
+      "simplifications": "Simulation-only 512-byte-sector GPT with up to 16 modeled slots; ext4 uses fixed 4 KiB capacity accounting, swap initialization uses fixed 4 KiB pages. No real device access, MBR/logical partitions, delete, resize, overwrite, mount, fstab, swap activation or complete parted/mkfs/mkswap emulation. Native buttons establish outcomes, not full named-tool syntax coverage.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "capture",
+                        "start": 2048,
+                        "end": 26623,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "paging",
+                        "start": 28672,
+                        "end": 36863,
+                        "type_hint": "linux_swap",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 3,
+                        "name": "archive",
+                        "start": 38912,
+                        "end": 55295,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                          "blocks": 2048,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Cedar handoff retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "capture",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 12582912,
+                  "maximum_bytes": 12582912,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "capture"
+                  }
+                },
+                {
+                  "name": "paging",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 4194304,
+                  "maximum_bytes": 4194304,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "paging"
+                  }
+                }
+              ]
+            },
+            "example_initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "draft",
+                        "start": 2048,
+                        "end": 14335,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "reserve",
+                        "start": 16384,
+                        "end": 20479,
+                        "type_hint": "linux_swap",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 3,
+                        "name": "archive",
+                        "start": 22528,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000066",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Willow practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [
+                {
+                  "name": "draft",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 6291456,
+                  "maximum_bytes": 6291456,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "draft"
+                  }
+                },
+                {
+                  "name": "reserve",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 2097152,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "reserve"
+                  }
+                }
+              ]
+            }
+          },
+          "current": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "capture",
+                      "start": 2048,
+                      "end": 26623,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "paging",
+                      "start": 28672,
+                      "end": 36863,
+                      "type_hint": "linux_swap",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 3,
+                      "name": "archive",
+                      "start": 38912,
+                      "end": 55295,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Cedar handoff retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "draft",
+                      "start": 2048,
+                      "end": 14335,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "reserve",
+                      "start": 16384,
+                      "end": 20479,
+                      "type_hint": "linux_swap",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 3,
+                      "name": "archive",
+                      "start": 22528,
+                      "end": 30719,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000066",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Willow practice retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdf": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdg": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "capture",
+                      "start": 2048,
+                      "end": 26623,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "paging",
+                      "start": 28672,
+                      "end": 36863,
+                      "type_hint": "linux_swap",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 3,
+                      "name": "archive",
+                      "start": 38912,
+                      "end": 55295,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Cedar handoff retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [
+              {
+                "name": "capture",
+                "eligible_disks": [
+                  "/dev/vda"
+                ],
+                "type_hint": "linux_data",
+                "minimum_bytes": 12582912,
+                "maximum_bytes": 12582912,
+                "aligned_start": true,
+                "content": {
+                  "kind": "ext4",
+                  "label": "capture"
+                }
+              },
+              {
+                "name": "paging",
+                "eligible_disks": [
+                  "/dev/vda"
+                ],
+                "type_hint": "linux_swap",
+                "minimum_bytes": 4194304,
+                "maximum_bytes": 4194304,
+                "aligned_start": true,
+                "content": {
+                  "kind": "swap",
+                  "label": "paging"
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "capture",
+              "uuid": null
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vda2",
+              "format": "swap",
+              "label": "paging",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.",
+            "concepts": [
+              {
+                "title": "Read the supplied media first",
+                "text": "A disk is the whole supplied virtual device. A partition is one named range inside its table. Read the status: Read-only, In use or Existing data to preserve means it is not spare writable media. The applied disk table and retained file details are inspection facts, not draft fields."
+              },
+              {
+                "title": "Inclusive sectors and alignment",
+                "text": "Here each sector holds 512 bytes and 1 MiB is 1048576 bytes. A range includes both ends, so bytes=(end-start+1)*512. Each supplied alignment is 2048 sectors: choose a start divisible by 2048. GPT reserves sectors 0..33 and the final 33 sectors; the last usable sector on these 131072-sector disks is 131038. No extent may overlap another."
+              },
+              {
+                "title": "A type hint is not content",
+                "text": "Linux data and Linux swap are partition type hints. Adding a partition chooses an extent and a hint; it does not create a filesystem or swap signature. Choose the actual partition number shown in the applied table, then explicitly initialize blank content as ext4 or swap. A name or a hint alone cannot pass a content requirement."
+              },
+              {
+                "title": "Labels, UUIDs and preservation",
+                "text": "A label is a short human-readable name for the actual filesystem or swap area. A UUID is an identity; any valid unique identity satisfies these tasks. Leave the UUID field blank for this simulator's persistent deterministic generator, or provide an explicit lowercase UUID. Existing nonblank signatures and file contents must remain unchanged."
+              },
+              {
+                "title": "Drafts, applied state and honest recovery",
+                "text": "Fields are unapplied drafts. Add, Create GPT and Initialize content are explicit native actions. Check evaluates the applied configuration against every required row and preservation rule. A correct applied result stays correct when an unfinished draft is edited. This subset cannot delete, resize, overwrite or undo a valid allocation: use Reset practice, or reset the affected assignment, then replay the intended actions. Inspect protection before committing."
+              },
+              {
+                "title": "Preparation is not activation",
+                "text": "The tools are simulator controls, not commands executed on your computer. ext4 creation here models a 4 KiB-block capacity and identity, not a real filesystem image. Swap initialization prepares a header; activating it with swapon, mounting filesystems and editing fstab are outside this model. Real formatting can destroy data and these simulator refusals are not general real-tool safeguards."
+              }
+            ],
+            "description": "Willow practice already has the draft 6 MiB and reserve 2 MiB blank extents. Read their actual unformatted content, then initialize /dev/vde1 as ext4 label draft and /dev/vde2 as swap label reserve. Keep /dev/vde3 and its distinct retained file unchanged. After success, an extra partition at 32768..34815 demonstrates why a complete-looking pair can still fail preservation.",
+            "fixture": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "draft",
+                        "start": 2048,
+                        "end": 14335,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "reserve",
+                        "start": 16384,
+                        "end": 20479,
+                        "type_hint": "linux_swap",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 3,
+                        "name": "archive",
+                        "start": 22528,
+                        "end": 30719,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000066",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Willow practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "draft",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 6291456,
+                  "maximum_bytes": 6291456,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "draft"
+                  }
+                },
+                {
+                  "name": "reserve",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 2097152,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "reserve"
+                  }
+                }
+              ]
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde1",
+                  "format": "ext4",
+                  "label": "draft",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde2",
+                  "format": "swap",
+                  "label": "reserve",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              }
+            ],
+            "try_change": "After the practice passes, apply the described extra allocation. Check again: required content may remain correct while preservation fails. Use Reset practice and manually replay the worked native actions; do not look for delete or disk undo.",
+            "experiment": {
+              "kind": "add_partition",
+              "disk": "/dev/vde",
+              "name": "extra",
+              "start": 32768,
+              "end": 34815,
+              "type_hint": "linux_data"
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use the explicitly listed native worked actions below; select actual applied partition numbers. Other allowed extents, operation order, eligible media and valid unique UUIDs can also meet the objective."
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "lpic1-disk-safe-gap"
+      ]
+    },
+    {
+      "id": "lpic1-disk-eligible-media",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Prepare virtual GPT, ext4 and swap",
+      "unit": "linux-disk-preparation",
+      "title": "Build a layout on eligible media",
+      "summary": "Select the usable blank disk among protected devices, then allocate two different kinds of content.",
+      "objective": "Inspect all supplied media. On the eligible blank /dev/vdb, create GPT and exactly two aligned non-overlapping partitions: records, 8–16 MiB, Linux data hint, actual ext4 label records; and overflow, 2–4 MiB, Linux swap hint, actual swap label overflow. Preserve the opaque data on /dev/vda, the read-only /dev/vdc, the in-use /dev/vdd and all unrequested allocations. Partition order and valid unique UUIDs are your choice.",
+      "retry_guidance": "Compare every required row with the applied table and actual signatures. Drafts do not change applied state. If a valid wrong allocation or format cannot be removed in this subset, reset this assignment and replay; do not mistake simulator refusal for real disk protection.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Inspect supplied media and required outcomes.",
+        "Use the native configuration fields and explicit actions; keep protected data unchanged.",
+        "Check every current requirement and preservation row."
+      ],
+      "guide": [],
+      "explanation": "The native reference is one valid configuration, not a required command order or UUID. The model grades named extents, actual signatures, capacity, alignment and preservation. It never executes commands on your computer.",
+      "hints": [
+        "A disk with no GPT is not necessarily blank. Read the protection status on every device first.",
+        "Creating GPT is only the table step. Allocate both named ranges without overlap and inspect the actual slot numbers.",
+        "Each named target needs its own actual signature and label. Check every row, including unchanged protected media and absence of extras."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-104.1_Create_partitions_and_filesystems",
+        "https://www.gnu.org/software/parted/manual/html_node/mkpart.html",
+        "https://raw.githubusercontent.com/tytso/e2fsprogs/master/misc/mke2fs.8.in",
+        "https://raw.githubusercontent.com/util-linux/util-linux/master/disk-utils/mkswap.8.adoc"
+      ],
+      "simplifications": "Simulation-only 512-byte-sector GPT with up to 16 modeled slots; ext4 uses fixed 4 KiB capacity accounting, swap initialization uses fixed 4 KiB pages. No real device access, MBR/logical partitions, delete, resize, overwrite, mount, fstab, swap activation or complete parted/mkfs/mkswap emulation. Native buttons establish outcomes, not full named-tool syntax coverage.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": true,
+                  "table": null
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "records",
+                  "eligible_disks": [
+                    "/dev/vdb"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 8388608,
+                  "maximum_bytes": 16777216,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "records"
+                  }
+                },
+                {
+                  "name": "overflow",
+                  "eligible_disks": [
+                    "/dev/vdb"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 4194304,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "overflow"
+                  }
+                }
+              ]
+            },
+            "example_initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": true,
+                  "table": null
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [
+                {
+                  "name": "sample",
+                  "eligible_disks": [
+                    "/dev/vdf"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 3145728,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "sample"
+                  }
+                },
+                {
+                  "name": "reserve",
+                  "eligible_disks": [
+                    "/dev/vdf"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 1048576,
+                  "maximum_bytes": 2097152,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "reserve"
+                  }
+                }
+              ]
+            }
+          },
+          "current": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": true,
+                "table": null
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": true,
+                "table": null
+              },
+              "/dev/vdf": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdg": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": true,
+                "table": null
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": true,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [
+              {
+                "name": "records",
+                "eligible_disks": [
+                  "/dev/vdb"
+                ],
+                "type_hint": "linux_data",
+                "minimum_bytes": 8388608,
+                "maximum_bytes": 16777216,
+                "aligned_start": true,
+                "content": {
+                  "kind": "ext4",
+                  "label": "records"
+                }
+              },
+              {
+                "name": "overflow",
+                "eligible_disks": [
+                  "/dev/vdb"
+                ],
+                "type_hint": "linux_swap",
+                "minimum_bytes": 2097152,
+                "maximum_bytes": 4194304,
+                "aligned_start": true,
+                "content": {
+                  "kind": "swap",
+                  "label": "overflow"
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "records",
+              "start": 2048,
+              "end": 18431,
+              "type_hint": "linux_data"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "ext4",
+              "label": "records",
+              "uuid": null
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "overflow",
+              "start": 20480,
+              "end": 24575,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb2",
+              "format": "swap",
+              "label": "overflow",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.",
+            "concepts": [
+              {
+                "title": "Read the supplied media first",
+                "text": "A disk is the whole supplied virtual device. A partition is one named range inside its table. Read the status: Read-only, In use or Existing data to preserve means it is not spare writable media. The applied disk table and retained file details are inspection facts, not draft fields."
+              },
+              {
+                "title": "Inclusive sectors and alignment",
+                "text": "Here each sector holds 512 bytes and 1 MiB is 1048576 bytes. A range includes both ends, so bytes=(end-start+1)*512. Each supplied alignment is 2048 sectors: choose a start divisible by 2048. GPT reserves sectors 0..33 and the final 33 sectors; the last usable sector on these 131072-sector disks is 131038. No extent may overlap another."
+              },
+              {
+                "title": "A type hint is not content",
+                "text": "Linux data and Linux swap are partition type hints. Adding a partition chooses an extent and a hint; it does not create a filesystem or swap signature. Choose the actual partition number shown in the applied table, then explicitly initialize blank content as ext4 or swap. A name or a hint alone cannot pass a content requirement."
+              },
+              {
+                "title": "Labels, UUIDs and preservation",
+                "text": "A label is a short human-readable name for the actual filesystem or swap area. A UUID is an identity; any valid unique identity satisfies these tasks. Leave the UUID field blank for this simulator's persistent deterministic generator, or provide an explicit lowercase UUID. Existing nonblank signatures and file contents must remain unchanged."
+              },
+              {
+                "title": "Drafts, applied state and honest recovery",
+                "text": "Fields are unapplied drafts. Add, Create GPT and Initialize content are explicit native actions. Check evaluates the applied configuration against every required row and preservation rule. A correct applied result stays correct when an unfinished draft is edited. This subset cannot delete, resize, overwrite or undo a valid allocation: use Reset practice, or reset the affected assignment, then replay the intended actions. Inspect protection before committing."
+              },
+              {
+                "title": "Preparation is not activation",
+                "text": "The tools are simulator controls, not commands executed on your computer. ext4 creation here models a 4 KiB-block capacity and identity, not a real filesystem image. Swap initialization prepares a header; activating it with swapon, mounting filesystems and editing fstab are outside this model. Real formatting can destroy data and these simulator refusals are not general real-tool safeguards."
+              }
+            ],
+            "description": "Juniper practice has different device letters and smaller requirements. /dev/vde contains opaque data, /dev/vdg is read-only and /dev/vdh is in use. Use only blank /dev/vdf for GPT, sample 3–5 MiB ext4 label sample and reserve 1–2 MiB swap label reserve. The extra experiment at 16384..18431 is unrequested even though the original targets remain healthy.",
+            "fixture": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": true,
+                  "table": null
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": true,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "sample",
+                  "eligible_disks": [
+                    "/dev/vdf"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 3145728,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "sample"
+                  }
+                },
+                {
+                  "name": "reserve",
+                  "eligible_disks": [
+                    "/dev/vdf"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 1048576,
+                  "maximum_bytes": 2097152,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "reserve"
+                  }
+                }
+              ]
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "create_gpt",
+                  "disk": "/dev/vdf"
+                },
+                "explanation": "Create only an empty GPT on the selected eligible blank disk; no filesystem appears yet."
+              },
+              {
+                "operation": {
+                  "kind": "add_partition",
+                  "disk": "/dev/vdf",
+                  "name": "sample",
+                  "start": 2048,
+                  "end": 8191,
+                  "type_hint": "linux_data"
+                },
+                "explanation": "Fill the exact name, inclusive sector range and hint, then use Add partition using draft. Inspect the actual allocated number before formatting."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vdf1",
+                  "format": "ext4",
+                  "label": "sample",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              },
+              {
+                "operation": {
+                  "kind": "add_partition",
+                  "disk": "/dev/vdf",
+                  "name": "reserve",
+                  "start": 10240,
+                  "end": 12287,
+                  "type_hint": "linux_swap"
+                },
+                "explanation": "Fill the exact name, inclusive sector range and hint, then use Add partition using draft. Inspect the actual allocated number before formatting."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vdf2",
+                  "format": "swap",
+                  "label": "reserve",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              }
+            ],
+            "try_change": "After the practice passes, apply the described extra allocation. Check again: required content may remain correct while preservation fails. Use Reset practice and manually replay the worked native actions; do not look for delete or disk undo.",
+            "experiment": {
+              "kind": "add_partition",
+              "disk": "/dev/vdf",
+              "name": "extra",
+              "start": 16384,
+              "end": 18431,
+              "type_hint": "linux_data"
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use the explicitly listed native worked actions below; select actual applied partition numbers. Other allowed extents, operation order, eligible media and valid unique UUIDs can also meet the objective."
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "lpic1-disk-hints-versus-content"
+      ]
+    },
+    {
+      "id": "lpic1-disk-delivery",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Prepare virtual GPT, ext4 and swap",
+      "unit": "linux-disk-preparation",
+      "title": "Deliver prepared storage without disturbing retained data",
+      "summary": "Complete an existing blank filesystem extent and choose separate media for swap while preserving the full supplied inventory.",
+      "objective": "Initialize the existing handoff partition /dev/vda1 as ext4 with label dispatch; keep its 10 MiB extent and the archive /dev/vda2 with /keep.txt unchanged. On either /dev/vdb OR /dev/vdc, create GPT and one aligned reserve partition, 4–8 MiB, Linux swap hint and actual swap label reserve. Leave the unused eligible disk and read-only /dev/vdd unchanged. No extra allocations, overwrite, mounting or activation are required. Any valid unique UUIDs are acceptable.",
+      "retry_guidance": "Compare every required row with the applied table and actual signatures. Drafts do not change applied state. If a valid wrong allocation or format cannot be removed in this subset, reset this assignment and replay; do not mistake simulator refusal for real disk protection.",
+      "difficulty": "Advanced",
+      "minutes": 28,
+      "steps": [
+        "Inspect supplied media and required outcomes.",
+        "Use the native configuration fields and explicit actions; keep protected data unchanged.",
+        "Check every current requirement and preservation row."
+      ],
+      "guide": [],
+      "explanation": "The native reference is one valid configuration, not a required command order or UUID. The model grades named extents, actual signatures, capacity, alignment and preservation. It never executes commands on your computer.",
+      "hints": [
+        "Separate the work: handoff already has an extent; reserve needs a new extent on one of two eligible disks.",
+        "Do not recreate /dev/vda GPT or format its archive. Inspect actual content and labels after each explicit action.",
+        "Leave the unused spare completely unchanged. A passing content pair with an extra allocation still fails the delivery requirement."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/#rdp-we-104.1_Create_partitions_and_filesystems",
+        "https://www.gnu.org/software/parted/manual/html_node/mkpart.html",
+        "https://raw.githubusercontent.com/tytso/e2fsprogs/master/misc/mke2fs.8.in",
+        "https://raw.githubusercontent.com/util-linux/util-linux/master/disk-utils/mkswap.8.adoc"
+      ],
+      "simplifications": "Simulation-only 512-byte-sector GPT with up to 16 modeled slots; ext4 uses fixed 4 KiB capacity accounting, swap initialization uses fixed 4 KiB pages. No real device access, MBR/logical partitions, delete, resize, overwrite, mount, fstab, swap activation or complete parted/mkfs/mkswap emulation. Native buttons establish outcomes, not full named-tool syntax coverage.",
+      "initial": {
+        "kind": "PartitionFs",
+        "simulation": {
+          "version": 1,
+          "origin": {
+            "initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vda": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "handoff",
+                        "start": 2048,
+                        "end": 22527,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "archive",
+                        "start": 24576,
+                        "end": 40959,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+                          "blocks": 2048,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Alder delivery retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdb": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdc": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdd": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "handoff",
+                  "eligible_disks": [
+                    "/dev/vda"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 10485760,
+                  "maximum_bytes": 10485760,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "dispatch"
+                  }
+                },
+                {
+                  "name": "reserve",
+                  "eligible_disks": [
+                    "/dev/vdb",
+                    "/dev/vdc"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 4194304,
+                  "maximum_bytes": 8388608,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "reserve"
+                  }
+                }
+              ]
+            },
+            "example_initial": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "parcel",
+                        "start": 2048,
+                        "end": 12287,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "archive",
+                        "start": 14336,
+                        "end": 22527,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000068",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Hazel practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "example_plan": {
+              "targets": [
+                {
+                  "name": "parcel",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 5242880,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "parcel"
+                  }
+                },
+                {
+                  "name": "buffer",
+                  "eligible_disks": [
+                    "/dev/vdf",
+                    "/dev/vdg"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 3145728,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "buffer"
+                  }
+                }
+              ]
+            }
+          },
+          "current": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "handoff",
+                      "start": 2048,
+                      "end": 22527,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "archive",
+                      "start": 24576,
+                      "end": 40959,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Alder delivery retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "example": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vde": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "parcel",
+                      "start": 2048,
+                      "end": 12287,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "archive",
+                      "start": 14336,
+                      "end": 22527,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000068",
+                        "blocks": 1024,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Hazel practice retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdf": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdg": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdh": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "assignment_editor": {
+            "selected": "/dev/vda",
+            "drafts": {
+              "/dev/vda": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdb": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdc": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdd": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "example_editor": {
+            "selected": "/dev/vde",
+            "drafts": {
+              "/dev/vde": {
+                "selected_partition": 1,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdf": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdg": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              },
+              "/dev/vdh": {
+                "selected_partition": null,
+                "name": "",
+                "start": "",
+                "end": "",
+                "type_hint": "linux_data",
+                "format": "ext4",
+                "label": "",
+                "uuid": ""
+              }
+            }
+          },
+          "view": "introduction",
+          "selected_example": 0,
+          "transcript": [],
+          "example_transcript": [],
+          "checked": false,
+          "example_checked": false
+        }
+      },
+      "goal": {
+        "kind": "PartitionFs",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "next_uuid": 1,
+            "disks": {
+              "/dev/vda": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": {
+                  "partitions": [
+                    {
+                      "number": 1,
+                      "name": "handoff",
+                      "start": 2048,
+                      "end": 22527,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "blank"
+                      }
+                    },
+                    {
+                      "number": 2,
+                      "name": "archive",
+                      "start": 24576,
+                      "end": 40959,
+                      "type_hint": "linux_data",
+                      "content": {
+                        "kind": "ext4",
+                        "label": "archive",
+                        "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+                        "blocks": 2048,
+                        "files": {
+                          "/keep.txt": {
+                            "text": "Alder delivery retained archive\n"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "/dev/vdb": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdc": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": true,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              },
+              "/dev/vdd": {
+                "sectors": 131072,
+                "sector_bytes": 512,
+                "optimal_alignment": 2048,
+                "writable": false,
+                "in_use": false,
+                "occupied_without_table": false,
+                "table": null
+              }
+            }
+          },
+          "plan": {
+            "targets": [
+              {
+                "name": "handoff",
+                "eligible_disks": [
+                  "/dev/vda"
+                ],
+                "type_hint": "linux_data",
+                "minimum_bytes": 10485760,
+                "maximum_bytes": 10485760,
+                "aligned_start": true,
+                "content": {
+                  "kind": "ext4",
+                  "label": "dispatch"
+                }
+              },
+              {
+                "name": "reserve",
+                "eligible_disks": [
+                  "/dev/vdb",
+                  "/dev/vdc"
+                ],
+                "type_hint": "linux_swap",
+                "minimum_bytes": 4194304,
+                "maximum_bytes": 8388608,
+                "aligned_start": true,
+                "content": {
+                  "kind": "swap",
+                  "label": "reserve"
+                }
+              }
+            ]
+          },
+          "reference": [
+            {
+              "kind": "format",
+              "partition": "/dev/vda1",
+              "format": "ext4",
+              "label": "dispatch",
+              "uuid": null
+            },
+            {
+              "kind": "create_gpt",
+              "disk": "/dev/vdb"
+            },
+            {
+              "kind": "add_partition",
+              "disk": "/dev/vdb",
+              "name": "reserve",
+              "start": 2048,
+              "end": 10239,
+              "type_hint": "linux_swap"
+            },
+            {
+              "kind": "format",
+              "partition": "/dev/vdb1",
+              "format": "swap",
+              "label": "reserve",
+              "uuid": null
+            }
+          ],
+          "lesson": {
+            "prerequisite_note": "No disk-command knowledge is required. Familiarity with file paths is useful; read these concepts and try the independent practice before the full assignment. The introduction is skippable, and prerequisite suggestions never lock access.",
+            "concepts": [
+              {
+                "title": "Read the supplied media first",
+                "text": "A disk is the whole supplied virtual device. A partition is one named range inside its table. Read the status: Read-only, In use or Existing data to preserve means it is not spare writable media. The applied disk table and retained file details are inspection facts, not draft fields."
+              },
+              {
+                "title": "Inclusive sectors and alignment",
+                "text": "Here each sector holds 512 bytes and 1 MiB is 1048576 bytes. A range includes both ends, so bytes=(end-start+1)*512. Each supplied alignment is 2048 sectors: choose a start divisible by 2048. GPT reserves sectors 0..33 and the final 33 sectors; the last usable sector on these 131072-sector disks is 131038. No extent may overlap another."
+              },
+              {
+                "title": "A type hint is not content",
+                "text": "Linux data and Linux swap are partition type hints. Adding a partition chooses an extent and a hint; it does not create a filesystem or swap signature. Choose the actual partition number shown in the applied table, then explicitly initialize blank content as ext4 or swap. A name or a hint alone cannot pass a content requirement."
+              },
+              {
+                "title": "Labels, UUIDs and preservation",
+                "text": "A label is a short human-readable name for the actual filesystem or swap area. A UUID is an identity; any valid unique identity satisfies these tasks. Leave the UUID field blank for this simulator's persistent deterministic generator, or provide an explicit lowercase UUID. Existing nonblank signatures and file contents must remain unchanged."
+              },
+              {
+                "title": "Drafts, applied state and honest recovery",
+                "text": "Fields are unapplied drafts. Add, Create GPT and Initialize content are explicit native actions. Check evaluates the applied configuration against every required row and preservation rule. A correct applied result stays correct when an unfinished draft is edited. This subset cannot delete, resize, overwrite or undo a valid allocation: use Reset practice, or reset the affected assignment, then replay the intended actions. Inspect protection before committing."
+              },
+              {
+                "title": "Preparation is not activation",
+                "text": "The tools are simulator controls, not commands executed on your computer. ext4 creation here models a 4 KiB-block capacity and identity, not a real filesystem image. Swap initialization prepares a header; activating it with swapon, mounting filesystems and editing fstab are outside this model. Real formatting can destroy data and these simulator refusals are not general real-tool safeguards."
+              }
+            ],
+            "description": "Hazel practice uses an existing 5 MiB parcel on /dev/vde1 and a separate 2–3 MiB buffer on either blank /dev/vdf or /dev/vdg. Keep the archive /dev/vde2 and unused media intact. Initialize parcel as ext4 label parcel and buffer as swap label buffer. Adding extra at 24576..26623 on /dev/vde breaks preservation; reset and replay the practice without changing the assignment.",
+            "fixture": {
+              "version": 1,
+              "next_uuid": 1,
+              "disks": {
+                "/dev/vde": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": {
+                    "partitions": [
+                      {
+                        "number": 1,
+                        "name": "parcel",
+                        "start": 2048,
+                        "end": 12287,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "blank"
+                        }
+                      },
+                      {
+                        "number": 2,
+                        "name": "archive",
+                        "start": 14336,
+                        "end": 22527,
+                        "type_hint": "linux_data",
+                        "content": {
+                          "kind": "ext4",
+                          "label": "archive",
+                          "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-000000000068",
+                          "blocks": 1024,
+                          "files": {
+                            "/keep.txt": {
+                              "text": "Hazel practice retained archive\n"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "/dev/vdf": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdg": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": true,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                },
+                "/dev/vdh": {
+                  "sectors": 131072,
+                  "sector_bytes": 512,
+                  "optimal_alignment": 2048,
+                  "writable": false,
+                  "in_use": false,
+                  "occupied_without_table": false,
+                  "table": null
+                }
+              }
+            },
+            "plan": {
+              "targets": [
+                {
+                  "name": "parcel",
+                  "eligible_disks": [
+                    "/dev/vde"
+                  ],
+                  "type_hint": "linux_data",
+                  "minimum_bytes": 5242880,
+                  "maximum_bytes": 5242880,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "ext4",
+                    "label": "parcel"
+                  }
+                },
+                {
+                  "name": "buffer",
+                  "eligible_disks": [
+                    "/dev/vdf",
+                    "/dev/vdg"
+                  ],
+                  "type_hint": "linux_swap",
+                  "minimum_bytes": 2097152,
+                  "maximum_bytes": 3145728,
+                  "aligned_start": true,
+                  "content": {
+                    "kind": "swap",
+                    "label": "buffer"
+                  }
+                }
+              ]
+            },
+            "worked": [
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vde1",
+                  "format": "ext4",
+                  "label": "parcel",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              },
+              {
+                "operation": {
+                  "kind": "create_gpt",
+                  "disk": "/dev/vdf"
+                },
+                "explanation": "Create only an empty GPT on the selected eligible blank disk; no filesystem appears yet."
+              },
+              {
+                "operation": {
+                  "kind": "add_partition",
+                  "disk": "/dev/vdf",
+                  "name": "buffer",
+                  "start": 2048,
+                  "end": 6143,
+                  "type_hint": "linux_swap"
+                },
+                "explanation": "Fill the exact name, inclusive sector range and hint, then use Add partition using draft. Inspect the actual allocated number before formatting."
+              },
+              {
+                "operation": {
+                  "kind": "format",
+                  "partition": "/dev/vdf1",
+                  "format": "swap",
+                  "label": "buffer",
+                  "uuid": null
+                },
+                "explanation": "Choose the actual applied partition, format and label; leave UUID blank or supply a unique identity. Use Initialize selected blank partition explicitly."
+              }
+            ],
+            "try_change": "After the practice passes, apply the described extra allocation. Check again: required content may remain correct while preservation fails. Use Reset practice and manually replay the worked native actions; do not look for delete or disk undo.",
+            "experiment": {
+              "kind": "add_partition",
+              "disk": "/dev/vde",
+              "name": "extra",
+              "start": 24576,
+              "end": 26623,
+              "type_hint": "linux_data"
+            }
+          }
+        }
+      },
+      "solution": [
+        "Use the explicitly listed native worked actions below; select actual applied partition numbers. Other allowed extents, operation order, eligible media and valid unique UUIDs can also meet the objective."
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "lpic1-disk-eligible-media"
+      ]
+    }
+  ]
+}

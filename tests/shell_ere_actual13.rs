@@ -1,5 +1,8 @@
 //! Genuine evaluator13 observations, independently rerun by current14 when gated.
 //! No producer invocation, constructed historical outcomes or learner mastery.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{Goal, State},
     pack,
@@ -94,7 +97,8 @@ fn preserved_metadata(mut a: Value, mut b: Value) {
 }
 fn all() -> Vec<pack::Scenario> {
     let out = pack::bundled().unwrap();
-    assert_eq!(out.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&out).len(), 193);
+    assert_eq!(out.len(), 197);
     out
 }
 fn save(raw: &[u8], p: &Progress, all: &[pack::Scenario]) -> Progress {
@@ -370,7 +374,7 @@ fn both_captured13_profiles_retain_every_prior12_record_and_exact_non_script_and
     }
 }
 #[test]
-#[ignore = "Requires fixed genuine13 profile; all43 current missing nonScript contexts remain absent"]
+#[ignore = "Requires fixed genuine13 profile; original43 plus4 new missing nonScript contexts remain absent"]
 fn current193_absent_non_script_identities_never_gain_answers_favorites_or_mastery() {
     let all = all();
     let raw = evidence::observed("writer13-original.json");
@@ -434,7 +438,19 @@ fn current193_absent_non_script_identities_never_gain_answers_favorites_or_maste
         assert!(!old.favorites.contains(id) && !loaded.favorites.contains(id));
         assert!(!progress::current_solved(&Attempt::new(s, 1), s));
     }
-    assert_eq!(ids.len(), 43);
+    assert_eq!(ids.len(), 43); // Exact original193-era missing identities remain.
+    for id in disk_registration::IDS {
+        let s = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(s.initial, State::PartitionFs { .. })
+                && matches!(s.goal, Goal::PartitionFs { .. })
+        );
+        assert!(!old.attempts.contains_key(id) && !loaded.attempts.contains_key(id));
+        assert!(!old.favorites.contains(id) && !loaded.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(s, 1), s));
+        assert!(ids.insert(id));
+    }
+    assert_eq!(ids.len(), 47);
     assert_eq!(
         all.iter()
             .filter(

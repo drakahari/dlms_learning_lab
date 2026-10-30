@@ -9,6 +9,7 @@ use dlms_learning_lab::{
     script_teaching::View,
     workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "support/physical_scenario.rs"]
 mod fixture;
 fn sim(a: &Attempt) -> &core::State {
@@ -261,6 +262,14 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         .iter()
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
         .collect::<Vec<_>>();
+    // Keep all original189 assertions on the complete canonical193 prefix.
+    // The full current vector, including disk4, remains the negative matrix.
+    let current_old = old;
+    let prior193 = disk_registration::before_scenarios(&all);
+    let old = prior193
+        .iter()
+        .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
+        .collect::<Vec<_>>();
     assert_eq!(
         old[..172].len(),
         172,
@@ -397,10 +406,38 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         assert!(work::context(&own, source).is_ok());
         assert!(!progress::current_solved(&own, source));
     }
-    for old in old {
+    assert_eq!(current_old.len(), old.len() + disk_registration::IDS.len());
+    assert_eq!(
+        serde_json::to_value(&current_old[..old.len()]).unwrap(),
+        serde_json::to_value(&old).unwrap()
+    );
+    assert_eq!(
+        current_old[old.len()..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::IDS
+    );
+    assert!(current_old[old.len()..].iter().all(|s| matches!(
+        s.initial,
+        State::PartitionFs { .. }
+    ) && matches!(
+        s.goal,
+        engine::Goal::PartitionFs { .. }
+    )));
+
+    for old in current_old {
         for mask in 1..4 {
             let mut own = Attempt::new(old, 1);
             workspace::prepare(&mut own);
+            if matches!(own.state, State::PartitionFs { .. }) {
+                // A genuine native empty workspace is the positive control;
+                // only afterwards inject the foreign physical payload below.
+                dlms_learning_lab::partition_fs_workspace::binding::prepare(&mut own, old).unwrap();
+                dlms_learning_lab::partition_fs_workspace::binding::context(&own, old).unwrap();
+                assert!(own.workspace.as_ref().unwrap().command.is_empty());
+                assert!(!progress::current_solved(&own, old));
+            }
             let w = own
                 .workspace
                 .get_or_insert_with(workspace::WorkspaceData::new);

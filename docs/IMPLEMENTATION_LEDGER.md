@@ -5027,3 +5027,82 @@ passes; onlynextcandidatesgetgeneratedrelativeREADME, oldbaaarcimmutable.
 Lastfullinclusive2857M550precedesharness; currentnewgenuine3/static483 are
 reported separately. Continue final50storage capability/authored4/native gates,
 then literal15controlledfidelity/content andallremainingcurriculum.
+
+
+## 2026-10-30 — bounded disk preparation, integration pending
+
+Applied the independently reviewed capability, four authored tasks and private
+native verification route while retaining normal193/51 and evaluator14. M572
+passes35 core/backend/persistence groups; M579 passes12 authored groups covering
+reference and two alternatives per task,28 wrong/partial/damage vectors, unsafe
+refusal, isolated practice, progress/export/restore and source authority. Test
+fixture guidance now matches its50 steps with the same120,000-byte text payload;
+no resource limits or assertions were reduced. Missing test-only Goal import,
+Progress copy, real popup scrolling and per-pass repaint observation are repaired.
+
+M581 passes2 real-egui route groups/all84painted checkpoints/20settings. M582
+passes486Python checks and M584all-target Clippy. Actual M587 desktop evidence
+was deliberately stopped after original-image review found vague wrong-label
+feedback and a repeated failure detail. The partial run and14 independently
+viewed100% dark originals remain private; this is not a full native pass.
+Actual/required content and labels now appear in each failed objective, with
+one concise failed-check count. Grading predicates/state remain unchanged;
+source peer478fdcdd confirms the narrow inverse. M58824backend/content,
+M58915native-control, M5902complete route, M591486Python and M592all-target
+Clippy pass after the improvement. M593all3 genuine14 retained-progress consumers
+pass, including prior records,90 non-script Attempts and two unfinished contexts.
+
+Normal197 registration remains a reviewed-source work in progress; no new count
+or objective credit yet. Next: close strict old193/51 normal integration,
+complete desktop/scaling review and inclusive checks, then package/install/reopen
+the verified candidate. Continue remaining networking/Linux/Bash work afterward.
+The193 installed candidate and original genuine14 capture remain immutable.
+No public release, novice study or other-platform acceptance is asserted.
+
+
+## 2026-10-30 — normal197 regression closure, full inclusive acceptance
+
+Four exact disk assignments/one unit are integrated in source,197/52, evaluator14.
+M60029 focused catalog/content/history groups and M6013 complete native-control
+routes pass. Actual development M596 completed84 captures/20 settings; it remains
+193+private4 evidence, not installed197 acceptance. Feedback names actual/required
+labels and does not duplicate details; Root/independent original-image review is
+recorded separately. No new objective credit or installed candidate is claimed yet.
+
+M602 partial and M604/M606 timing failures are retained. M607 complete integrations
+had2152PASS/10FAIL, identifying historical-count/foreign-native fixture assumptions.
+M608 corrects those premises while preserving old assertions, all current matrices,
+source proofs and exact records. The borrowed exact-serialization comparer passes
+8 parity groups. Three controllers now run complete current-source admission on
+every callback and reuse only same-callback immutable predecessor slices. No
+execution/time/Stop limit was raised. M609 previously failing Run/Stop passes.
+M610 fixes9of10; M611 fixes the last prototype fixture by retaining actual native
+workspace metadata before its first save, preserving the exact receipt assertion.
+
+M612 FULL --all-targets --no-fail-fast --include-ignored --nocapture: **2935PASS,
+0FAIL/0ignored/228result targets**, actual reaped0. Library111/UI651(all affected
+controllers)/all integrations pass. All1102public inputs stay exact throughout:
+inventorybc4863aa/log4934f5d7.3581memorysamples/min23113965568B/fullPSImax0.36%,
+swapout0/OOM0; no sustained pressure. Public prose is reconciled afterward; no
+code/data/test delta is hidden beneath this result. Source-only future proposals
+are not included or counted. Next gates: Python/Clippy, clean commit/candidate,
+actual installed normal197 layout/flows, lifecycle, NFS cold and startup checks.
+Then continue literal15/HSRP/links/syslog and remaining documented requirements.
+
+M613 Python initially reports484PASS/2FAIL: the old44-unit preservation guard
+requires strict52→51 normalization before its unchanged seven earlier recipes.
+The correction preserves old mutators on their actual51-unit premise and adds
+new full52 positive/append-tamper controls; source review and rerun follow.
+M614 Clippy identifies only a test Display format-literal style warning. One
+format spelling changes, identical emitted Unicode value/assertions; M615 all8
+catalog groups pass again. M616 all-target Clippy-Dwarnings passes. Product code,
+grading, data and Rust assertion semantics remain the M612 inputs.
+
+M617 applies only the independently reviewed strict52→51 Python helper/caller
+repair (db97fb3a/peerd357fbf8). All original51→44 recipes,31 other test methods,
+old hashes and old mutator inputs remain exact; new full52 positive/ten negative
+controls are appended. All487 Python tests pass. M618 coverage check passes:
+197 registered/authored labs, no unregistered draft IDs;187Partial/1Supporting/
+1052Open and all136 full parents incomplete. No objective promotion yet.
+Public-file marker scan and git diff--check pass; generated evidence stays ignored.
+Next: clean scoped commit/push, actual197 candidate/lifecycle/native/cold/startup.

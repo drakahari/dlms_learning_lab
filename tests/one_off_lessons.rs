@@ -5,6 +5,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt},
     script_teaching::View,
 };
+use ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::Value;
 #[path = "support/ntp_registration.rs"]
 mod ntp_registration;
@@ -99,7 +100,8 @@ fn four_distinct_registered_tasks_have_real_prerequisites_and_separate_teaching(
         ntp_registration::ere_registration::before_scenarios(&old).len(),
         190
     );
-    assert_eq!(old.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&old).len(), 193);
+    assert_eq!(old.len(), 197);
     assert_eq!(
         serde_json::to_value(&old[176..180]).unwrap(),
         serde_json::to_value(lessons()).unwrap()

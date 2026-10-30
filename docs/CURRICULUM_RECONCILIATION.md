@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main193 source, reconciled2026-10-30; final193inclusive2,857PASS/0FAIL/0ignored; installed193 scoped acceptance passed; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main197 source/52units, reconciled2026-10-30. The four newly integrated disk-preparation assignments pass the full inclusive Rust suite (2,935 passed, zero failed/ignored). Installed-candidate verification remains pending, and no new objective credit has yet been applied. The available verified Fedora candidate remains193labs/51units at`baa66bdad7e5`: its final193 inclusive2,857PASS/0FAIL/0ignored and scoped installed acceptance retain their original identity. Original154 baseline `4bc390a` remains historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -11,9 +11,11 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 57 | 15 | 64 | 47 | 0 |
-| LPIC-1 | 40 | 10 | 496 | 101 | 1 |
+| LPIC-1 | 44 | 11 | 496 | 101 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
 | Bash/Shell | 60 | 17 | Separate path below | — | — |
+
+The197 source assignments are57CCNA,44LPIC-1,36LPIC-2 and60Bash/Shell, in15/11/9/17units respectively. The shell remains evaluator14 with477 graded sample-input cases and60 separate examples. No197 candidate is claimed ready.
 
 All136 current parent objectives remain incomplete (91 Open,45 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in

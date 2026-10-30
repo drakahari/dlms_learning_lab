@@ -1,4 +1,5 @@
 //! Combined154 NFS boundary: exact original147 plus Bash3, then NFS4; raw37 retained.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 use dlms_learning_lab::{course, engine, nfs, nfs_teaching, nfs_workspace, pack, progress};
@@ -85,9 +86,18 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
         [57, 40, 36, 57]
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| disk_registration::before_scenarios(
+            &all
+        )
+        .iter()
+        .filter(|s| s.track == t)
+        .count()),
+        [57, 40, 36, 60]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 60]
+        [57, 44, 36, 60]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

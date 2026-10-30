@@ -4,7 +4,11 @@ Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://lea
 
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are187 narrowly evidenced Partial practice rows, one Supporting explanation
 row and1052 Open rows; no full-objective completion is asserted. Main source
-contains193 authored assignments/51 units (57CCNA,40LPIC-1,36LPIC-2,60Bash).
+contains197 authored assignments/52 units (57CCNA,44LPIC-1,36LPIC-2,60Bash).
+The four new storage assignments pass29 focused registration/content/history
+groups and3 complete private/normal native-control routes. Full inclusive Rust
+passes2,935 tests/228targets/0FAIL/0ignored; installed-candidate acceptance is pending. No new objective credit is applied
+yet. The verified installed milestone remains193/51.
 Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.

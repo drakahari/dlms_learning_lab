@@ -4,6 +4,7 @@ mod one_off_boundary;
 use dlms_learning_lab::{
     engine::Goal, pack::Scenario, physical_link_workspace as work, progress::Attempt, workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "support/physical_scenario.rs"]
 mod fixture;
 use std::collections::BTreeSet;
@@ -263,6 +264,21 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         })
         .map(|(i, _)| i)
         .collect::<Vec<_>>();
+    // Retain the complete historical189 proof on the strictly checked193
+    // predecessor, then exercise every current foreign source below.
+    let current_old_indices = old_indices;
+    let prior193 = disk_registration::before_scenarios(&all);
+    let old_indices = prior193
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| {
+            !matches!(
+                s.initial,
+                dlms_learning_lab::engine::State::PhysicalLink { .. }
+            )
+        })
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
     assert_eq!(
         old_indices[..172].len(),
         172,
@@ -378,7 +394,43 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         dlms_learning_lab::engine::State::OneOff { .. }
     )));
 
-    for index in old_indices {
+    assert_eq!(
+        current_old_indices.len(),
+        old_indices.len() + disk_registration::IDS.len()
+    );
+    assert_eq!(
+        &current_old_indices[..old_indices.len()],
+        old_indices.as_slice()
+    );
+    assert_eq!(
+        &current_old_indices[old_indices.len()..],
+        &[193, 194, 195, 196]
+    );
+    assert_eq!(
+        current_old_indices[old_indices.len()..]
+            .iter()
+            .map(|i| all[*i].id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::IDS
+    );
+    for index in &current_old_indices[old_indices.len()..] {
+        let disk_source = &all[*index];
+        assert!(matches!(
+            disk_source.initial,
+            dlms_learning_lab::engine::State::PartitionFs { .. }
+        ));
+        assert!(matches!(disk_source.goal, Goal::PartitionFs { .. }));
+        let mut own = Attempt::new(disk_source, 9);
+        dlms_learning_lab::partition_fs_workspace::binding::prepare(&mut own, disk_source).unwrap();
+        dlms_learning_lab::partition_fs_workspace::binding::context(&own, disk_source).unwrap();
+        assert!(own.workspace.as_ref().unwrap().command.is_empty());
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &own,
+            disk_source
+        ));
+    }
+
+    for index in current_old_indices {
         let mut foreign = all.clone();
         foreign[index].physical_link_teaching = lesson.clone();
         let error = contexts(&foreign).unwrap_err();
@@ -392,6 +444,11 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
             dlms_learning_lab::engine::State::Ntp { .. }
         ) {
             "Foreign teaching metadata on NTP source"
+        } else if matches!(
+            all[index].initial,
+            dlms_learning_lab::engine::State::PartitionFs { .. }
+        ) {
+            "Foreign teaching metadata on partition/filesystem source"
         } else {
             "Physical-link teaching/Goal belongs to another activity"
         };

@@ -10,6 +10,7 @@ pub(in crate::ui) mod cron_workspace;
 mod debian_packages;
 mod dhcpv4;
 mod dhcpv4_lessons;
+mod disk_preparation_native;
 mod ere_evidence_native;
 mod etherchannel_native;
 pub(in crate::ui) mod etherchannel_workspace;
@@ -937,7 +938,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 }
                 simulation.reconfigure(configuration).unwrap();
             }
-            State::Lvm { .. }
+            State::PartitionFs { .. }
+            | State::Lvm { .. }
             | State::Ntp { .. }
             | State::OneOff { .. }
             | State::FileBackup { .. }
@@ -7185,3 +7187,5 @@ mod lvm_lessons_native;
 mod ntp_client_server;
 
 mod ntp_lessons_native;
+
+mod partition_fs_workspace;

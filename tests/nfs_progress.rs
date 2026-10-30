@@ -1,3 +1,4 @@
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
 #[path = "../examples/support/automation_digest.rs"]
@@ -216,6 +217,8 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     use std::sync::atomic::{AtomicBool, AtomicUsize};
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut all = pack::bundled().unwrap();
+    assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+    assert_eq!(all.len(), 197);
     let s = scenario(0);
     all.push(s.clone());
     let mut p = progress::decode(raw, &all).unwrap();
@@ -225,7 +228,17 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 193);
+    assert_eq!(disk_registration::before_attempts_len(&p.attempts), 193);
+    assert_eq!(p.attempts.len(), 197);
+    for id in disk_registration::IDS {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        let a = &p.attempts[id];
+        assert!(matches!(a.state, State::PartitionFs { .. }));
+        assert_eq!(a.state, source.initial);
+        assert!(a.transcript.is_empty());
+        dlms_learning_lab::partition_fs_workspace::context(a, source).unwrap();
+        assert!(!progress::current_solved(a, source));
+    }
     for id in [
         "shell-ere-event-view",
         "shell-ere-inventory-review",
@@ -239,12 +252,13 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     assert_eq!(
         p.attempts
             .keys()
-            .filter(|id| ![
-                "shell-ere-event-view",
-                "shell-ere-inventory-review",
-                "shell-ere-incident-report"
-            ]
-            .contains(&id.as_str())
+            .filter(|id| !disk_registration::IDS.contains(&id.as_str())
+                && ![
+                    "shell-ere-event-view",
+                    "shell-ere-inventory-review",
+                    "shell-ere-incident-report"
+                ]
+                .contains(&id.as_str())
                 && !one_off_registration::IDS.contains(&id.as_str())
                 && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str())
                 && ![

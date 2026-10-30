@@ -769,6 +769,13 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::PartitionFs { .. })
+        || matches!(s.initial, State::PartitionFs { .. })
+        || matches!(s.goal, crate::engine::Goal::PartitionFs { .. })
+    {
+        return crate::partition_fs_workspace::binding::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
     if matches!(a.state, State::Ntp { .. }) || matches!(s.initial, State::Ntp { .. }) {
         return crate::ntp_workspace::context(a, s).is_ok()
             && crate::engine::solved(&a.state, &s.goal);
@@ -1157,6 +1164,13 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             || a.transcript.len() > 120
         {
             return Err("Incompatible saved attempt; original retained".into());
+        }
+        crate::partition_fs_workspace::binding::metadata(a)?;
+        if matches!(a.state, State::PartitionFs { .. })
+            || matches!(s.initial, State::PartitionFs { .. })
+            || matches!(s.goal, crate::engine::Goal::PartitionFs { .. })
+        {
+            crate::partition_fs_workspace::binding::context(a, s)?;
         }
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
@@ -2222,6 +2236,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     }
     validate_provenance(p)?;
     for a in p.attempts.values() {
+        crate::partition_fs_workspace::binding::metadata(a)?;
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
@@ -2288,6 +2303,12 @@ enum WriteMode<'a> {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     if p.attempts
         .values()
+        .any(|a| matches!(a.state, State::PartitionFs { .. }))
+    {
+        return Err("Disk preparation progress needs its held authored catalog; use save_with_catalog. Original retained".into());
+    }
+    if p.attempts
+        .values()
         .any(|a| matches!(a.state, State::Lvm { .. } | State::Ntp { .. }))
     {
         return Err(
@@ -2306,6 +2327,16 @@ pub fn save_with_catalog(
 ) -> Result<Saved, String> {
     for (id, a) in &p.attempts {
         let source = scenarios.iter().find(|s| &s.id == id);
+        let disk_source = source.is_some_and(|s| {
+            matches!(s.initial, State::PartitionFs { .. })
+                || matches!(s.goal, crate::engine::Goal::PartitionFs { .. })
+        });
+        if matches!(a.state, State::PartitionFs { .. }) || disk_source {
+            crate::partition_fs_workspace::binding::context(
+                a,
+                source.ok_or("Unknown authored disk source; original retained")?,
+            )?;
+        }
         let lvm_source = source.is_some_and(|s| {
             matches!(s.initial, State::Lvm { .. })
                 || matches!(s.goal, crate::engine::Goal::Lvm { .. })

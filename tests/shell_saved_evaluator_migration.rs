@@ -1,5 +1,6 @@
 //! Current-evaluator migration checks from exact actually captured writer8 bytes.
 //! New outcomes exist only when these tests explicitly execute the current VM.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
@@ -246,6 +247,15 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         assert!(!p.attempts.contains_key(id) && !p.favorites.contains(id));
         assert!(!progress::current_solved(&Attempt::new(source, 0), source));
     }
+    for id in disk_registration::IDS {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::PartitionFs { .. })
+                && matches!(source.goal, Goal::PartitionFs { .. })
+        );
+        assert!(!p.attempts.contains_key(id) && !p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
     let missing: BTreeSet<_> = all
         .iter()
         .filter(|s| !p.attempts.contains_key(&s.id))
@@ -254,6 +264,10 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "lpic1-disk-safe-gap",
+            "lpic1-disk-hints-versus-content",
+            "lpic1-disk-eligible-media",
+            "lpic1-disk-delivery",
             "shell-ere-event-view",
             "shell-ere-inventory-review",
             "shell-ere-incident-report",

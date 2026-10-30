@@ -177,3 +177,7 @@ pub mod links;
 
 /// Original bounded C-byte ERE engine; utilities remain simulated.
 pub mod ere;
+
+/// Bounded virtual GPT/ext4/swap preparation; no curriculum registration.
+pub mod partition_fs;
+pub mod partition_fs_workspace;

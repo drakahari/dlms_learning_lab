@@ -8,6 +8,7 @@ use dlms_learning_lab::{
     shell::{self, Case, Outcome, Record, Vm},
     workspace,
 };
+use lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -65,7 +66,8 @@ fn catalog() -> &'static Vec<Scenario> {
             lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),
             190
         );
-        assert_eq!(all.len(), 193);
+        assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+        assert_eq!(all.len(), 197);
         assert_eq!(value(&all[180..182]), value(&authored()));
         bounded(all)
     })

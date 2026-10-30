@@ -1,5 +1,6 @@
 //! Current12 boundaries use actual9 evidence ONLY in explicit private replay.
 //! The default tests never fabricate historical9 outcomes or implied revisions.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 use dlms_learning_lab::{
@@ -138,6 +139,15 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             source
         ));
     }
+    for id in disk_registration::IDS {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::PartitionFs { .. })
+                && matches!(source.goal, Goal::PartitionFs { .. })
+        );
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -146,6 +156,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "lpic1-disk-safe-gap",
+            "lpic1-disk-hints-versus-content",
+            "lpic1-disk-eligible-media",
+            "lpic1-disk-delivery",
             "shell-ere-event-view",
             "shell-ere-inventory-review",
             "shell-ere-incident-report",

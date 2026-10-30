@@ -197,3 +197,44 @@ continues using its exact retained snapshot, independent of later current source
 unit registration, docs or QA files. Any future fresh comparison requires a new
 separately reviewed source closure, compiled probe and Root-approved controls.
 This native QA addition grants no new reference execution or fidelity claim.
+
+
+## Later storage workspace source closure
+
+The GPT/ext4/swap workspace proposal adds five named product source modules:
+`src/partition_fs.rs`, `src/partition_fs_workspace.rs`,
+`src/partition_fs_workspace/binding.rs`, `src/ui/partition_fs_workspace.rs` and
+`src/ui/tests/partition_fs_workspace.rs`. Current Python QA accounts for their
+exact complete sizes/hashes as a separate disjoint union after the two native193
+QA modules and the original396 names. The current full roster remains closed;
+these are not inputs observed by the sealed r1 ELF.
+
+The r1 collector/probe, COMPILED396, SOURCES409, approvals, retained source, ELF
+and raw observations stay immutable. A new synthetic guard requires fresh r1
+prepare to refuse each new storage product path before any child or destination
+is created. Retained r1 verification stays independent of current source. This
+QA roster extension grants no fresh GNU/probe execution and no new reference
+fidelity, curriculum, native or coverage acceptance. A future fresh comparison
+needs a new separately reviewed closure, compiled identity and Root controls.
+
+
+The conditional unregistered storage content application adds the exact
+`scenarios/disk-preparation-v1.json` Pack as one further disjoint current-roster
+entry, retaining the two native and five product input pins. QA checks its full
+size and SHA256, plus the complete union; a dedicated synthetic guard requires
+frozen r1 prepare to refuse that leaf before any child or control destination.
+This data file is not bundled or a normal curriculum registration. It was not
+observed by the sealed r1 probe. The frozen collector/probe/evidence and every
+historical pin remain unchanged; no fresh reference execution is granted.
+
+
+The conditional storage native route adds two explicitly named later QA sources,
+`src/ui/smoke/disk_preparation.rs` and `src/ui/tests/disk_preparation_native.rs`.
+Current roster QA checks their complete sizes/hashes and the full disjoint union;
+the one renderer current-product pin is refreshed for passive capture metrics.
+A synthetic guard requires frozen r1 prepare to refuse each later QA path before
+child execution or control creation. Every old native/product/authored path and
+all frozen collector/probe/capture/history pins remain intact. The new route is
+a fixed private-source fixture until normal registration is separately accepted;
+its proposed actions/captures are UNRUN, not GNU fidelity or normal-course credit.
+No new reference execution is granted by this current-roster QA layer.

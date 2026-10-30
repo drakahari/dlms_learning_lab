@@ -30,6 +30,7 @@ mod ntp_workspace;
 mod one_off_boundary;
 mod one_off_workspace;
 mod ospf_workspace;
+mod partition_fs_workspace;
 mod physical_link_workspace;
 mod process_learning;
 mod rpm_packages;
@@ -61,6 +62,7 @@ struct Metrics {
     physical: physical_link_workspace::Metrics,
     lvm: lvm_workspace::Metrics,
     ntp: ntp_workspace::Metrics,
+    partition_fs: partition_fs_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -350,6 +352,7 @@ pub struct LabApp {
     physical_presentation: physical_link_workspace::Presentation,
     lvm_presentation: lvm_workspace::Presentation,
     ntp_presentation: ntp_workspace::Presentation,
+    partition_fs_presentation: partition_fs_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     one_off_presentation: one_off_workspace::Presentation,
@@ -495,6 +498,7 @@ impl LabApp {
             notice: None,
             lvm_presentation: Default::default(),
             ntp_presentation: Default::default(),
+            partition_fs_presentation: Default::default(),
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
@@ -666,6 +670,10 @@ impl LabApp {
             {
                 stage
             } else if let Some(stage) =
+                Self::disk_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::ere_evidence_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -822,6 +830,20 @@ impl LabApp {
         }
     }
     fn launch(&mut self, i: usize) {
+        let source = &self.scenarios[i];
+        let previous = self.progress.attempts.get(&source.id);
+        if (matches!(source.initial, engine::State::PartitionFs { .. })
+            || matches!(source.goal, engine::Goal::PartitionFs { .. })
+            || previous.is_some_and(|a| matches!(a.state, engine::State::PartitionFs { .. })))
+            && let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::admit_launch(
+                previous,
+                source,
+                self.progress.clock.saturating_add(1),
+            )
+        {
+            self.notice = Some(e);
+            return;
+        }
         let ntp_source = &self.scenarios[i];
         let previous = self.progress.attempts.get(&ntp_source.id);
         if matches!(ntp_source.initial, engine::State::Ntp { .. })
@@ -875,6 +897,12 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        if matches!(a.state, engine::State::PartitionFs { .. })
+            && let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
         Self::prepare_apache_static(a, s, new_attempt);
         Self::prepare_rpm(a, s, new_attempt);
         Self::prepare_nfs(a, s, new_attempt);
@@ -1076,6 +1104,18 @@ impl LabApp {
         };
     }
     fn reset_attempt(&mut self, i: usize) {
+        if matches!(self.scenarios[i].initial, engine::State::PartitionFs { .. }) {
+            let s = &self.scenarios[i];
+            if let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::admit_launch(
+                None,
+                s,
+                self.progress.attempts[&s.id].visited,
+            ) {
+                self.notice = Some(e);
+                return;
+            }
+            self.partition_fs_presentation.reset_all();
+        }
         if matches!(self.scenarios[i].initial, engine::State::Ntp { .. }) {
             self.ntp_presentation.reset_all();
         }
@@ -1115,6 +1155,12 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        if matches!(a.state, engine::State::PartitionFs { .. })
+            && let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
         Self::prepare_apache_static(a, s, true);
         Self::prepare_rpm(a, s, true);
         Self::prepare_nfs(a, s, true);
@@ -1265,7 +1311,8 @@ impl LabApp {
             || self.physical_capture_active()
             || self.one_off_capture_active()
             || self.lvm_capture_active()
-            || self.ntp_capture_active();
+            || self.ntp_capture_active()
+            || self.disk_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1313,7 +1360,8 @@ impl LabApp {
             || self.physical_capture_active()
             || self.one_off_capture_active()
             || self.lvm_capture_active()
-            || self.ntp_capture_active();
+            || self.ntp_capture_active()
+            || self.disk_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)

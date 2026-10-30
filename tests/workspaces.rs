@@ -1,3 +1,4 @@
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 use dlms_learning_lab::{
@@ -158,9 +159,52 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     let mut one_off_drafts = 0;
     let mut lvm_drafts = 0;
     let mut ntp_drafts = 0;
+    let mut disk_drafts = 0;
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
+        if matches!(a.state, State::PartitionFs { .. }) {
+            use dlms_learning_lab::partition_fs_workspace as disk;
+            disk::binding::prepare(&mut a, s).unwrap();
+            let State::PartitionFs { simulation } = &mut a.state else {
+                unreachable!()
+            };
+            let path = simulation
+                .current
+                .disks
+                .iter()
+                .find(|(_, d)| d.writable && !d.in_use)
+                .unwrap()
+                .0
+                .clone();
+            simulation.assignment_editor.selected = path.clone();
+            simulation
+                .assignment_editor
+                .drafts
+                .get_mut(&path)
+                .unwrap()
+                .name = "unfinished-assignment".into();
+            let path = simulation
+                .example
+                .disks
+                .iter()
+                .find(|(_, d)| d.writable && !d.in_use)
+                .unwrap()
+                .0
+                .clone();
+            simulation.example_editor.selected = path.clone();
+            simulation
+                .example_editor
+                .drafts
+                .get_mut(&path)
+                .unwrap()
+                .name = "unfinished-example".into();
+            disk::context(&a, s).unwrap();
+            assert!(!progress::current_solved(&a, s));
+            disk_drafts += 1;
+            p.attempts.insert(s.id.clone(), a);
+            continue;
+        }
         if matches!(a.state, State::Cron { .. }) {
             dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
         }
@@ -288,7 +332,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     }
     assert_eq!((original_drafts, backup_drafts), (172, 4));
     assert_eq!((original_drafts - 3, backup_drafts), (169, 4));
-    for source in &labs[190..] {
+    for source in &labs[190..193] {
         assert!(matches!(source.initial, State::Script { .. }));
         let a = &p.attempts[&source.id];
         assert_eq!(a.workspace.as_ref().unwrap().command, "unfinished |");
@@ -305,7 +349,9 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     assert_eq!(lvm_drafts, 4);
     assert_eq!(ntp_drafts, 4);
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_attempts_len(&p.attempts),190);
-    assert_eq!(p.attempts.len(), 193);
+    assert_eq!(disk_drafts, 4);
+    assert_eq!(disk_registration::before_attempts_len(&p.attempts), 193);
+    assert_eq!(p.attempts.len(), 197);
     assert_eq!(
         labs[176..180]
             .iter()

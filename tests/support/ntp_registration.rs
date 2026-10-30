@@ -426,7 +426,7 @@ pub fn before_attempts_len(
     if all.len() == 186 {
         return 186;
     }
-    let normal190 = if all.len() == 193 {
+    let normal190 = if matches!(all.len(), 193 | 197) {
         ere_registration::before_attempts_len(all)
     } else {
         all.len()

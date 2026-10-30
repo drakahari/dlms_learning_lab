@@ -1,5 +1,8 @@
 //! Genuine14-before15 consumers. Source proposal; every group needs future
 //! real capture/seals. No old producer invocation or invented historical result.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{Goal, State},
     pack,
@@ -142,6 +145,32 @@ fn all_prior_records_multiplicity_two_unfinished_contexts_and_90_nonscript_attem
                 progress::current_solved(a, s),
                 shell::EVALUATOR_REVISION == 14
             );
+        }
+    }
+}
+
+#[test]
+#[ignore = "Requires genuine sealed14 original/draft profiles; no replay"]
+fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
+    let all = pack::bundled().unwrap();
+    assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+    assert_eq!(all.len(), 197);
+    for role in ["original", "drafts"] {
+        let raw = evidence::observed(&format!("writer14-{role}.json"));
+        let old: Progress = serde_json::from_slice(&raw).unwrap();
+        assert_eq!(old.attempts.len(), 150);
+        let current = progress::decode(&raw, &all).unwrap();
+        assert_eq!(value(&current.attempts), value(&old.attempts));
+        assert_eq!(current.favorites, old.favorites);
+        for id in disk_registration::IDS {
+            let s = all.iter().find(|s| s.id == id).unwrap();
+            assert!(
+                matches!(s.initial, State::PartitionFs { .. })
+                    && matches!(s.goal, Goal::PartitionFs { .. })
+            );
+            assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
+            assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
+            assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));
         }
     }
 }

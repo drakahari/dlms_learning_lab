@@ -6,6 +6,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace,
 };
+use registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "support/lvm_original_catalog.rs"]
 mod original;
 #[path = "support/lvm_registration.rs"]
@@ -41,7 +42,8 @@ fn catalog() -> Vec<Scenario> {
         registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),
         190
     );
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     assert_eq!(
         v(&expected),
         v(registration::ntp_registration::before_scenarios(

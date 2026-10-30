@@ -8,6 +8,7 @@ use dlms_learning_lab::{
     shell::{self, Case, Outcome, Record, Vm},
     workspace,
 };
+use ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -63,7 +64,8 @@ fn catalog() -> &'static Vec<Scenario> {
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 14);
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 193);
+        assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+        assert_eq!(all.len(), 197);
         let t = texts(&all);
         assert!(t.iter().all(|s| s.len() <= pack::MAX_PACK_BYTES));
         pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap()
@@ -140,7 +142,8 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
         r["original_units_sha256"].as_str().unwrap()
     );
     let full_units = course::bundled(&current).unwrap();
-    assert_eq!(full_units.len(), 51);
+    assert_eq!(disk_registration::before_typed_units(&full_units).len(), 51);
+    assert_eq!(full_units.len(), 52);
     let typed_current = ntp_registration::ere_registration::before_typed_units(&full_units);
     let typed_predecessor = course::load(
         std::str::from_utf8(&predecessor).unwrap(),
@@ -153,12 +156,13 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
     );
     let all = catalog();
     assert_eq!(value(&all[..old.len()]), value(old));
-    assert_eq!(value(&all[old.len()..]), value(&authored()));
+    assert_eq!(value(&all[old.len()..193]), value(&authored()));
     assert_eq!(
         authored().iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         IDS
     );
-    let typed = course::bundled(all).unwrap();
+    let current52 = course::bundled(all).unwrap();
+    let typed = disk_registration::before_typed_units(&current52);
     assert_eq!(value(typed.last().unwrap()), r["unit_proposal"]);
 }
 #[test]
@@ -373,27 +377,91 @@ fn actual_run_edit_invalidation_retry_save_resume_and_selected_reset_preserve_ot
 }
 #[test]
 fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectations_fail() {
-    catalog();
-    for failure in ["prerequisite", "teaching", "solution", "expected"] {
-        let mut p: Value = serde_json::from_str(PACK).unwrap();
-        let s = &mut p["scenarios"][0];
-        match failure {
-            "prerequisite" => s["prerequisites"] = json!(["missing-ere-prerequisite"]),
-            "teaching" => s["teaching"]["example"] = json!("unimplemented-tool"),
-            "solution" => s["solution"] = json!(["printf wrong"]),
-            "expected" => s["goal"]["cases"][0]["stdout"] = json!("unreachable expected line\n"),
-            _ => unreachable!(),
-        }
-        let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 193);
-        all.retain(|s| !IDS.contains(&s.id.as_str()));
-        assert_eq!(all.len(), 190);
-        all.extend(serde_json::from_value::<Pack>(p).unwrap().scenarios);
-        let t = texts(&all);
-        assert!(
-            pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).is_err(),
-            "{failure}"
+    let current = catalog();
+    assert_eq!(current.len(), 197);
+    let original193 = disk_registration::before_scenarios(current);
+    assert_eq!(original193.len(), 193);
+    assert_eq!(
+        current[193..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::IDS
+    );
+    for s in &current[193..] {
+        assert!(matches!(
+            (&s.initial, &s.goal),
+            (State::PartitionFs { .. }, Goal::PartitionFs { .. })
+        ));
+    }
+    let mut original190 = original193.to_vec();
+    original190.retain(|s| !IDS.contains(&s.id.as_str()));
+    assert_eq!(original190.len(), 190);
+    let mut current194 = current.clone();
+    current194.retain(|s| !IDS.contains(&s.id.as_str()));
+    assert_eq!(current194.len(), 194);
+    assert_eq!(value(&current194[..190]), value(&original190));
+    assert_eq!(value(&current194[190..]), value(&current[193..]));
+
+    for (base, expected_count) in [(&original190, 193), (&current194, 197)] {
+        // A valid control reaches the real validator with both the complete
+        // historical base and the current base including all four native labs.
+        let mut valid = base.clone();
+        valid.extend(authored());
+        assert_eq!(valid.len(), expected_count);
+        assert_eq!(
+            valid.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+            expected_count
         );
+        let t = texts(&valid);
+        let checked =
+            pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+        assert_eq!(value(&checked), value(&valid));
+        if expected_count == 193 {
+            assert_eq!(value(&checked), value(original193));
+        } else {
+            // Removing/reappending ERE changes only order, never a definition.
+            let by_id = |all: &[Scenario]| {
+                all.iter()
+                    .map(|s| (s.id.clone(), value(s)))
+                    .collect::<BTreeMap<_, _>>()
+            };
+            assert_eq!(by_id(&checked), by_id(current));
+        }
+        for failure in ["prerequisite", "teaching", "solution", "expected"] {
+            let mut p: Value = serde_json::from_str(PACK).unwrap();
+            let s = &mut p["scenarios"][0];
+            match failure {
+                "prerequisite" => s["prerequisites"] = json!(["missing-ere-prerequisite"]),
+                "teaching" => s["teaching"]["example"] = json!("unimplemented-tool"),
+                "solution" => s["solution"] = json!(["printf wrong"]),
+                "expected" => {
+                    s["goal"]["cases"][0]["stdout"] = json!("unreachable expected line\n")
+                }
+                _ => unreachable!(),
+            }
+            let mut all = base.clone();
+            all.extend(serde_json::from_value::<Pack>(p).unwrap().scenarios);
+            assert_eq!(all.len(), expected_count);
+            assert_eq!(
+                all.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+                expected_count
+            );
+            let t = texts(&all);
+            let error =
+                pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap_err();
+            let expected = match failure {
+                "prerequisite" => "invalid prerequisites",
+                "teaching" => "Teaching example does not produce its declared behavior",
+                "solution" | "expected" => "solution does not reach objective",
+                _ => unreachable!(),
+            };
+            assert_eq!(
+                error,
+                format!("{}: {expected}", IDS[0]),
+                "{failure} on {expected_count}"
+            );
+        }
     }
 }
 

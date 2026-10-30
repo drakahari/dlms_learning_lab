@@ -1,6 +1,7 @@
 //! Closed native-only normal-course acceptance. All script effects occur through
 //! actual editor events and Run/Stop; no State/Record or solved result is installed.
 use super::*;
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 pub(in crate::ui) const BASE: usize = 43000;
 const STRIDE: usize = 200;
 pub(in crate::ui) const LAST: usize = 104;
@@ -245,15 +246,21 @@ impl LabApp {
             .iter()
             .position(|s| s.id == id)
             .expect("Normal command-vectors lab");
+        // Admit the complete current source on EVERY callback, then reuse only
+        // these immutable checked predecessors for the older authority proofs.
+        let checked193 = disk_registration::before_scenarios(&self.scenarios);
+        let checked51 = disk_registration::before_typed_units(&self.units);
+        assert_eq!((checked193.len(), checked51.len()), (193, 51));
+        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
         assert_eq!(
             (
-                one_off_boundary::before_len(&self.scenarios),
-                one_off_boundary::before_len(&self.units)
+                one_off_boundary::before_len(checked193),
+                one_off_boundary::before_len(checked51)
             ),
             (176, 46)
         );
         assert_eq!(
-            one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios)
+            one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(checked193)
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),

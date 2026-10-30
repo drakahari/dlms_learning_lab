@@ -10,6 +10,7 @@ use dlms_learning_lab::{
     shell::{self, Case, Outcome, Record, Vm},
     workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde::Deserialize;
 use std::{
     collections::BTreeSet,
@@ -424,8 +425,45 @@ fn fill_is_only_a_draft_and_separate_unfinished_sources_resume_and_reset_locally
 fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loading() {
     let baseline: Vec<Original> =
         serde_json::from_str(include_str!("fixtures/shell-getopts-original-catalog.json")).unwrap();
-    let old = pack::bundled().unwrap();
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 197);
+    assert_eq!(
+        current.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        197
+    );
+    // Keep every historical proof below on the complete canonical193 source.
+    let old = disk_registration::before_scenarios(&current).to_vec();
+    assert_eq!(old.len(), 193);
     let all = catalog();
+    assert_eq!(
+        serde_json::to_value(&all).unwrap(),
+        serde_json::to_value(&current).unwrap()
+    );
+    assert_eq!(
+        current[193..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "lpic1-disk-safe-gap",
+            "lpic1-disk-hints-versus-content",
+            "lpic1-disk-eligible-media",
+            "lpic1-disk-delivery"
+        ]
+    );
+    assert_eq!(
+        current[193..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::IDS
+    );
+    for s in &current[193..] {
+        assert!(matches!(
+            (&s.initial, &s.goal),
+            (State::PartitionFs { .. }, Goal::PartitionFs { .. })
+        ));
+    }
     assert_eq!(baseline.len(), 119);
     assert_eq!(one_off_boundary::before_len(&old), 176);
     assert_eq!(
@@ -459,7 +497,7 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
         old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
         193
     );
-    assert_eq!(old[190..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::IDS);
+    assert_eq!(old[190..193].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::IDS);
     assert_eq!(
         old[..176]
             .iter()
@@ -512,6 +550,10 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     let frozen: serde_json::Value = serde_json::from_slice(bytes).unwrap();
     let p = progress::decode(bytes, &all).unwrap();
     assert_eq!(p.attempts.len(), 116);
+    for id in disk_registration::IDS {
+        assert!(!p.attempts.contains_key(id));
+        assert!(!p.favorites.contains(id));
+    }
     assert!(authored().iter().all(|s| !p.attempts.contains_key(&s.id)));
     let loaded = serde_json::to_value(&p).unwrap();
     assert_eq!(loaded["attempts"], frozen["attempts"]);

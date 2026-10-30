@@ -1,4 +1,5 @@
 //! Physical175 component gates composed into private normal176. Not a runtime/curriculum acceptance claim.
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
 use dlms_learning_lab::{
@@ -127,9 +128,18 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
         [57, 40, 36, 57]
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| disk_registration::before_scenarios(
+            &all
+        )
+        .iter()
+        .filter(|s| s.track == t)
+        .count()),
+        [57, 40, 36, 60]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 60]
+        [57, 44, 36, 60]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

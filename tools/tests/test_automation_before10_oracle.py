@@ -200,6 +200,28 @@ class FixedAutomationSafety(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Whole amended Lesson'):
                 teaching_amendment.historical_example(ROOT, scenario)
 
+    def closed_original51_units(self, current_raw):
+        # Close all current disk52 bytes before the unchanged old51→44 recipes.
+        # Historical recipes and observations are never rewritten or relabeled.
+        recipe_raw=(ROOT/'tests/fixtures/catalog197-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(recipe_raw).hexdigest(),
+                         'ddc64d8b6c5dce8d4066f0531700de253063c943bb347b1543ed4d4a106390ee')
+        recipe=json.loads(recipe_raw)
+        self.assertEqual(hashlib.sha256(current_raw).hexdigest(),recipe['after_units52_sha256'])
+        self.assertEqual(len(current_raw),recipe['after_units52_bytes'])
+        self.assertEqual(len(json.loads(current_raw)['units']),52)
+        suffix=recipe['append_suffix_utf8'].encode()
+        self.assertTrue(current_raw.endswith(suffix))
+        original=current_raw[:-len(suffix)]+recipe['old_tail_utf8'].encode()
+        self.assertEqual(hashlib.sha256(original).hexdigest(),recipe['before_units51_sha256'])
+        self.assertEqual(len(original),recipe['before_units51_bytes'])
+        self.assertEqual(original,(ROOT/'tests/fixtures/disk-units-before193.json').read_bytes())
+        before=json.loads(original)
+        self.assertEqual(before,recipe['before_units51'])
+        self.assertEqual(len(before['units']),51)
+        self.assertEqual(json.loads(current_raw),{**before,'units':before['units']+[recipe['disk_unit']]})
+        return original
+
     def closed_original44_units(self, current_raw):
         # Close every reviewed current append before the unchanged old44/43
         # assertions. No historical input, recipe or observation is rewritten.
@@ -230,7 +252,9 @@ class FixedAutomationSafety(unittest.TestCase):
         return current_raw
 
     def test_closed_network_appends_recover_all_old_units_and_refuse_changed_bytes(self):
-        current=(ROOT/'scenarios/units-v1.json').read_bytes()
+        current52=(ROOT/'scenarios/units-v1.json').read_bytes()
+        self.assertEqual(len(json.loads(current52)['units']),52)
+        current=self.closed_original51_units(current52)
         old=self.closed_original44_units(current)
         self.assertEqual(hashlib.sha256(old).hexdigest(), '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
         self.assertEqual(len(json.loads(current)['units']),51)
@@ -288,6 +312,7 @@ class FixedAutomationSafety(unittest.TestCase):
             self.assertEqual(p['teaching']['fixture'],s['example_case'])
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
         current_raw=(ROOT/'scenarios/units-v1.json').read_bytes()
+        current_raw=self.closed_original51_units(current_raw)
         current_raw=self.closed_original44_units(current_raw)
         numeric_raw=(ROOT/'tests/fixtures/catalog171-registration.json').read_bytes()
         self.assertEqual(hashlib.sha256(numeric_raw).hexdigest(),
@@ -528,6 +553,38 @@ class FixedAutomationSafety(unittest.TestCase):
         with self.assertRaisesRegex(oracle.safe.OracleError,'missing actual'):oracle.profile_observations([bad,stop])
         with self.assertRaisesRegex(oracle.safe.OracleError,'Unknown VM row'):oracle.profile_observations([stop,{'kind':'unrecognized','slice':1,'actual':{}}])
         with self.assertRaisesRegex(oracle.safe.OracleError,'Duplicate named'):oracle.profile_observations([base,stop,base])
+
+    def test_closed_disk52_append_recovers_whole51_and_refuses_every_new_unit_mutation(self):
+        current=(ROOT/'scenarios/units-v1.json').read_bytes()
+        before=self.closed_original51_units(current)
+        whole=json.loads(current)
+        self.assertEqual(len(whole['units']),52)
+        self.assertEqual(len(json.loads(before)['units']),51)
+        self.assertEqual(whole['units'][:51],json.loads(before)['units'])
+        self.assertEqual(before,(ROOT/'tests/fixtures/disk-units-before193.json').read_bytes())
+        self.assertEqual(hashlib.sha256(self.closed_original44_units(before)).hexdigest(),
+                         '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
+        bad=[current+b' ',before]
+        for mode in ('title','track','summary','prerequisites','lab','missing','extra','old'):
+            changed=json.loads(current)
+            unit=changed['units'][-1]
+            if mode in ('title','track','summary'):
+                unit[mode]+=' unreviewed'
+            elif mode=='prerequisites':
+                unit['prerequisites']=[]
+            elif mode=='lab':
+                unit['labs'][0]='unreviewed-disk-lab'
+            elif mode=='missing':
+                changed['units'].pop()
+            elif mode=='extra':
+                changed['units'].append(json.loads(json.dumps(unit)))
+            else:
+                changed['units'][0]['summary']+=' unreviewed'
+            bad.append(json.dumps(changed).encode())
+        for invalid in bad:
+            with self.subTest(sha256=hashlib.sha256(invalid).hexdigest()):
+                with self.assertRaises(AssertionError):
+                    self.closed_original51_units(invalid)
 
 if __name__ == '__main__': unittest.main()
 

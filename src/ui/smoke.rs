@@ -14,6 +14,7 @@ pub(in crate::ui) mod cron_lessons;
 mod debian_packages_lessons;
 mod dhcpv4;
 mod dhcpv4_lessons;
+pub(in crate::ui) mod disk_preparation;
 mod dns_reverse;
 pub(in crate::ui) mod ere_evidence;
 pub(in crate::ui) mod etherchannel_lessons;
@@ -417,6 +418,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 90000..=93999 => {
+                let (advance, capture) = self.disk_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 80000..=81999 => {
                 let (advance, capture) = self.ntp_lessons_native(ctx, n);
                 if !advance {

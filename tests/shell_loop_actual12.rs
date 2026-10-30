@@ -6,6 +6,7 @@ use dlms_learning_lab::{
     shell::{self, Case, Outcome, Record, Vm},
     workspace,
 };
+use ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde::Deserialize;
 use serde_json::Value;
 #[path = "support/ntp_registration.rs"]
@@ -232,10 +233,24 @@ fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() 
         ntp_registration::ere_registration::before_scenarios(&all).len(),
         190
     );
-    assert_eq!(all.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+    assert_eq!(all.len(), 197);
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();
+    for id in disk_registration::IDS {
+        let s = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(s.initial, State::PartitionFs { .. })
+                && matches!(s.goal, Goal::PartitionFs { .. })
+        );
+        assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
+        assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(s, 1),
+            s
+        ));
+    }
     let nine = [
         "ccna-physical-media-span",
         "ccna-physical-duplex-diagnosis",

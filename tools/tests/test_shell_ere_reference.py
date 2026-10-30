@@ -17,7 +17,16 @@ PROJECT = Path(__file__).resolve().parents[2]
 # Named CURRENT QA extension, not inputs observed by the sealed r1 ELF.
 # r1 COMPILED396/SOURCES409/collector/probe stay immutable. Fresh r1 capture
 # must still refuse these paths until a separately reviewed new collector.
-CURRENT_NATIVE_QA_INPUTS = (('src/ui/smoke/ere_evidence.rs', 81398, 'dae5c113b049d5678b298e955a7a7a26a8716a5afb4e0683d68423207d8633ea'), ('src/ui/tests/ere_evidence_native.rs', 30841, '1d5dc8f59e89802af17b2fcbb7c137ee5dfa650674e6b7800877412c2fc2bdc6'))
+CURRENT_NATIVE_QA_INPUTS = (('src/ui/smoke/ere_evidence.rs', 81869, '5cca3228fd73d15a11ee19c1b4872afe61abcfa5e531d2615743f202789fe394'), ('src/ui/tests/ere_evidence_native.rs', 30841, '1d5dc8f59e89802af17b2fcbb7c137ee5dfa650674e6b7800877412c2fc2bdc6'))
+
+# Named CURRENT product-workspace extension; never sealed r1 compiled evidence.
+CURRENT_STORAGE_WORKSPACE_INPUTS = (('src/partition_fs.rs', 34808, 'a769056e923a5dc932727bafaae52ed81e4d7c2e88f28dc867ab975406022ea9'), ('src/partition_fs_workspace.rs', 43668, '138c38aa3529c05136aa27d4caf8612e3c98a18b120ab30fe158370cddbf2a2e'), ('src/partition_fs_workspace/binding.rs', 16588, '7d4496e9ba9e4ba318bcd8176d8a6ade5d88b451258347ac855e748ce48dfd52'), ('src/ui/partition_fs_workspace.rs', 41812, '0623d6b4840158ef4d3a8f13baad663d7bda49d9d54321be426508fa74268cd5'), ('src/ui/tests/partition_fs_workspace.rs', 62096, 'aac1752f0289b6f99281423216383d4366286e8ae531d26fe7a265b38dd98441'))
+
+# Fixed current authored Pack only; not observed by the sealed r1 probe.
+CURRENT_AUTHORED_STORAGE_INPUTS = (('scenarios/disk-preparation-v1.json', 118384, '6971f6001d8cd9f3e58d28ef708ffecb6a5f4fdd1ad0f12b3d9606f07bf7dcb1'),)
+
+# Two fixed conditional native QA modules; no sealed r1 observation claim.
+CURRENT_STORAGE_NATIVE_INPUTS = (('src/ui/smoke/disk_preparation.rs', 159702, 'd97c9d25e9b8bd091b7ceccfda7424d6e41e6f6bb04a6d14e2cb3b3b9d0b3e68'), ('src/ui/tests/disk_preparation_native.rs', 15789, '76bf6dfe81b3b9b3a92a881521cb4448c55240576b898cacf9920d52ec45b6f5'))
 
 class ShellEreReferenceGuards(unittest.TestCase):
     def setUp(self):
@@ -319,7 +328,39 @@ class ShellEreReferenceGuards(unittest.TestCase):
         extension = {name for name, _, _ in CURRENT_NATIVE_QA_INPUTS}
         self.assertEqual(len(extension), 2)
         self.assertTrue(listed.isdisjoint(extension))
-        self.assertEqual(listed | extension, actual)
+        storage_extension = {name for name, _, _ in CURRENT_STORAGE_WORKSPACE_INPUTS}
+        self.assertEqual(len(storage_extension), 5)
+        self.assertTrue((listed | extension).isdisjoint(storage_extension))
+        authored_extension = {name for name, _, _ in CURRENT_AUTHORED_STORAGE_INPUTS}
+        self.assertEqual(len(authored_extension), 1)
+        self.assertTrue((listed | extension | storage_extension).isdisjoint(authored_extension))
+        storage_native_extension = {name for name, _, _ in CURRENT_STORAGE_NATIVE_INPUTS}
+        self.assertEqual(len(storage_native_extension), 2)
+        self.assertTrue((listed | extension | storage_extension | authored_extension).isdisjoint(storage_native_extension))
+        # Project each complete predecessor by removing ALL fixed later sets.
+        # The final equality still rejects every unknown, omitted or extra path.
+        self.assertEqual(listed | extension, actual - storage_extension - authored_extension - storage_native_extension)
+        self.assertEqual(listed | extension | storage_extension, actual - authored_extension - storage_native_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension, actual - storage_native_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension, actual)
+        for name, size, sha in CURRENT_STORAGE_NATIVE_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
+        for name, size, sha in CURRENT_AUTHORED_STORAGE_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
+        for name, size, sha in CURRENT_STORAGE_WORKSPACE_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
         for name, size, sha in CURRENT_NATIVE_QA_INPUTS:
             path = PROJECT / name
             info = path.lstat()
@@ -412,6 +453,81 @@ class ShellEreReferenceGuards(unittest.TestCase):
                 child.assert_not_called()
                 self.assertFalse((self.root / c.BASE).exists())
                 # Remove only exact newly-created disposable mock paths.
+                path.unlink()
+                parent = path.parent
+                while parent != self.root / 'src':
+                    previous = parent
+                    parent = parent.parent
+                    previous.rmdir()
+                self.assertEqual(c.project_roster(self.root), set(names))
+            child.assert_not_called()
+
+
+    def test_frozen_r1_prepare_refuses_each_new_storage_product_input_before_child_or_control(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_STORAGE_WORKSPACE_INPUTS:
+                path = self.put(name, 'SYNTHETIC named later storage product file')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                # Remove only exact newly-created disposable mock paths.
+                path.unlink()
+                parent = path.parent
+                while parent != self.root / 'src':
+                    previous = parent
+                    parent = parent.parent
+                    previous.rmdir()
+                self.assertEqual(c.project_roster(self.root), set(names))
+            child.assert_not_called()
+
+
+
+    def test_frozen_r1_prepare_refuses_unregistered_storage_pack_before_child_or_control(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_AUTHORED_STORAGE_INPUTS:
+                path = self.put(name, 'SYNTHETIC unregistered storage pack')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                path.unlink()  # Only this exact new disposable mock leaf; family already existed.
+                self.assertEqual(c.project_roster(self.root), set(names))
+            child.assert_not_called()
+
+
+    def test_frozen_r1_prepare_refuses_conditional_storage_native_modules_before_children(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_STORAGE_NATIVE_INPUTS:
+                path = self.put(name, 'SYNTHETIC later storage native QA file')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
                 path.unlink()
                 parent = path.parent
                 while parent != self.root / 'src':

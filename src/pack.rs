@@ -237,6 +237,12 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         {
             return Err(format!("{}: invalid learning guidance", s.id));
         }
+        if matches!(s.initial, State::PartitionFs { .. })
+            || matches!(s.goal, Goal::PartitionFs { .. })
+        {
+            let definition = crate::partition_fs_workspace::binding::source(s)?;
+            definition.validate()?;
+        }
         if matches!(s.initial, State::Lvm { .. }) || matches!(s.goal, Goal::Lvm { .. }) {
             crate::lvm_workspace::source(s)?;
             let Goal::Lvm { definition } = &s.goal else {
@@ -951,9 +957,19 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             return Err(format!("{}: starts solved", s.id));
         }
         let mut state = s.initial.clone();
-        for cmd in &s.solution {
-            engine::execute_for_goal(&mut state, &s.goal, cmd)
-                .map_err(|e| format!("{}: unreachable solution: {e}", s.id))?;
+        if let (State::PartitionFs { simulation }, Goal::PartitionFs { definition }) =
+            (&mut state, &s.goal)
+        {
+            for operation in &definition.reference {
+                simulation
+                    .apply(definition, operation, false)
+                    .map_err(|e| format!("{}: unreachable native reference: {e}", s.id))?;
+            }
+        } else {
+            for cmd in &s.solution {
+                engine::execute_for_goal(&mut state, &s.goal, cmd)
+                    .map_err(|e| format!("{}: unreachable solution: {e}", s.id))?;
+            }
         }
         if let (State::Script { source, run }, Goal::Script { cases }) = (&mut state, &s.goal) {
             if cases.len() < 3
@@ -1005,6 +1021,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::PartitionFs { simulation } => simulation.validate().is_ok(),
         State::Ntp { simulation } => simulation.validate().is_ok(),
         State::Lvm { simulation } => simulation.validate().is_ok(),
         State::PhysicalLink { simulation } => simulation.validate().is_ok(),
@@ -1227,5 +1244,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/lvm-growth-v1.json"),
         include_str!("../scenarios/ntp-client-server-v1.json"),
         include_str!("../scenarios/shell-ere-evidence-v1.json"),
+        include_str!("../scenarios/disk-preparation-v1.json"),
     ])
 }

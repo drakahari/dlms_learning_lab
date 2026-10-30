@@ -1161,6 +1161,18 @@ fn old_prepared(s: &pack::Scenario) -> Attempt {
         // matrix using the same Goal-aware preparation as its real workspace.
         dlms_learning_lab::one_off_workspace::budget::prepare(&mut a, s).unwrap();
     }
+    if matches!(a.state, State::PartitionFs { .. }) {
+        // Keep all four native disk sources in the positive/foreign-negative
+        // matrix through their real source-bound preparation, not a fake draft.
+        use dlms_learning_lab::partition_fs_workspace as disk;
+        disk::binding::prepare(&mut a, s).unwrap();
+        disk::binding::context(&a, s).unwrap();
+        assert!(
+            a.workspace.as_ref().unwrap().command.is_empty(),
+            "Native disk preparation never borrows a terminal command"
+        );
+        assert!(!progress::current_solved(&a, s));
+    }
     if let Some(lesson) = &s.file_backup_teaching {
         // Preserve this real new-family positive in the cross-family matrix.
         dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();

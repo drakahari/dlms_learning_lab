@@ -1055,21 +1055,21 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     );
     catalog.extend(validated);
     assert_eq!(
-        one_off_boundary::loop_registration::lvm_registration::before_scenarios(&catalog[..193])
+        one_off_boundary::loop_registration::lvm_registration::before_scenarios(&catalog[..197])
             .len()
             + 1,
         183
     );
     assert_eq!(
         one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
-            &catalog[..193]
+            &catalog[..197]
         )
         .len()
             + 1,
         187
     );
-    assert_eq!(catalog.len(), 194);
-    assert_eq!(serde_json::to_value(&catalog[..193]).unwrap(), normal);
+    assert_eq!(catalog.len(), 198);
+    assert_eq!(serde_json::to_value(&catalog[..197]).unwrap(), normal);
     let oversized = format!("{}{}", fixture_pack, " ".repeat(2 * 1024 * 1024));
     assert!(
         pack::load(&oversized)

@@ -6,6 +6,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 #[path = "support/combined_catalog.rs"]
 mod combined;
@@ -32,7 +33,8 @@ fn normal186_retains_full182_objects_all57scripts442cases57examples_and_exact_fo
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     let old = original::load();
     assert_eq!(old.len(), 182);
@@ -86,7 +88,8 @@ fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     assert_eq!(all.len(), 186);
     let old = original::load();
     let current50 = include_bytes!("../scenarios/units-v1.json");
@@ -100,7 +103,11 @@ fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without
     assert_eq!(digest::hash(&before), r["before_units48_sha256"]);
     let current_units = course::bundled(&current190).unwrap();
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&current_units).len(),50);
-    assert_eq!(current_units.len(), 51);
+    assert_eq!(
+        disk_registration::before_typed_units(&current_units).len(),
+        51
+    );
+    assert_eq!(current_units.len(), 52);
     let units = registration::ntp_registration::before_typed_units(&current_units);
     let prior = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!((units.len(), prior.len()), (49, 48));
@@ -154,7 +161,8 @@ fn source_boundaries_reject_partial_or_extra_lvm_and_source_mutations_without_br
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     for mode in 0..5 {
         let mut bad = all.clone();
@@ -188,7 +196,8 @@ fn current_catalog_never_invents_lvm_work_or_credit_in_a_retained_old_profile() 
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let old: Progress = serde_json::from_slice(raw).unwrap();
@@ -211,7 +220,8 @@ fn all_new_lvm_sources_require_authored_save_context_even_when_current_and_initi
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     let s = &all[182];
     let peer = &all[183];
@@ -274,7 +284,8 @@ fn copied_example_names_display_text_and_foreign_oneoff_metadata_cannot_satisfy_
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     for s in &all[182..] {
         let Goal::Lvm { definition } = &s.goal else {
@@ -324,7 +335,8 @@ fn joint_forgery_cannot_supply_authority_to_load_export_inspect_restore_or_compl
             &current190,
         );
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),190);
-    assert_eq!(current190.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current190).len(), 193);
+    assert_eq!(current190.len(), 197);
     let all = all.to_vec();
     let s = &all[182];
     let mut own = fresh(s);

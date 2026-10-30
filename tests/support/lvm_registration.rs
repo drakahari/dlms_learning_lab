@@ -393,7 +393,7 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    let normal186 = if matches!(all.len(), 190 | 193) {
+    let normal186 = if matches!(all.len(), 190 | 193 | 197) {
         ntp_registration::before_attempts_len(all)
     } else {
         all.len()

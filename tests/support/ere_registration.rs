@@ -11,6 +11,8 @@ use serde_json::Value;
 use std::sync::OnceLock;
 #[path = "ere_original_catalog.rs"]
 pub mod original190;
+#[path = "partition_fs_registration.rs"]
+pub mod partition_fs_registration;
 pub const IDS: [&str; 3] = [
     "shell-ere-event-view",
     "shell-ere-inventory-review",
@@ -36,6 +38,8 @@ fn recipe() -> &'static Value {
     })
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_disk = partition_fs_registration::prefix_units(raw)?;
+    let raw = without_disk.as_deref().unwrap_or(raw);
     let r = recipe();
     if raw.len() as u64 != r["after_units51_bytes"].as_u64().ok_or("51length")?
         || digest::hash(raw) != r["after_units51_sha256"].as_str().ok_or("51pin")?
@@ -68,6 +72,8 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let without_disk = partition_fs_registration::prefix_units(raw)?;
+    let raw = without_disk.as_deref().unwrap_or(raw);
     if raw.len() as u64 == recipe()["after_units51_bytes"].as_u64().unwrap()
         && digest::hash(raw) == recipe()["after_units51_sha256"].as_str().unwrap()
     {
@@ -309,6 +315,7 @@ fn same_scenario(a: &Scenario, b: &Scenario) {
 }
 
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    let all = partition_fs_registration::prefix_scenarios(all).unwrap_or(all);
     assert_eq!(all.len(), 193);
     let e = expected();
     for (a, (id, v)) in all[..190].iter().zip(&e.ids) {
@@ -324,6 +331,7 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..190]
 }
 pub fn prefix_scenarios(all: &[Scenario]) -> Option<&[Scenario]> {
+    let all = partition_fs_registration::prefix_scenarios(all).unwrap_or(all);
     if all.len() == 193 {
         Some(before_scenarios(all))
     } else {
@@ -359,6 +367,7 @@ fn same_unit(a: &Unit, b: &Unit) {
     )
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = partition_fs_registration::prefix_typed_units(all).unwrap_or(all);
     assert_eq!(all.len(), 51);
     let e = expected();
     for (a, b) in all[..50].iter().zip(&e.old_units) {
@@ -368,6 +377,7 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..50]
 }
 pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
+    let all = partition_fs_registration::prefix_typed_units(all).unwrap_or(all);
     if all.len() == 51 {
         Some(before_typed_units(all))
     } else {
@@ -375,6 +385,7 @@ pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
     }
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = partition_fs_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 51);
     let e = expected();
     assert_eq!(&all[..50], &e.old_values);
@@ -382,6 +393,7 @@ pub fn before_values(all: &[Value]) -> &[Value] {
     &all[..50]
 }
 pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
+    let all = partition_fs_registration::prefix_values(all).unwrap_or(all);
     if all.len() == 51 {
         Some(before_values(all))
     } else {
@@ -393,7 +405,12 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    assert_eq!(all.len(), 193);
+    let checked193 = if all.len() == 197 {
+        partition_fs_registration::before_attempts_len(all)
+    } else {
+        all.len()
+    };
+    assert_eq!(checked193, 193);
     let e = expected();
     for (id, version) in &e.ids {
         assert_eq!(all[id].scenario_version, *version)

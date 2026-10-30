@@ -49,7 +49,18 @@ impl LabApp {
                 self.metrics.manager_challenge = Some(independent.rect);
             }
             if before != challenge {
-                if matches!(self.scenarios[i].initial, State::PhysicalLink { .. }) {
+                if matches!(self.scenarios[i].initial, State::PartitionFs { .. }) {
+                    if let Err(e) =
+                        dlms_learning_lab::partition_fs_workspace::binding::set_challenge(
+                            self.progress.attempts.get_mut(&id).unwrap(),
+                            &self.scenarios[i],
+                            challenge,
+                        )
+                    {
+                        self.notice = Some(e);
+                        challenge = before;
+                    }
+                } else if matches!(self.scenarios[i].initial, State::PhysicalLink { .. }) {
                     if let Err(error) = dlms_learning_lab::physical_link_workspace::record_mode(
                         self.progress.attempts.get_mut(&id).unwrap(),
                         &self.scenarios[i],
@@ -100,7 +111,7 @@ impl LabApp {
                 if let Some(view) = &mut self.ipv4_view {
                     view.hide_guidance();
                 }
-                self.dirty = true;
+                self.dirty |= before != challenge;
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
                 self.rpm_presentation.clear();
@@ -147,6 +158,10 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::PartitionFs { .. }) {
+            self.partition_fs_page(ui, i);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::Ntp { .. }) {
             self.ntp_page(ui, i);
             return;

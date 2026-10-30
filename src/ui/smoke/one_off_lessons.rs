@@ -2,6 +2,7 @@
 //! sends native events only; it never installs learner state, grades or focus.
 use super::*;
 use dlms_learning_lab::{one_off_workspace as work, script_teaching::View};
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::Value;
 use std::collections::BTreeMap;
 pub(in crate::ui) const FIRST: usize = 73000;
@@ -94,7 +95,7 @@ fn sources() -> &'static Vec<Scenario> {
         );
         assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).len(),186);
         assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).len(),190);
-        assert_eq!(all.len(),193);
+        assert_eq!(disk_registration::before_scenarios(&all).len(),193);assert_eq!(all.len(),197);
         assert_eq!(
             all[176..180]
                 .iter()
@@ -957,7 +958,14 @@ impl LabApp {
         );
         assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units).len()),(186,49));
         assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(&self.units).len()), (190, 50));
-        assert_eq!((self.scenarios.len(), self.units.len()), (193, 51));
+        assert_eq!(
+            (
+                disk_registration::before_scenarios(&self.scenarios).len(),
+                disk_registration::before_typed_units(&self.units).len()
+            ),
+            (193, 51)
+        );
+        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
         assert_eq!(
             self.scenarios[176..180]
                 .iter()

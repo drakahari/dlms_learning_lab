@@ -6,6 +6,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace,
 };
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
 use serde_json::{Value, json};
 #[path = "support/combined_catalog.rs"]
 mod combined;
@@ -27,7 +28,8 @@ fn prepared(s: &pack::Scenario) -> Attempt {
 #[test]
 fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_tasks() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
+    assert_eq!(current.len(), 197);
     let all = ere::before_scenarios(&current).to_vec();
     let old = original::load();
     assert_eq!((all.len(), old.len()), (190, 186));
@@ -47,9 +49,18 @@ fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_t
         [57, 40, 36, 57]
     );
     assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| disk_registration::before_scenarios(
+            &current
+        )
+        .iter()
+        .filter(|s| s.track == t)
+        .count()),
+        [57, 40, 36, 60]
+    );
+    assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| current.iter().filter(|s| s.track == t).count()),
-        [57, 40, 36, 60]
+        [57, 44, 36, 60]
     );
     let scripts = all
         .iter()
@@ -77,7 +88,8 @@ fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_t
 #[test]
 fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mutations() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
+    assert_eq!(current.len(), 197);
     let all = ere::before_scenarios(&current).to_vec();
     assert_eq!(all.len(), 190);
     let old = original::load();
@@ -91,7 +103,11 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
     assert_eq!(digest::hash(raw), r["after_units50_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units49_sha256"]);
     let current_units = course::bundled(&current).unwrap();
-    assert_eq!(current_units.len(), 51);
+    assert_eq!(
+        disk_registration::before_typed_units(&current_units).len(),
+        51
+    );
+    assert_eq!(current_units.len(), 52);
     let units = ere::before_typed_units(&current_units);
     let previous = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!((units.len(), previous.len()), (50, 49));
@@ -150,7 +166,8 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
 #[test]
 fn source_inverse_never_masks_partial_extra_or_modified_new_tasks() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 193);
+    assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
+    assert_eq!(current.len(), 197);
     let all = ere::before_scenarios(&current).to_vec();
     for mode in 0..6 {
         let mut bad = all.clone();
