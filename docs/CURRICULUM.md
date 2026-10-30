@@ -1,17 +1,17 @@
 # Curriculum plan and coverage ledger
 
-Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
+Version boundaries rechecked **2026-10-29**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **176 source-integrated
-assignments/46 units:53CCNA,36LPIC-1,32LPIC-2,55Bash/Shell**. Four physical-uplink
-assignments and one private-office plan follow the earlier171 catalog. Units by
-track are14CCNA,9LPIC-1,8LPIC-2 and15Bash. Generated numerical practice and developer
-synthetic entries are excluded. All136 current parent objectives remain incomplete
-(94Open/42Partial); the1240 overlapping references are172Partial/1Supporting/1067Open.
+evidence ledger, not complete exam preparation. Main has **190 source-integrated
+assignments/50 units:57CCNA,40LPIC-1,36LPIC-2,57Bash/Shell**. Units by track are
+15CCNA,10LPIC-1,9LPIC-2 and16Bash. Generated numerical practice, private proposals
+and developer synthetic entries are excluded. All136 current parent objectives
+remain incomplete(92Open/44Partial); the1240 overlapping references are
+182Partial/1Supporting/1057Open.
 
-Main inclusive2,467/all24history groups pass. Source, scoped rendered evidence,
-long-route teardown and installed candidates are separated in
-[CATALOG176_MILESTONE.md](CATALOG176_MILESTONE.md). The available171 candidate's
+Main inclusive2,788 tests pass with0fail/0ignored. Source, scoped native rendered
+evidence and installed candidates are separated in
+[CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md). The available171 candidate's
 installed lifecycle/NFS cold reopening/ten starts retain their exact065032d identity.
 No current candidate, documentation row or test count completes the agreed scope.
 Windows/macOS runtime, screen-reader/physical-device and novice acceptance remain
@@ -32,6 +32,13 @@ The Cisco PDF and LPI objective pages were inspected, including versions and com
 Recheck evidence (2026-10-22): both official PDFs identify their blueprint versions; [Cisco’s certification page](https://www.cisco.com/web/go/ccna/) states the last v1.1 and first v2.0 testing dates. Both LPI overview/objective pages retain the versions above. No version changed in this recheck.
 
 Version-only recheck2026-10-27: official [LPIC-1 overview](https://www.lpi.org/our-certifications/lpic-1-overview/) and [LPIC-2 overview](https://www.lpi.org/our-certifications/lpic-2-overview/) still identify5.0 (101-500/102-500) and4.5 (201-450/202-450). [Cisco's dated transition notice](https://blogs.cisco.com/learning/stay-on-track-get-certified-before-the-ccna-refresh) still separates currentv1.1 through2027-02-02 fromv2.0 starting2027-02-03. The shortcut page currently redirects; its cached text alone is not this check. This check does not recompute or redate every objective fingerprint.
+
+Version/source recheck2026-10-29: the official LPI objective pages still identify
+5.0 and4.5.0; Cisco's exam overview points to the v1.1 topic route, its official
+v1.1/v2.0 PDFs identify their versions, and the dated transition notice retains
+current-v1.1 testing through2027-02-02. The dynamic Learning Network article still
+fails to expose its objective text. No objective fingerprints are recomputed or
+redated, and future-v2.0 receives no inherited implementation credit.
 
 ## Complete planning crosswalk
 

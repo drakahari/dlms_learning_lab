@@ -147,6 +147,10 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::Ntp { .. }) {
+            self.ntp_page(ui, i);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::Lvm { .. }) {
             self.lvm_page(ui, i);
             return;

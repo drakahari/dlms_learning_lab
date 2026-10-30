@@ -1,10 +1,15 @@
 # Virtual NTP foundation v1
 
-This pure model is a source foundation, not an integrated lesson, wire-protocol
-implementation or completed objective. The current CCNA v1.1 4.2 row remains
-Open until authored lessons, native interactions and verification are integrated.
-No new catalog entries, UI, progress format, dependencies or host facilities are
-added here. The existing upcoming CCNA v2.0 rows remain separate.
+This bounded dependency model supports four authored client/server assignments
+in the normal native catalog. It does not implement the wire protocol or complete
+CCNA objective4.2. The unit uses separate ungraded practice, configuration commands
+and state-based verification; see NTP_CLIENT_SERVER_LESSONS.md. No host clock,
+network facility, new dependency or progress schema is required. Upcoming CCNA
+v2.0 and LPIC time-administration coverage remain separate.
+
+Source integration and scoped tests do not by themselves promote objective
+coverage or establish native/installed acceptance. The current evidence and
+remaining gates are recorded in CHECKPOINT.md and the coverage matrix.
 
 ## Supported teaching problem
 
@@ -73,15 +78,15 @@ no unbounded learner program, host path, process, socket, clock or wall-time API
 `from_json` validates version, sizes and referential integrity; `to_json` also
 rejects excess raw output. Generic serde deserialization is data decoding only;
 callers must use validated admission and never bypass public state operations.
-Scenario authors supply references and exchange facts; future integrations must
-use `environment_matches` / `check_with_environment` at restored-attempt admission
+Scenario authors supply references and exchange facts. The native unit uses
+`environment_matches` / `check_with_environment` at restored-attempt admission
 to preserve node identities/roles/availability, supplied reference health/strata
 and exact ordered delivery fixtures while allowing device upstream edits. Ordinary
 `check` validates current state but cannot infer an absent author baseline.
-The current foundation does not add a progress migration or invent credit.
-Reset means restoring the scenario's supplied initial state; resume serializes
-actual configuration and grades it again. Tests exercise these model operations,
-not an app-level cold process, UI or migration claim.
+The unit adds no progress migration or invented credit. Reset restores only the
+selected assignment; separate examples retain their own state. Resume serializes
+actual configuration and grades it against its authored source. Model/adapter
+tests do not establish an app-level cold process or installed lifecycle.
 
 ## Deliberate omissions
 
@@ -109,9 +114,12 @@ are newly authored; no RFC reference code, Cisco code or manual passage is copie
 - [Cisco Basic System Management command reference](https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/bsm/command/bsm-cr-book/m_bsm-cr-n1.html): `ntp server`, its no form and status/association inspection. Exact platform options vary; only the disclosed command subset is implemented.
 - [RFC5905, June2010](https://www.rfc-editor.org/rfc/rfc5905.html), sections7.3,9 and11: strata, reference identity, unsynchronized status and substantial protocol/selection behavior deliberately excluded here. Consult its current status/errata; this foundation claims neither full RFC conformance nor code equivalence.
 
-The18 core tests pass through the serialized runner. They exercise derived
-chains and reports, alternatives, wrong-source and broken-transport outcomes,
-stratum limits/cycles, read-only fixture preservation, serialization and hostile
-inputs. All-target Clippy also passes with warnings denied. The combined inclusive
-application gate remains pending. There are no
-accepted native interactions or authored lessons yet; objective4.2 remains Open.
+The18 core tests pass through the serialized runner, covering derived chains/
+reports, alternatives, wrong-source/broken-exchange outcomes, strata/cycles,
+read-only fixture preservation, serialization and hostile inputs. The integrated
+unit adds38 scoped content/catalog/widget/native-event groups. M481fullinclusive
+passes2,788 tests with0fail/0ignored; all-target Clippy passes. M480actually
+renders1389 events/94 Fedora development captures, with selected original-view
+review. See CATALOG190_MILESTONE.md for identities and exact limits. Packaged/cold,
+physical-device, screen-reader, novice and Windows/macOS acceptance remain
+separate. No full NTP/protocol, objective or platform completion is inferred.

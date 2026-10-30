@@ -36,7 +36,14 @@ fn catalog() -> Vec<Scenario> {
         .collect::<Vec<_>>();
     let expected =
         pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
-    assert_eq!(v(&expected), v(&pack::bundled().unwrap()));
+    let current190 = pack::bundled().unwrap();
+    assert_eq!(current190.len(), 190);
+    assert_eq!(
+        v(&expected),
+        v(registration::ntp_registration::before_scenarios(
+            &current190
+        ))
+    );
     expected
 }
 fn definition(s: &Scenario) -> &work::Definition {

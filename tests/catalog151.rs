@@ -78,10 +78,11 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
         }),
         [53, 40, 32, 57]
     );
+    assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 36, 57]
+        [57, 40, 36, 57]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

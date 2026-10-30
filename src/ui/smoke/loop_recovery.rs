@@ -597,7 +597,8 @@ impl LabApp {
             ),
             (182, 48)
         );
-        assert_eq!((self.scenarios.len(), self.units.len()), (186, 49));
+        assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units).len()),(186,49));
+        assert_eq!((self.scenarios.len(), self.units.len()), (190, 50));
         assert_eq!(
             self.scenarios[180..182]
                 .iter()

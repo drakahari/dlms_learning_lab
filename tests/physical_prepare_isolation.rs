@@ -285,7 +285,16 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         &old_indices[..previous_indices.len()],
         previous_indices.as_slice()
     );
-    assert_eq!(old_indices.len(), 182);
+    assert_eq!(old_indices.len(), 186);
+    assert_eq!(&old_indices[182..], &[186, 187, 188, 189]);
+    assert!(old_indices[182..].iter().all(|i| matches!(
+        all[*i].initial,
+        dlms_learning_lab::engine::State::Ntp { .. }
+    ) && matches!(
+        all[*i].goal,
+        dlms_learning_lab::engine::Goal::Ntp { .. }
+    )));
+
     let prior182 = one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all);
     let prior178 = prior182
         .iter()
@@ -300,9 +309,9 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         .collect::<Vec<_>>();
     assert_eq!(prior178.len(), 178);
     assert_eq!(&old_indices[..178], prior178.as_slice());
-    assert_eq!(&old_indices[178..], &[182, 183, 184, 185]);
+    assert_eq!(&old_indices[178..182], &[182, 183, 184, 185]);
     assert_eq!(
-        old_indices[178..]
+        old_indices[178..182]
             .iter()
             .map(|i| all[*i].id.as_str())
             .collect::<Vec<_>>(),
@@ -313,7 +322,7 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
             "lpic2-lvm-handover"
         ]
     );
-    assert!(old_indices[178..].iter().all(|i| matches!(
+    assert!(old_indices[178..182].iter().all(|i| matches!(
         all[*i].initial,
         dlms_learning_lab::engine::State::Lvm { .. }
     ) && matches!(
@@ -354,6 +363,11 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
             dlms_learning_lab::engine::State::Lvm { .. }
         ) {
             "Foreign teaching metadata on LVM source"
+        } else if matches!(
+            all[index].initial,
+            dlms_learning_lab::engine::State::Ntp { .. }
+        ) {
+            "Foreign teaching metadata on NTP source"
         } else {
             "Physical-link teaching/Goal belongs to another activity"
         };

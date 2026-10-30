@@ -272,7 +272,23 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
         .collect::<Vec<_>>();
     assert_eq!(previous.len(), 176);
-    assert_eq!(old.len(), 182);
+    assert_eq!(old.len(), 186);
+    assert_eq!(
+        old[182..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "ccna-ntp-client-chain",
+            "ccna-ntp-cycle-repair",
+            "ccna-ntp-asymmetric-delivery",
+            "ccna-ntp-policy-handover"
+        ]
+    );
+    assert!(
+        old[182..]
+            .iter()
+            .all(|s| matches!(s.initial, State::Ntp { .. })
+                && matches!(s.goal, engine::Goal::Ntp { .. }))
+    );
+
     let prior182 = one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all);
     let prior178 = prior182
         .iter()
@@ -284,7 +300,10 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         prior178.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
     );
     assert_eq!(
-        old[178..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        old[178..182]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         [
             "lpic2-lvm-free-space",
             "lpic2-lvm-add-pv",
@@ -293,7 +312,7 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         ]
     );
     assert!(
-        old[178..]
+        old[178..182]
             .iter()
             .all(|s| matches!(s.initial, State::Lvm { .. })
                 && matches!(s.goal, engine::Goal::Lvm { .. }))

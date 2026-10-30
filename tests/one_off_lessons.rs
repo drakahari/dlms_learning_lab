@@ -6,6 +6,8 @@ use dlms_learning_lab::{
     script_teaching::View,
 };
 use serde_json::Value;
+#[path = "support/ntp_registration.rs"]
+mod ntp_registration;
 fn lessons() -> Vec<pack::Scenario> {
     let p: pack::Pack =
         serde_json::from_str(include_str!("../scenarios/linux-one-off-v1.json")).unwrap();
@@ -92,7 +94,8 @@ fn actual_reference(a: &mut Attempt, s: &pack::Scenario, actions: &Value) {
 #[test]
 fn four_distinct_registered_tasks_have_real_prerequisites_and_separate_teaching() {
     let old = pack::bundled().unwrap();
-    assert_eq!(old.len(), 186);
+    assert_eq!(ntp_registration::before_scenarios(&old).len(), 186);
+    assert_eq!(old.len(), 190);
     assert_eq!(
         serde_json::to_value(&old[176..180]).unwrap(),
         serde_json::to_value(lessons()).unwrap()

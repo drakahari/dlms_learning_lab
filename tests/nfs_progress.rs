@@ -225,12 +225,19 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 186);
+    assert_eq!(p.attempts.len(), 190);
     assert_eq!(
         p.attempts
             .keys()
             .filter(|id| !one_off_registration::IDS.contains(&id.as_str())
                 && !["shell-loop-intake", "shell-loop-fallback"].contains(&id.as_str())
+                && ![
+                    "ccna-ntp-client-chain",
+                    "ccna-ntp-cycle-repair",
+                    "ccna-ntp-asymmetric-delivery",
+                    "ccna-ntp-policy-handover"
+                ]
+                .contains(&id.as_str())
                 && ![
                     "lpic2-lvm-free-space",
                     "lpic2-lvm-add-pv",

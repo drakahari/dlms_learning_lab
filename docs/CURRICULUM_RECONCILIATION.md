@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main186 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main190 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -10,12 +10,12 @@ grading, persistence and available native acceptance. There is no lab-count targ
 
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| CCNA | 53 | 14 | 65 | 46 | 0 |
+| CCNA | 57 | 15 | 64 | 47 | 0 |
 | LPIC-1 | 40 | 10 | 501 | 96 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
 | Bash/Shell | 57 | 16 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (93 Open,43 Partial).
+All136 current parent objectives remain incomplete (92 Open,44 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -23,7 +23,7 @@ and proposed assignment. There is no inherited child/tool credit. Counts overlap
 and are not a completion percentage. Documentation, pure libraries, private
 worktrees and generated numerical practice are excluded from authored totals.
 
-Current versions were checked2026-10-28 against the official
+Current versions were checked2026-10-29 against the official
 [CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf),
 [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/)
 and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/).
@@ -74,7 +74,7 @@ configuration or troubleshooting.
 | 3.4 | Partial practice · ccna-ospf-router-identity;ccna-ospf-p2p-parameters;ccna-ospf-directed-ecmp;ccna-ospf-passive-handover | Recover an OSPF neighbor | Neighbor FSM/Full state, Hello/LSA exchange, flooding, protocol timers/convergence, broadcast DR/BDR, multi-area/external routing and IOS CLI are not implemented yet. Snapshot calculations do not demonstrate packet delivery or real equipment experience. |
 | 3.5 | Open | Trace gateway failover | FHRP state machine. Required model not implemented; cannot claim faithful command or state behavior. |
 | 4.1 | Partial practice · ccna-nat-static;ccna-nat-pool;ccna-nat-handover | Configure a static address mapping; diagnose pool eligibility/capacity; preserve mappings during a policy handover | No IOS CLI/interface configuration or real equipment verification; no PAT, ports, sessions, routing, connectivity or real packets. Actual Fedora normal-lesson and installed00d69d3 flows passed; NAT-specific cold and other-platform acceptance remain pending. This is partial objective practice. |
-| 4.2 | Open | Repair an inconsistent time source | Bounded single-upstream dependency model passes18 core tests; no accepted teaching/native assignments yet. Packet timing/filter/discipline, multiple-peer selection, ntp master, authentication and real clock behavior remain absent. |
+| 4.2 | Partial practice | Repair an inconsistent time source | Four native client/server-chain, cycle/asymmetric-exchange diagnosis and protected-source-handover assignments with separate practice and alternate valid sources. Bounded single-upstream evidence only; timing/filter/discipline, real convergence/UTC, multipeer selection, ntp master, authentication and actual clocks remain absent. |
 | 4.3 | Partial practice · ccna-dhcp-held-options;ccna-dhcp-relay-scope;ccna-dhcp-lease-handover | Trace a name and address assignment | Broader DNS-role instruction, real resolver behavior, protocol packets, automatic client behavior and the full DHCP/DNS objective remain incomplete. Numeric network parameters do not prove routing or DNS service. |
 | 4.4 | Open | Interpret a monitoring alarm | SNMP counter/event model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 4.5 | Open | Route an actionable log event | syslog severity/facility model. Required model not implemented; cannot claim faithful command or state behavior. |

@@ -937,6 +937,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 simulation.reconfigure(configuration).unwrap();
             }
             State::Lvm { .. }
+            | State::Ntp { .. }
             | State::OneOff { .. }
             | State::FileBackup { .. }
             | State::Cron { .. }
@@ -7179,3 +7180,7 @@ mod rpm_lessons_native;
 
 mod lvm_growth;
 mod lvm_lessons_native;
+
+mod ntp_client_server;
+
+mod ntp_lessons_native;

@@ -643,6 +643,26 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
             assert!(a.workspace.as_ref().unwrap().command.is_empty());
             assert!(one::context(&a, s).is_ok());
             assert!(!progress::current_solved(&a, s));
+        } else if let (State::Ntp { simulation }, Goal::Ntp { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            simulation
+                .set_command(
+                    definition,
+                    format!("Retained NTP assignment draft for {}", s.id),
+                    false,
+                )
+                .unwrap();
+            simulation
+                .set_command(
+                    definition,
+                    "Retained independent NTP example draft".into(),
+                    true,
+                )
+                .unwrap();
+            dlms_learning_lab::ntp_workspace::context(&a, s).unwrap();
+            assert!(a.workspace.as_ref().unwrap().command.is_empty());
+            assert!(!progress::current_solved(&a, s));
         } else if let (State::Lvm { simulation }, Goal::Lvm { definition }) =
             (&mut a.state, &s.goal)
         {

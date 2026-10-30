@@ -8,6 +8,8 @@ use dlms_learning_lab::{
 };
 use serde::Deserialize;
 use serde_json::Value;
+#[path = "support/ntp_registration.rs"]
+mod ntp_registration;
 use std::collections::BTreeMap;
 #[path = "support/actual12_evidence.rs"]
 mod evidence;
@@ -225,7 +227,8 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
 #[ignore = "Requires genuine12 sealed profile; explicit guarded current13 migration"]
 fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 186);
+    assert_eq!(ntp_registration::before_scenarios(&all).len(), 186);
+    assert_eq!(all.len(), 190);
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();
@@ -252,6 +255,21 @@ fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() 
         assert!(!current.attempts.contains_key(&s.id));
         assert!(!old.favorites.contains(&s.id));
         assert!(!current.favorites.contains(&s.id));
+    }
+    for id in [
+        "ccna-ntp-client-chain",
+        "ccna-ntp-cycle-repair",
+        "ccna-ntp-asymmetric-delivery",
+        "ccna-ntp-policy-handover",
+    ] {
+        let s = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(s.initial, State::Ntp { .. }));
+        assert!(!current.attempts.contains_key(id) && !current.favorites.contains(id));
+        assert!(!old.attempts.contains_key(id) && !old.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(s, 0),
+            s
+        ));
     }
     for id in [
         "lpic2-lvm-free-space",

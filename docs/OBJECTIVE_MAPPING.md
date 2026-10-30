@@ -2,14 +2,15 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are181 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1058 Open rows; no full-objective completion is asserted. Main source
-contains186 authored assignments/49 units (53CCNA,40LPIC-1,36LPIC-2,57Bash).
-The four storage assignments add only narrow204.3/K1/K2/T1–T3 evidence;
-snapshots, activation, mount integration, mapper aliases and lvm.conf stay Open.
-All136 parents remain incomplete(93Open/43Partial). The inclusive Rust suite
-passes2,715 tests with0fail/0ignored; static and actual native gates are separated
-in [CATALOG186_MILESTONE.md](CATALOG186_MILESTONE.md). Candidate065032d0a90b still
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are182 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1057 Open rows; no full-objective completion is asserted. Main source
+contains190 authored assignments/50 units (57CCNA,40LPIC-1,36LPIC-2,57Bash).
+Current CCNA4.2 gains only the bounded client/server dependency slice, including
+configuration, cycle/reply diagnosis and protected handover. Complete protocol,
+clock discipline, UTC accuracy and Linux time administration remain absent.
+All136 parents remain incomplete(92Open/44Partial). The inclusive Rust suite
+passes2,788 tests with0fail/0ignored; static and actual native gates are separated
+in [CATALOG190_MILESTONE.md](CATALOG190_MILESTONE.md). Candidate065032d0a90b still
 contains171 assignments, with its separate installed lifecycle/NFS cold/startup
 identity. See [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
 [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
@@ -330,12 +331,16 @@ Open. Futurev2.0 receives no inherited credit. The coverage CSV retains all othe
 1236 rows exactly. See PHYSICAL_LINK_LESSONS.md and IPV4_PRIVATE_PLANNING_LESSONS.md.
 
 
-The NTP library foundation adds no authored assignment or objective credit. Its
-18 passing core tests cover only bounded single-upstream dependency/stratum and
-immutable supplied delivery/source evidence. Current4.2 stays Open until native
-instruction, separate practice and meaningful configuration/troubleshooting
-assignments pass their own gates. Packet timing, clock discipline, multipeer
-selection and real clocks remain absent; see NTP_SUBSET.md.
+The four registered NTP client/server assignments add narrow Partial practice
+only to current CCNA v1.1 objective4.2 after their content/native/full gates.
+They configure and verify bounded single-upstream dependency chains, diagnose
+cycles and asymmetric supplied exchanges, and preserve downstream associations
+during an unhealthy-source handover. Separate ungraded examples and alternate
+allowed sources retain meaningful state-based work. Packet timing, clock
+filter/discipline, real convergence/UTC, multipeer selection, authentication,
+ntp master and actual clocks remain absent. Supplied exchange facts do not prove
+routing or measured traffic. LPIC time administration and upcoming CCNAv2.0
+receive no inherited credit. See NTP_SUBSET.md and NTP_CLIENT_SERVER_LESSONS.md.
 
 
 The180 one-off unit promotes only107.2.T9/T10/T11 from Open to narrow Partial

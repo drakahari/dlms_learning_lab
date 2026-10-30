@@ -155,6 +155,7 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     let mut private_drafts = 0;
     let mut one_off_drafts = 0;
     let mut lvm_drafts = 0;
+    let mut ntp_drafts = 0;
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
@@ -198,6 +199,20 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
             )
             .unwrap();
             one_off_drafts += 1;
+            p.attempts.insert(s.id.clone(), a);
+            continue;
+        }
+        if let (State::Ntp { simulation }, engine::Goal::Ntp { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            simulation
+                .set_command(definition, "unfinished NTP assignment |".into(), false)
+                .unwrap();
+            simulation
+                .set_command(definition, "separate NTP example draft |".into(), true)
+                .unwrap();
+            dlms_learning_lab::ntp_workspace::context(&a, s).unwrap();
+            ntp_drafts += 1;
             p.attempts.insert(s.id.clone(), a);
             continue;
         }
@@ -279,7 +294,8 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     assert_eq!(private_drafts, 1);
     assert_eq!(one_off_drafts, 4);
     assert_eq!(lvm_drafts, 4);
-    assert_eq!(p.attempts.len(), 186);
+    assert_eq!(ntp_drafts, 4);
+    assert_eq!(p.attempts.len(), 190);
     assert_eq!(
         labs[176..180]
             .iter()

@@ -340,10 +340,13 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
             );
         }
     }
-    let prior182 = one_off_boundary::loop_registration::lvm_registration::before_units(
-        include_bytes!("../scenarios/units-v1.json"),
-    )
-    .unwrap();
+    let prior186 =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_units(
+            include_bytes!("../scenarios/units-v1.json"),
+        )
+        .unwrap();
+    let prior182 =
+        one_off_boundary::loop_registration::lvm_registration::before_units(&prior186).unwrap();
     let mut current: Value = serde_json::from_slice(&prior182).unwrap();
     let units = current["units"].as_array_mut().unwrap();
     assert_eq!(one_off_boundary::before_len(&units), 46);

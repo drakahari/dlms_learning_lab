@@ -93,6 +93,20 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         assert!(!original.favorites.contains(id));
     }
     for id in [
+        "ccna-ntp-client-chain",
+        "ccna-ntp-cycle-repair",
+        "ccna-ntp-asymmetric-delivery",
+        "ccna-ntp-policy-handover",
+    ] {
+        let s = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(s.initial, State::Ntp { .. }));
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &dlms_learning_lab::progress::Attempt::new(s, 0),
+            s
+        ));
+    }
+    for id in [
         "lpic2-lvm-free-space",
         "lpic2-lvm-add-pv",
         "lpic2-lvm-filesystem-gap",
@@ -116,6 +130,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "ccna-ntp-client-chain",
+            "ccna-ntp-cycle-repair",
+            "ccna-ntp-asymmetric-delivery",
+            "ccna-ntp-policy-handover",
             "lpic2-lvm-free-space",
             "lpic2-lvm-add-pv",
             "lpic2-lvm-filesystem-gap",

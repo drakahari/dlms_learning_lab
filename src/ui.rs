@@ -26,6 +26,7 @@ mod legacy_learning;
 mod lvm_workspace;
 mod nat_workspace;
 mod nfs_workspace;
+mod ntp_workspace;
 mod one_off_boundary;
 mod one_off_workspace;
 mod ospf_workspace;
@@ -59,6 +60,7 @@ struct Metrics {
     ether: etherchannel_workspace::EtherMetrics,
     physical: physical_link_workspace::Metrics,
     lvm: lvm_workspace::Metrics,
+    ntp: ntp_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -347,6 +349,7 @@ pub struct LabApp {
     ether_presentation: etherchannel_workspace::Presentation,
     physical_presentation: physical_link_workspace::Presentation,
     lvm_presentation: lvm_workspace::Presentation,
+    ntp_presentation: ntp_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     one_off_presentation: one_off_workspace::Presentation,
@@ -491,6 +494,7 @@ impl LabApp {
             lesson_scroll_reset: false,
             notice: None,
             lvm_presentation: Default::default(),
+            ntp_presentation: Default::default(),
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
@@ -654,6 +658,10 @@ impl LabApp {
             {
                 72000
             } else if let Some(stage) =
+                Self::ntp_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::lvm_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -810,6 +818,22 @@ impl LabApp {
         }
     }
     fn launch(&mut self, i: usize) {
+        let ntp_source = &self.scenarios[i];
+        let previous = self.progress.attempts.get(&ntp_source.id);
+        if matches!(ntp_source.initial, engine::State::Ntp { .. })
+            || matches!(ntp_source.goal, engine::Goal::Ntp { .. })
+            || previous.is_some_and(|a| matches!(a.state, engine::State::Ntp { .. }))
+        {
+            let admission = dlms_learning_lab::ntp_workspace::source(ntp_source).and_then(|()| {
+                previous.map_or(Ok(()), |a| {
+                    dlms_learning_lab::ntp_workspace::context(a, ntp_source)
+                })
+            });
+            if let Err(e) = admission {
+                self.notice = Some(e);
+                return;
+            }
+        }
         let source = &self.scenarios[i];
         let previous = self.progress.attempts.get(&source.id);
         if matches!(source.initial, engine::State::Lvm { .. })
@@ -1048,6 +1072,9 @@ impl LabApp {
         };
     }
     fn reset_attempt(&mut self, i: usize) {
+        if matches!(self.scenarios[i].initial, engine::State::Ntp { .. }) {
+            self.ntp_presentation.reset_all();
+        }
         if matches!(self.scenarios[i].initial, engine::State::Lvm { .. }) {
             self.lvm_presentation.reset_all();
         }
@@ -1233,7 +1260,8 @@ impl LabApp {
         let observe_picker = self.reopen.is_some()
             || self.physical_capture_active()
             || self.one_off_capture_active()
-            || self.lvm_capture_active();
+            || self.lvm_capture_active()
+            || self.ntp_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1280,7 +1308,8 @@ impl LabApp {
         let observe_picker = self.reopen.is_some()
             || self.physical_capture_active()
             || self.one_off_capture_active()
-            || self.lvm_capture_active();
+            || self.lvm_capture_active()
+            || self.ntp_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)

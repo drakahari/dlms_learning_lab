@@ -84,7 +84,13 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
             count
         );
         let current = if track == "LPIC-2" { count + 4 } else { count };
-        assert_eq!(all.iter().filter(|s| s.track == track).count(), current);
+        assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==track).count(),current);
+        let current190 = if track == "CCNA" {
+            current + 4
+        } else {
+            current
+        };
+        assert_eq!(all.iter().filter(|s| s.track == track).count(), current190);
     }
 }
 #[test]

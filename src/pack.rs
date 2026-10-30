@@ -244,6 +244,13 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             };
             definition.validate()?;
         }
+        if matches!(s.initial, State::Ntp { .. }) || matches!(s.goal, Goal::Ntp { .. }) {
+            crate::ntp_workspace::source(s)?;
+            let Goal::Ntp { definition } = &s.goal else {
+                return Err("Wrong NTP Goal".into());
+            };
+            definition.validate()?;
+        }
         if let State::Vlsm { allocations, .. } = &s.initial
             && allocations
                 .iter()
@@ -998,6 +1005,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Ntp { simulation } => simulation.validate().is_ok(),
         State::Lvm { simulation } => simulation.validate().is_ok(),
         State::PhysicalLink { simulation } => simulation.validate().is_ok(),
         State::FileBackup { simulation } => simulation.valid(),
@@ -1217,5 +1225,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/linux-one-off-v1.json"),
         include_str!("../scenarios/shell-loop-recovery-v1.json"),
         include_str!("../scenarios/lvm-growth-v1.json"),
+        include_str!("../scenarios/ntp-client-server-v1.json"),
     ])
 }

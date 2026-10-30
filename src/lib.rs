@@ -168,6 +168,7 @@ pub mod ntp;
 #[doc(hidden)]
 #[path = "../examples/support/automation_digest.rs"]
 pub mod developer_digest;
+pub mod ntp_workspace;
 
 /// Bounded settled gateway-failover model; authored integration is separate.
 pub mod hsrp;

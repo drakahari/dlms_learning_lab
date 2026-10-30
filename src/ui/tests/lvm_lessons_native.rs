@@ -244,7 +244,9 @@ fn lvm_normal186_real_events_complete_all_tasks_and_every_capture_phase_without_
     a.smoke = true;
     a.smoke_stage = 78000;
     assert!(!a.synthetic && !a.developer);
-    assert_eq!((a.scenarios.len(), a.units.len()), (186, 49));
+    let boundary = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&a.scenarios);
+    let units = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&a.units);
+    assert_eq!((boundary.len(), units.len()), (186, 49));
     assert!(a.progress.attempts.is_empty());
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();

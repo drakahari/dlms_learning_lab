@@ -822,7 +822,9 @@ impl LabApp {
         match step {
             Step::Init => {
                 assert!(self.smoke && !self.synthetic && !self.developer);
-                assert_eq!((self.scenarios.len(), self.units.len()), (186, 49));
+                let boundary = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios);
+                let units = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units);
+                assert_eq!((boundary.len(), units.len()), (186, 49));
                 assert!(
                     self.progress.attempts.is_empty(),
                     "Real fresh isolated profile, no installed successes"

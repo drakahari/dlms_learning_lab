@@ -1681,6 +1681,43 @@ mod attempt_projection_tests {
         progress::{self, Attempt},
         workspace::WorkspaceData,
     };
+    // Library-unit scope cannot import the UI-owned historical boundary. Keep
+    // its complete new-source equality here; external catalog190 guards retain
+    // the independent recipe/pack hashes and raw/full-typed unit inverse.
+    fn ntp_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../tests/fixtures/catalog190-registration.json"
+        ))
+        .unwrap();
+        let new: pack::Pack =
+            serde_json::from_str(include_str!("../scenarios/ntp-client-server-v1.json")).unwrap();
+        assert_eq!(all.len(), 190);
+        assert_eq!(new.scenarios.len(), 4);
+        assert_eq!(
+            new.scenarios
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "ccna-ntp-client-chain",
+                "ccna-ntp-cycle-repair",
+                "ccna-ntp-asymmetric-delivery",
+                "ccna-ntp-policy-handover",
+            ]
+        );
+        assert_eq!(
+            all[..186]
+                .iter()
+                .map(|s| serde_json::json!({"id":s.id,"version":s.version}))
+                .collect::<Vec<_>>(),
+            *recipe["before_ids"].as_array().unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&all[186..]).unwrap(),
+            serde_json::to_value(&new.scenarios).unwrap()
+        );
+        &all[..186]
+    }
     fn scenario() -> Scenario {
         let v: serde_json::Value =
             serde_json::from_str(include_str!("../tests/fixtures/nfs-workbench-v1.json")).unwrap();
@@ -1761,7 +1798,8 @@ mod attempt_projection_tests {
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
         let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 186);
+        assert_eq!(ntp_predecessor(&all).len(), 186);
+        assert_eq!(all.len(), 190);
         let new: crate::pack::Pack =
             serde_json::from_str(include_str!("../scenarios/linux-one-off-v1.json")).unwrap();
         assert_eq!(

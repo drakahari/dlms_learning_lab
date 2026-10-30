@@ -57,7 +57,11 @@ fn catalog() -> &'static Vec<Scenario> {
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 13);
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 186);
+        assert_eq!(
+            lvm_registration::ntp_registration::before_scenarios(&all).len(),
+            186
+        );
+        assert_eq!(all.len(), 190);
         assert_eq!(value(&all[180..182]), value(&authored()));
         bounded(all)
     })

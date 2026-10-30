@@ -4,9 +4,9 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 
 | ID | Acceptance requirement | Status |
 | --- | --- | --- |
-| C1 | Current official objective versions, dates and source links verified; announced future blueprints separate | Objective snapshot2026-10-22; official version boundaries rechecked2026-10-27; finer authoring references record their own dates; see CURRICULUM.md |
+| C1 | Current official objective versions, dates and source links verified; announced future blueprints separate | Objective snapshot2026-10-22; official version boundaries rechecked2026-10-29; finer authoring references record their own dates; see CURRICULUM.md |
 | C2 | Every active objective and listed subobjective maps to practical coverage, supporting teaching, or a specific justified fidelity limitation; configure/troubleshoot requirements need actual modeled practice | Open; 165-row planning index plus1240-reference granular evidence/gap ledger; most required behavior remains absent, see OBJECTIVE_MAPPING.md |
-| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;186 integrated assignments/49units (53CCNA/40LPIC-1/36LPIC-2/57Bash). Inclusive2,715 Rust, Clippy,396 Python and actual68-capture storage flows pass; see CATALOG186_MILESTONE.md. Available171 candidate retains its separate installed lifecycle/NFS cold/startup evidence. All136 full parent objectives and novice acceptance remain incomplete |
+| C3 | Each unit has prerequisite teaching, isolated runnable practice, independent meaningful tasks, troubleshooting and appropriate capstones; distinct authored inventory with no numeric inflation | Open;190 integrated assignments/50units (57CCNA/40LPIC-1/36LPIC-2/57Bash). Inclusive2,788 Rust, Clippy,424 Python and actual94-capture NTP development flows pass; see CATALOG190_MILESTONE.md. Available171 candidate retains its separate installed lifecycle/NFS cold/startup evidence. All136 full parent objectives and novice acceptance remain incomplete |
 | S1 | Implement required networking/Linux/shell capabilities before dependent content; typed state and multiple deterministic behavior cases, alternate solutions and plausible negative tests | Open; subset and capability gaps remain |
 | S2 | Learner input stays inside bounded in-process simulation; test resource/path/malformed-input limits and responsive Stop; controlled disposable reference comparisons only | Existing boundary implemented; independent review and extension regression work open |
 | G1 | Examples cannot award assignment credit; edits invalidate success; objective expansion never fabricates learner answers/mastery | Implemented baseline; audit all extensions |
@@ -19,11 +19,10 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | R2 | Actual OS clean install/reopen/upgrade/uninstall acceptance, not just CI/cross-build | Fedora scoped installed-candidate lifecycle/flows verified; full-product acceptance remains open; Windows/macOS desktop environments unavailable here |
 | R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | MIT approved 2026-10-22; target notice/source bundle implemented; macOS dispatch notice, signing decisions and platform acceptance remain open |
 
-The current source batch adds four substantive existing-volume assignments:
-49units(14CCNA,10LPIC-1,9LPIC-2,16Bash),186assignments. Inclusive/static and actual
-native evidence is in CATALOG186_MILESTONE.md. Available Fedora candidate171/
+The current source batch adds four distinct time-service assignments:
+50units(15CCNA,10LPIC-1,9LPIC-2,16Bash),190assignments. Inclusive/static and actual
+native evidence is in CATALOG190_MILESTONE.md. Available Fedora candidate171/
 065032d retains its own installation and cold-reopening identity. All136 parents
-remain incomplete; NTP content, HSRP/links integration, ERE language and projects,
-and every other mapped gap remain work. Packaging is not curriculum completion.
+remain incomplete; no complete curriculum or other-platform acceptance is claimed.
 
 A model can teach evidence interpretation without performing physical, kernel or cryptographic operations, but its exact limits must accompany coverage. A limitation is not a substitute for implementing a difficult supported configuration task. No incomplete objective becomes “covered” merely because a related command is recognized. No public release or deployment is authorized.

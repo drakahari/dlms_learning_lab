@@ -143,8 +143,10 @@ pub fn save_action(text: String) -> String {
 }
 
 pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_attempt: bool) {
-    if matches!(attempt.state, crate::engine::State::Lvm { .. })
-        || crate::workspace::is_physical_workspace(attempt)
+    if matches!(
+        attempt.state,
+        crate::engine::State::Lvm { .. } | crate::engine::State::Ntp { .. }
+    ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;
     }

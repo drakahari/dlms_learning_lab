@@ -4629,3 +4629,145 @@ control/status plus final file contents, links and alias groups without replay.
 No broad POSIX/CLI, native or authored coverage claim; no new catalog credit.
 Ordinary reference observations show25.36GB available/PSI0/no counter increase;
 the short run is not a stress or universal memory-safety acceptance test.
+
+### NTP190 integration — actual scoped gates, broader acceptance pending
+
+Foundation/reference71aa25a is committed and pushed. Compositionee94469c applies
+exactly78paths/14new while preserving all971current unowned source paths. Old186
+definitions/49units/script behavior remain guarded. The four NTP assignments are
+not yet accepted as authored coverage. M457wrong test-target name refuses before
+compilation; corrected M458 catches four invalid initial View literals. Use the
+existing lowercase enum spelling; no serde alias/schema weakening. New-pack pin
+f024f117/closed receipt29d8d6d3 propagate to three exact hash consumers, preserving
+old186 proof bytes/assertions. Independent five-path ACKc775669c. M4595PASS2stale-
+receipt FAIL precedes this complete fix; M460all21content/catalogPASS.
+
+M46111widget/native-phase PASS, including1369actual events/all90capture phases,
+and1transcript-geometry FAIL. M462 failure-only diagnostics show x18..714 content
+versus x18..728 field: egui inner_rect excludes its reserved14-point scrollbar.
+M463 corrects the measurement using ScrollStyle.allocated_width, retaining exact
+left/height, actual fully clipped glyphs, all40geometries, real old/latest wheels
+and full profile/receipt equality. PASS; source peer8472203f. No product width/
+pixel-offset change or tolerance relaxation. M465424PythonPASS.
+
+M464alltargetClippy exposes one library-test namespace error: new NFS predecessor
+assertion references a UI-only one_off_boundary module. Repair the test scope
+without dropping its strict predecessor checks. Full inclusive/static/native
+desktop gates remain required; unit capture-phase success is not observed native
+screens, installed/cold acceptance, or completion of the agreed curriculum.
+
+Library-test scope remedybec445e0/peer5ffc0c75 adds a private closed predecessor
+adapter, exact190/186ID-version prefix/four IDs/fullfour-Scenario equality, with
+all original actual9/rawbackup assertions intact. External seven tests retain
+independent recipe/pack hashing/fullraw+typed inverse; no historical digest or
+production namespace change. M466 compiles that scope, catches two catalog186
+test lints. M467's ambiguous replacement guard refuses before mutation and the
+unchanged lint fails again; scoped two-line M468 replaces an unused clone with
+an explicit186length assertion and removes a needless borrow(peer d37c056a).
+Two remaining UI nested-if warnings become equivalent ordered let-chains, with
+the same body and parenthesized OR(peer315991ec). M469alltargetClippyPASS.
+Current-status guide correction e4b8842b is applied separately from conditional
+coverage: no CSV promotion before full inclusive and actual native screenshots.
+
+M470fullinclusive completes216harnesses,2782PASS1FAIL0ignored, reaped41173exit1.
+All1049 source inputs cd4bbeb7 remain exact. Sole failure is catalog182's typed
+current49 premise after adding unit50. Remedysourcef0cae359/peer9e4de744 admits
+strict raw/typedNTP50→49 before unchanged LVM49→48/Loop48→47; independently
+recovered raw49 equals typed49, fullcurrent190/50 course roundtrip is added, and
+all old hashes/fullunits/37prefix/mutants remain exact. Applied after reaping;
+M471all5affectedPASS. Final fullinclusive still required after actual native90.
+
+M470memory1728samples/minavailable21612642304B/maxfullPSI3.07,28samples at least1%,
+525863additional swap-out pages(about2GiB),OOMdelta0. No runner threshold stop;
+lastfullPSI0/available25895202816B before the next gated invocation. These are
+system-wide observations, not proof that the build caused all swap activity or
+a sufficient-memory guarantee. No overlapping heavy work or system tuning.
+
+M472ordinary build retained as220757416B ELF6f6c26cfadf86752991515a164e3019f3ae313bb4818927726bfe5d9ba3f4e8a,
+source1049b8d25a93/archive6fe9be91. M473actual1369events/90captures exits0, reaped
+4554; all1049source inputs unchanged, screenshot inventory187cdade. Root views
+and independent14-original reviewc73096bf confirm field/card/button alignment
+and clean100/150/200light/darkwide/narrow scrolling in selected views. They find
+missing arrow glyphs, a permanent simulator-navigation implementation note, and
+long unsupported-command text below all objective feedback. Source review also
+finds a single hints disclosure revealing every hint and the full solution.
+Prepare narrow presentation/progressive-help fixes, preserving full assignment,
+all objective rows, chain evidence, grade API and canonical data. Before images
+and exact source/ELF remain intact; native behavior pass is not UI acceptance.
+Memory634samples/min25837113344B/fullPSI0/swapout15pages/OOM0. Warm resume only;
+no new installed/cold/novice/device/screen-reader/Windows/macOS acceptance.
+
+Presentation/progressive-help9cc2bb98/peer702f0244 applied to only two paths;
+1047current unowned inputs retained. No canonical pack/core/Goal/reference/hash
+change. Native text uses ASCII connectors, short simulation label and adjacent
+concise unsupported error with requested full commands. Hints persist one at a
+time, worked answers require a separate explicit request, and SIM selection
+records become native-dropdown instructions. Dispatch is staged until all
+guidance/root/held/paste gates are known, with explicit next-frame repaint.
+All original ten widget groups retain assertions (four separator expectations
+change); five new help/persistence/packet/ASCII/repaint groups are added.
+M475all17widget/old-native-phase groups PASS, M476alltargetClippyPASS.
+
+Native help94source7b15b15a/peerb639fa5c preserves1369actions/90names and adds
+20actualactions/four requested-body captures. Before apply, source inspection
+finds offscreen Label paint is legitimately culled. Its new text target must
+use real response rectangles for wheel reveal, then retain actual visible
+glyph/clip assertions at capture; no pixel guesses or injected scroll state.
+R2 instrumentation and actual polished native/fullinclusive gates are pending.
+
+Native94R2 44a18c6b/peer55726a40 records real help Label/hyperlink responses for
+bounded wheel reveal, preserving the actual painted-glyph/clip capture checks.
+It adds a deliberate760x600 unpainted-first-hint/response-present negative to
+the complete real-event group, then normal reveal must recover actual painted
+text and restore observed size; full progress/receipts remain exact. Three paths
+applied with1046current unowned inputs retained. Old1369actions/90names remain
+ordered, plus20actions/four requested-help captures; the only intended progress
+change is an actually clicked hint increment. M477both route groups PASS116.08s,
+M478alltargetClippyPASS. Retain new source/ELF and inspect actual polished native
+screens before final fullinclusive; no early coverage/installed acceptance.
+
+M479ordinarybuild retained220817496B/3897c9486bbd0e1c27f3fde8de5c97d61ad5ace9e628e5afb1c126e60abd158e,
+source1049inventory206b6c5e/archivee81b39b9. M480actual1389events/94captures exits0,
+reaped27537; all1049source inputs unchanged, receipt5a689d12. Allfour requested
+help bodies are actually captured; full progress law permits only observed hint
+increment. Root original views and independent16after/9before sample4530f36f
+confirm readable ASCII chains, adjacent concise error, separately requested help,
+preserved complete task/facts and aligned field/button/card/connector geometry
+at selected100/150/200light/darkwide/narrow views. Natural scrolling and elided
+dropdown labels remain explicit view limits; not every94image/all28themes or a
+novice/reader/device study. Memory640samples/min25846128640B/fullPSI0/swapout1page/
+OOM0. Final inclusive must now pass before narrow CCNA4.2 credit and commit.
+No new installed/cold/Windows/macOS acceptance is inferred from development UI.
+
+### Accepted190 inclusive development milestone
+
+M481fullinclusive completes216harnesses:2,788PASS0FAIL0ignored, reaped15625exit0.
+All1049inputs27729beb remain exact; receiptd95724bc/logd464f689. All production
+source matches the actual polished M480/3897c948 build; only checkpoint/ledger
+prose differs.1545memory samples/min25498927104B/fullPSI0/swapout8pages/OOM0.
+All186 prior definitions/49units and57script/442case/57example data stay exact.
+
+Only after those actual gates, conditional coverage1f5fd9e2/peerbc551904 is
+applied: exactly currentCCNA4.2 plus its matching planning row and consistency
+prose. All1239other skills/164other planning rows/source fingerprints remain
+unchanged.190labs/50units are57CCNA15,40LPIC-1/10,36LPIC-2/9,57Bash/16.
+182Partial/1Supporting/1057Open references; all136parents incomplete(92Open44Partial).
+The client/server dependency slice is not complete NTP/protocol/UTC/Linux time
+coverage; future-v2.0 receives nothing inherited.
+
+Current README/checklist/reconciliation/objective summaries and the previously
+stale176-summary in CURRICULUM.md now describe190, retaining historical records.
+Root authoritative2026-10-29 version check confirms LPI5.0/4.5.0, official Cisco
+v1.1/v2.0 documents and current/future transition distinction. Dynamic Learning
+Network objective text still fails to render; official PDFs and dated transition
+notice supply evidence. Original granular2026-10-22 fingerprints are not redated.
+CATALOG190_MILESTONE.md separates actual development/native from installed171
+evidence; CHECKPOINT.md now contains a concise current resumable queue rather
+than contradictory historical next-action instructions. Post-doc gates/privacy/
+commit/push follow. Continue the remaining curriculum; no release publication.
+
+Post-doc M482all424PythonPASS; M483coverage validates190registered/50units,
+182Partial/1Supporting/1057Open and no unregistered draft IDs. Exact89-path
+text-only scope/privacy review excludes private progress, PNGs, logs, archives,
+binaries and credential/personal-path markers. Whitespace checks pass. Commit
+and push this coherent unit, then continue actual ERE14/193 and remaining tracks.

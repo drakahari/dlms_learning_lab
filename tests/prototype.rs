@@ -347,7 +347,14 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let (State::Lvm { simulation }, engine::Goal::Lvm { definition }) =
+        if let (State::Ntp { simulation }, engine::Goal::Ntp { definition }) =
+            (&mut a.state, &s.goal)
+        {
+            let client = definition.targets[0].client;
+            simulation.current.nodes.get_mut(&client).unwrap().role =
+                dlms_learning_lab::ntp::Role::Device { upstream: None };
+            simulation.validate().unwrap();
+        } else if let (State::Lvm { simulation }, engine::Goal::Lvm { definition }) =
             (&mut a.state, &s.goal)
         {
             // Deliberate persisted wrong capacity, not an exposed shrink command.

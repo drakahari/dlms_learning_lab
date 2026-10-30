@@ -26,7 +26,13 @@ fn fresh(s: &pack::Scenario) -> Attempt {
 }
 #[test]
 fn normal186_retains_full182_objects_all57scripts442cases57examples_and_exact_four_lvm_sources() {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     let old = original::load();
     assert_eq!(old.len(), 182);
     assert_eq!(all.len(), 186);
@@ -73,23 +79,33 @@ fn normal186_retains_full182_objects_all57scripts442cases57examples_and_exact_fo
 }
 #[test]
 fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without_tail_acceptance() {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    assert_eq!(all.len(), 186);
     let old = original::load();
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current50 = include_bytes!("../scenarios/units-v1.json");
+    let checked49 = registration::ntp_registration::before_units(current50).unwrap();
+    let raw = checked49.as_slice();
     let before = registration::before_units(raw).unwrap();
     assert_eq!(before, include_bytes!("fixtures/lvm-units-before182.json"));
     let r: Value =
         serde_json::from_str(include_str!("fixtures/catalog186-registration.json")).unwrap();
     assert_eq!(digest::hash(raw), r["after_units49_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units48_sha256"]);
-    let units = course::bundled(&all).unwrap();
+    let current_units = course::bundled(&current190).unwrap();
+    assert_eq!(current_units.len(), 50);
+    let units = registration::ntp_registration::before_typed_units(&current_units);
     let prior = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     assert_eq!((units.len(), prior.len()), (49, 48));
     assert_eq!(v(&units[..48]), v(&prior));
     assert_eq!(v(&units[48]), r["lvm_unit"]);
     assert_eq!(units[48].labs, registration::IDS);
     assert_eq!(units[48].prerequisites, ["persistent-mounts"]);
-    assert_eq!(v(registration::before_typed_units(&units)), v(&prior));
+    assert_eq!(v(registration::before_typed_units(units)), v(&prior));
     let old37 = combined::old_unit_bytes(raw).unwrap();
     assert_eq!(old37, combined::old_unit_bytes(&before).unwrap());
     assert_eq!(
@@ -129,7 +145,13 @@ fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without
 #[test]
 fn source_boundaries_reject_partial_or_extra_lvm_and_source_mutations_without_broadening_old_authority()
  {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     for mode in 0..5 {
         let mut bad = all.clone();
         match mode {
@@ -156,7 +178,13 @@ fn source_boundaries_reject_partial_or_extra_lvm_and_source_mutations_without_br
 }
 #[test]
 fn current_catalog_never_invents_lvm_work_or_credit_in_a_retained_old_profile() {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let old: Progress = serde_json::from_slice(raw).unwrap();
     let loaded = progress::decode(raw, &all).unwrap();
@@ -172,7 +200,13 @@ fn current_catalog_never_invents_lvm_work_or_credit_in_a_retained_old_profile() 
 #[test]
 fn all_new_lvm_sources_require_authored_save_context_even_when_current_and_initial_are_jointly_forged()
  {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     let s = &all[182];
     let peer = &all[183];
     let mut good = Progress {
@@ -228,7 +262,13 @@ fn all_new_lvm_sources_require_authored_save_context_even_when_current_and_initi
 }
 #[test]
 fn copied_example_names_display_text_and_foreign_oneoff_metadata_cannot_satisfy_lvm() {
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     for s in &all[182..] {
         let Goal::Lvm { definition } = &s.goal else {
             panic!()
@@ -271,7 +311,13 @@ fn copied_example_names_display_text_and_foreign_oneoff_metadata_cannot_satisfy_
 fn joint_forgery_cannot_supply_authority_to_load_export_inspect_restore_or_completion() {
     use dlms_learning_lab::backup;
     use std::sync::atomic::{AtomicBool, AtomicUsize};
-    let all = pack::bundled().unwrap();
+    let current190 = pack::bundled().unwrap();
+    let all =
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &current190,
+        );
+    assert_eq!(current190.len(), 190);
+    let all = all.to_vec();
     let s = &all[182];
     let mut own = fresh(s);
     for command in &s.solution {

@@ -2,6 +2,8 @@
 //! Canonical data is parsed once; warm source/unit comparisons borrow fields.
 #![allow(dead_code)] // Native QA and integration binaries import different helper subsets.
 use dlms_learning_lab::developer_digest as digest;
+#[path = "ntp_registration.rs"]
+pub mod ntp_registration;
 use dlms_learning_lab::{
     course::Unit,
     engine::{Goal, State},
@@ -36,6 +38,8 @@ fn recipe() -> &'static Value {
     })
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_ntp = ntp_registration::prefix_units(raw)?;
+    let raw = without_ntp.as_deref().unwrap_or(raw);
     let r = recipe();
     if raw.len() as u64 != r["after_units49_bytes"].as_u64().ok_or("49length")?
         || digest::hash(raw) != r["after_units49_sha256"].as_str().ok_or("49pin")?
@@ -68,6 +72,8 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let without_ntp = ntp_registration::prefix_units(raw)?;
+    let raw = without_ntp.as_deref().unwrap_or(raw);
     if raw.len() as u64 == recipe()["after_units49_bytes"].as_u64().unwrap()
         && digest::hash(raw) == recipe()["after_units49_sha256"].as_str().unwrap()
     {
@@ -303,6 +309,7 @@ fn same_scenario(a: &Scenario, b: &Scenario) {
     }
 }
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    let all = ntp_registration::prefix_scenarios(all).unwrap_or(all);
     assert_eq!(all.len(), 186);
     let e = expected();
     for (a, (id, v)) in all[..182].iter().zip(&e.ids) {
@@ -318,6 +325,7 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..182]
 }
 pub fn prefix_scenarios(all: &[Scenario]) -> Option<&[Scenario]> {
+    let all = ntp_registration::prefix_scenarios(all).unwrap_or(all);
     if all.len() == 186 {
         Some(before_scenarios(all))
     } else {
@@ -345,6 +353,7 @@ fn same_unit(a: &Unit, b: &Unit) {
     );
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = ntp_registration::prefix_typed_units(all).unwrap_or(all);
     assert_eq!(all.len(), 49);
     let e = expected();
     assert_eq!(e.old_units.len(), 48);
@@ -355,6 +364,7 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..48]
 }
 pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
+    let all = ntp_registration::prefix_typed_units(all).unwrap_or(all);
     if all.len() == 49 {
         Some(before_typed_units(all))
     } else {
@@ -362,6 +372,7 @@ pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
     }
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = ntp_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 49);
     let e = expected();
     assert_eq!(&all[..48], &e.old_values);
@@ -369,6 +380,7 @@ pub fn before_values(all: &[Value]) -> &[Value] {
     &all[..48]
 }
 pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
+    let all = ntp_registration::prefix_values(all).unwrap_or(all);
     if all.len() == 49 {
         Some(before_values(all))
     } else {
@@ -381,10 +393,15 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    if all.len() == 182 {
+    let normal186 = if all.len() == 190 {
+        ntp_registration::before_attempts_len(all)
+    } else {
+        all.len()
+    };
+    if normal186 == 182 {
         return 182;
     }
-    assert_eq!(all.len(), 186);
+    assert_eq!(normal186, 186);
     let e = expected();
     for (id, version) in &e.ids {
         assert!(all.contains_key(id));

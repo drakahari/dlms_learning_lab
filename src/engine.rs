@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Ntp {
+        simulation: Box<crate::ntp_workspace::Session>,
+    },
     Lvm {
         simulation: Box<crate::lvm_workspace::Session>,
     },
@@ -166,6 +169,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Ntp {
+        definition: Box<crate::ntp_workspace::Definition>,
+    },
     Lvm {
         definition: Box<crate::lvm_workspace::Definition>,
     },
@@ -355,6 +361,7 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Ntp { simulation }, Goal::Ntp { definition }) => definition.checks(simulation),
         (State::Lvm { simulation }, Goal::Lvm { definition }) => definition.checks(simulation),
         (State::PhysicalLink { simulation }, Goal::PhysicalLink { definition }) => {
             definition.checks(simulation)
@@ -693,6 +700,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Ntp { .. } => crate::ntp::HELP,
         State::Lvm { .. } => crate::lvm::HELP,
         State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
@@ -761,6 +769,12 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::Ntp { simulation } = s {
+        let Goal::Ntp { definition } = goal else {
+            return Err("NTP commands require the supplied task".into());
+        };
+        return simulation.execute(definition, input, false);
+    }
     if let State::Lvm { simulation } = s {
         let Goal::Lvm { definition } = goal else {
             return Err("LVM commands require their authored Goal".into());
@@ -988,6 +1002,13 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::Ntp { .. }) {
+        return match input {
+            "help" => Ok(crate::ntp::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("NTP changes require their authored Goal".into()),
+        };
+    }
     if matches!(s, State::Lvm { .. }) {
         return match input {
             "help" => Ok(crate::lvm::HELP.into()),
@@ -1232,7 +1253,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Lvm { .. }
+        State::Ntp { .. }
+        | State::Lvm { .. }
         | State::PhysicalLink { .. }
         | State::OneOff { .. }
         | State::FileBackup { .. }
@@ -1686,6 +1708,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Ntp { simulation } => format!(
+            "Virtual single-upstream NTP · {} supplied nodes · read-only reference/delivery facts; no host clock or packets",
+            simulation.current.nodes.len()
+        ),
         State::Lvm { simulation } => format!(
             "Virtual linear LVM · {} supplied groups · separate LV/filesystem capacity; no real devices",
             simulation.current.groups.len()

@@ -204,6 +204,7 @@ class FixedAutomationSafety(unittest.TestCase):
         # Close every reviewed current append before the unchanged old44/43
         # assertions. No historical input, recipe or observation is rewritten.
         for catalog, before_count, after_count, unit_key, expected_recipe in [
+            (190,49,50,'ntp_unit','29d8d6d38b61d6d8a81ab89cf7e4cc7e0454ec605fbc838f73b43a1747331966'),
             (186, 48, 49, 'lvm_unit', '72befcc13bf6fb0f8d78b301f699de98b105430d5b4240babcc3b7b409cab861'),
             (182, 47, 48, 'loop_unit', 'e1083dcd628430234e317627335da8dc45e77c96789e1aad4a7f09e98e89bf6b'),
             (180, 46, 47, 'one_off_unit', 'c472de759a336ae226a9349da605b569e08b9ab65c8b86d162276b78d01cda0d'),
@@ -231,7 +232,10 @@ class FixedAutomationSafety(unittest.TestCase):
         current=(ROOT/'scenarios/units-v1.json').read_bytes()
         old=self.closed_original44_units(current)
         self.assertEqual(hashlib.sha256(old).hexdigest(), '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
-        self.assertEqual(len(json.loads(current)['units']),49)
+        self.assertEqual(len(json.loads(current)['units']),50)
+        before49=(ROOT/'tests/fixtures/ntp-units-before186.json').read_bytes()
+        self.assertEqual(len(json.loads(before49)['units']),49)
+        self.assertEqual(json.loads(current)['units'][:49],json.loads(before49)['units'])
         before48=(ROOT/'tests/fixtures/lvm-units-before182.json').read_bytes()
         self.assertEqual(len(json.loads(before48)['units']),48)
         self.assertEqual(json.loads(current)['units'][:48],json.loads(before48)['units'])
@@ -239,6 +243,11 @@ class FixedAutomationSafety(unittest.TestCase):
         for bad in [current+b' ',current.replace(b'physical-uplink-diagnosis',b'physical-uplink-tampered',1), current.replace(b'linux-one-off-jobs',b'linux-one-off-tampered',1)]:
             with self.assertRaises(AssertionError):
                 self.closed_original44_units(bad)
+
+        ntp_title=b'Configure and verify NTP client/server dependencies'
+        self.assertEqual(current.count(ntp_title),1)
+        with self.assertRaises(AssertionError):
+            self.closed_original44_units(current.replace(ntp_title,b'Unreviewed NTP metadata',1))
 
         lvm_title=b'Grow existing logical volumes while preserving data'
         self.assertEqual(current.count(lvm_title),1)

@@ -20,7 +20,14 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
     let all = pack::bundled().unwrap();
     let old = registration::original_catalog(&all);
     assert_eq!(old.len(), 176);
-    assert_eq!(all.len(), 186);
+    assert_eq!(
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &all
+        )
+        .len(),
+        186
+    );
+    assert_eq!(all.len(), 190);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|t| {
             one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all)
@@ -30,11 +37,19 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
         }),
         [53, 40, 32, 57]
     );
-    assert_eq!(all.len(), 186);
+    assert_eq!(
+        one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(
+            &all
+        )
+        .len(),
+        186
+    );
+    assert_eq!(all.len(), 190);
+    assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&all).iter().filter(|s|s.track==t).count()),[53,40,36,57]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [53, 40, 36, 57]
+        [57, 40, 36, 57]
     );
     let scripts = all
         .iter()
@@ -85,7 +100,8 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
         ),
         (48, 46)
     );
-    assert_eq!((units.len(), old_units.len()), (49, 46));
+    assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&units).len(),old_units.len()),(49,46));
+    assert_eq!((units.len(), old_units.len()), (50, 46));
     assert_eq!(value(&units[..46]), value(&old_units));
     assert_eq!(units[46].id, "linux-one-off-jobs");
     assert_eq!(units[46].labs, registration::IDS.map(str::to_owned));
@@ -108,10 +124,11 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
         }),
         [14, 10, 8, 16]
     );
+    assert_eq!(["CCNA","LPIC-1","LPIC-2","Bash/Shell"].map(|t|one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&units).iter().filter(|u|u.track==t).count()),[14,10,9,16]);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| units.iter().filter(|u| u.track == t).count()),
-        [14, 10, 9, 16]
+        [15, 10, 9, 16]
     );
     let before44 = combined::before_physical_units(&before).unwrap();
     let before37 = combined::old_unit_bytes(&before).unwrap();
@@ -239,9 +256,22 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
         );
         assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
-    for source in &all[182..] {
+    for source in &all[182..186] {
         assert!(
             matches!(source.initial, State::Lvm { .. }) && matches!(source.goal, Goal::Lvm { .. })
+        );
+        assert!(
+            !decoded.attempts.contains_key(&source.id) && !decoded.favorites.contains(&source.id)
+        );
+        assert!(
+            !p.attempts.contains_key(&source.id) && !restored.attempts.contains_key(&source.id)
+        );
+        assert!(!p.favorites.contains(&source.id) && !restored.favorites.contains(&source.id));
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    for source in &all[186..] {
+        assert!(
+            matches!(source.initial, State::Ntp { .. }) && matches!(source.goal, Goal::Ntp { .. })
         );
         assert!(
             !decoded.attempts.contains_key(&source.id) && !decoded.favorites.contains(&source.id)

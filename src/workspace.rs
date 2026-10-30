@@ -394,6 +394,12 @@ pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
     }
 }
 pub fn prepare(a: &mut Attempt) {
+    if let State::Ntp { simulation } = &a.state {
+        if crate::ntp_workspace::metadata(a).is_ok() && simulation.validate().is_ok() {
+            a.workspace.get_or_insert_with(WorkspaceData::new);
+        }
+        return;
+    }
     if let State::Lvm { simulation } = &a.state {
         if crate::lvm_workspace::metadata(a).is_ok() && simulation.validate().is_ok() {
             a.workspace.get_or_insert_with(WorkspaceData::new);
