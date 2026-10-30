@@ -4996,3 +4996,34 @@ evidence and precise continuation remainCATALOG193_MILESTONE/CHECKPOINT.
 M558 finalcoverage193/51(187Partial1Supporting1052Open) andM559446PythonPASS.
 No runtimecode/scenario/test changes afterbaa; nextcommitrecords verifieddocs
 andexact5narrowevidence promotions only. No fullobjective completion/release.
+
+Before15R4 exact9paths applied after accepted193; immutablegenuine13 parent
+stays unchanged. Rootrebase before15-current193-root-rebase-r1 selects737
+compilerinputs overcurrent1073 withprotectedadditionalguide/licenses. Allseals
+None. M560479mockPythonPASS, not actualcapture. PackagingrelativeREADME2source
+files separately applied peer5ddee1bb (existing193archiveunchanged); M561483
+PythonPASS. M562 defaultalltargetClippyPASS. Guardedproducerbuild andactual
+control/source/executable approval/capture/readback remain next; no15grant.
+
+## Genuine14-before15 actual preservation baseline —2026-10-30
+
+M563guardedproducer154415056B94607253/737frozeninputs81cf27c0 buildPASS;
+M564zero-child control484e2199 pins1465/383697331B, Root+peer7ce4f983 review.
+Flag-only approval576b7f70 precedes M565actualcapture0:6046f5fbmanifest/9089741a
+attestation/f461f276SOURCE.60records477cases60examples/537API;150contexts,
+old366/358wholeRecord multisets retained exactly with60/58actual14additions
+(426/416),90nonScript and2whole unfinishedAttempts exact,43absent; clocks
++60/+58 andonly14receiptappend. Independent RAWb7ab066c plusRootreadback.
+Rootad-hoc readback first used inappropriateUnicode splitlines and then wrongly
+forbade legitimate14receiptappend; both readonly assumptions corrected to LF
+JSONL/exactcontract, no evidence/source replay or changes. All actual streams
+matchauthored outcomes andall752files/737source/executedELF retained.
+
+Tiny5observed-hash publicseals only; M566retainedverifyPASSwithoutreplay;
+M567actual3genuine14consumersPASS; M568483PythonPASS; M569alltargetClippy
+includingcurrent14producer feature-DwarningsPASS. ActualVm14/catalog193still;
+no15orcurriculumcredit. Packaging helper source2filefix4newdisposabletests
+passes; onlynextcandidatesgetgeneratedrelativeREADME, oldbaaarcimmutable.
+Lastfullinclusive2857M550precedesharness; currentnewgenuine3/static483 are
+reported separately. Continue final50storage capability/authored4/native gates,
+then literal15controlledfidelity/content andallremainingcurriculum.

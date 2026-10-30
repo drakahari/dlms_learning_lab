@@ -90,6 +90,96 @@ def embedded_content_hashes():
     return result
 
 
+def write_candidate_readme(stage, system, version, revision, target):
+    """Describe this staged candidate, never a repository-specific launch path."""
+    for value, pattern in (
+        (version, r'[0-9A-Za-z][0-9A-Za-z.+-]{0,79}'),
+        (revision, r'[0-9a-f]{40}(?:-dirty)?'),
+        (target, r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}'),
+    ):
+        if not isinstance(value, str) or re.fullmatch(pattern, value) is None:
+            raise ValueError('Candidate README requires ordinary build identity fields')
+    target_component = {'Linux': 'linux', 'Windows': 'windows', 'Darwin': 'darwin'}.get(system)
+    if target_component is None or target_component not in target.split('-'):
+        raise ValueError('Candidate README platform does not match its native target')
+    if not stage.is_dir() or stage.is_symlink():
+        raise ValueError('Candidate README requires an ordinary staging directory')
+    if system == 'Linux':
+        entries = ('dlms-learning-lab', 'install.sh', 'uninstall.sh')
+        prefix = ''
+        instructions = (
+            'Open `dlms-learning-lab` from this extracted folder, or open a terminal '
+            'in this folder and run:\n\n```sh\n./dlms-learning-lab\n```\n\n'
+            'For optional per-user installation, run `sh ./install.sh` from this '
+            'folder, then open **DLMS Learning Lab** from the application menu. '
+            'The installer reports its launcher location. No administrator access '
+            'or development tools are needed.\n'
+        )
+    elif system == 'Windows':
+        entries = ('dlms-learning-lab.exe', 'Install.ps1')
+        prefix = ''
+        instructions = (
+            'Open `dlms-learning-lab.exe` from this extracted folder. '
+            'In PowerShell opened in this folder, the equivalent command is '
+            '`.\\dlms-learning-lab.exe`.\n\n'
+            'For optional per-user installation, if permitted by local policy, '
+            'run `.\\Install.ps1` in PowerShell from this folder. Then use the '
+            '**DLMS Learning Lab** Start-menu shortcut. No developer tools or '
+            'administrator access are needed. Windows runtime and installation '
+            'acceptance must be recorded separately.\n'
+        )
+    elif system == 'Darwin':
+        entries = ('DLMS Learning Lab.app/Contents/MacOS/dlms-learning-lab',
+                   'DLMS Learning Lab.app/Contents/Info.plist', 'INSTALL.txt')
+        prefix = 'DLMS Learning Lab.app/Contents/Resources/'
+        instructions = (
+            'Open `DLMS Learning Lab.app` from this extracted folder in Finder. '
+            'To install it, drag the app into Applications or your user Applications '
+            'folder. Read `INSTALL.txt` for upgrade and removal instructions.\n\n'
+            'This candidate is unsigned and not notarized. Follow normal macOS '
+            'security checks; signing/notarization and macOS runtime acceptance '
+            'remain pending. No development tools are needed.\n'
+        )
+    else:
+        raise ValueError('Unsupported native README platform')
+    # Fixed relative entries must really exist in this stage. A README for a
+    # wrong-platform binary or partial package must not point outside the folder.
+    required = (*entries, *(prefix + name for name in (
+        'BUILD_INFO.json', 'docs/LEARNER_GUIDE.md', 'docs/INSTALLATION.md',
+        'LICENSE', 'NOTICE',
+    )))
+    for relative in required:
+        path = stage
+        for part in Path(relative).parts:
+            path = path / part
+            if path.is_symlink():
+                raise ValueError('Candidate README cannot point through resource links')
+        if not path.is_file():
+            raise ValueError('Candidate README launch/resource entry missing: ' + relative)
+    text = (
+        '# DLMS Learning Lab — local installation candidate\n\n'
+        f'Version: **{version}**  \nRevision: `{revision}`  \nTarget: `{target}`\n\n'
+        '## Open this candidate\n\n' + instructions + '\n'
+        'The application is native and offline, with bundled lessons and fonts. '
+        'No repository checkout, account, profile path, VM or browser is needed.\n\n'
+        '## Progress and guidance\n\n'
+        'Learner progress stays in a separate application-data folder. Use '
+        '**Settings → Your data** to back it up before upgrading. Close the app '
+        'before replacing application files. Keep application data when removing '
+        'the app if you want to retain progress.\n\n'
+        f'- [Learner guide](<{prefix}docs/LEARNER_GUIDE.md>)\n'
+        f'- [Installation and upgrade details](<{prefix}docs/INSTALLATION.md>)\n'
+        f'- [Exact build information](<{prefix}BUILD_INFO.json>)\n'
+        f'- [Project license](<{prefix}LICENSE>) and [third-party notices](<{prefix}NOTICE>)\n\n'
+        'This is a development milestone candidate. Building a package does not '
+        'establish runtime, complete-curriculum, accessibility or beginner '
+        'acceptance. No public release is published by the packaging tool.\n'
+    )
+    # Staging is fresh; never replace an existing candidate README or link.
+    with (stage / 'README.md').open('x', encoding='utf-8') as stream:
+        stream.write(text)
+
+
 def build(output, allow_dirty=False):
     with workflow(ROOT, 'candidate'):
         return _build(output, allow_dirty)
@@ -164,7 +254,7 @@ def _build(output, allow_dirty=False):
             (contents.parent / 'Info.plist').write_bytes(plistlib.dumps(plist))
             shutil.copyfile(ROOT / 'packaging/macos/INSTALL.txt', stage / 'INSTALL.txt')
         shutil.copy2(binary, contents / binary_name)
-        for name in ('README.md', 'LICENSE', 'NOTICE'):
+        for name in ('LICENSE', 'NOTICE'):
             shutil.copyfile(ROOT / name, resources / name)
         copy_tracked_tree('docs', resources / 'docs')
         copy_tracked_tree('assets/themes', resources / 'theme-notices')
@@ -192,6 +282,7 @@ def _build(output, allow_dirty=False):
                 'bundled_content': embedded_content_hashes(),
                 'rust_notice_sha256': sha256(rust_notice)}
         (resources / 'BUILD_INFO.json').write_text(json.dumps(info, indent=2) + '\n')
+        write_candidate_readme(stage, platform.system(), version, revision, target)
         files = [p for p in stage.rglob('*') if p.is_file()]
         if any(p.is_symlink() for p in stage.rglob('*')):
             raise ValueError('Candidate may contain ordinary resources only')

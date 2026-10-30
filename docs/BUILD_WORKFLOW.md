@@ -276,3 +276,21 @@ a revision advance is refused; no feature selects an earlier evaluator.
 New language still needs migration/negative/current-state tests; the seal itself
 is not new evaluator or curriculum acceptance. All memory/lock/disk rules above
 remain mandatory for this tool and every worker.
+
+
+The genuine evaluator14-before15 harness was actually captured on2026-10-30
+against normal193 after its installed Fedora acceptance. The nondefault
+`historical-evaluator14-capture` feature requires actual14; it never selects
+older semantics. M565537API outcomes and preserved150-context original/draft
+profiles are independently sealed (6046f5fb/9089741a). Keep all737retained source
+inputs, executed producer and old9–13 histories immutable.
+`tools/dev.py tool scripting_before15_verify.py --mode verify` verifies retained
+bytes without replay. Do not overwrite/recreate its fixed original destination,
+rerun old producers after an advance, invent observations or treat a baseline as
+new mastery. BEFORE15_CAPTURE.md records actual source/ELF/control/limits.
+
+Package README generation now validates real platform launch/resources and
+writes relative standalone instructions. Disposable Linux/Windows/macOS layout
+fixtures test only this packaging logic, not native platform acceptance. Existing
+193 candidate/archive stays immutable with its documented old-README limitation;
+the correction applies only to later newly built candidates.
