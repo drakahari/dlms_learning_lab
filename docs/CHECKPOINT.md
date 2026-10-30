@@ -37,18 +37,31 @@ full real filesystem behavior or learner parted/mkfs command coverage is claimed
 All193 predecessor sources/51 units remain through strict whole-source, typed
 and raw-byte inverses. No generated variants or unregistered proposals count.
 
-The last verified installed Fedora candidate is STILL193/51, sourcebaa66bd:
+The scoped verified installed Fedora candidate is197/52, source553d39d:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gbaa66bdad7e5-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g553d39d0eff7-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-Its actual install/upgrade/uninstall/reinstall,105 scripting captures, NFS
-separate-process cold reopening and10 native starts retain their own identities
-in CATALOG193_MILESTONE.md. Its archive README has the historical old190 path;
-use the command above. The already committed packaging fix generates correct
-relative launch instructions for NEXT candidates; never silently repack an old one.
-No new197 candidate has yet been built or declared ready.
+ELF85,321,024B d30bc3af/archive47,755,810B28cc5db5; full SHA256 values and exact
+scope are in CATALOG197_MILESTONE.md. M620 clean build/M621 actual install+upgrade
+baa193→553197/uninstall/reinstall/exact synthetic progress PASS. M622 ACTUAL
+INSTALLED normal four-lab84capture route PASS;84names/81unique,20settings.
+All1103committed inputs remain exact through the run. Root5 originals and
+independent22originals (73d4e089) reviewed; not all84/28themes/manual accessibility.
+Large narrow text requires substantial scrolling; no selected material blocker.
+The printed old normal-registration disclaimer is stale; actual false fixture
+flag/existing four-source branch establish normal bundled use without injection.
+
+M624 NFS writer887382 and reader888012 are distinct native processes, both0:
+full68,237B loaded observation equals writer cb6a14db; separate unfinished
+assignment/example, mounts/files, favorites/preferences survive, then actual
+native repair/regrade passes. M623 was only a pre-child output-directory refusal,
+retained, not a startup failure. M62510/10Wayland fresh-process starts0, protocol/
+ready/update/capture observed,0.965–1.016s fixed driver cadence, not a benchmark
+or closure of historical Physical143. All evidence remains private on project disk.
+The new archive README correctly uses ./dlms-learning-lab. Prior193/190 packages
+are immutable; their original evidence remains separately identified.
 
 ## Actual current verification
 
@@ -79,7 +92,7 @@ Development native M596 actually passed84 captures/20 light/dark,width,text-size
 settings after correcting wrong-label detail and repeated feedback. Root4 and
 independent22 originals were inspected. It used193+private4, not an installed197
 binary. M601 and M612 pass all3 complete real-egui routes, including MAIN197
-without catalog/Attempt injection. Native installed197 verification is still next.
+without catalog/Attempt injection. Installed197 verification has since passed as recorded above.
 Private evidence and active handles: .build-artifacts/reviews/ACTIVE_ROOT_RESUME.json.
 Public documentation follows M612. Product code/data and Rust assertions remain
 its inputs; only a Display format-literal spelling changed afterward, with the
@@ -89,18 +102,16 @@ M616 all-target Clippy-Dwarnings and M618 coverage pass.
 
 ## Immediate continuation — do not stop at this checkpoint
 
-1. M617 Python487 and M616 all-target Clippy-Dwarnings PASS; M618 coverage
-   checker confirms197 registered labs/1240references and no unregistered drafts.
-2. Commit/push reviewed scoped source and documentation. Build a clean Fedora
-   candidate from Main. Verify actual install/upgrade/progress retention, all
-   four normal disk flows/rendered layouts, NFS two-process cold reopening and
-   repeated Wayland starts. Reap every run and inspect original screenshots.
-3. Record the exact new installed identity and checksums. Only then review narrowly
-   Partial104.1/104.1.K1 credit; no mkfs/parted utility or full-objective credit.
-4. Continue the reviewed shell/networking/Linux work below without routine approval.
+1. M627 all487Python and M629coverage189/1/1050 pass after doc-only updates.
+   Commit/push evidence separately from candidate553; never silently repack it.
+2. Apply the independently reviewed literal15 capability/reference fresh source
+   union only after preserving these doc/CSV deltas. Actual capability/history/
+   fixed32Bash comparison gates precede the new two-project content R5.
+3. Continue HSRP, links, syslog, RPM and remaining curriculum in reviewed tested
+   batches. A delivered197 candidate is not a reason to stop implementation.
 
-Coverage remains187 Partial/1 Supporting/1052 Open over1240 overlapping current
-references; all136 parents incomplete(91 Open/45 Partial). OBJECTIVE_MAPPING.md,
+Coverage now has189 Partial/1 Supporting/1050 Open over1240 overlapping current
+references; all136 parents incomplete(90 Open/46 Partial). OBJECTIVE_MAPPING.md,
 SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md identify remaining behavior.
 The official LPI104.1 page/version was checked again2026-10-30; original full
 objective fingerprints keep their2026-10-22 date. Future Cisco v2.0 stays separate.
@@ -118,8 +129,8 @@ Do not recapture, relabel or select an old engine through a Cargo feature.
 All following are SOURCE-REVIEWED, UNAPPLIED/UNRUN, not curriculum credit.
 Exact current proposals live under .build-artifacts/reviews/:
 
-- Literal15 capability bash-literal15-current197-source-r3 (63491965), fixed
-  reference bash-literal15-reference-source-r4 (7b4133e0), peer7f5254c6.
+- Literal15 capability bash-literal15-current197-source-r4 (743c1e4e), fixed
+  reference bash-literal15-reference-source-r5 (2590635b), peer59842391.
   Readonly shortest literal edge removal only;32 fixed Bash recipes/8 reason-only
   exclusions/408 compiled inputs. Apply narrow unions after197 acceptance;
   compile/gate the actual engine, then prepare, independently approve exact
@@ -141,10 +152,13 @@ Exact current proposals live under .build-artifacts/reviews/:
 - Pure RPM repository foundation R2 (bb63b895), peer6dc45987:3 new files,
  19 groups pending, no export/CLI/labs. Default disabled refresh now refuses
  atomically; R1's incorrect manual inference is retained and must not be applied.
-- Bash reviewer is authoring separate snapshot/drift/conditional-rollout projects
- using supported bounded UTF8/nonNUL file comparison, not a new evaluator.
+- Bash snapshot/rollout R1 e2111f1f has two material graded gaps, peer c15b518e:
+ whitespace-only drift and graded overlength names. Author is preparing R2 with
+ counterexamples89586216; do not apply R1. No new evaluator/utility is required.
 
-Every proposal was pinned before the post-M612 documentation updates. Reconcile
+Literal finalR4/referenceR5 were pinned to clean553/1103, preserving all current
+code/test fixes; other proposals predate the final docs. Current acceptance
+doc/CSV-only deltas still need a fresh exact source receipt and review. Reconcile
 those explicit doc-only deltas and every intervening family/current-QA/shared
 progress change before applying; stale whole afterimages must refuse. Preserve
 M605/M608/M611 fixes, all genuine9–14 artifacts and frozen ERE396/409 collectors.

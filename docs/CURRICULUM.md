@@ -2,9 +2,17 @@
 
 Version boundaries rechecked **2026-10-29**; batch-specific source checks on2026-10-30 are recorded with their content evidence. The granular objective fingerprints retain their separately documented2026-10-22 source snapshot. This is a plan and evidence ledger, not complete exam preparation. Main has **197 source-integrated assignments/52 units:57CCNA,44LPIC-1,36LPIC-2,60Bash/Shell**. Units by track are15CCNA,11LPIC-1,9LPIC-2 and17Bash. The scripting evaluator remains14, with477 graded sample-input cases and60 separate examples. Generated numerical practice, private proposals and developer synthetic entries are excluded from authored totals.
 
-The four disk-preparation additions are integrated in source; the full197 inclusive Rust suite passes2,935 tests with0failures/0ignored; installed-candidate acceptance remains pending. They receive no new objective credit at this stage. All136 current parent objectives remain incomplete(91Open/45Partial); the1240 overlapping references remain187Partial/1Supporting/1052Open. These counts overlap and are not a completion percentage.
+The four disk-preparation additions now pass fullinclusive2,935 Rust tests,
+487Python, Clippy and scoped installed Fedora553 acceptance. Narrow native104.1
+and GPT-K1 practice is recorded; command-specific and broader filesystem gaps
+remain Open. All136 current parents remain incomplete(90Open/46Partial); the
+1240overlapping references are189Partial/1Supporting/1050Open, not a percentage.
 
-The latest available verified Fedora candidate remains193 labs/51 units at`baa66bdad7e5`, with its final2,857-test inclusive milestone, scoped installation/native flows, NFS cold reopening and ten native starts recorded in [CATALOG193_MILESTONE.md](CATALOG193_MILESTONE.md). It is distinct from the current197-source checkout; no197 candidate is declared ready here. Older171/190 and other historical milestones retain their original counts, results and build identities. No candidate, documentation row or test count completes the agreed scope. Windows/macOS runtime, screen-reader/physical-device and novice acceptance remain pending.
+The current verified Fedora candidate is197/52 at553d39d; exact installation,
+native84, NFS cold and10start evidence is in [CATALOG197_MILESTONE.md](CATALOG197_MILESTONE.md).
+The193/baa,190 and older milestones retain their identities. No candidate or
+count completes the scope. Windows/macOS runtime, screen-reader/physical-device
+and novice acceptance remain pending.
 
 ## Primary sources and version boundaries
 

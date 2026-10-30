@@ -5106,3 +5106,46 @@ controls are appended. All487 Python tests pass. M618 coverage check passes:
 1052Open and all136 full parents incomplete. No objective promotion yet.
 Public-file marker scan and git diff--check pass; generated evidence stays ignored.
 Next: clean scoped commit/push, actual197 candidate/lifecycle/native/cold/startup.
+
+
+## Installed197 source553 —2026-10-30
+
+553d39d is pushed clean source; M620 candidate buildPASS4m51s,ELF85321024B/d30bc3af,
+archive47755810B/28cc5db5.223Linux notices/fonts/28themes retained, README relative
+launch correction actually present.297memorysamples/min21653495808B/fullPSI0/
+swapout0/OOM0. M621 actual baa193→553197 upgrade/desktop/hash/content/uninstall/
+reinstall/privateoriginal-nine retention passes. No personal progress used.
+
+M622 actual INSTALLED normal route reaped0:84exactPNGnames/81unique/20actual
+Light/Dark,width,100/115/125/150/200 settings; existing4sources, fixture=false,
+no catalog/Attempt injection. All1103 source inputs exact through run; log0f843640.
+1016memorysamples/min24874237952B/fullPSImax1.08/swapout0/OOM0, no sustained stop.
+Root5 originals and independent22originals/73d4e089 inspected, no selected material
+blocker.200%narrow requires normal scrolling; not all84/all28themes/manual novice.
+The driver final text retains a historical no-normal-registration disclaimer;
+actual false fixture flag and source branch establish already bundled197use.
+
+M623 wrong evidence directory is refused before app children; no bypass or
+startup-failure relabel. M624 allowed private TMPDIR actual NFS writer887382/
+75.775s and reader888012/30.685s exit0. Full68237B loaded observation equals writer
+cb6a14db; separate unfinished drafts/state/favorites/preferences retained, then
+native editor repair/regrade passes. Repaired saved bytes intentionally differ.
+M62510/10 nativeWayland fresh processes exit0; protocol/ready/update/framecapture
+observed.0.965–1.016s includes fixed cadence, not performance/historical143 closure.
+
+After conditional peer9d9d00cc and these installed gates, M626 changes only
+104.1 parent/K1 and matching planning parent to narrow Partial native practice.
+Exactly3CSVrows; every fingerprint and unrelated row exact. Hints/content is
+inspection+formatting, not tablecreation; creation/allocation occurs in other
+three. K2/K3/5toolterms/102.1/104.2/104.3 stay Open.189Partial/1Supporting/1050Open,
+parents90Open46Partial, all136incomplete. No full curriculum/platform/novice claim.
+Next: static doc/coverage checks and evidence commit, then actual literal15 and
+remaining curriculum. Do not stop after this197 milestone; no public release.
+
+M627 all487 Python checks pass after acceptance documentation/coverage edits.
+M628 ledger checker rejects two src/ui test-module paths because its established
+evidence contract admits tests/ paths only. Root removes those two path strings
+from the same two credited rows, retaining four integration-test paths and
+separate actual UI evidence in CATALOG197_MILESTONE.md. The verifier is unchanged;
+M629 coverage passes189Partial/1Supporting/1050Open/197registered, no draft IDs.
+Only documentation/CSV changes follow source553; no candidate is repacked.

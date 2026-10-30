@@ -1,6 +1,10 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main197 source/52units, reconciled2026-10-30. The four newly integrated disk-preparation assignments pass the full inclusive Rust suite (2,935 passed, zero failed/ignored). Installed-candidate verification remains pending, and no new objective credit has yet been applied. The available verified Fedora candidate remains193labs/51units at`baa66bdad7e5`: its final193 inclusive2,857PASS/0FAIL/0ignored and scoped installed acceptance retain their original identity. Original154 baseline `4bc390a` remains historical evidence. This is an implementation queue, not
+Current Main197/52, reconciled2026-10-30. Fullinclusive2,935 Rust,487Python,
+Clippy and scoped installed Fedora553 acceptance pass. Narrow104.1/GPT-K1 practice
+is Partial; full curriculum completion remains open. Original154/193/190 evidence
+retains its exact identity. See CATALOG197_MILESTONE.md. This is an implementation
+queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -11,13 +15,13 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 57 | 15 | 64 | 47 | 0 |
-| LPIC-1 | 44 | 11 | 496 | 101 | 1 |
+| LPIC-1 | 44 | 11 | 494 | 103 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
 | Bash/Shell | 60 | 17 | Separate path below | — | — |
 
-The197 source assignments are57CCNA,44LPIC-1,36LPIC-2 and60Bash/Shell, in15/11/9/17units respectively. The shell remains evaluator14 with477 graded sample-input cases and60 separate examples. No197 candidate is claimed ready.
+The197 source assignments are57CCNA,44LPIC-1,36LPIC-2 and60Bash/Shell, in15/11/9/17units respectively. The shell remains evaluator14 with477 graded sample-input cases and60 separate examples. Installed197 scoped acceptance passes; full-product acceptance remains open.
 
-All136 current parent objectives remain incomplete (91 Open,45 Partial).
+All136 current parent objectives remain incomplete (90 Open,46 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -123,7 +127,7 @@ configuration or troubleshooting.
 | 103.6 | Partial practice · lpic1-process-priority;lpic1-process-handover | Restore interactive workload priority | Fixed virtual metadata and supported positive-PID actions only. Jobs, fg/bg, nohup, spawning/nice, sorting, top/resource monitoring, groups, handlers, full scheduler/capabilities and complete Linux utility syntax remain absent. |
 | 103.7 | Open | Select structured failures with regex | BRE/ERE implementation. Required model not implemented; cannot claim faithful command or state behavior. |
 | 103.8 | Open | Repair a setting in a modal editor | vi input and buffer model. Required model not implemented; cannot claim faithful command or state behavior. |
-| 104.1 | Open | Choose and create a suitable filesystem | partition/filesystem metadata. Required model not implemented; cannot claim faithful command or state behavior. |
+| 104.1 | Partial practice · lpic1-disk-safe-gap;lpic1-disk-hints-versus-content;lpic1-disk-eligible-media;lpic1-disk-delivery | Choose and create a suitable filesystem | Bounded native GPT/ext4/swap preparation only. MBR/logical tables, deletion/resize, other filesystems, learner utility syntax, mounts and swap activation remain absent. |
 | 104.2 | Open | Recover an inconsistent filesystem | filesystem integrity graph. Required model not implemented; cannot claim faithful command or state behavior. |
 | 104.3 | Open | Repair a persistent removable mount | fstab/options/UUID model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 104.5 | Partial practice · lpic1-permissions;lpic1-traversal;lpic1-team-brief;lpic1-drop-directory;lpic1-update-existing;lpic1-retire-handover | Give a colleague least-privilege access | No ACL/SELinux or special-file/suid/sgid/sticky-bit practice; ordinary modeled users only. |

@@ -100,9 +100,8 @@ Unsupported scope remains explicit: MBR/DOS/extended/logical/hybrid tables,
 force or destructive replacement, fdisk/gdisk interactive workflows, ext2/ext3,
 XFS/VFAT/exFAT/Btrfs, filesystem features and maintenance, boot/ESP integration,
 mounts/fstab, swap activation, LVM/RAID, performance and host disk operations.
-There is no inherited102.1,104.2/104.3 or LPIC-2 credit.104.1 stays Open until
-meaningful authored tasks, integration and actual acceptance gates justify a
-narrow Partial mapping. No complete utility or objective claim is proposed.
+There is no inherited102.1,104.2/104.3 or LPIC-2 credit.104.1/GPT-K1 now have a narrowly Partial native mapping after authored tasks,
+normal integration and scoped installed197 gates; all other104.1 rows stay Open. No complete utility or objective claim is proposed.
 
 Primary sources checked2026-10-29; paraphrases only, no upstream code/manual text:
 

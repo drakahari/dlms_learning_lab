@@ -2,17 +2,17 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are187 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1052 Open rows; no full-objective completion is asserted. Main source
-contains197 authored assignments/52 units (57CCNA,44LPIC-1,36LPIC-2,60Bash).
-The four new storage assignments pass29 focused registration/content/history
-groups and3 complete private/normal native-control routes. Full inclusive Rust
-passes2,935 tests/228targets/0FAIL/0ignored; installed-candidate acceptance is pending. No new objective credit is applied
-yet. The verified installed milestone remains193/51.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are189 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1050 Open rows. Main and scoped verified Fedora553 contain197 assignments/
+52units (57CCNA/44LPIC-1/36LPIC-2/60Bash). Fullinclusive2,935 Rust/228targets,
+487Python/Clippy, installed disk84/lifecycle/NFS cold/10starts pass. New credit is
+limited to native104.1/GPT-K1; command-specific and broader requirements stay Open.
+See [CATALOG197_MILESTONE.md](CATALOG197_MILESTONE.md). The193 milestone retains
+its original identity and checks below.
 Current CCNA4.2 gains only the bounded client/server dependency slice, including
 configuration, cycle/reply diagnosis and protected handover. Complete protocol,
 clock discipline, UTC accuracy and Linux time administration remain absent.
-All136 parents remain incomplete(91Open/45Partial). The final normal193 inclusive run passes2,857tests/222targets/0FAIL/0ignored;
+All136 parents remain incomplete(90Open/46Partial). The final normal193 inclusive run passes2,857tests/222targets/0FAIL/0ignored;
 Clippy and446Python checks pass. M547's3 historical count failures are retained,
 with strict predecessor preservation and all23 focused corrections passing.
 Installed193 candidate baa66bd passes105 captures for the3 new projects,

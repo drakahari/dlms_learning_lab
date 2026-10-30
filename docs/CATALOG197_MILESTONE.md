@@ -53,18 +53,74 @@ and independent22originals were viewed; at200% ordinary scrolling is required.
 M601 and M612 pass all3complete control routes, including normal197 without
 catalog/Attempt injection. These are not novice or screen-reader studies.
 
-## Installed Fedora acceptance pending
+## Installed Fedora553 candidate
 
-The last verified installed candidate is stillbaa66bd/193. A new clean197
-candidate must be built after the source commit, then checked for installation,
-upgrade, progress retention, actual rendered new flows, NFS two-process cold
-reopening and repeated native starts. Its source identity, checksums and actual
-results will be recorded here after execution. No existing archive is repacked,
-and no197 installer is declared ready in this source checkpoint.
+Source `553d39d0eff7bad72cd31a7dda8edcb1d1b43505`, evaluator14, clean build.
 
-Coverage remains187Partial/1Supporting/1052Open over1240 overlapping references;
-all136 parent objectives remain incomplete. Narrow104.1/K1 promotion awaits
-installed validation. No full curriculum, Windows/macOS runtime, physical-device,
-screen-reader or novice acceptance is claimed. The macOS dispatch notice gate
-remains unresolved; MIT project approval and existing third-party notices stand.
-No public release is authorized or published.
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g553d39d0eff7-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+- ELF85,321,024B SHA256 `d30bc3af15f32ae563857e2829ac26374a46f06fbe25b2ccfcf69ae5c6ea9d3a`.
+- Archive47,755,810B SHA256 `28cc5db5da78c725eb5608f1eb1b902c963b0e79b4366eaa12f77e2babda2024`.
+- Linux223dependency notices/source bundles; unchanged28theme/fonts notices and
+  Rust notice5647be07. No release publication. The README inside this new archive
+  correctly names ./dlms-learning-lab relative to its extracted folder.
+
+M620 clean candidate build passes (4m51s).297memorysamples/min21653495808B/
+fullPSImax0/swapout0/OOM0. M621 installs the actual executable outside the checkout,
+upgrades baa193→553197, verifies content/hash/desktop metadata, uninstalls and
+reinstalls, and preserves exact synthetic original-nine bytes4b74228e. The installed
+ELF is d30bc3af. No personal progress or global desktop setting is used.
+
+M622 actual INSTALLED normal197 route passes84capturefiles/81unique and20observed
+settings:100/115/125/150/200%, Light/Dark,1920×1080 wide/946×929 narrow. The route
+uses four already bundled sources (fixed_source_fixture=false), actual Start,
+intro/separate practice/assignment, native fields/actions, wrong/partial/reference/
+two alternatives, invalidation, Challenge, reset/cancel/resume/current-state and
+whole-profile checks. Every1103 committed input remains exact through the run.
+The log retains an older generic no-normal-registration-claim disclaimer; the
+false fixture flag and actual existing-source branch independently establish
+normal bundled use without catalog or Attempt injection. No full utility claim.
+1016memorysamples/min24874237952B/fullPSIavg10max1.08%/swapout0/OOM0; no sustained
+pressure. Log0f843640, originals in ignored run-6jt61abk. Root viewed5 originals;
+independent review73d4e089 records22selected originals across all four labs and
+all five scales, both widths and Light/Dark (not all20 combinations manually).
+Populated single-line text/focus/labels remain aligned; large narrow layouts
+reflow and require substantial ordinary scrolling. No selected material blocker.
+This is not manual review of all84, all28themes, placeholders or a novice study.
+
+M623 cold harness refused Root's unsupported evidence path BEFORE any app child;
+the retained error is not a startup failure or successful reopen. M624 uses the
+required private disk TMPDIR and passes actual NFS separate processes: writer
+887382/75.775s and reader888012/30.685s, both0. The writer observation and reader
+loaded observation are byteequal68,237B SHA256
+`cb6a14db2300a0dde5daf415574a19efde7434d809348630fbbe2a4b8b9af9da`.
+Separate unfinished assignment/example exports, mounts/files, favorite/preferences
+survive. The reader repairs through native editors and regrades both goals;
+post-repair saved bytes intentionally differ from the writer's unfinished work.
+Root views the repaired150%Light screen. Evidence native-reopen-ef36375248e361ef754bb66d
+stays on project disk; manifest c1a4f7d5 is sealed with COMPLETE.
+
+M62510/10 fresh Wayland processes pass: protocol observed, application ready,
+update complete, frame captured,0exit/no timeout. Times0.965–1.016s include the
+fixed driver cadence and are not startup benchmarks. Retained native traces
+cannot settle the historical Physical143 intermittent cause; no such failure
+was reproduced in this finite run.
+
+## Narrow coverage and remaining limits
+
+Only LPIC-1 v5.0 parent104.1 and K1 gain narrowly Partial native practice after
+review9d9d00cc and the installed gates. Safe-gap/eligible-media/delivery exercise
+allocation/creation; hints-versus-content contributes table/type-hint inspection
+and formatting. K2 requires mkfs commands and wider families; K3/Btrfs and all
+five command terms stay Open. No102.1,104.2/104.3 or LPIC-2 credit is inherited.
+Only three CSV rows change; all fingerprints and unrelated rows remain exact.
+Totals189Partial/1Supporting/1050Open; all136 parents incomplete(90Open46Partial).
+
+The full curriculum, Windows/macOS runtime, physical-device, screen-reader and
+novice acceptance remain unfinished. Other26themes were not manually rerendered
+in this route; existing palette/contrast/persistence tests remain distinct.
+The macOS dispatch notice gate and signing/platform decisions remain pending.
+MIT project approval and third-party notices stand. No public release or full
+exam-preparation/equipment/endorsement claim is made.
