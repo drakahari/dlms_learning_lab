@@ -4771,3 +4771,38 @@ Post-doc M482all424PythonPASS; M483coverage validates190registered/50units,
 text-only scope/privacy review excludes private progress, PNGs, logs, archives,
 binaries and credential/personal-path markers. Whitespace checks pass. Commit
 and push this coherent unit, then continue actual ERE14/193 and remaining tracks.
+
+
+### Installed190 validation and retained route failure
+
+Accepted190 is committed/pushed asf242519. M484 clean Fedora candidate build
+passes notices/dependency gates. ELF76186560B/eff2de43, archivec15004fa. M485 actual
+private installation/171-to190 upgrade/progress/uninstall/reinstall PASS; M486
+10/10 installed Wayland launches PASS. M487 nofollow preflight correctly rejects
+the launcher symlink before GUI; selecting its actual installed ELF, M488 NFS
+write/read processes254118/254478 fully exit0 after75.747s/30.662s. Both retain
+whole observed profile18f3d1b2; real separate unfinished drafts, appearance,
+favorite, mounts/files and current repair/regrading survive cold reopening.
+
+M489 installed NTP route FAIL at80185 Click(Back),phase0,polls301,exit101 after14
+actual captures. Exact failed evidence receipt99087dfc remains private; no marker
+or active owned child remains.71memory samples show no current pressure/swapout/
+OOM. Development M480 pass is not package acceptance. Fast optimized repaints
+may exhaust the frame budget during intentional wheel settling; investigate and
+add a real-event regression without increasing limits or weakening visibility.
+No candidate-ready/full-curriculum/platform claim, release or cleanup is made.
+
+
+### Owner-requested safe overnight pause
+
+M490 optimized failure-only diagnostic build finishes/reaps0 after6m20s. Actual
+native diagnostic has NOT run; suspected wait-frame exhaustion remains unproved.
+Retained76273472B ELF47995e37,1050source inventory0be486cd and source archive
+70532c91 under ignoredreviews/ntp-installed-diagnostic-m490; receiptd294e2cf.
+381memory samples/min22821171200B/fullPSIavg10max0/OOMdelta0; system swapout2063pages
+is reported without project-only attribution. The diagnostic one-path change is
+archived then restored byte-exact to accepted Main4fdc7f46. Conditional remedy
+37999dc4 and its real fast-frame regression remain unapplied/unrun/source-review
+pending. All workers pause, no active command/unfinished marker remains. No new
+labs, runtime acceptance, release or cleanup. CHECKPOINT.md records exact first
+resume command target and subsequent ERE14/curriculum work.

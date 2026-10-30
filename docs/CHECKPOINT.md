@@ -14,6 +14,39 @@ NVMe-backed artifacts are mandatory. Source-only workers must not mutate Main or
 run heavy commands. Use followup_task to wake a completed reviewer; send_message
 only queues a message. No GPU/swap/services/model/desktop changes or cleanup.
 
+## Owner-requested overnight pause —2026-10-29
+
+Paused after completing/reaping the sole running build. No build/native/test
+process, active-command or unfinished-child marker remains. All source-only
+workers are paused. No new curriculum was integrated in this resumption.
+Accepted implementation remainsf242519/190labs; the unverified diagnostic source
+was retained privately and restored byte-exact to accepted Main. Only checkpoint
+and ledger documentation changed. No release was published.
+
+M490 optimized diagnostic build PASS,exit0,6m20s; native diagnostic NOT RUN.
+Retained ELF `.build-artifacts/reviews/ntp-installed-diagnostic-m490/dlms-learning-lab`
+76273472B/SHA47995e37cfd62a424f182080670b9402928a7554ec24d3e3e231624ed5da51d2;
+all1050 actual source inputs0be486cd/source archive70532c91 retained there.
+Receiptd294e2cf.381memory samples/min22821171200B/fullPSIavg10max0/OOMdelta0;
+system-wide swapout2063pages, not attributed solely to this build.
+
+First resume action: use MAIN runner with `DLMS_SMOKE_STAGE=ntp-lessons` to run
+that retained optimized diagnostic, not the ordinary target ELF or restored
+Main source. Retain actual elapsed/wheel-deadline/geometry failure facts. The
+conditional remedy `installed190-ntp-cadence-remedy-source-r1` /37999dc4 is
+UNAPPLIED/UNRUN: excludes deliberate deadline waiting from active workpolls,
+uses delayed repaint, preserves300active-poll/15s/20wheel/visibility limits, and
+adds a real400-fast-frame/scroll/Back/profile regression. Independently review,
+prove the regression, then rerun optimized/full/installed validation before
+acceptance. Do not assume the suspected cause is confirmed. Current accepted
+Main driver is4fdc7f46; diagnostic afterimagec4c5b7a1 remains private.
+
+Then continue reviewed ERE14 actual capability/history/reference gates and
+normal193 integration, followed by mapped remaining curriculum. Bash reviewer
+prepared a current-owned45 application preflight; GPT normal workspace is only
+planning at `partition-filesystem-workspace-paused-checkpoint-r1`, not code or
+coverage. No routine owner approval is required to resume this authorized work.
+
 ## Current accepted development milestone:190
 
 190 authored assignments/50units:57CCNA/15,40LPIC-1/10,36LPIC-2/9,57Bash/16.
@@ -64,8 +97,9 @@ OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md.
 
 ## Next work — continue without routine approval
 
-1. Finish post-doc Python/coverage/privacy gates and coherent commit/push if not
-   already reflected by Git. Do not reimplement the accepted workspaces.
+1. Accepted190 is committed/pushed asf242519. Post-doc424Python and coverage
+   passed. Finish the installed optimized NTP route failure below before accepting
+   the new candidate. Do not reimplement the accepted workspaces.
 2. Continue actual ERE14 foundation/history/utility gates below. Core/source ACKs
    and sealed13 evidence do not prove new evaluator behavior. Then integrate the
    three distinct ERE projects through reviewed normal193/native193, test actual
@@ -75,8 +109,8 @@ OBJECTIVE_MAPPING.md, SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md.
    capabilities/content in substantive batches, not arbitrary lab-count targets.
 4. Prepare useful clean Fedora candidates and verify actual installed upgrade,
    progress preservation, long routes, NFS two-process cold reopening and repeated
-   startup. A candidate does not complete the curriculum. Installed171 is still
-   the last accepted package; see below. Do not publish releases.
+   startup. A candidate does not complete the curriculum. Installed171 remains the last fully accepted package; the190 candidate has
+   passed lifecycle/startup/NFS cold but its NTP route is not accepted; see below. Do not publish releases.
 
 ## Source queue — not runtime or curriculum credit
 
@@ -104,8 +138,8 @@ must survive future composition. Unowned files stay current at application.
 | Links optional help | `links-assignment-help-source-r1` /702d73a9 |peera4d6b05b; two added real-control groups, capability38 total UNRUN |
 | Links authored4 | `links-unit-source-r3` /cc382d00 |peerab42c3ba;12groups UNRUN; practice paths/chronology claim fixed, late-copy alternative accepted, task-specific hints; no credit |
 | GPT/ext4/swap pure | `partition-filesystem-source-r2` /9cae6ea4 |peer73cc4f2e;4paths/3new/19groups UNRUN; public environment predicate fails closed; no Goal/UI/MBR/activation coverage |
-| Syslog pure | `syslog-foundation-source-r1` /a5b1a4d8 |3new paths/19groups UNRUN, no export/Goal/UI; independent review pending; current-policy probes distinct from history |
-| Future actual14-before15 capture | `bash-literal-trim-before15-source-r1` /6665bfe8 |9paths/7new/29mock+2history groups UNRUN, sealsNone; independent review found NEW3 history/namespace verifier gap, narrow remedy pending; do not execute or claim baseline |
+| Syslog pure | `syslog-foundation-source-r1` /a5b1a4d8 |3new paths/19groups UNRUN, no export/Goal/UI; peere513e3ab source ACK; current-policy probes distinct from history |
+| Future actual14-before15 capture | `bash-literal-trim-before15-source-r2` /75775231 |9paths/7new/32mock+2history groups UNRUN, sealsNone; peer5e0f73e7 closes NEW3 defaults/foreign-field/426-416 whole-record verifier gap; final193 source rebase required, no baseline credit |
 | Future literal trim | `bash-literal-trim-next-source-r1` /444a02b0 checkpoint |borrowed helper/5groups UNRUN; no VM15 wiring; actual14/193/sealed baseline must precede advance |
 
 ## Immutable evidence and platform limits
@@ -120,7 +154,26 @@ acceptance. PureERE M411 already matches34GNU cases/eight honest exclusions
 Current accepted Fedora installed candidate is171/44units,065032d0a90b:
 `dist/dlms-learning-lab-0.1.0-g065032d0a90b-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
 Its lifecycle/NFS two-process cold/ten Wayland starts keep their exact historical
-identity. New190 package/cold/startup acceptance remains separate. Older long
+identity. New190 candidate built cleanf242519 (M484) is available at
+`dist/dlms-learning-lab-0.1.0-gf2425193e3bd-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
+ELF SHAeff2de4369eadf3f446ddc15b22e97ccc54e6da26845e0d113b0d7673222e0d1;
+archivec15004fa40be8d37f5e697a7424ebf46a0e9a4f835561be5ba12fe75bdb74fc4.
+M485 actual private install/171-to190 upgrade/uninstall/reinstall/progress retention
+PASS. M486 ten installed native Wayland starts PASS. M487 rejected a launcher
+symlink before GUI; M488 correctly selected its real ordinary ELF and passed NFS
+two-process cold reopening: distinctPIDs254118/254478 exit0,75.747s/30.662s;
+writer-observed/reader-loaded18f3d1b2 exact, current repairs/regrading PASS.
+No personal profile or host NFS was used.
+
+M489 installed NTP94 route FAIL, exit101 after14 captures:80185 Click(Back),
+phase0/polls301. Retained log/source/candidate/screens and failure receipt99087dfc
+under ignoredreviews/installed190-m489-failure. No marker/owned descendants remain.
+71memory samples/currentPSI0/swapout0/OOM0. Development M480 passing is not
+substituted for installed acceptance. Source review finds immediate repaint during
+an intentional150ms wheel wait can consume a frame-count budget in an optimized
+build; actual cause is still under investigation. Preserve wall-time/visibility
+checks and add a deterministic regression, then rerun the actual optimized and
+installed routes. Candidate is not yet accepted for this flow. Older long
 Physical native143 termination cause is unproved; new wrapper TERM/HUP cleanup
 is fixed, but do not call it the demonstrated cause of that historical failure.
 
