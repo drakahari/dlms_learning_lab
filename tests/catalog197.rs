@@ -33,7 +33,7 @@ fn definition(s: &Scenario) -> &work::Definition {
 }
 #[test]
 fn complete193_sources_and_all60_script_cases_stay_before_four_normal_native_assignments() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original193();
@@ -82,11 +82,12 @@ fn complete193_sources_and_all60_script_cases_stay_before_four_normal_native_ass
 }
 #[test]
 fn closed52_to51_raw_and_full_typed_inverse_retains_every_old_unit_and_all_prior_boundaries() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original193();
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let raw = previous52.as_slice();
     let before = registration::before_units(raw).unwrap();
@@ -162,7 +163,7 @@ fn closed52_to51_raw_and_full_typed_inverse_retains_every_old_unit_and_all_prior
 }
 #[test]
 fn exact_source_inverse_rejects_partial_extra_changed_old_or_new_source_and_foreign_family() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     for mode in 0..9 {
@@ -198,7 +199,7 @@ fn exact_source_inverse_rejects_partial_extra_changed_old_or_new_source_and_fore
 }
 #[test]
 fn count_only_predecessor_preserves_full_map_validates_each_new_context_and_awards_no_credit() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let mut p = Progress {
@@ -242,7 +243,7 @@ fn count_only_predecessor_preserves_full_map_validates_each_new_context_and_awar
 }
 #[test]
 fn retained_profile_does_not_invent_new_disk_attempts_answers_favorites_or_completion() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
@@ -258,7 +259,7 @@ fn retained_profile_does_not_invent_new_disk_attempts_answers_favorites_or_compl
 }
 #[test]
 fn all_four_normal_assignment_and_example_drafts_resume_separately_with_validated_backup() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let mut p = Progress {
@@ -339,7 +340,7 @@ fn all_four_normal_assignment_and_example_drafts_resume_separately_with_validate
 #[test]
 fn actual_normal_sources_accept_reference_and_two_alternatives_then_invalidate_after_later_damage()
 {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let review: Value =
@@ -408,7 +409,7 @@ fn borrowed_complete_serialized_equality_matches_all197_and_scalar_container_cor
         };
         assert!(!registration::serialized_equal(actual, &wrong));
     }
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(all.len(), 197);
@@ -650,4 +651,10 @@ fn borrowed_complete_serialized_equality_matches_all197_and_scalar_container_cor
         &MissingMapValue,
         &json!({"key":1})
     ));
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

@@ -1,21 +1,30 @@
-# Exact snapshots and conditional rollout — unregistered source
+# Exact snapshots and conditional rollout
 
-Current continuation,2026-10-30: this remains an unregistered two-project unit.
-M664 all11 content groups pass after correcting quadratic preflight within the
-unchanged2,000-instruction cap and retaining all24graded/25guard Cases. Source
-and profile/invalid-pack checks pass with the corrected Script identity writer.
-Normal201 registration, full-inclusive and native acceptance remain pending.
-Historical unrun/failure descriptions below retain their original boundary;
-they are not the current scoped test status. No curriculum count is earned yet.
+## Current integration —2026-10-31
 
-This is an unregistered authored proposal after the accepted narrow literal15
-capability and the separate literal-interface content gates. It advances no engine,
-registers no pack/unit and records no execution of these new assignments. The accepted197/evaluator14 baseline and
-all genuine9–14 producers, inputs, drafts, records and seals remain untouched.
-Accepted197 is the preserved public baseline. The separately applied evaluator15
-trial is not accepted by this proposal; its actual core/reference acceptance and
-the earlier literal content gates must precede these prospective tests. Later source drift needs a
-narrow explicit rebase.
+Both assignments are now in the normal201/54 catalog under evaluator15. They
+add24 graded cases and two separate editable examples, retaining every old199
+source/unit and genuine historical progress context. All48 affected integration
+targets pass407 checks; catalog201 adds11 passing parity/mutation groups. The
+complete uninstrumented UI route passes, and actual Fedora captures74 screens
+across24 appearance settings.517 Python and all-target Clippy pass. The new
+full-inclusive201 suite passes3,055 tests/237 targets/0failures/ignored. This is
+not full-curriculum or installed-candidate acceptance. See CATALOG201_MILESTONE.md and CHECKPOINT.md.
+
+The `.json`/document draft filenames preserve authoring/evidence identities;
+they do not mean these two scenarios are still hidden from the normal catalog.
+HSRP and other source-only proposals remain unregistered and uncounted.
+
+## Preserved authoring history
+
+The initial2026-10-30 proposal was unregistered. M664's11 content groups passed
+after correcting quadratic preflight within the unchanged2,000-instruction cap,
+retaining all24 graded/25 guard cases. Source/profile/invalid-pack gates and the
+Script identity writer preceded registration. Historical private201 and
+prospective test descriptions later in this document refer to that source stage;
+they do not replace the current normal integration evidence above. Genuine9–14
+producers, source bundles, captures, unfinished drafts, records and seals remain
+immutable; none has been rerun or relabeled as current evidence.
 
 There are two learning decisions, not a catalog-size target:
 

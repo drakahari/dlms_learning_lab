@@ -679,6 +679,10 @@ impl LabApp {
             {
                 stage
             } else if let Some(stage) =
+                Self::snapshot_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::literal_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -1362,7 +1366,8 @@ impl LabApp {
             || self.lvm_capture_active()
             || self.ntp_capture_active()
             || self.disk_capture_active()
-            || self.literal_capture_active();
+            || self.literal_capture_active()
+            || self.snapshot_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1412,7 +1417,8 @@ impl LabApp {
             || self.lvm_capture_active()
             || self.ntp_capture_active()
             || self.disk_capture_active()
-            || self.literal_capture_active();
+            || self.literal_capture_active()
+            || self.snapshot_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)

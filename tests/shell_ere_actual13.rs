@@ -97,7 +97,9 @@ fn preserved_metadata(mut a: Value, mut b: Value) {
     assert_eq!(a, b);
 }
 fn all() -> Vec<pack::Scenario> {
-    let current = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    assert_eq!(full201.len(), 201);
+    let current = literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
     assert_eq!(current.len(), 199);
     let out = literal_registration::before_scenarios(&current).to_vec();
     assert_eq!(disk_registration::before_scenarios(&out).len(), 193);
@@ -110,7 +112,7 @@ fn all() -> Vec<pack::Scenario> {
             .collect::<Vec<_>>(),
         literal_registration::IDS
     );
-    current
+    full201
 }
 fn no_invented_literal_attempts(old: &Progress, current: &Progress, all: &[pack::Scenario]) {
     for id in literal_registration::IDS {
@@ -224,6 +226,16 @@ fn original147_contexts366_record_occurrences_and90_non_script_attempts_are_pres
     );
     let mut p = progress::decode(&raw, &all).unwrap();
     no_invented_literal_attempts(&old, &p, &all);
+    for id in literal_registration::snapshot_registration::IDS {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(!old.attempts.contains_key(id) && !p.attempts.contains_key(id));
+        assert!(!old.favorites.contains(id) && !p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
     assert_eq!(value(&p), value(&old));
     assert_eq!(
         p.migration_receipts.as_ref().unwrap().shell,
@@ -292,6 +304,16 @@ fn genuine_unfinished_assignment_and_practice_drafts_keep_all358_records_and_ent
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let mut p = progress::decode(&raw, &all).unwrap();
     no_invented_literal_attempts(&old, &p, &all);
+    for id in literal_registration::snapshot_registration::IDS {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(!old.attempts.contains_key(id) && !p.attempts.contains_key(id));
+        assert!(!old.favorites.contains(id) && !p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
     assert_eq!(value(&p), value(&old));
     assert_eq!(p.attempts.len(), 147);
     assert_eq!(count(&p), 358);

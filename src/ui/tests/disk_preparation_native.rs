@@ -289,13 +289,20 @@ fn run_disk_route(private_fixture: bool) {
     let (ctx, mut a) = app();
     assert!(!a.synthetic && !a.developer);
     assert!(a.progress.attempts.is_empty());
-    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
-    let current_catalog = serde_json::to_value(&a.scenarios).unwrap();
-    let current_units = serde_json::to_value(&a.units).unwrap();
+    assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
+    let whole201_catalog = serde_json::to_value(&a.scenarios).unwrap();
+    let whole201_units = serde_json::to_value(&a.units).unwrap();
+    let checked199 =
+        registration::literal_registration::snapshot_registration::before_scenarios(&a.scenarios);
+    let checked53 =
+        registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
+    assert_eq!((checked199.len(), checked53.len()), (199, 53));
+    let current_catalog = serde_json::to_value(checked199).unwrap();
+    let current_units = serde_json::to_value(checked53).unwrap();
     // Preserve the complete original197/52 scope through the strict current
     // source and full typed-unit inverse, rather than an unchecked prefix.
-    let checked197 = registration::literal_registration::before_scenarios(&a.scenarios);
-    let checked52 = registration::literal_registration::before_typed_units(&a.units);
+    let checked197 = registration::literal_registration::before_scenarios(checked199);
+    let checked52 = registration::literal_registration::before_typed_units(checked53);
     assert_eq!(checked197.len(), 197);
     assert_eq!(checked52.len(), 52);
     // Only the private predecessor exercise peels the checked disk append,
@@ -310,9 +317,21 @@ fn run_disk_route(private_fixture: bool) {
         a.scenarios = scenarios;
         a.units = units;
     } else {
-        assert_eq!(serde_json::to_value(&a.scenarios).unwrap(), current_catalog);
-        assert_eq!(serde_json::to_value(&a.units).unwrap(), current_units);
-        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        let checked199 =
+            registration::literal_registration::snapshot_registration::before_scenarios(
+                &a.scenarios,
+            );
+        let checked53 =
+            registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
+        assert_eq!(serde_json::to_value(checked199).unwrap(), current_catalog);
+        assert_eq!(serde_json::to_value(checked53).unwrap(), current_units);
+        assert_eq!((checked199.len(), checked53.len()), (199, 53));
+        assert_eq!(
+            serde_json::to_value(&a.scenarios).unwrap(),
+            whole201_catalog
+        );
+        assert_eq!(serde_json::to_value(&a.units).unwrap(), whole201_units);
+        assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
     }
     assert!(a.progress.attempts.is_empty());
     let before = serde_json::to_value(&a.scenarios).unwrap();
@@ -437,15 +456,37 @@ fn run_disk_route(private_fixture: bool) {
     );
     assert_eq!(a.units.len(), old_units + usize::from(private_fixture));
     if !private_fixture {
-        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
-        assert_eq!(serde_json::to_value(&a.scenarios).unwrap(), current_catalog);
-        assert_eq!(serde_json::to_value(&a.units).unwrap(), current_units);
+        let checked199 =
+            registration::literal_registration::snapshot_registration::before_scenarios(
+                &a.scenarios,
+            );
+        let checked53 =
+            registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
+        assert_eq!(serde_json::to_value(checked199).unwrap(), current_catalog);
+        assert_eq!(serde_json::to_value(checked53).unwrap(), current_units);
+        assert_eq!((checked199.len(), checked53.len()), (199, 53));
+        assert_eq!(
+            serde_json::to_value(&a.scenarios).unwrap(),
+            whole201_catalog
+        );
+        assert_eq!(serde_json::to_value(&a.units).unwrap(), whole201_units);
+        assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
         for id in registration::literal_registration::IDS {
             let source = a.scenarios.iter().find(|s| s.id == id).unwrap();
             assert!(matches!(source.initial, State::Script { .. }));
             assert!(matches!(source.goal, Goal::Script { .. }));
             assert!(!a.progress.attempts.contains_key(id));
             assert!(!a.progress.favorites.contains(id));
+        }
+    }
+    if !private_fixture {
+        for id in registration::literal_registration::snapshot_registration::IDS {
+            let source = a.scenarios.iter().find(|s| s.id == id).unwrap();
+            assert!(
+                matches!(source.initial, State::Script { .. })
+                    && matches!(source.goal, Goal::Script { .. })
+            );
+            assert!(!a.progress.attempts.contains_key(id) && !a.progress.favorites.contains(id));
         }
     }
     for id in IDS {

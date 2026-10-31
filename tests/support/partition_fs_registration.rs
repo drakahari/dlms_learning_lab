@@ -430,7 +430,7 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    let checked197 = if all.len() == 199 {
+    let checked197 = if matches!(all.len(), 199 | 201) {
         literal_registration::before_attempts_len(all)
     } else {
         all.len()

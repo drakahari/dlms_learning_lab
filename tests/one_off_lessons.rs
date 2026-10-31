@@ -94,7 +94,25 @@ fn actual_reference(a: &mut Attempt, s: &pack::Scenario, actions: &Value) {
 }
 #[test]
 fn four_distinct_registered_tasks_have_real_prerequisites_and_separate_teaching() {
-    let current199 = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    let checked199 = disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201);
+    assert_eq!((full201.len(),checked199.len()),(201,199));
+    let full54 = dlms_learning_lab::course::bundled(&full201).unwrap();
+    let snapshot_raw53 = disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let checked53 = dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),checked199).unwrap();
+    assert_eq!((full54.len(),checked53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&checked53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    assert_eq!(full201.iter().filter(|s|matches!(s.goal,dlms_learning_lab::engine::Goal::Script{..})).count(),64);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
+        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+    }
+    let current199 = checked199.to_vec();
     let old = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(current199.len(), 199);
     assert_eq!(ntp_registration::before_scenarios(&old).len(), 186);
@@ -148,7 +166,7 @@ fn four_distinct_registered_tasks_have_real_prerequisites_and_separate_teaching(
         serde_json::to_value(&labs[0].goal).unwrap(),
         serde_json::to_value(&labs[1].goal).unwrap()
     );
-    let current53 = dlms_learning_lab::course::bundled(&current199).unwrap();
+    let current53 = dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &current199).unwrap();
     let raw52 = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))

@@ -2,7 +2,7 @@
 use dlms_learning_lab::{
     course,
     engine::{self, Goal, State},
-    one_off_workspace as work, pack,
+    one_off_workspace as work,
     progress::{self, Attempt, Progress},
     script_teaching::View,
 };
@@ -18,7 +18,7 @@ fn value<T: serde::Serialize + ?Sized>(v: &T) -> serde_json::Value {
 }
 #[test]
 fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_distinct() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original_catalog(&all);
@@ -103,11 +103,12 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
 }
 #[test]
 fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original_catalog(&all);
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let raw = previous52.as_slice();
     let before = registration::before_units(raw).unwrap();
@@ -177,10 +178,11 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
 }
 #[test]
 fn changed_raw_or_typed_appends_wrong_prerequisites_and_duplicate_units_are_refused() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let raw = previous52.as_slice();
     let before = registration::before_units(raw).unwrap();
@@ -205,7 +207,7 @@ fn changed_raw_or_typed_appends_wrong_prerequisites_and_duplicate_units_are_refu
 }
 #[test]
 fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_selected() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
@@ -344,7 +346,7 @@ mod one_off_boundary;
 use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration as literal_registration;
 #[test]
 fn closed_current_count_boundary_preserves176_and46_only_after_exact_append_checks() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let units = course::load(
@@ -398,4 +400,10 @@ fn closed_current_count_boundary_preserves176_and46_only_after_exact_append_chec
     }
     assert_eq!(value(&all), source);
     assert_eq!(value(&units), index);
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

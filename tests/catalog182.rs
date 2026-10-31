@@ -25,7 +25,7 @@ fn recipe() -> Value {
 #[test]
 fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immutable() {
     assert_eq!(shell::EVALUATOR_REVISION, 15);
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::before_scenarios(&all);
@@ -138,11 +138,12 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
 }
 #[test]
 fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrecipes() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::before_scenarios(&all);
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let current_raw = previous52.as_slice();
     let checked49 =
@@ -233,7 +234,7 @@ fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrec
 }
 #[test]
 fn exact_newappend_checks_do_not_ignore_changedtasks_or_edited_predecessor_identities() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     for (which, index) in [("new", 180), ("old", 0)] {
@@ -270,7 +271,7 @@ fn exact_newappend_checks_do_not_ignore_changedtasks_or_edited_predecessor_ident
 
 #[test]
 fn nonempty_authored_guides_are_preserved_and_modified_guidance_is_refused() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     for index in [180, 181] {
@@ -292,4 +293,10 @@ fn nonempty_authored_guides_are_preserved_and_modified_guidance_is_refused() {
             assert!(std::panic::catch_unwind(|| registration::before_scenarios(&changed)).is_err());
         }
     }
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

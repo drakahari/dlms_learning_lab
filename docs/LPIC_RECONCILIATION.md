@@ -1,6 +1,13 @@
 # LPIC reconciliation and next implementation frontier
 
-Current source note (2026-10-31): Main now has199 assignments/53 units, including44 LPIC-1 and36 LPIC-2 assignments. All83 LPIC parents remain incomplete: LPIC-1 has26 Open/16 Partial, and LPIC-2 has33 Open/8 Partial. The current granular matrix is OBJECTIVE_MAPPING.md/SKILL_COVERAGE.csv; these overlapping rows are not a completion percentage. The168/176 counts and reconciliation below are historical snapshots, not current inventory. The scoped installed Fedora candidate remains197/52; current199 full-inclusive verification passes3,041 tests/236targets/0 failures/0 ignored. No new objective credit follows from this documentation correction.
+Current source note (2026-10-31): Main integrates201 assignments/54 units,
+including44 LPIC-1 and36 LPIC-2 assignments. All83 LPIC parents remain incomplete:
+LPIC-1 has26 Open/16 Partial; LPIC-2 has33 Open/8 Partial. OBJECTIVE_MAPPING.md
+and SKILL_COVERAGE.csv remain authoritative; overlapping rows are not a completion
+percentage. Current scoped checks/native Fedora and full-inclusive201 pass
+(3,055 tests/237 targets/0failures/ignored). Accepted199 retains3,041 tests; installed553 remains197/52. This scripting
+batch adds no LPIC parent/status credit. The168/176 reconciliation below is
+historical. See CATALOG201_MILESTONE.md for current evidence and limits.
 
 The original reconciliation snapshot used Main168 source on2026-10-28. At that historical snapshot,
 Main176 keeps the same36LPIC-1 and32LPIC-2 assignments, including four recurring-job

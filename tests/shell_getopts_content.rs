@@ -425,7 +425,24 @@ fn fill_is_only_a_draft_and_separate_unfinished_sources_resume_and_reset_locally
 fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loading() {
     let baseline: Vec<Original> =
         serde_json::from_str(include_str!("fixtures/shell-getopts-original-catalog.json")).unwrap();
-    let current199 = pack::bundled().unwrap();
+    let full201=pack::bundled().unwrap();
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),current199.len()),(201,199));
+    let full54=course::bundled(&full201).unwrap();
+    let snapshot_raw53=disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let old53=course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&current199).unwrap();
+    assert_eq!((full54.len(),old53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&old53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot sources require Script Goals")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+
     let current = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(current199.len(), 199);
     assert_eq!(current.len(), 197);
@@ -436,19 +453,21 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     // Keep every historical proof below on the complete canonical193 source.
     let old = disk_registration::before_scenarios(&current).to_vec();
     assert_eq!(old.len(), 193);
-    let all = catalog();
+    let all=catalog();
+    assert_eq!(serde_json::to_value(&all).unwrap(),serde_json::to_value(&full201).unwrap());
+    let all199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&all);
     assert_eq!(
         serde_json::to_value(disk_registration::literal_registration::before_scenarios(
-            &all
+            all199
         ))
         .unwrap(),
         serde_json::to_value(&current).unwrap()
     );
     assert_eq!(
-        serde_json::to_value(&all).unwrap(),
+        serde_json::to_value(all199).unwrap(),
         serde_json::to_value(&current199).unwrap()
     );
-    let units53 = course::bundled(&all).unwrap();
+    let units53=course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),all199).unwrap();
     let raw52 = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))
@@ -588,10 +607,10 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     }
     assert!(authored().iter().all(|s| !p.attempts.contains_key(&s.id)));
     assert_eq!(
-        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all199[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         disk_registration::literal_registration::IDS
     );
-    for source in &all[197..] {
+    for source in &all199[197..] {
         assert!(matches!(source.initial, State::Script { run: None, .. }));
         let Goal::Script { cases } = &source.goal else {
             panic!("Literal append must retain Script goal")
@@ -602,6 +621,11 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
         assert!(!p.favorites.contains(&source.id));
     }
 
+    for source in &all[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        assert!(!p.attempts.contains_key(&source.id));
+        assert!(!p.favorites.contains(&source.id));
+    }
     let loaded = serde_json::to_value(&p).unwrap();
     assert_eq!(loaded["attempts"], frozen["attempts"]);
     let mut main = 0;

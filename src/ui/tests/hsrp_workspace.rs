@@ -6,7 +6,9 @@ mod fixture;
 fn opened() -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
     let i = a.scenarios.len();
-    assert_eq!(i, 199);
+    assert_eq!(i, 201);
+    let old199=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&a.scenarios);
+    assert_eq!(old199.len(), 199);
     let old197=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&a.scenarios);
     assert_eq!(old197.len(), 197);
     let checked193 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::before_scenarios(&a.scenarios);

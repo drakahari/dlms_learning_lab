@@ -63,7 +63,8 @@ fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 15);
-        let current199 = pack::bundled().unwrap();
+        let full201=pack::bundled().unwrap();
+        let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
         let all = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
         assert_eq!(all.len(), 197);
@@ -82,7 +83,12 @@ fn catalog() -> &'static Vec<Scenario> {
         let checked199 =
             pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
         assert_eq!(value(&checked199), value(&current199));
-        checked199
+        let t=texts(&full201);
+        assert!(t.iter().all(|s|s.len()<=pack::MAX_PACK_BYTES));
+        let checked201=pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+        assert_eq!(value(disk_registration::literal_registration::snapshot_registration::before_scenarios(&checked201)),value(&checked199));
+        assert_eq!(value(&checked201),value(&full201));
+        checked201
     })
 }
 fn run(p: &str, c: &Case, n: usize) -> Outcome {
@@ -117,7 +123,24 @@ fn programs(s: &Scenario) -> Vec<String> {
 #[test]
 fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dependency_closure() {
     let r = review();
-    let current = pack::bundled().unwrap();
+    let full201=pack::bundled().unwrap();
+    let current=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),current.len()),(201,199));
+    let full54=course::bundled(&full201).unwrap();
+    let snapshot_raw53=disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let old53=course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&current).unwrap();
+    assert_eq!((full54.len(),old53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&old53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot sources require Script Goals")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+
     assert_eq!(
         (
             current.len(),
@@ -125,7 +148,7 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
         ),
         (199, 197)
     );
-    let literal_units53 = course::bundled(&current).unwrap();
+    let literal_units53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &current).unwrap();
     let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))
@@ -207,7 +230,7 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
         digest::hash(&predecessor),
         r["original_units_sha256"].as_str().unwrap()
     );
-    let current_units53 = course::bundled(&current).unwrap();
+    let current_units53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &current).unwrap();
     let full_units =
         disk_registration::literal_registration::before_typed_units(&current_units53).to_vec();
     assert_eq!(disk_registration::before_typed_units(&full_units).len(), 51);
@@ -445,7 +468,9 @@ fn actual_run_edit_invalidation_retry_save_resume_and_selected_reset_preserve_ot
 }
 #[test]
 fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectations_fail() {
-    let full199 = catalog();
+    let full201=catalog();
+    let checked199=disk_registration::literal_registration::snapshot_registration::before_scenarios(full201).to_vec();
+    let full199=&checked199;
     let previous197 = disk_registration::literal_registration::before_scenarios(full199).to_vec();
     let current = &previous197;
     assert_eq!(current.len(), 197);
@@ -478,7 +503,12 @@ fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectati
     assert_eq!(current196.len(), 196);
     assert_eq!(value(&current196[..194]), value(&current194));
     assert_eq!(value(&current196[194..]), value(&full199[197..]));
-    for (base, expected_count) in [(&original190, 193), (&current194, 197), (&current196, 199)] {
+    let mut current198=full201.clone();
+    current198.retain(|s|!IDS.contains(&s.id.as_str()));
+    assert_eq!(current198.len(),198);
+    assert_eq!(value(&current198[..196]),value(&current196));
+    assert_eq!(value(&current198[196..]),value(&full201[199..]));
+    for (base, expected_count) in [(&original190,193),(&current194,197),(&current196,199),(&current198,201)] {
         // A valid control reaches the real validator with both the complete
         // historical base and the current base including all four native labs.
         let mut valid = base.clone();
@@ -501,7 +531,9 @@ fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectati
                     .map(|s| (s.id.clone(), value(s)))
                     .collect::<BTreeMap<_, _>>()
             };
-            if expected_count == 199 {
+            if expected_count == 201 {
+                assert_eq!(by_id(&checked),by_id(full201));
+            } else if expected_count == 199 {
                 assert_eq!(by_id(&checked), by_id(full199));
             } else {
                 assert_eq!(by_id(&checked), by_id(current));

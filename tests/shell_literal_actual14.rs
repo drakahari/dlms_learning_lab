@@ -154,7 +154,11 @@ fn all_prior_records_multiplicity_two_unfinished_contexts_and_90_nonscript_attem
 #[ignore = "Requires genuine sealed14 original/draft profiles; no replay"]
 fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
     let current_all = pack::bundled().unwrap();
-    assert_eq!(current_all.len(), 199);
+    assert_eq!(current_all.len(), 201);
+    let old199 = disk_registration::literal_registration::snapshot_registration::before_scenarios(
+        &current_all,
+    );
+    assert_eq!(old199.len(), 199);
     let all = disk_registration::literal_registration::before_scenarios(&current_all);
     assert_eq!(disk_registration::before_scenarios(all).len(), 193);
     assert_eq!(all.len(), 197);
@@ -182,6 +186,15 @@ fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
                 panic!()
             };
             assert_eq!(cases.len(), 12);
+            assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
+            assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
+            assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));
+        }
+        for id in disk_registration::literal_registration::snapshot_registration::IDS {
+            let s = current_all.iter().find(|s| s.id == id).unwrap();
+            assert!(
+                matches!(s.initial, State::Script { .. }) && matches!(s.goal, Goal::Script { .. })
+            );
             assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
             assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
             assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));

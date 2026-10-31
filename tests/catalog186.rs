@@ -28,7 +28,7 @@ fn fresh(s: &pack::Scenario) -> Attempt {
 }
 #[test]
 fn normal186_retains_full182_objects_all57scripts442cases57examples_and_exact_four_lvm_sources() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -85,7 +85,7 @@ fn normal186_retains_full182_objects_all57scripts442cases57examples_and_exact_fo
 }
 #[test]
 fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without_tail_acceptance() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -97,7 +97,8 @@ fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without
     assert_eq!(current190.len(), 197);
     assert_eq!(all.len(), 186);
     let old = original::load();
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let current50 = previous52.as_slice();
     let checked49 = registration::ntp_registration::before_units(current50).unwrap();
@@ -170,7 +171,7 @@ fn strict49_to48_raw_and_complete_typed_inverse_retains_every_old_recipe_without
 #[test]
 fn source_boundaries_reject_partial_or_extra_lvm_and_source_mutations_without_broadening_old_authority()
  {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -207,7 +208,7 @@ fn source_boundaries_reject_partial_or_extra_lvm_and_source_mutations_without_br
 }
 #[test]
 fn current_catalog_never_invents_lvm_work_or_credit_in_a_retained_old_profile() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -233,7 +234,7 @@ fn current_catalog_never_invents_lvm_work_or_credit_in_a_retained_old_profile() 
 #[test]
 fn all_new_lvm_sources_require_authored_save_context_even_when_current_and_initial_are_jointly_forged()
  {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -299,7 +300,7 @@ fn all_new_lvm_sources_require_authored_save_context_even_when_current_and_initi
 }
 #[test]
 fn copied_example_names_display_text_and_foreign_oneoff_metadata_cannot_satisfy_lvm() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -352,7 +353,7 @@ fn copied_example_names_display_text_and_foreign_oneoff_metadata_cannot_satisfy_
 fn joint_forgery_cannot_supply_authority_to_load_export_inspect_restore_or_completion() {
     use dlms_learning_lab::backup;
     use std::sync::atomic::{AtomicBool, AtomicUsize};
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current190 = literal_registration::before_scenarios(&current199).to_vec();
     let all =
@@ -421,4 +422,10 @@ fn joint_forgery_cannot_supply_authority_to_load_export_inspect_restore_or_compl
     assert!(!dir.path().join("progress-before-restore-1.json").exists());
     let valid = progress::load(&path, &all).unwrap();
     assert!(progress::current_solved(&valid.attempts[&s.id], s));
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

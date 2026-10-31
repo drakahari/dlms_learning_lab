@@ -73,7 +73,7 @@ fn catalog() -> &'static Vec<Scenario> {
             15,
             "No fallback to an older evaluator"
         );
-        let current = pack::bundled().unwrap();
+        let current = normal199_predecessor();
         assert_eq!(current.len(), 199);
         let mut all = disk_registration::literal_registration::before_scenarios(&current).to_vec();
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
@@ -198,7 +198,7 @@ fn record(s: &Scenario, source: &str) -> Record {
 fn private_fixture_preserves_all193_specs60_scripts477_cases60_examples_and51_unit_objects() {
     let all = catalog();
     assert_eq!(all.len(), 199, "Complete normal two-task registration");
-    let normal = pack::bundled().unwrap();
+    let normal = normal199_predecessor();
     assert_eq!(normal.len(), 199);
     assert_eq!(value(&normal), value(all));
     let current = disk_registration::literal_registration::before_scenarios(&normal).to_vec();
@@ -465,7 +465,7 @@ fn missing_prerequisite_wrong_expected_behavior_or_unsupported_example_cannot_lo
             "example" => bad["scenarios"][0]["teaching"]["example"] = json!("unimplemented-tool\n"),
             _ => unreachable!(),
         }
-        let mut all = pack::bundled().unwrap();
+        let mut all = normal199_predecessor();
         all.extend(serde_json::from_value::<Pack>(bad).unwrap().scenarios);
         let t = texts(&all);
         assert!(
@@ -624,4 +624,10 @@ fn active_input_boundary_is_exact_and_after_loop_omission_still_fails_by_support
         let c: Case = serde_json::from_value(pair["case"].clone()).unwrap();
         assert!(c.accepts(&supported_run(&correct, &c, 7)));
     }
+}
+
+fn normal199_predecessor() -> Vec<Scenario> {
+    let all = pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    disk_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

@@ -207,12 +207,25 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
     assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
     assert!(a.progress.attempts.is_empty());
     until(&ctx, &mut a, FIRST + 2, &mut w);
-    let normal199 = pack::bundled().unwrap();
+    let normal201 = pack::bundled().unwrap();
+    assert_eq!(normal201.len(), 201);
+    let normal199=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&normal201).to_vec();
     assert_eq!(normal199.len(), 199);
-    assert_eq!(a.scenarios.len(), normal199.len() + 1);
-    let current199 = &a.scenarios[..normal199.len()];
+    assert_eq!(a.scenarios.len(), normal201.len() + 1);
+    let current201 = &a.scenarios[..normal201.len()];
+    let current199=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(current201);
+    let checked53=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
+    assert_eq!((current199.len(), checked53.len()), (199, 53));
+    assert_eq!(
+        serde_json::to_value(current201).unwrap(),
+        serde_json::to_value(&normal201).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&a.units).unwrap(),
+        serde_json::to_value(course::bundled(&normal201).unwrap()).unwrap()
+    );
     let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(current199);
-    let checked52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&a.units);
+    let checked52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(checked53);
     assert_eq!((checked197.len(), checked52.len()), (197, 52));
     assert_eq!(
         (
@@ -237,13 +250,21 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
         serde_json::to_value(&normal199).unwrap(),
         "The single private NAT fixture must preserve every normal assignment"
     );
+    let normal53_raw=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../../../scenarios/units-v1.json")).unwrap();
     assert_eq!(
-        serde_json::to_value(&a.units).unwrap(),
-        serde_json::to_value(course::bundled(&normal199).unwrap()).unwrap(),
+        normal53_raw.as_slice(),
+        include_bytes!("../../../tests/fixtures/snapshot-units-before199.json")
+    );
+    let normal53 = course::load(std::str::from_utf8(&normal53_raw).unwrap(), &normal199).unwrap();
+    assert_eq!(normal53.len(), 53);
+    assert_eq!(
+        serde_json::to_value(checked53).unwrap(),
+        serde_json::to_value(&normal53).unwrap(),
         "The private fixture must not change any current typed unit field"
     );
-    assert_eq!((a.scenarios.len(), a.units.len()), (200, 53));
-    assert_eq!(a.scenarios[199].id, ID);
+    assert_eq!((current199.len() + 1, checked53.len()), (200, 53));
+    assert_eq!((a.scenarios.len(), a.units.len()), (202, 54));
+    assert_eq!(a.scenarios[normal201.len()].id, ID);
     assert_eq!(
         current199[197..]
             .iter()
@@ -254,6 +275,17 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
     for source in &current199[197..] {
         assert!(matches!(source.initial, State::Script { .. }));
         assert!(matches!(source.goal, engine::Goal::Script { .. }));
+        assert!(
+            !a.progress.attempts.contains_key(&source.id)
+                && !a.progress.favorites.contains(&source.id)
+        );
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    for source in &current201[199..201] {
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, engine::Goal::Script { .. })
+        );
         assert!(
             !a.progress.attempts.contains_key(&source.id)
                 && !a.progress.favorites.contains(&source.id)

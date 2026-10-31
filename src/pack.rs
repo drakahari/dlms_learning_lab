@@ -1254,5 +1254,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-ere-evidence-v1.json"),
         include_str!("../scenarios/disk-preparation-v1.json"),
         include_str!("../scenarios/shell-literal-normalization-draft.json"),
+        include_str!("../scenarios/shell-snapshot-rollout-draft.json"),
     ])
 }

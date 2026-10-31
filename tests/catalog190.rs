@@ -28,7 +28,7 @@ fn prepared(s: &pack::Scenario) -> Attempt {
 }
 #[test]
 fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_tasks() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
@@ -90,7 +90,7 @@ fn all186_complete_sources_49_units_and57scripts_remain_before_four_normal_ntp_t
 }
 #[test]
 fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mutations() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
@@ -98,7 +98,8 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
     let all = ere::before_scenarios(&current).to_vec();
     assert_eq!(all.len(), 190);
     let old = original::load();
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let current_raw = previous52.as_slice();
     let checked50 = ere::before_units(current_raw).unwrap();
@@ -180,7 +181,7 @@ fn strict50_to49_full_raw_typed_inverse_composes_all_older_proofs_and_rejects_mu
 }
 #[test]
 fn source_inverse_never_masks_partial_extra_or_modified_new_tasks() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let current = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(disk_registration::before_scenarios(&current).len(), 193);
@@ -218,7 +219,7 @@ fn source_inverse_never_masks_partial_extra_or_modified_new_tasks() {
 }
 #[test]
 fn retained_old_profiles_have_no_new_ntp_or_lvm_answers_favorites_or_completion() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
@@ -234,7 +235,7 @@ fn retained_old_profiles_have_no_new_ntp_or_lvm_answers_favorites_or_completion(
 }
 #[test]
 fn shared_normal_save_checks_both_families_and_every_nonselected_attempt_before_writing() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let mut good = Progress {
@@ -316,7 +317,7 @@ fn shared_normal_save_checks_both_families_and_every_nonselected_attempt_before_
 }
 #[test]
 fn one_family_drafts_and_retry_never_execute_or_replace_the_other_familys_world() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let l = &all[182];
@@ -369,7 +370,7 @@ fn one_family_drafts_and_retry_never_execute_or_replace_the_other_familys_world(
 }
 #[test]
 fn current_oneoff_source_and_saved_metadata_remain_foreign_to_each_new_typed_family() {
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let one = all
@@ -423,4 +424,10 @@ fn current_oneoff_source_and_saved_metadata_remain_foreign_to_each_new_typed_fam
             _ => panic!(),
         }
     }
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

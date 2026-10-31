@@ -1040,7 +1040,15 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     assert!(lesson.separate_from(&assignment));
     scenario.dhcpv4_teaching = Some(lesson);
     // The catalog is a collection of bounded packs, not one growing artificial pack.
-    let normal199 = pack::bundled().unwrap();
+    let full201=pack::bundled().unwrap();
+    let normal199=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),normal199.len()),(201,199));
+    let full54=dlms_learning_lab::course::bundled(&full201).unwrap();
+    let snapshot_raw53=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let checked53=dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&normal199).unwrap();
+    assert_eq!((full54.len(),checked53.len()),(54,53));
+    assert_eq!(serde_json::to_value(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&checked53).unwrap());
     let previous197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&normal199);
     assert_eq!((normal199.len(), previous197.len()), (199, 197));
     let normal199_value = serde_json::to_value(&normal199).unwrap();
@@ -1117,7 +1125,7 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     );
     // Reuse the same maximum assignment/practice and actual decoded receipts
     // with every current normal source; no new Script attempt is fabricated.
-    let units53 = dlms_learning_lab::course::bundled(&normal199).unwrap();
+    let units53=dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&normal199).unwrap();
     let units52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&units53);
     assert_eq!((units53.len(), units52.len()), (53, 52));
     let mut current200 = normal199;
@@ -1166,6 +1174,23 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
         assert!(!current_decoded.attempts.contains_key(&source.id));
         assert!(!current_decoded.favorites.contains(&source.id));
     }
+    let mut current202=full201;
+    current202.push(scenario.clone());
+    assert_eq!(current202.len(),202);
+    let current202_path=dir.path().join("current201-progress.json");
+    std::fs::write(&current202_path,&current_saved).unwrap();
+    let expected202=serde_json::json!({"portable":current_decoded,"receipts":current_decoded.migration_receipts});
+    progress::save_with_catalog(&current202_path,&current_decoded,&current202).unwrap();
+    assert_eq!(serde_json::json!({"portable":current_decoded,"receipts":current_decoded.migration_receipts}),expected202);
+    let loaded202=progress::load(&current202_path,&current202).unwrap();
+    assert_eq!(serde_json::json!({"portable":loaded202,"receipts":loaded202.migration_receipts}),expected202);
+    for id in ["shell-trim-options","shell-trim-manifest","shell-snapshot-audit","shell-conditional-rollout"] {
+        let source=current202.iter().find(|s|s.id==id).unwrap();
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        assert!(!loaded202.attempts.contains_key(id)&&!loaded202.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+
 }
 #[test]
 fn each_explicit_safety_and_grant_preservation_predicate_checks_its_own_current_row() {

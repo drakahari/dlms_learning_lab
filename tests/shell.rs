@@ -23,7 +23,9 @@ fn fixture() -> Case {
 }
 #[test]
 fn all_authored_scripts_grade_behavior_and_break_after_edit() {
-    let labs = pack::bundled().unwrap();
+    let full201=pack::bundled().unwrap();
+    let labs=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),labs.len()),(201,199));
     assert_eq!(one_off_boundary::before_len(&labs), 176);
     let previous197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&labs);
     assert_eq!((labs.len(), previous197.len()), (199, 197));
@@ -73,7 +75,15 @@ fn all_authored_scripts_grade_behavior_and_break_after_edit() {
         assert!(!progress::current_solved(&Attempt::new(s, 1), s));
     }
     // The original grade/solution/edit body below exercises EVERY current Script.
-    for s in current_scripts {
+    let all_current_scripts:Vec<_>=full201.iter().filter(|s|s.track=="Bash/Shell").collect();
+    assert_eq!((all_current_scripts.len(),count_cases(&all_current_scripts)),(64,525));
+    assert_eq!(all_current_scripts.iter().filter(|s|s.teaching.is_some()).count(),64);
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),["shell-snapshot-audit","shell-conditional-rollout"]);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        assert!(!progress::current_solved(&Attempt::new(source,1),source));
+    }
+    for s in all_current_scripts {
         let Goal::Script { cases } = &s.goal else {
             panic!()
         };

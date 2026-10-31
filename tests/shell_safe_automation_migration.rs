@@ -148,8 +148,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
         assert!(!progress::current_solved(&Attempt::new(source, 0), source));
     }
-    let previous197 = disk_registration::literal_registration::before_scenarios(&labs);
-    assert_eq!((labs.len(), previous197.len()), (199, 197));
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&labs);
+    assert_eq!((labs.len(),current199.len()),(201,199));
+    let previous197 = disk_registration::literal_registration::before_scenarios(current199);
+    assert_eq!((current199.len(), previous197.len()), (199, 197));
     let later = previous197
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -224,7 +226,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "lpic1-cron-calendar-handover",
         ])
     );
-    let current_later = labs
+    let current_later = current199
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
         .map(|s| s.id.as_str())
@@ -244,12 +246,24 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     }
     assert_eq!(current_later, expected_current_later);
     assert_eq!(
-        labs[197..]
+        current199[197..]
             .iter()
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
         disk_registration::literal_registration::IDS
     );
+    let whole201_later=labs.iter().filter(|s|!original.attempts.contains_key(&s.id)).map(|s|s.id.as_str()).collect::<std::collections::BTreeSet<_>>();
+    let expected201_later=expected_current_later.iter().copied().chain(disk_registration::literal_registration::snapshot_registration::IDS).collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(whole201_later,expected201_later);
+    for id in disk_registration::literal_registration::snapshot_registration::IDS {
+        let source=labs.iter().find(|s|s.id==id).unwrap();
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!original.attempts.contains_key(id)&&!original.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
     assert_eq!(original.attempts.len(), 133);
     for (id, scripting) in [
         ("shell-command-options", true),

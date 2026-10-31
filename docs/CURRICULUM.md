@@ -1,6 +1,16 @@
 # Curriculum plan and coverage ledger
 
-Version boundaries rechecked **2026-10-31**; batch-specific source checks on2026-10-30 are recorded with their content evidence. The granular objective fingerprints retain their separately documented2026-10-22 source snapshot. This is a plan and evidence ledger, not complete exam preparation. Main has **199 source-integrated assignments/53 units:57CCNA,44LPIC-1,36LPIC-2,62Bash/Shell**. Units by track are15CCNA,11LPIC-1,9LPIC-2 and18Bash. The scripting evaluator is15, with501 graded sample-input cases and62 separate examples. Current full-inclusive verification passes3,041 Rust tests/236targets with0 failures/ignored;514 Python and all-target Clippy also pass. Scoped current native observations and limits are in CATALOG199_MILESTONE.md. Generated numerical practice, private proposals and developer synthetic entries are excluded from authored totals.
+Version boundaries rechecked **2026-10-31**; objective fingerprints retain their
+2026-10-22 snapshot and batch references retain their actual dates. This is a
+plan/evidence ledger, not complete exam preparation. Main contains **201
+source-integrated assignments/54 units:57CCNA,44LPIC-1,36LPIC-2,64Bash/Shell**,
+in15/11/9/19 units. Evaluator15 is unchanged, with525 graded script-input cases
+and64 separate examples. Scoped current grading/progress/UI/native checks,
+517 Python checks and all-target Clippy pass; full-inclusive201 passes3,055
+tests across237 targets, zero failures/ignored.
+The accepted199 full suite passed3,041 tests/236targets. See
+[CATALOG201_MILESTONE.md](CATALOG201_MILESTONE.md). Generated variants, private
+proposals and developer synthetic entries are excluded from authored totals.
 
 The four disk-preparation additions now pass fullinclusive2,935 Rust tests,
 487Python, Clippy and scoped installed Fedora553 acceptance. Narrow native104.1

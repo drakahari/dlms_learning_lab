@@ -1,17 +1,19 @@
 # DLMS Learning Lab
 
 A native, offline Rust desktop application for networking, Linux administration
-and scripting. Current source contains **199 authored assignments in53units**:
-57CCNA,44LPIC-1,36LPIC-2 and62Bash/Shell. The two new scripting projects pass
-scoped grading, progress and native Fedora checks, including corrected editor
-clipping at large text sizes. Current full-inclusive verification passes3,041 Rust tests across236targets,
-with zero failures or ignored tests.
-514Python checks and all-targetClippy pass. The verified installed Fedora
-candidate remains197/52/evaluator14; its2,935-test full-inclusive result and
-installation/upgrade, NFS cold reopening and ten Wayland launches retain that
-identity. See the [checkpoint](docs/CHECKPOINT.md) for current implementation and
-the [199 source milestone](docs/CATALOG199_MILESTONE.md) and
-[197 installed milestone](docs/CATALOG197_MILESTONE.md) for their separate scopes.
+and scripting. Current source contains **201 authored assignments in 54 units**:
+57 CCNA, 44 LPIC-1, 36 LPIC-2 and 64 Bash/Shell. The two new scripting projects
+teach exact text comparison and a validated multi-file preview/apply workflow.
+Scoped grading, progress, native Fedora and static checks pass. The full inclusive
+201 suite passes **3,055 tests across237 targets, zero failures/ignored**;517
+Python checks and all-target Clippy also pass. The predecessor199 retains its
+original3,041-test evidence.
+See the [201 milestone](docs/CATALOG201_MILESTONE.md) and
+[checkpoint](docs/CHECKPOINT.md) for actual evidence and remaining work.
+
+The verified installed Fedora candidate remains 197/52/evaluator14. Its installation,
+NFS cold reopening and ten Wayland launches retain that identity; the current
+201 development build has not yet been packaged or installed for acceptance.
 
 All 28 themes and approved native workspaces remain. **This is not full exam
 coverage.** Windows/macOS runtime, screen-reader, physical-device and novice

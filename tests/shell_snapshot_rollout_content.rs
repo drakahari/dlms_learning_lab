@@ -55,7 +55,7 @@ fn admit(all: &[Scenario]) -> Result<Vec<Scenario>, String> {
 }
 fn before() -> Vec<Scenario> {
     assert_eq!(shell::EVALUATOR_REVISION, 15, "No older evaluator fallback");
-    let current = pack::bundled().unwrap();
+    let current = normal199_predecessor();
     assert_eq!(current.len(), 199);
     let old197 = literal::before_scenarios(&current);
     assert_eq!(old197.len(), 197);
@@ -194,7 +194,7 @@ fn full(p: &Progress) -> Value {
 
 #[test]
 fn two_distinct_decisions_preserve_full197_literal_predecessor_and_all_raw_units_privately() {
-    let current = pack::bundled().unwrap();
+    let current = normal199_predecessor();
     assert_eq!(current.len(), 199);
     let old197 = literal::before_scenarios(&current);
     let old = before();
@@ -226,9 +226,12 @@ fn two_distinct_decisions_preserve_full197_literal_predecessor_and_all_raw_units
     assert_eq!(original.len(), 60);
     assert_eq!(original.iter().map(|s| cases(s).len()).sum::<usize>(), 477);
     assert_eq!(original.iter().filter(|s| s.teaching.is_some()).count(), 60);
-    let units53 = course::bundled(&current).unwrap();
+    let previous53 =
+        literal::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json"))
+            .unwrap();
+    let raw = std::str::from_utf8(&previous53).unwrap();
+    let units53 = course::load(raw, &current).unwrap();
     assert_eq!(units53.len(), 53);
-    let raw = include_str!("../scenarios/units-v1.json");
     let raw52 = literal::before_units(raw.as_bytes()).unwrap();
     let units52 = course::load(std::str::from_utf8(&raw52).unwrap(), old197).unwrap();
     assert_eq!(units52.len(), 52);
@@ -257,7 +260,7 @@ fn two_distinct_decisions_preserve_full197_literal_predecessor_and_all_raw_units
         units[53].labs,
         IDS.iter().map(|id| id.to_string()).collect::<Vec<_>>()
     );
-    assert_eq!(value(&pack::bundled().unwrap()), value(&current));
+    assert_eq!(value(&normal199_predecessor()), value(&current));
 }
 
 #[test]
@@ -859,4 +862,10 @@ fn raw2000_boundary_is_retained_and_preflight_amendment_uses_existing_quote_safe
             "Every mask/label/outcome premise stays exact"
         );
     }
+}
+
+fn normal199_predecessor() -> Vec<Scenario> {
+    let all = pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    literal::snapshot_registration::before_scenarios(&all).to_vec()
 }

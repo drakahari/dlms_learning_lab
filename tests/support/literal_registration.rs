@@ -9,6 +9,8 @@ use dlms_learning_lab::{
 };
 use serde_json::Value;
 use std::{collections::BTreeMap, sync::OnceLock};
+#[path = "snapshot_registration.rs"]
+pub mod snapshot_registration;
 pub const IDS: [&str; 2] = ["shell-trim-options", "shell-trim-manifest"];
 fn recipe() -> &'static Value {
     static R: OnceLock<Value> = OnceLock::new();
@@ -78,6 +80,9 @@ fn new_values() -> &'static Vec<Value> {
     })
 }
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    if let Some(checked199) = snapshot_registration::prefix_scenarios(all) {
+        return &checked199[..197];
+    }
     assert_eq!(all.len(), 199);
     for (actual, expected) in all.iter().zip(old_values().iter().chain(new_values())) {
         assert!(
@@ -89,9 +94,15 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..197]
 }
 pub fn prefix_scenarios(all: &[Scenario]) -> Option<&[Scenario]> {
+    if let Some(checked199) = snapshot_registration::prefix_scenarios(all) {
+        return Some(&checked199[..197]);
+    }
     (all.len() == 199).then(|| before_scenarios(all))
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    if let Some(previous) = snapshot_registration::prefix_units(raw)? {
+        return before_units(&previous);
+    }
     let r = recipe();
     if raw.len() as u64 != r["after_units53_bytes"].as_u64().unwrap()
         || digest::hash(raw) != r["after_units53_sha256"].as_str().unwrap()
@@ -120,6 +131,8 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(old)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let previous = snapshot_registration::prefix_units(raw)?;
+    let raw = previous.as_deref().unwrap_or(raw);
     if raw.len() as u64 == recipe()["after_units53_bytes"].as_u64().unwrap()
         && digest::hash(raw) == recipe()["after_units53_sha256"].as_str().unwrap()
     {
@@ -129,6 +142,7 @@ pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
     }
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = snapshot_registration::prefix_typed_units(all).unwrap_or(all);
     assert_eq!(all.len(), 53);
     for (actual, expected) in all.iter().zip(
         recipe()["before_units52"]["units"]
@@ -146,9 +160,11 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..52]
 }
 pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
+    let all = snapshot_registration::prefix_typed_units(all).unwrap_or(all);
     (all.len() == 53).then(|| before_typed_units(all))
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = snapshot_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 53);
     assert_eq!(
         &all[..52],
@@ -158,11 +174,17 @@ pub fn before_values(all: &[Value]) -> &[Value] {
     &all[..52]
 }
 pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
+    let all = snapshot_registration::prefix_values(all).unwrap_or(all);
     (all.len() == 53).then(|| before_values(all))
 }
 /// Count only; validates every key/version and both bounded Script contexts.
 pub fn before_attempts_len(all: &BTreeMap<String, Attempt>) -> usize {
-    assert_eq!(all.len(), 199);
+    let admitted_len = if all.len() == 201 {
+        snapshot_registration::before_attempts_len(all)
+    } else {
+        all.len()
+    };
+    assert_eq!(admitted_len, 199);
     for v in old_values().iter().chain(new_values()) {
         assert_eq!(
             all[v["id"].as_str().unwrap()].scenario_version as u64,

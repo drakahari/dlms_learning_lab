@@ -965,7 +965,7 @@ impl LabApp {
             ),
             (193, 51)
         );
-        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!((self.scenarios.len(), self.units.len()), (201, 54));
         assert_eq!(
             (
                 disk_registration::literal_registration::before_scenarios(&self.scenarios).len(),

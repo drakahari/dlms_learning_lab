@@ -66,11 +66,11 @@ fn solved(source: &Scenario) -> State {
 // Retain the complete old193 proofs only after validating every current197
 // field and the canonical whole disk append; never recover by unchecked slice.
 fn current193() -> Vec<Scenario> {
-    let normal199 = pack::bundled().unwrap();
+    let normal199 = normal199_predecessor();
     assert_eq!(normal199.len(), 199);
     let current = disk_registration::literal_registration::before_scenarios(&normal199).to_vec();
     assert_eq!(current.len(), 197);
-    let units53 = course::bundled(&normal199).unwrap();
+    let units53 = normal199_units(&normal199);
     assert_eq!(units53.len(), 53);
     let units = disk_registration::literal_registration::before_typed_units(&units53).to_vec();
     assert_eq!(units.len(), 52);
@@ -708,7 +708,7 @@ fn current193_and_fifty_one_units_remain_exact_in_full197_private_content_exerci
     // Keep all preceding exact193/51→190/50 and private197 proofs above. Also
     // exercise the actual fullcurrent197 with all four private HSRP sources;
     // this201/53 fixture is unregistered and grants no curriculum credit.
-    let normal199 = pack::bundled().unwrap();
+    let normal199 = normal199_predecessor();
     assert_eq!(normal199.len(), 199);
     let current197 = disk_registration::literal_registration::before_scenarios(&normal199).to_vec();
     assert_eq!(current197.len(), 197);
@@ -727,7 +727,7 @@ fn current193_and_fifty_one_units_remain_exact_in_full197_private_content_exerci
     assert_eq!(full.len(), 201);
     assert_eq!(value(&full[..197]), value(&current197));
     assert_eq!(value(&full[197..]), value(&labs()));
-    let units53 = course::bundled(&normal199).unwrap();
+    let units53 = normal199_units(&normal199);
     assert_eq!(units53.len(), 53);
     let units52 = disk_registration::literal_registration::before_typed_units(&units53).to_vec();
     assert_eq!(units52.len(), 52);
@@ -775,11 +775,11 @@ fn current193_and_fifty_one_units_remain_exact_in_full197_private_content_exerci
     assert_eq!(value(&saved_full), full_before);
     assert_eq!(
         value(disk_registration::literal_registration::before_scenarios(
-            &pack::bundled().unwrap()
+            &normal199_predecessor()
         )),
         value(&current197)
     );
-    assert_eq!(value(&pack::bundled().unwrap()), value(&normal199));
+    assert_eq!(value(&normal199_predecessor()), value(&normal199));
     let mut actual = normal199.clone();
     actual.extend(labs());
     let chunks = actual
@@ -791,7 +791,7 @@ fn current193_and_fifty_one_units_remain_exact_in_full197_private_content_exerci
     assert_eq!(actual.len(), 203);
     assert_eq!(value(&actual[..199]), value(&normal199));
     assert_eq!(value(&actual[199..]), value(&labs()));
-    let units53 = course::bundled(&normal199).unwrap();
+    let units53 = normal199_units(&normal199);
     assert_eq!(units53.len(), 53);
     let before53 = value(&units53);
     let mut proposed54 = units53;
@@ -835,4 +835,97 @@ fn current193_and_fifty_one_units_remain_exact_in_full197_private_content_exerci
         value(&progress::load(&actual_path, &actual).unwrap()),
         before
     );
+
+    let current201 = pack::bundled().unwrap();
+    assert_eq!(current201.len(), 201);
+    assert_eq!(
+        value(
+            disk_registration::literal_registration::snapshot_registration::before_scenarios(
+                &current201
+            )
+        ),
+        value(&normal199)
+    );
+    let mut with205 = current201.clone();
+    with205.extend(labs());
+    let chunks = with205
+        .chunks(16)
+        .map(|s| json!({"schema_version":1,"scenarios":s}).to_string())
+        .collect::<Vec<_>>();
+    let with205 =
+        pack::load_catalog(&chunks.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+    assert_eq!(with205.len(), 205);
+    assert_eq!(value(&with205[..201]), value(&current201));
+    assert_eq!(value(&with205[201..]), value(&labs()));
+    let units54 = course::bundled(&current201).unwrap();
+    assert_eq!(units54.len(), 54);
+    let prior54 = value(&units54);
+    let mut units55 = units54;
+    units55.push(serde_json::from_value(review()["unit_proposal"].clone()).unwrap());
+    let units55 =
+        course::load(&json!({"version":1,"units":units55}).to_string(), &with205).unwrap();
+    assert_eq!(units55.len(), 55);
+    assert_eq!(value(&units55[..54]), prior54);
+    assert_eq!(
+        units55[54].labs,
+        labs().iter().map(|s| s.id.clone()).collect::<Vec<_>>()
+    );
+    let mut profile205 = profile(&with205);
+    for source in &with205[201..] {
+        let a = profile205.attempts.get_mut(&source.id).unwrap();
+        for action in &source.solution {
+            engine::execute_for_goal(&mut a.state, &source.goal, action).unwrap();
+        }
+        assert!(progress::current_solved(a, source));
+    }
+    for source in &with205[..201] {
+        assert_eq!(
+            value(&profile205.attempts[&source.id].state),
+            value(&source.initial)
+        );
+        assert!(!progress::current_solved(
+            &profile205.attempts[&source.id],
+            source
+        ));
+    }
+    let before = value(&profile205);
+    let receipts = value(&profile205.migration_receipts);
+    let path205 = dir.path().join("full-current201-profile.json");
+    progress::save_with_catalog(&path205, &profile205, &with205).unwrap();
+    assert_eq!(value(&profile205), before);
+    assert_eq!(value(&profile205.migration_receipts), receipts);
+    let loaded205 = progress::load(&path205, &with205).unwrap();
+    assert_eq!(value(&loaded205), before);
+    // Fresh caller stays unstamped; real first decode supplies the saved metadata.
+    let decoded_receipts205 = value(&loaded205.migration_receipts);
+    assert!(loaded205.migration_receipts.is_some());
+    let raw205: Value = serde_json::from_slice(&std::fs::read(&path205).unwrap()).unwrap();
+    assert_eq!(raw205["migration_receipts"], decoded_receipts205);
+    let decoded_full205 = json!({"portable":&loaded205,"receipts":&loaded205.migration_receipts});
+    progress::save_with_catalog(&path205, &loaded205, &with205).unwrap();
+    assert_eq!(
+        json!({"portable":&loaded205,"receipts":&loaded205.migration_receipts}),
+        decoded_full205
+    );
+    let reread205 = progress::load(&path205, &with205).unwrap();
+    assert_eq!(
+        json!({"portable":&reread205,"receipts":&reread205.migration_receipts}),
+        decoded_full205
+    );
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    disk_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
+}
+fn normal199_units(
+    all: &[dlms_learning_lab::pack::Scenario],
+) -> Vec<dlms_learning_lab::course::Unit> {
+    assert_eq!(all.len(), 199);
+    let raw53 = disk_registration::literal_registration::snapshot_registration::before_units(
+        include_bytes!("../scenarios/units-v1.json"),
+    )
+    .unwrap();
+    dlms_learning_lab::course::load(std::str::from_utf8(&raw53).unwrap(), all).unwrap()
 }

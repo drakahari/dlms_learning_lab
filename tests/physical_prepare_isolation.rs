@@ -396,13 +396,15 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
 
     // Retain the complete historical197 matrix, then run the SAME rejection
     // checks against every current source, including both literal additions.
-    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
-    assert_eq!((all.len(), previous197.len()), (199, 197));
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&all);
+    assert_eq!((all.len(),current199.len()),(201,199));
+    let previous197 = disk_registration::literal_registration::before_scenarios(current199);
+    assert_eq!((current199.len(), previous197.len()), (199, 197));
     assert_eq!(
-        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        current199[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         disk_registration::literal_registration::IDS
     );
-    for source in &all[197..] {
+    for source in &current199[197..] {
         assert!(matches!(
             source.initial,
             dlms_learning_lab::engine::State::Script { run: None, .. }
@@ -417,7 +419,11 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
             source
         ));
     }
-    let full_current_old_indices = current_old_indices;
+    let full201_old_indices=current_old_indices;
+    let full_current_old_indices=current199.iter().enumerate().filter(|(_,s)|!matches!(s.initial,dlms_learning_lab::engine::State::PhysicalLink{..})).map(|(i,_)|i).collect::<Vec<_>>();
+    assert_eq!(full201_old_indices.len(),full_current_old_indices.len()+2);
+    assert_eq!(&full201_old_indices[..full_current_old_indices.len()],full_current_old_indices.as_slice());
+    assert_eq!(&full201_old_indices[full_current_old_indices.len()..],&[199,200]);
     let current_old_indices = previous197
         .iter()
         .enumerate()
@@ -478,7 +484,7 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         ));
     }
 
-    for index in full_current_old_indices {
+    for index in full201_old_indices {
         let mut foreign = all.clone();
         foreign[index].physical_link_teaching = lesson.clone();
         let error = contexts(&foreign).unwrap_err();

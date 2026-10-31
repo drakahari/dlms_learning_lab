@@ -106,7 +106,24 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
     const {
         assert!(shell::EVALUATOR_REVISION >= 8);
     }
-    let all = catalog();
+    let full201=pack::bundled().unwrap();
+    let all=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),all.len()),(201,199));
+    let full54=course::bundled(&full201).unwrap();
+    let snapshot_raw53=disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let old53=course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&all).unwrap();
+    assert_eq!((full54.len(),old53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&old53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot sources require Script Goals")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+    assert_eq!(serde_json::to_value(catalog()).unwrap(),serde_json::to_value(&full201).unwrap());
     assert_eq!(
         (
             all.len(),
@@ -114,7 +131,7 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
         ),
         (199, 197)
     );
-    let literal_units53 = course::bundled(&all).unwrap();
+    let literal_units53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &all).unwrap();
     let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))
@@ -196,8 +213,8 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
             .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
-    let original = pack::bundled().unwrap();
-    let normal_units = course::bundled(&original).unwrap();
+    let original=all.clone();
+    let normal_units = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &original).unwrap();
     assert_eq!(one_off_boundary::before_len(&normal_units), 46);
     let normal_unit = normal_units
         .iter()
@@ -207,7 +224,7 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
         normal_unit.labs,
         authored().iter().map(|s| s.id.clone()).collect::<Vec<_>>()
     );
-    let mut units = course::bundled(&original).unwrap();
+    let mut units = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &original).unwrap();
     units.retain(|u| u.id != "shell-case-dispatch");
     let proposed: course::Unit =
         serde_json::from_str(include_str!("fixtures/shell-case-unit-proposal.json")).unwrap();

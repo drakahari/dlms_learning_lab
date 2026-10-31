@@ -1687,7 +1687,51 @@ mod attempt_projection_tests {
     // Library-unit scope uses its own immutable compiled Pack and recipe,
     // never a UI test module. A fresh canonical constructor is independent of
     // the caller's mutable Vec, so every old197 field is checked too.
+    fn snapshot_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../tests/fixtures/catalog201-registration.json"
+        ))
+        .unwrap();
+        let raw = include_bytes!("../scenarios/shell-snapshot-rollout-draft.json");
+        let new: pack::Pack = serde_json::from_slice(raw).unwrap();
+        assert_eq!(
+            (
+                recipe["before_count"].as_u64(),
+                recipe["after_count"].as_u64()
+            ),
+            (Some(199), Some(201))
+        );
+        assert_eq!(
+            raw.len() as u64,
+            recipe["canonical_snapshot_pack_bytes"].as_u64().unwrap()
+        );
+        assert_eq!(all.len(), 201);
+        assert_eq!(new.scenarios.len(), 2);
+        assert_eq!(
+            new.scenarios
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            ["shell-snapshot-audit", "shell-conditional-rollout"]
+        );
+        let canonical = pack::bundled().unwrap();
+        assert_eq!(canonical.len(), 201);
+        assert_eq!(
+            serde_json::to_value(&all[..199]).unwrap(),
+            serde_json::to_value(&canonical[..199]).unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&all[199..]).unwrap(),
+            serde_json::to_value(&new.scenarios).unwrap()
+        );
+        &all[..199]
+    }
     fn literal_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let all = if all.len() == 201 {
+            snapshot_predecessor(all)
+        } else {
+            all
+        };
         let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
             "../tests/fixtures/catalog199-registration.json"
         ))
@@ -1718,7 +1762,8 @@ mod attempt_projection_tests {
             serde_json::to_value(new.scenarios.iter().map(|s| &s.id).collect::<Vec<_>>()).unwrap(),
             recipe["new_ids"]
         );
-        let canonical = pack::bundled().unwrap();
+        let canonical_current = pack::bundled().unwrap();
+        let canonical = snapshot_predecessor(&canonical_current);
         assert_eq!(canonical.len(), 199);
         assert_eq!(
             serde_json::to_value(&all[..197]).unwrap(),
@@ -1731,7 +1776,7 @@ mod attempt_projection_tests {
         &all[..197]
     }
     fn disk_predecessor(all: &[Scenario]) -> &[Scenario] {
-        let all = if all.len() == 199 {
+        let all = if matches!(all.len(), 199 | 201) {
             literal_predecessor(all)
         } else {
             all
@@ -1905,7 +1950,9 @@ mod attempt_projection_tests {
     #[ignore = "Requires the retained accepted private actual9 capture; never fabricates a run"]
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
-        let current_catalog = pack::bundled().unwrap();
+        let full201_catalog = pack::bundled().unwrap();
+        assert_eq!(full201_catalog.len(), 201);
+        let current_catalog = snapshot_predecessor(&full201_catalog).to_vec();
         assert_eq!(current_catalog.len(), 199);
         let mut all = literal_predecessor(&current_catalog).to_vec();
         assert_eq!(ntp_predecessor(&all).len(), 186);
@@ -2062,10 +2109,125 @@ mod attempt_projection_tests {
         let mut replayed = serde_json::to_value(&resumed.attempts).unwrap();
         replayed.as_object_mut().unwrap().remove(&s.id);
         assert_eq!(replayed, old);
+        // Explicit full201 plus the same private NFS fixture, after all
+        // original197 and completecurrent199 controls above remain intact.
+        let mut full202 = full201_catalog;
+        full202.push(s.clone());
+        assert_eq!(full202.len(), 202);
+        let mut expanded202 = progress::decode(&raw, &full202).unwrap();
+        assert_eq!(serde_json::to_value(&expanded202.attempts).unwrap(), old);
+        for id in ["shell-snapshot-audit", "shell-conditional-rollout"] {
+            let source = full202.iter().find(|source| source.id == id).unwrap();
+            let crate::engine::Goal::Script { cases } = &source.goal else {
+                panic!()
+            };
+            assert_eq!(cases.len(), 12);
+            let mut fresh = Attempt::new(source, 0);
+            crate::workspace::prepare(&mut fresh);
+            crate::script_teaching::prepare(&mut fresh, source.teaching.as_ref().unwrap(), true);
+            assert!(matches!(fresh.state, State::Script { run: None, .. }));
+            assert!(
+                fresh
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .script_learning
+                    .as_ref()
+                    .unwrap()
+                    .example_result
+                    .is_none()
+            );
+            assert!(!progress::current_solved(&fresh, source));
+            assert!(!expanded202.attempts.contains_key(id) && !expanded202.favorites.contains(id));
+        }
+        let mut nfs202 = Attempt::new(&s, 17);
+        teach::prepare(&mut nfs202, &s, true).unwrap();
+        expanded202.attempts.insert(s.id.clone(), nfs202);
+        let before202 = serde_json::to_value(&expanded202).unwrap();
+        let before202_receipts = serde_json::to_value(&expanded202.migration_receipts).unwrap();
+        let path202 = dir.path().join("current201-with-nfs.json");
+        std::fs::write(&path202, &raw).unwrap();
+        progress::save_with_catalog(&path202, &expanded202, &full202).unwrap();
+        assert_eq!(serde_json::to_value(&expanded202).unwrap(), before202);
+        assert_eq!(
+            serde_json::to_value(&expanded202.migration_receipts).unwrap(),
+            before202_receipts
+        );
+        assert_eq!(
+            std::fs::read(path202.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
+            raw
+        );
+        let raw202 = std::fs::read(&path202).unwrap();
+        let loaded202 = progress::load(&path202, &full202).unwrap();
+        assert_eq!(serde_json::to_value(&loaded202).unwrap(), before202);
+        let raw202_value: serde_json::Value = serde_json::from_slice(&raw202).unwrap();
+        assert_eq!(
+            serde_json::to_value(&loaded202.migration_receipts).unwrap(),
+            raw202_value["migration_receipts"]
+        );
+        let mut unchanged202 = serde_json::to_value(&loaded202.attempts).unwrap();
+        unchanged202.as_object_mut().unwrap().remove(&s.id);
+        assert_eq!(unchanged202, old);
+        for id in [
+            "shell-trim-options",
+            "shell-trim-manifest",
+            "shell-snapshot-audit",
+            "shell-conditional-rollout",
+        ] {
+            assert!(!loaded202.attempts.contains_key(id) && !loaded202.favorites.contains(id));
+        }
+        let decoded202 = serde_json::to_value(&loaded202).unwrap();
+        let receipts202 = serde_json::to_value(&loaded202.migration_receipts).unwrap();
+        progress::save_with_catalog(&path202, &loaded202, &full202).unwrap();
+        let resumed202 = progress::load(&path202, &full202).unwrap();
+        assert_eq!(serde_json::to_value(&resumed202).unwrap(), decoded202);
+        assert_eq!(
+            serde_json::to_value(&resumed202.migration_receipts).unwrap(),
+            receipts202
+        );
+    }
+    #[test]
+    fn snapshot201_local_predecessor_refuses_source_changes_before_old199_guards() {
+        let all = pack::bundled().unwrap();
+        assert_eq!(snapshot_predecessor(&all).len(), 199);
+        for mode in 0..7 {
+            let mut bad = all.clone();
+            match mode {
+                0 => {
+                    bad.pop();
+                }
+                1 => bad.push(all[199].clone()),
+                2 => bad[0].objective.push('!'),
+                3 => {
+                    let crate::engine::Goal::Script { cases } = &mut bad[199].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                4 => bad[200]
+                    .teaching
+                    .as_mut()
+                    .unwrap()
+                    .example
+                    .push_str("\n# changed"),
+                5 => bad[199].version += 1,
+                _ => bad[199].id = "unreviewed-id".into(),
+            }
+            assert!(std::panic::catch_unwind(|| snapshot_predecessor(&bad)).is_err());
+        }
     }
     #[test]
     fn literal199_local_predecessor_checks_every_old_and_new_source_field() {
-        let all = pack::bundled().unwrap();
+        let current201 = pack::bundled().unwrap();
+        let checked199 = snapshot_predecessor(&current201);
+        assert_eq!((current201.len(), checked199.len()), (201, 199));
+        // Admit the new layer before cloning the historical negative fixture.
+        // Its seven mutations below must reach the original literal199 guard.
+        let all = checked199.to_vec();
         assert_eq!(literal_predecessor(&all).len(), 197);
         assert_eq!(disk_predecessor(&all).len(), 193);
         for mode in 0..7 {

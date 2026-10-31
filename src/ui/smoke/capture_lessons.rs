@@ -604,9 +604,13 @@ impl LabApp {
         // Admit every current source/unit field once on EACH callback. The
         // exact literal predecessor contains disk original193+canonical4;
         // reuse only same-callback immutable prefixes for the older proof.
-        let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&self.scenarios);
-        let checked52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&self.units);
-        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        let checked199 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&self.scenarios);
+        let checked53 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_typed_units(&self.units);
+        assert_eq!((checked199.len(), checked53.len()), (199, 53));
+        // Same-callback immutable prefixes are implied by the one full201 proof.
+        let checked197 = &checked199[..197];
+        let checked52 = &checked53[..52];
+        assert_eq!((self.scenarios.len(), self.units.len()), (201, 54));
         assert_eq!((checked197.len(), checked52.len()), (197, 52));
         let checked193 = &checked197[..193];
         let checked51 = &checked52[..51];

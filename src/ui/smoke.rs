@@ -44,6 +44,7 @@ pub(in crate::ui) mod rpm_lessons;
 mod safe_automation_lessons;
 mod script_feedback;
 mod seed_teaching;
+pub(in crate::ui) mod snapshot_lessons;
 pub(super) mod spanning_tree;
 mod spanning_tree_lessons;
 mod substitution;
@@ -374,6 +375,7 @@ impl LabApp {
         let immediate_stop = immediate_stop || loop_recovery::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || ere_evidence::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || literal_lessons::immediate_stop(self.smoke_stage);
+        let immediate_stop = immediate_stop || snapshot_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop =
             immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
@@ -712,6 +714,13 @@ impl LabApp {
             }
             n @ 72000..=72499 => {
                 let (advance, capture) = self.private_office_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n if (snapshot_lessons::BASE..=snapshot_lessons::last_stage()).contains(&n) => {
+                let (advance, capture) = self.snapshot_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

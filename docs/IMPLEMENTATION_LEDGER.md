@@ -5494,3 +5494,59 @@ teaching review1e05f56f. They remain unregistered; final Main/doc rebase and act
 capability proposals also remain uncounted. No curriculum parent is complete;
 Windows/macOS desktop, screen-reader, physical-device and novice acceptance stay
 pending. Continue the authorized batches after scoped source commit/push.
+
+
+## Normal201 integration and developer-frame closure —2026-10-31
+
+Two exact snapshot/conditional-rollout assignments are normally registered:
+201/54,57CCNA/44LPIC-1/36LPIC-2/64Bash; evaluator15 unchanged,525 graded script
+cases/64 separate examples. Complete199/raw53 and genuine9–14 histories remain
+protected without invented drafts/credit. M748/M750 all48 affected integration
+targets pass407 checks; M754 NFS5 groups pass, including actual9 history.
+
+M749/M751/M752 remain FAILED UI runs. Read-only instrumentation observed real
+progress across all12 cases, about1.2ms render versus25ms full-source callback,
+within the original15-second completion wait. JSON streaming/fresh vectors were
+measured slower. The independently reviewed event serializer compares complete
+actual data every callback to independently reconstructed immutable expected
+events, without actual-source/pointer/hash caching, JSON escaping or map lookups.
+M758 all11 catalog/parity/mutation/error groups pass, measured full201/54 checks
+7.75–8.63ms. Instrumentation is removed exactly. M759 uninstrumented complete
+479-action/74-phase/24-setting route and duplicate-frame guard both pass156.28s.
+No Case, program, mask, motor,15-second wait,16-instruction slice or2,000-instruction
+limit changed. M760/M761 Clippy exposed two unused imports; only those were removed.
+M762 all-target warnings-denied Clippy passes; M763517 Python pass11.623s.
+
+M764 retained current development ELF245,418,432bytes SHA256
+f5e32db75a2e1e55deb4b443e57001d81c96d6b0201c352d29aa7fd8e7035302.
+M765 actual native Fedora exits0,74PNGs/64unique,1920×1080+946×929 windows,
+100/150/200% Light/Dark+initialNavy. Root reviews five original files; independent
+review inspects22 originals, all16 Goal200 endpoints plus6 representative other
+views (receipt a6e2a0a5). All22 hashes match Root completion.454 memory samples,
+minimum24,397,934,592available bytes/fullPSIavg10max0%/swap-outOOMdeltas0.
+All1146 inputs remain byte-exact during these gates. Source/current-document
+reconciliation follows; full-inclusive201 is pending and no new candidate exists.
+Installed553 retains197/evaluator14 evidence. No issuer status/fingerprint changes,
+full-curriculum/platform/novice acceptance or release publication.
+
+
+## M769: complete normal201 full-inclusive acceptance —2026-10-31
+
+The actual runner/PTY session65863 is directly reaped exit0. The full inclusive
+command is `env CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 python3 tools/dev.py test --locked --offline --all-targets --no-fail-fast -- --include-ignored --nocapture`.
+Result:3,055 PASS/0 FAIL/0 ignored across237 result targets, including library120
+and UI677. All1147 project inputs remain byte-exact through the run. Log
+17,275,040bytes/SHA25666d6f29fefbe857456a58516cab15f7aba1f2652ebdb97b8c0bd5cb50d87bb24.
+4179 ordinary-run samples: minimum22,800,207,872 available bytes, full PSI avg10
+maximum0.36% transient (not zero), swap-out/OOM deltas0; no sustained-pressure
+intervention. Cargo2 jobs/Rust2 threads/project-disk artifacts remain enforced.
+
+Independent native review opens22 exact original M765 images, all16 Goal200
+endpoints plus6 representative views, with no material finding (a6e2a0a5).
+Independent factual10-document review32980abd agrees201source/199predecessor/
+197installed boundaries. M767coverage201registered/4unregistered/189Partial/
+1Supporting/1050Open and M768517Python11.326s pass. Only final acceptance text
+changes after M769; no tested code, grading, assertions, source fixtures,
+execution budgets or historical observations change. Stage/privacy/commit/push
+follow actual gates. Installed553 remains197/evaluator14; no new installed
+candidate or complete curriculum/platform/novice acceptance or release is claimed.

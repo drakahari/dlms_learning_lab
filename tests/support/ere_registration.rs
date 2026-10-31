@@ -405,7 +405,7 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    let checked193 = if matches!(all.len(), 197 | 199) {
+    let checked193 = if matches!(all.len(), 197 | 199 | 201) {
         partition_fs_registration::before_attempts_len(all)
     } else {
         all.len()

@@ -239,7 +239,21 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
     let checked197 = disk_registration::literal_registration::before_scenarios(&a.scenarios);
     let checked52 = disk_registration::literal_registration::before_typed_units(&a.units);
     assert_eq!((checked197.len(), checked52.len()), (197, 52));
-    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+    let checked199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&a.scenarios);
+    let checked53=disk_registration::literal_registration::snapshot_registration::before_typed_units(&a.units);
+    assert_eq!((checked199.len(),checked53.len()),(199,53));
+    assert_eq!((a.scenarios.len(),a.units.len()),(201,54));
+    assert_eq!(a.scenarios[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    assert_eq!(a.units[53].id,"shell-snapshot-rollout");
+    assert_eq!(a.units[53].labs,disk_registration::literal_registration::snapshot_registration::IDS);
+    for source in &a.scenarios[199..] {
+        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
+        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its typed Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!a.progress.attempts.contains_key(&source.id)&&!a.progress.favorites.contains(&source.id));
+        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+    }
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();
     let mut physical = egui::vec2(1920., 1080.);
@@ -491,4 +505,10 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
             Some(true)
         );
     }
+    // The actual full route must not create work for unrelated new projects.
+    for id in disk_registration::literal_registration::snapshot_registration::IDS {
+        assert!(!a.progress.attempts.contains_key(id));
+        assert!(!a.progress.favorites.contains(id));
+    }
+
 }

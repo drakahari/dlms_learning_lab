@@ -26,13 +26,13 @@ fn solved() -> (work::Definition, work::Session) {
 // Keep all historical193/190 proofs only after checking the complete current197
 // and canonical full disk source/unit append; no unchecked tail or numeric bump.
 fn current193() -> Vec<pack::Scenario> {
-    let normal199 = pack::bundled().unwrap();
+    let normal199 = normal199_predecessor();
     assert_eq!(normal199.len(), 199);
     let current = disk_registration::literal_registration::before_scenarios(&normal199).to_vec();
     assert_eq!(current.len(), 197);
     let old = disk_registration::before_scenarios(&current);
     assert_eq!(old.len(), 193);
-    let units53 = dlms_learning_lab::course::bundled(&normal199).unwrap();
+    let units53 = normal199_units(&normal199);
     assert_eq!(units53.len(), 53);
     let units52 = disk_registration::literal_registration::before_typed_units(&units53).to_vec();
     assert_eq!(units52.len(), 52);
@@ -685,7 +685,7 @@ fn actual193_full_catalog_roundtrip_and_private_hsrp_solve_preserve_every_curren
 
     // The unchanged predecessor assertions above remain193/194. Separately
     // retain the entire live197 catalog around the new private capability.
-    let normal199 = pack::bundled().unwrap();
+    let normal199 = normal199_predecessor();
     assert_eq!(normal199.len(), 199);
     let live = disk_registration::literal_registration::before_scenarios(&normal199).to_vec();
     assert_eq!(live.len(), 197);
@@ -715,11 +715,11 @@ fn actual193_full_catalog_roundtrip_and_private_hsrp_solve_preserve_every_curren
     assert!(progress::current_solved(&attempt, source));
     assert_eq!(
         value(disk_registration::literal_registration::before_scenarios(
-            &pack::bundled().unwrap()
+            &normal199_predecessor()
         )),
         value(&live)
     );
-    assert_eq!(value(&pack::bundled().unwrap()), value(&normal199));
+    assert_eq!(value(&normal199_predecessor()), value(&normal199));
     let mut actual = normal199.clone();
     actual.push(fixture::scenario());
     let chunks = actual
@@ -764,6 +764,77 @@ fn actual193_full_catalog_roundtrip_and_private_hsrp_solve_preserve_every_curren
     assert_eq!(value(&actual_profile), before);
     assert_eq!(value(&actual_profile.migration_receipts), receipts);
     assert_eq!(value(&progress::load(&path, &actual).unwrap()), before);
+
+    let current201 = pack::bundled().unwrap();
+    assert_eq!(current201.len(), 201);
+    assert_eq!(
+        value(
+            disk_registration::literal_registration::snapshot_registration::before_scenarios(
+                &current201
+            )
+        ),
+        value(&normal199)
+    );
+    let mut with202 = current201.clone();
+    with202.push(fixture::scenario());
+    let chunks = with202
+        .chunks(16)
+        .map(|s| json!({"schema_version":1,"scenarios":s}).to_string())
+        .collect::<Vec<_>>();
+    let with202 =
+        pack::load_catalog(&chunks.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+    assert_eq!(with202.len(), 202);
+    assert_eq!(value(&with202[..201]), value(&current201));
+    let mut profile202 = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    for source in &with202 {
+        profile202
+            .attempts
+            .insert(source.id.clone(), Attempt::new(source, 1));
+    }
+    let source = &with202[201];
+    let a = profile202.attempts.get_mut(&source.id).unwrap();
+    workspace::prepare(a);
+    for action in &source.solution {
+        engine::execute_for_goal(&mut a.state, &source.goal, action).unwrap();
+    }
+    assert!(progress::current_solved(a, source));
+    for source in &with202[..201] {
+        assert_eq!(
+            value(&profile202.attempts[&source.id].state),
+            value(&source.initial)
+        );
+        assert!(!progress::current_solved(
+            &profile202.attempts[&source.id],
+            source
+        ));
+    }
+    let before = value(&profile202);
+    let receipts = value(&profile202.migration_receipts);
+    let path202 = dir.path().join("full-current201-profile.json");
+    progress::save_with_catalog(&path202, &profile202, &with202).unwrap();
+    assert_eq!(value(&profile202), before);
+    assert_eq!(value(&profile202.migration_receipts), receipts);
+    let loaded202 = progress::load(&path202, &with202).unwrap();
+    assert_eq!(value(&loaded202), before);
+    // Fresh caller stays unstamped; real first decode supplies the saved metadata.
+    let decoded_receipts202 = value(&loaded202.migration_receipts);
+    assert!(loaded202.migration_receipts.is_some());
+    let raw202: Value = serde_json::from_slice(&std::fs::read(&path202).unwrap()).unwrap();
+    assert_eq!(raw202["migration_receipts"], decoded_receipts202);
+    let decoded_full202 = json!({"portable":&loaded202,"receipts":&loaded202.migration_receipts});
+    progress::save_with_catalog(&path202, &loaded202, &with202).unwrap();
+    assert_eq!(
+        json!({"portable":&loaded202,"receipts":&loaded202.migration_receipts}),
+        decoded_full202
+    );
+    let reread202 = progress::load(&path202, &with202).unwrap();
+    assert_eq!(
+        json!({"portable":&reread202,"receipts":&reread202.migration_receipts}),
+        decoded_full202
+    );
 }
 
 #[path = "support/hsrp_capacity.rs"]
@@ -905,4 +976,20 @@ fn fresh_source_preflights_widest_attempt_without_answer_replay_and_below_pack_c
     let text = json!({"schema_version":1,"scenarios":[source]}).to_string();
     assert!(text.len() < pack::MAX_PACK_BYTES);
     assert!(pack::load(&text).is_err());
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    disk_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
+}
+fn normal199_units(
+    all: &[dlms_learning_lab::pack::Scenario],
+) -> Vec<dlms_learning_lab::course::Unit> {
+    assert_eq!(all.len(), 199);
+    let raw53 = disk_registration::literal_registration::snapshot_registration::before_units(
+        include_bytes!("../scenarios/units-v1.json"),
+    )
+    .unwrap();
+    dlms_learning_lab::course::load(std::str::from_utf8(&raw53).unwrap(), all).unwrap()
 }

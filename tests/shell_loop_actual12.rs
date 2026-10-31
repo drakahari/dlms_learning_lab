@@ -228,7 +228,10 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
 #[test]
 #[ignore = "Requires genuine12 sealed profile; explicit guarded current14 migration"]
 fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() {
-    let full_current = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    assert_eq!(full201.len(), 201);
+    let full_current =
+        literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
     assert_eq!(full_current.len(), 199);
     let all = literal_registration::before_scenarios(&full_current).to_vec();
     assert_eq!(v(&all), v(&literal_registration::original197()));
@@ -246,9 +249,25 @@ fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() 
         all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         literal_registration::IDS
     );
+    let all = full201;
+    assert_eq!(all.len(), 201);
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();
+    for source in &all[199..201] {
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(
+            !old.attempts.contains_key(&source.id) && !current.attempts.contains_key(&source.id)
+        );
+        assert!(!old.favorites.contains(&source.id) && !current.favorites.contains(&source.id));
+        assert!(!progress::current_solved(
+            &progress::Attempt::new(source, 0),
+            source
+        ));
+    }
     for source in &all[197..199] {
         let Goal::Script { cases } = &source.goal else {
             panic!()

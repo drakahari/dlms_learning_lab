@@ -146,7 +146,10 @@ fn every_free_host_is_accepted_and_reserved_duplicate_outside_or_malformed_hosts
 }
 #[test]
 fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original() {
-    let current_catalog = pack::bundled().unwrap();
+    let full201_catalog = pack::bundled().unwrap();
+    assert_eq!(full201_catalog.len(), 201);
+    let current_catalog =
+        literal_registration::snapshot_registration::before_scenarios(&full201_catalog).to_vec();
     assert_eq!(current_catalog.len(), 199);
     // Preserve the complete original197 loop, counters and negative fixtures.
     // The strict helper validates every current199 object before this slice.
@@ -634,6 +637,113 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         assert!(progress::save_with_catalog(&current_path, &invalid, &current_catalog).is_err());
         assert_eq!(serde_json::to_value(&invalid).unwrap(), before_invalid);
         assert_eq!(std::fs::read(&current_path).unwrap(), current_raw);
+    }
+    // Whole current201, using the actual saved/decoded199 receipt baseline.
+    let mut full201_profile = progress::load(&current_path, &full201_catalog).unwrap();
+    let snapshot_drafts = full201_catalog[199..201].len();
+    for (index, source) in full201_catalog[199..201].iter().enumerate() {
+        assert_eq!(
+            source.id,
+            literal_registration::snapshot_registration::IDS[index]
+        );
+        let engine::Goal::Script { cases } = &source.goal else {
+            panic!()
+        };
+        assert_eq!(cases.len(), 12);
+        let mut attempt = Attempt::new(source, full201_profile.clock);
+        workspace::prepare(&mut attempt);
+        dlms_learning_lab::script_teaching::prepare(
+            &mut attempt,
+            source.teaching.as_ref().unwrap(),
+            true,
+        );
+        let State::Script { source: draft, run } = &mut attempt.state else {
+            panic!()
+        };
+        *draft = "# unfinished snapshot assignment\n".into();
+        assert!(run.is_none());
+        let learning = attempt
+            .workspace
+            .as_mut()
+            .unwrap()
+            .script_learning
+            .as_mut()
+            .unwrap();
+        learning.example_source = "# separate unfinished snapshot practice\n".into();
+        assert!(learning.example_result.is_none());
+        assert!(!progress::current_solved(&attempt, source));
+        full201_profile.attempts.insert(source.id.clone(), attempt);
+    }
+    assert_eq!((snapshot_drafts, full201_profile.attempts.len()), (2, 201));
+    assert_eq!(
+        (
+            original_drafts + literal_drafts + snapshot_drafts,
+            backup_drafts
+        ),
+        (176, 4)
+    );
+    assert_eq!(
+        literal_registration::snapshot_registration::before_attempts_len(&full201_profile.attempts),
+        199
+    );
+    assert_eq!(
+        literal_registration::before_attempts_len(&full201_profile.attempts),
+        197
+    );
+    assert_eq!(
+        disk_registration::before_attempts_len(&full201_profile.attempts),
+        193
+    );
+    for source in &current_catalog {
+        assert_eq!(
+            serde_json::to_value(&full201_profile.attempts[&source.id]).unwrap(),
+            serde_json::to_value(&current_read.attempts[&source.id]).unwrap()
+        );
+    }
+    let full201_path = dir.path().join("current201.json");
+    let full201_before = serde_json::to_value(&full201_profile).unwrap();
+    let full201_receipts = serde_json::to_value(&full201_profile.migration_receipts).unwrap();
+    progress::save_with_catalog(&full201_path, &full201_profile, &full201_catalog).unwrap();
+    assert_eq!(
+        serde_json::to_value(&full201_profile).unwrap(),
+        full201_before
+    );
+    assert_eq!(
+        serde_json::to_value(&full201_profile.migration_receipts).unwrap(),
+        full201_receipts
+    );
+    let full201_read = progress::load(&full201_path, &full201_catalog).unwrap();
+    assert_eq!(serde_json::to_value(&full201_read).unwrap(), full201_before);
+    assert_eq!(
+        serde_json::to_value(&full201_read.migration_receipts).unwrap(),
+        full201_receipts
+    );
+    for source in &full201_catalog[199..201] {
+        let a = &full201_read.attempts[&source.id];
+        assert!(
+            matches!(&a.state,State::Script{source,run:None} if source=="# unfinished snapshot assignment\n")
+        );
+        assert_eq!(
+            a.workspace
+                .as_ref()
+                .unwrap()
+                .script_learning
+                .as_ref()
+                .unwrap()
+                .example_source,
+            "# separate unfinished snapshot practice\n"
+        );
+        assert!(
+            a.workspace
+                .as_ref()
+                .unwrap()
+                .script_learning
+                .as_ref()
+                .unwrap()
+                .example_result
+                .is_none()
+        );
+        assert!(!progress::current_solved(a, source));
     }
     p.attempts
         .get_mut(&labs[0].id)

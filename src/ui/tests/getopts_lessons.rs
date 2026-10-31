@@ -255,7 +255,7 @@ fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks()
         let (ctx, mut a) = proposed_app();
         a.smoke = true;
         a.smoke_stage = 7241;
-        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
         let before = full(&a.progress);
         let sources = a.scenarios.as_ptr();
         let units = a.units.as_ptr();
@@ -267,7 +267,7 @@ fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks()
             assert_eq!(full(&a.progress), before);
         }
         assert!(settled, "The ordinary geometry phase must actually settle");
-        for mutation in 0..4 {
+        for mutation in 0..6 {
             match mutation {
                 0 => a.scenarios[0].objective.push('!'),
                 1 => {
@@ -277,7 +277,14 @@ fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks()
                     cases[0].stdout.push('!');
                 }
                 2 => a.units[0].summary.push('!'),
-                _ => a.units[52].labs.push("unreviewed-source".into()),
+                3 => a.units[52].labs.push("unreviewed-source".into()),
+                4 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[199].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                _ => a.units[53].labs.push("unreviewed-source".into()),
             }
             assert_eq!(a.scenarios.as_ptr(), sources);
             assert_eq!(a.units.as_ptr(), units);
@@ -288,7 +295,7 @@ fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks()
                 .map(String::as_str)
                 .or_else(|| error.downcast_ref::<&str>().copied())
                 .unwrap_or("");
-            let expected = if mutation < 2 {
+            let expected = if matches!(mutation, 0 | 1 | 4) {
                 "Complete source differs"
             } else {
                 "Complete unit differs"
@@ -311,8 +318,17 @@ fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks()
                 2 => {
                     a.units[0].summary.pop();
                 }
-                _ => {
+                3 => {
                     a.units[52].labs.pop();
+                }
+                4 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[199].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.pop();
+                }
+                _ => {
+                    a.units[53].labs.pop();
                 }
             }
             assert_eq!(callback(&ctx, &mut a, kind).unwrap(), (true, None));

@@ -1,11 +1,13 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main199/53, reconciled2026-10-31. Current scoped scripting/registration and native199 checks pass; full-inclusive199 passes3,041 tests/236targets/0 failures/0 ignored. Verified installed553 remains197/52. Fullinclusive2,935 Rust,487Python,
-Clippy and scoped installed Fedora553 acceptance pass. Narrow104.1/GPT-K1 practice
-is Partial; full curriculum completion remains open. Original154/193/190 evidence
-retains its exact identity. See CATALOG197_MILESTONE.md. This is an implementation
-queue, not
-new curriculum or a completion claim. The accepted product requirements remain
+Current Main201/54, reconciled2026-10-31. Scoped scripting, registration,
+progress, UI and actual native Fedora checks pass;517 Python and all-target
+Clippy pass. Full-inclusive201 passes3,055 tests/237 targets,0 failures/ignored;
+accepted199 retains its3,041-test suite. Installed553 remains197/52 with its own2,935-test/lifecycle/NFS cold/startup
+evidence. No curriculum parent becomes complete. Original154/193/190/197/199
+records retain their identities. See CATALOG201_MILESTONE.md. This is an
+implementation queue, not a new curriculum or completion claim.
+The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
 grading, persistence and available native acceptance. There is no lab-count target.
@@ -17,9 +19,9 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | CCNA | 57 | 15 | 64 | 47 | 0 |
 | LPIC-1 | 44 | 11 | 494 | 103 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
-| Bash/Shell | 62 | 18 | Separate path below | — | — |
+| Bash/Shell | 64 | 19 | Separate path below | — | — |
 
-The199 source assignments are57CCNA,44LPIC-1,36LPIC-2 and62Bash/Shell, in15/11/9/18units respectively, with501 graded sample-input cases and62 separate examples. Source evaluator15 is accepted for narrow literal edge removal after scoped current/history and32 controlled Bash comparisons. The verified installed197 candidate remains evaluator14; there is no new15 installation candidate. Installed197 scoped acceptance passes; full-product acceptance remains open.
+The201 source assignments are57CCNA,44LPIC-1,36LPIC-2 and64Bash/Shell, in15/11/9/19units respectively, with525 graded sample-input cases and64 separate examples. Source evaluator15 is accepted for narrow literal edge removal after scoped current/history and32 controlled Bash comparisons. The verified installed197 candidate remains evaluator14; there is no new15 installation candidate. Installed197 scoped acceptance passes; full-product acceptance remains open.
 
 All136 current parent objectives remain incomplete (90 Open,46 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
@@ -201,7 +203,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These53 units contain199 registered authored scenarios. A unit is not evidence of full objective coverage. Exact lab prerequisites remain in the versioned packs; unit prerequisites are in units-v1.json.
+These54 units contain201 registered authored scenarios. A unit is not evidence of full objective coverage. Exact lab prerequisites remain in the versioned packs; unit prerequisites are in units-v1.json.
 
 | Track | Unit | Registered lab IDs |
 | --- | --- | --- |
@@ -258,12 +260,13 @@ These53 units contain199 registered authored scenarios. A unit is not evidence o
 | Bash/Shell | Exact matching and trustworthy evidence (`shell-ere-evidence`) | `shell-ere-event-view`, `shell-ere-inventory-review`, `shell-ere-incident-report` |
 | LPIC-1 | Prepare disks, filesystems and swap safely (`linux-disk-preparation`) | `lpic1-disk-safe-gap`, `lpic1-disk-hints-versus-content`, `lpic1-disk-eligible-media`, `lpic1-disk-delivery` |
 | Bash/Shell | Literal edges and safe interfaces (`shell-literal-normalization`) | `shell-trim-options`, `shell-trim-manifest` |
+| Bash/Shell | Exact snapshots and conditional rollout (`shell-snapshot-rollout`) | `shell-snapshot-audit`, `shell-conditional-rollout` |
 
 ## Bash/Shell remaining path
 
-The62 integrated scripts span18 units. The60scripts in the verified installed197/553 candidate
+The64 integrated scripts span19 units. The60scripts in the verified installed197/553 candidate
 contain477 graded cases and60 separate examples under evaluator14. Current source
-contains501 graded cases and62 separate examples.
+contains525 graded cases and64 separate examples.
 Source evaluator15 additionally supports the narrow read-only literal #/% forms;
 its two interface projects are normal catalog assignments after scoped content,
 registration and progress checks. Scoped native199 acceptance and the3,041-test inclusive suite pass. The existing scripting path covers bounded indexed
@@ -282,10 +285,10 @@ and projects, with prerequisite teaching before assessment:
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Two implemented assignments teach own-scope break/continue, unread-input handoff, first-success selection and independent job failures with22 graded cases. Broader conditional/regex forms and project-specific retry/lock behavior remain required where used; caller-loop and pipeline control escape remain unsupported. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
-| Text processing | Three registered ERE selection/row-validation/incident-evidence projects use the bounded C-byte grep subset (installed193105phase review passed). BRE, deliberate sed/awk or equivalent documented processing, snapshot comparison and broader log-analysis work remain required; no full regex objective credit. |
+| Text processing | Three registered ERE selection/row-validation/incident-evidence projects use the bounded C-byte grep subset (installed193105phase review passed). Exact bounded UTF8 text snapshots, including final-newline differences, are now taught and graded in201. BRE, deliberate sed/awk or equivalent documented processing, binary comparison and broader log-analysis work remain required; no full regex objective credit. |
 | Debugging and errors | Actual bounded tracing, useful error propagation, traps/cleanup and recovery; debugging and repair assignments, not only deliberately incorrect scripts. |
 | Safe file operations | Virtual directory/path semantics, safe temporary-file/rename behavior, validated mutation, deterministic clock and lock/retry behavior where the project depends on it. |
-| Substantial projects | Dry-run cleanup planning, verified backup/restore, idempotent configuration rollout, resumable batch processing; combine report generation/log analysis/input validation and preserve unrelated data. |
+| Substantial projects | The201 unit implements a finite preview/conditional-file rollout with complete preflight and independent old-content rollback. Dry-run cleanup, verified backup/restore, broader idempotent configuration and resumable batches remain required. No atomicity, races, locks or Stop/resource rollback is claimed. |
 
 Portable shell behavior and Bash-specific features must stay explicit. Current
 [SHELL_SUBSET.md](SHELL_SUBSET.md) and per-unit references define actual behavior;
@@ -298,28 +301,27 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Preserve accepted normal199/53/evaluator15, all prior197/52 and193/51
-   definitions and raw units, genuine9–14 histories, and62 scripts/501 cases/
-   62 separate examples. Full-inclusive M743 passes3,041 tests/236targets/0 FAIL/
-   0 ignored;514 Python and Clippy pass. The older installed553 remains197/52.
-   CATALOG199_MILESTONE.md distinguishes current source from installed evidence.
-2. Integrate the two reviewed but unregistered Snapshot projects only after fresh
-   strict199→201 preservation, combined source review and actual content/native
-   gates. Their existing bounded reference tests and conditional source proposals
-   do not award catalog, objective or learner credit.
+1. Preserve verified201 full-inclusive3,055 tests/237targets/0failures/ignored,
+   scoped native and static evidence; commit/push the scoped milestone after
+   final public/staged review, then proceed directly to the next batch. Preserve complete199/197 definitions/raw units, genuine
+   9–14 histories and no invented progress. Current source is64 scripts/525
+   cases/64 examples; the installed553 candidate stays197/52/evaluator14.
+2. Gate the four HSRP assignments through the reviewed201→205 source/unit boundary,
+   current/negative/persistence/native flows and the same full-source event proof.
+   Their source-only native route and existing foundation tests are not registration
+   or accepted curriculum. Then gate Links and Syslog capabilities and authored tasks.
+3. Continue RPM repository and filesystem-capacity foundations, remaining Linux
+   and networking gaps, and substantive scripting/debugging/safe-automation
+   projects. Pure modules, private fixtures and generated variants earn no lab
+   credit; preserve all granular fidelity limitations. The fifth backup directory
+   proposal still needs its remaining gates.
+4. Rebuild a candidate only from a verified committed identity. Repeat actual
+   Fedora installation/upgrade, progress preservation, NFS full-exit cold reopening
+   and startup/new-flow checks. A package never substitutes for curriculum work.
 
-3. Gate HSRP, links and Syslog source/workspace/persistence layers and authored
-   packs before registration. GPT/ext4/swap is already registered/verified in197;
-   source-only family proposals and pure RPM repository foundation earn no credit.
-4. The prior Snapshot implementation notes remain relevant to step2: strict199→201
-   preservation and native/full gates are required. The reference's quadratic preflight was
-   corrected without changing the eight-job Case or2,000-instruction bound;
-   M66411content groups pass. Source-aware Script save also gains an actual
-   pre-write identity guard, with3new regressions and unchanged legacy behavior.
-   Then continue remaining network/Linux/scripting capabilities and substantive
-   debugging/safe automation projects in the granular ledger. The fifth backup
-   directory-selection proposal still needs its remaining acceptance gates.
-   No arbitrary catalog quota or routine approval gate.
+No arbitrary catalog quota or routine approval gate. All heavy work uses the
+MAIN memory-safe runner and one shared lock. Do not relax the2,000-instruction
+limit,15-second developer waits or16-instruction GUI slice to rescue a test.
 
 Full curriculum acceptance stays separate from Windows/macOS desktop,
 physical-device/screen-reader and novice acceptance. No release publication.

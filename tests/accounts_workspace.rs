@@ -647,7 +647,9 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     }
     // Admit the whole current catalog before recovering the exact historical
     // scope used by every original context-free count/order assertion below.
-    let full199 = all;
+    let full201 = all;
+    let full199 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),full199.len()),(201,199));
     let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&full199);
     assert_eq!((full199.len(), checked197.len()), (199, 197));
     let all = checked197.to_vec();
@@ -821,7 +823,17 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         assert!(source.teaching.is_some());
         assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
-    for s in old.into_iter().chain(literal2.iter().cloned()) {
+    let snapshot2 = &full201[199..];
+    assert_eq!(snapshot2.iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),["shell-snapshot-audit","shell-conditional-rollout"]);
+    assert_eq!(old.len()+literal2.len()+snapshot2.len(),132);
+    for source in snapshot2 {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source,1),source));
+    }
+    for s in old.into_iter().chain(literal2.iter().cloned()).chain(snapshot2.iter().cloned()) {
         let mut raw = s.initial.clone();
         let mut contextual = s.initial.clone();
         for command in &s.solution {

@@ -51,7 +51,7 @@ fn old_catalog() -> Vec<pack::Scenario> {
 #[test]
 fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchanged() {
     let old = old_catalog();
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!((old.len(), one_off_boundary::before_len(&all)), (168, 176));
@@ -145,7 +145,8 @@ fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchan
 }
 #[test]
 fn exact44_append_recovers_all43_raw_objects_and_every_old_closed_inverse() {
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let raw = previous52.as_slice();
     let r = recipe();
@@ -172,7 +173,7 @@ fn exact44_append_recovers_all43_raw_objects_and_every_old_closed_inverse() {
         "e87bd9685cc69cef5a3c4929497323cee15fb44cc1518e7c16fec09c24bcc574"
     );
     let old = old_catalog();
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
@@ -195,7 +196,8 @@ fn exact44_append_recovers_all43_raw_objects_and_every_old_closed_inverse() {
 }
 #[test]
 fn new_inverse_rejects_partial_extra_changed_old_new_reordered_and_missing_unit() {
-    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current53 = snapshot_previous53_bytes.as_slice();
     let previous52 = literal_registration::before_units(current53).unwrap();
     let raw = previous52.as_slice();
     let before = combined_catalog::before_numeric_units(raw).unwrap();
@@ -232,7 +234,7 @@ fn old_explicit_profile_decode_preserves_every_answer_and_never_creates_numeric_
         "88c07f20276ba1555eaad886ec2a58eff3d3b3cb3cef2bf3108be64a63bacd26"
     );
     let old = old_catalog();
-    let current199 = pack::bundled().unwrap();
+    let current199 = normal199_predecessor();
     assert_eq!(current199.len(), 199);
     let all = literal_registration::before_scenarios(&current199).to_vec();
     let before = progress::decode(raw, &old).unwrap();
@@ -243,4 +245,10 @@ fn old_explicit_profile_decode_preserves_every_answer_and_never_creates_numeric_
         assert!(!after.attempts.contains_key(id));
         assert!(!after.favorites.contains(id));
     }
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

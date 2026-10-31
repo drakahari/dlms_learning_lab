@@ -200,6 +200,21 @@ class FixedAutomationSafety(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Whole amended Lesson'):
                 teaching_amendment.historical_example(ROOT, scenario)
 
+    def closed_original53_units(self, raw):
+        recipe_raw=(ROOT/'tests/fixtures/catalog201-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(recipe_raw).hexdigest(), 'e59b6f5ba29d84d886b322c5f1297047d4e9b6bf744a21fcc1f82c78f51244ae')
+        r=json.loads(recipe_raw)
+        self.assertEqual((len(raw),hashlib.sha256(raw).hexdigest()),(r['after_units54_bytes'],r['after_units54_sha256']))
+        self.assertEqual(len(json.loads(raw)['units']),54)
+        suffix=r['append_suffix_utf8'].encode()
+        self.assertTrue(raw.endswith(suffix))
+        old=raw[:-len(suffix)]+r['old_tail_utf8'].encode()
+        self.assertEqual((len(old),hashlib.sha256(old).hexdigest()),(r['before_units53_bytes'],r['before_units53_sha256']))
+        self.assertEqual(old,(ROOT/'tests/fixtures/snapshot-units-before199.json').read_bytes())
+        self.assertEqual(json.loads(old),r['before_units53'])
+        self.assertEqual(json.loads(raw),{**r['before_units53'],'units':r['before_units53']['units']+[r['snapshot_unit']]})
+        return old
+
     def closed_original52_units(self, raw):
         recipe_raw=(ROOT/'tests/fixtures/catalog199-registration.json').read_bytes()
         self.assertEqual(hashlib.sha256(recipe_raw).hexdigest(), 'c04649d4a8c0e3b25f41d68af3e5e5f5ae3a7a287190cbf0417ee2c60b7c15e0')
@@ -267,7 +282,7 @@ class FixedAutomationSafety(unittest.TestCase):
         return current_raw
 
     def test_closed_network_appends_recover_all_old_units_and_refuse_changed_bytes(self):
-        current52=self.closed_original52_units((ROOT/'scenarios/units-v1.json').read_bytes())
+        current52=self.closed_original52_units(self.closed_original53_units((ROOT/'scenarios/units-v1.json').read_bytes()))
         self.assertEqual(len(json.loads(current52)['units']),52)
         current=self.closed_original51_units(current52)
         old=self.closed_original44_units(current)
@@ -326,7 +341,7 @@ class FixedAutomationSafety(unittest.TestCase):
             self.assertEqual(teaching_amendment.historical_example(ROOT, p),s['example_source'])
             self.assertEqual(p['teaching']['fixture'],s['example_case'])
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
-        current_raw=self.closed_original52_units((ROOT/'scenarios/units-v1.json').read_bytes())
+        current_raw=self.closed_original52_units(self.closed_original53_units((ROOT/'scenarios/units-v1.json').read_bytes()))
         current_raw=self.closed_original51_units(current_raw)
         current_raw=self.closed_original44_units(current_raw)
         numeric_raw=(ROOT/'tests/fixtures/catalog171-registration.json').read_bytes()
@@ -570,7 +585,7 @@ class FixedAutomationSafety(unittest.TestCase):
         with self.assertRaisesRegex(oracle.safe.OracleError,'Duplicate named'):oracle.profile_observations([base,stop,base])
 
     def test_closed_disk52_append_recovers_whole51_and_refuses_every_new_unit_mutation(self):
-        current=self.closed_original52_units((ROOT/'scenarios/units-v1.json').read_bytes())
+        current=self.closed_original52_units(self.closed_original53_units((ROOT/'scenarios/units-v1.json').read_bytes()))
         before=self.closed_original51_units(current)
         whole=json.loads(current)
         self.assertEqual(len(whole['units']),52)
@@ -603,7 +618,7 @@ class FixedAutomationSafety(unittest.TestCase):
 
 
     def test_closed_literal53_append_preserves_complete52_and_rejects_mutations(self):
-        raw=(ROOT/'scenarios/units-v1.json').read_bytes()
+        raw=self.closed_original53_units((ROOT/'scenarios/units-v1.json').read_bytes())
         old=self.closed_original52_units(raw)
         self.assertEqual(len(json.loads(old)['units']),52)
         self.assertEqual(len(json.loads(raw)['units']),53)
@@ -621,6 +636,26 @@ class FixedAutomationSafety(unittest.TestCase):
         for b in bad:
             with self.subTest(size=len(b)):
                 with self.assertRaises(AssertionError):self.closed_original52_units(b)
+
+    def test_closed_snapshot54_append_preserves_complete53_and_rejects_mutations(self):
+        raw=(ROOT/'scenarios/units-v1.json').read_bytes()
+        old=self.closed_original53_units(raw)
+        self.assertEqual(len(json.loads(raw)['units']),54)
+        self.assertEqual(len(json.loads(old)['units']),53)
+        self.closed_original52_units(old)
+        bad=[raw+b' ',old]
+        for mode in ('title','track','summary','prerequisites','lab','missing','extra','old'):
+            v=json.loads(raw)
+            if mode in ('title','track','summary'):v['units'][-1][mode]+=' unreviewed'
+            elif mode=='prerequisites':v['units'][-1]['prerequisites']=[]
+            elif mode=='lab':v['units'][-1]['labs'][0]='shell-greetings'
+            elif mode=='missing':v['units'].pop()
+            elif mode=='extra':v['units'].append(v['units'][-1])
+            else:v['units'][0]['title']+=' changed'
+            bad.append(json.dumps(v).encode())
+        for b in bad:
+            with self.subTest(size=len(b)):
+                with self.assertRaises(AssertionError):self.closed_original53_units(b)
 
 if __name__ == '__main__': unittest.main()
 

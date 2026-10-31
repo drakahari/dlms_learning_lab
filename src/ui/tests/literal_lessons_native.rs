@@ -123,7 +123,7 @@ fn focused_literal_native_route_uses_real_edit_run_stop_reset_continue_and_every
     let (ctx, mut a) = app();
     a.smoke = true;
     a.smoke_stage = route::BASE;
-    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+    assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
     assert!(a.progress.attempts.is_empty());
     assert!(a._smoke_profile.is_some());
     let (actions, expected) = route::inventory();

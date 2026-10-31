@@ -56,7 +56,25 @@ fn before() -> Vec<pack::Scenario> {
 #[test]
 fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
     let old = before();
-    let all = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    let checked199 = disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201);
+    assert_eq!((full201.len(),checked199.len()),(201,199));
+    let full54 = course::bundled(&full201).unwrap();
+    let snapshot_raw53 = disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let checked53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),checked199).unwrap();
+    assert_eq!((full54.len(),checked53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&checked53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    assert_eq!(full201.iter().filter(|s|matches!(s.goal,dlms_learning_lab::engine::Goal::Script{..})).count(),64);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
+        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+    }
+    let all = checked199.to_vec();
     assert_eq!(old.len(), 175);
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
@@ -129,7 +147,7 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         assert_eq!(cases.len(), 12);
         assert!(source.teaching.is_some());
     }
-    let current_units = course::bundled(&all).unwrap();
+    let current_units = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &all).unwrap();
     let previous_raw = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))

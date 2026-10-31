@@ -408,13 +408,15 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
     }
     // Retain the complete historical197 matrix, then run the SAME rejection
     // checks against every current source, including both literal additions.
-    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
-    assert_eq!((all.len(), previous197.len()), (199, 197));
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&all);
+    assert_eq!((all.len(),current199.len()),(201,199));
+    let previous197 = disk_registration::literal_registration::before_scenarios(current199);
+    assert_eq!((current199.len(), previous197.len()), (199, 197));
     assert_eq!(
-        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        current199[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         disk_registration::literal_registration::IDS
     );
-    for source in &all[197..] {
+    for source in &current199[197..] {
         assert!(matches!(
             source.initial,
             dlms_learning_lab::engine::State::Script { run: None, .. }
@@ -429,7 +431,11 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
             source
         ));
     }
-    let full_current_old = current_old;
+    let full201_old=current_old;
+    let full_current_old=current199.iter().filter(|s|!matches!(s.initial,State::PhysicalLink{..})).collect::<Vec<_>>();
+    assert_eq!(full201_old.len(),full_current_old.len()+2);
+    assert_eq!(serde_json::to_value(&full201_old[..full_current_old.len()]).unwrap(),serde_json::to_value(&full_current_old).unwrap());
+    assert_eq!(full201_old[full_current_old.len()..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),["shell-snapshot-audit","shell-conditional-rollout"]);
     let current_old = previous197
         .iter()
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
@@ -467,7 +473,7 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
         engine::Goal::PartitionFs { .. }
     )));
 
-    for old in full_current_old {
+    for old in full201_old {
         for mask in 1..4 {
             let mut own = Attempt::new(old, 1);
             workspace::prepare(&mut own);

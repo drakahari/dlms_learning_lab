@@ -69,7 +69,25 @@ fn attempt(s: &pack::Scenario) -> Attempt {
 fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
     let labs = labs();
     assert_eq!(labs.len(), 4);
-    let all = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    let checked199 = disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201);
+    assert_eq!((full201.len(),checked199.len()),(201,199));
+    let full54 = dlms_learning_lab::course::bundled(&full201).unwrap();
+    let snapshot_raw53 = disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let checked53 = dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),checked199).unwrap();
+    assert_eq!((full54.len(),checked53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&checked53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    assert_eq!(full201.iter().filter(|s|matches!(s.goal,dlms_learning_lab::engine::Goal::Script{..})).count(),64);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
+        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+    }
+    let all = checked199.to_vec();
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
@@ -115,7 +133,7 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
         assert!(source.teaching.is_some());
         assert!(!progress::current_solved(&Attempt::new(source, 1), source));
     }
-    let current53 = dlms_learning_lab::course::bundled(&all).unwrap();
+    let current53 = dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &all).unwrap();
     let raw52 = disk_registration::literal_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
     assert_eq!(raw52.as_slice(), include_bytes!("fixtures/literal-units-before197.json"));
     let previous52 = dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), previous197).unwrap();
@@ -128,7 +146,7 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
             .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
-    let units = dlms_learning_lab::course::bundled(&all).unwrap();
+    let units = dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &all).unwrap();
     assert_eq!(one_off_boundary::before_len(&units), 46);
     let unit = units.iter().find(|u| u.id == "persistent-mounts").unwrap();
     assert_eq!(

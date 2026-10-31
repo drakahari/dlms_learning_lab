@@ -2,7 +2,7 @@
 use dlms_learning_lab::{
     course, developer_digest as digest,
     engine::{Goal, State},
-    pack::{self, Scenario},
+    pack::Scenario,
     progress::{self, Attempt, Progress},
     script_teaching, shell, workspace,
 };
@@ -18,7 +18,7 @@ fn full(p: &Progress) -> Value {
 }
 #[test]
 fn full197_sources_and477_cases_remain_before_two_normal_projects() {
-    let all = pack::bundled().unwrap();
+    let all = normal199_predecessor();
     let old = registration::original197();
     assert_eq!((all.len(), old.len()), (199, 197));
     assert_eq!(value(registration::before_scenarios(&all)), value(&old));
@@ -57,15 +57,17 @@ fn full197_sources_and477_cases_remain_before_two_normal_projects() {
 }
 #[test]
 fn exact53_to52_raw_and_typed_inverse_keeps_all_predecessors_independent() {
-    let all = pack::bundled().unwrap();
+    let all = normal199_predecessor();
     let old = registration::before_scenarios(&all);
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let raw = snapshot_previous53_bytes.as_slice();
     let before = registration::before_units(raw).unwrap();
     assert_eq!(
         &before,
         include_bytes!("fixtures/literal-units-before197.json")
     );
-    let current = course::bundled(&all).unwrap();
+    let raw53=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let current = course::load(std::str::from_utf8(&raw53).unwrap(), &all).unwrap();
     let previous = course::load(std::str::from_utf8(&before).unwrap(), old).unwrap();
     assert_eq!((current.len(), previous.len()), (53, 52));
     assert_eq!(
@@ -92,7 +94,7 @@ fn exact53_to52_raw_and_typed_inverse_keeps_all_predecessors_independent() {
 }
 #[test]
 fn source_inverse_refuses_missing_extra_changed_old_new_and_case_teaching_mutations() {
-    let all = pack::bundled().unwrap();
+    let all = normal199_predecessor();
     for mode in 0..9 {
         let mut bad = all.clone();
         match mode {
@@ -125,7 +127,8 @@ fn source_inverse_refuses_missing_extra_changed_old_new_and_case_teaching_mutati
 }
 #[test]
 fn raw_and_full_typed_unit_inverse_refuses_changed_append_and_old_objects() {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let snapshot_previous53_bytes=one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let raw = snapshot_previous53_bytes.as_slice();
     let whole: Value = serde_json::from_slice(raw).unwrap();
     let mut padded = raw.to_vec();
     padded.push(b' ');
@@ -160,7 +163,7 @@ fn raw_and_full_typed_unit_inverse_refuses_changed_append_and_old_objects() {
 }
 #[test]
 fn current_count_map_validates_every_key_and_new_script_without_awarding_credit() {
-    let all = pack::bundled().unwrap();
+    let all = normal199_predecessor();
     let mut p = Progress {
         schema_version: 1,
         ..Default::default()
@@ -198,7 +201,7 @@ fn current_count_map_validates_every_key_and_new_script_without_awarding_credit(
 }
 #[test]
 fn normal_projects_run_reference_and_practice_with_separate_resumable_drafts() {
-    let all = pack::bundled().unwrap();
+    let all = normal199_predecessor();
     let mut p = Progress {
         schema_version: 1,
         clock: 43,
@@ -260,4 +263,10 @@ fn normal_projects_run_reference_and_practice_with_separate_resumable_drafts() {
         );
         assert!(a.challenge);
     }
+}
+
+fn normal199_predecessor() -> Vec<dlms_learning_lab::pack::Scenario> {
+    let all = dlms_learning_lab::pack::bundled().unwrap();
+    assert_eq!(all.len(), 201);
+    one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec()
 }

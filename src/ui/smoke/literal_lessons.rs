@@ -636,7 +636,7 @@ impl LabApp {
             ),
             (197, 52)
         );
-        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!((self.scenarios.len(), self.units.len()), (201, 54));
         let Action { task, step } = &plan()[stage - BASE];
         let task = *task;
         let s = &authored()[task];

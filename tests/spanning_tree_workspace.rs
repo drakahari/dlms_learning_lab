@@ -836,9 +836,16 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
  {
     use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
     let mut all = catalog();
-    let original = disk_registration::literal_registration::before_scenarios(&all).to_vec();
-    assert_eq!((all.len(), original.len()), (199, 197));
-    let current53 = dlms_learning_lab::course::bundled(&all).unwrap();
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&all).to_vec();
+    assert_eq!((all.len(),current199.len()),(201,199));
+    let snapshot_raw53=disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let original = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
+    assert_eq!((current199.len(), original.len()), (199, 197));
+    let current53=dlms_learning_lab::course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&current199).unwrap();
+    let full54=dlms_learning_lab::course::bundled(&all).unwrap();
+    assert_eq!((full54.len(),current53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&current53).unwrap());
     let raw52 = disk_registration::literal_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
     assert_eq!(raw52.as_slice(), include_bytes!("fixtures/literal-units-before197.json"));
     let previous52 = dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), &original).unwrap();
@@ -967,15 +974,25 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     let literal_ids = disk_registration::literal_registration::IDS;
     let full_expected = current_expected.iter().copied().chain(literal_ids).collect::<BTreeSet<_>>();
     assert_eq!(full_expected.len(), 62);
-    assert_eq!(all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })).map(|s| s.id.as_str()).collect::<BTreeSet<_>>(), full_expected);
-    assert_eq!(all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), literal_ids);
-    for source in &all[197..] {
+    assert_eq!(current199.iter().filter(|s| matches!(s.goal, Goal::Script { .. })).map(|s| s.id.as_str()).collect::<BTreeSet<_>>(), full_expected);
+    assert_eq!(current199[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), literal_ids);
+    for source in &current199[197..] {
         assert!(matches!(source.initial, State::Script { run: None, .. }));
         let Goal::Script { cases } = &source.goal else { panic!("Literal source must retain its Script Goal") };
         assert_eq!(cases.len(), 12);
         assert!(source.teaching.is_some());
         assert!(!p.attempts.contains_key(&source.id));
         assert!(!p.favorites.contains(&source.id));
+    }
+    let snapshot_ids=disk_registration::literal_registration::snapshot_registration::IDS;
+    let expected201_scripts=full_expected.iter().copied().chain(snapshot_ids).collect::<BTreeSet<_>>();
+    assert_eq!(expected201_scripts.len(),64);
+    assert_eq!(all.iter().filter(|s|matches!(s.goal,Goal::Script{..})).map(|s|s.id.as_str()).collect::<BTreeSet<_>>(),expected201_scripts);
+    for id in snapshot_ids {
+        let source=all.iter().find(|s|s.id==id).unwrap();
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        assert!(!p.attempts.contains_key(id)&&!p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
     }
     for id in new_ids
         .into_iter()
@@ -1053,7 +1070,8 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     p.attempts.insert(s.id.clone(), a);
     p.favorites.insert(s.id.clone());
     all.push(s.clone());
-    assert_eq!((all.len(), p.attempts.len()), (200, 198));
+    assert_eq!((current199.len()+1, p.attempts.len()), (200, 198));
+    assert_eq!((all.len(),p.attempts.len()),(202,198));
     let favorites = p.favorites.clone();
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
@@ -1126,7 +1144,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     assert_eq!(restored.favorites, favorites);
     assert_eq!(restored.attempts[&s.id].state, s.initial);
     for profile in [&p, &loaded, &candidate.progress, &restored] {
-        for id in literal_ids {
+        for id in literal_ids.into_iter().chain(snapshot_ids) {
             assert!(!profile.attempts.contains_key(id));
             assert!(!profile.favorites.contains(id));
         }

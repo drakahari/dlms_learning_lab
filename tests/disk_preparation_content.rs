@@ -91,7 +91,25 @@ fn files(dir: &std::path::Path) -> std::collections::BTreeMap<String, Vec<u8>> {
 }
 #[test]
 fn independent_four_task_pack_and_appended_unit_preserve_full_current_catalog_and_prerequisites() {
-    let normal199 = pack::bundled().unwrap();
+    let full201 = pack::bundled().unwrap();
+    let checked199 = registration::literal_registration::snapshot_registration::before_scenarios(&full201);
+    assert_eq!((full201.len(),checked199.len()),(201,199));
+    let full54 = course::bundled(&full201).unwrap();
+    let snapshot_raw53 = registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let checked53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),checked199).unwrap();
+    assert_eq!((full54.len(),checked53.len()),(54,53));
+    assert_eq!(serde_json::to_value(registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&checked53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),registration::literal_registration::snapshot_registration::IDS);
+    assert_eq!(full201.iter().filter(|s|matches!(s.goal,dlms_learning_lab::engine::Goal::Script{..})).count(),64);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,dlms_learning_lab::engine::State::Script{run:None,..}));
+        let dlms_learning_lab::engine::Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!dlms_learning_lab::progress::current_solved(&dlms_learning_lab::progress::Attempt::new(source,0),source));
+    }
+    let normal199 = checked199.to_vec();
     let current = registration::literal_registration::before_scenarios(&normal199).to_vec();
     assert_eq!(normal199.len(), 199);
     assert_eq!(current.len(), 197);
@@ -162,7 +180,7 @@ fn independent_four_task_pack_and_appended_unit_preserve_full_current_catalog_an
         )),
         value(&all)
     );
-    let current_units = course::bundled(&full199).unwrap();
+    let current_units = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &full199).unwrap();
     assert_eq!(current_units.len(), 53);
     assert_eq!(
         value(registration::literal_registration::before_typed_units(
@@ -172,7 +190,7 @@ fn independent_four_task_pack_and_appended_unit_preserve_full_current_catalog_an
     );
     assert_eq!(
         value(&current_units),
-        value(&course::bundled(&normal199).unwrap())
+        value(&course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &normal199).unwrap())
     );
     assert_eq!(current_units[52].id, "shell-literal-normalization");
     assert_eq!(

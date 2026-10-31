@@ -41,6 +41,7 @@ pub(in crate::ui) mod physical_workspace;
 mod private_office;
 mod safe_automation_lessons;
 mod seed_learning;
+mod snapshot_lessons_native;
 mod spanning_tree;
 mod ui_consistency;
 #[test]

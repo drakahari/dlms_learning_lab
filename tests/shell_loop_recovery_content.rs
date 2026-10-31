@@ -57,7 +57,8 @@ fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 15);
-        let current199 = pack::bundled().unwrap();
+        let full201=pack::bundled().unwrap();
+        let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
         let all = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
         assert_eq!(
             lvm_registration::ntp_registration::before_scenarios(&all).len(),
@@ -79,7 +80,10 @@ fn catalog() -> &'static Vec<Scenario> {
         );
         let checked199 = bounded(current199);
         assert_eq!(checked199.len(), 199);
-        checked199
+        let checked201=bounded(full201);
+        assert_eq!(value(disk_registration::literal_registration::snapshot_registration::before_scenarios(&checked201)),value(&checked199));
+        assert_eq!(checked201.len(),201);
+        checked201
     })
 }
 fn run(source: &str, c: &Case, slice: usize) -> Outcome {
@@ -121,7 +125,24 @@ fn full(p: &Progress) -> Value {
 
 #[test]
 fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420_cases() {
-    let current = pack::bundled().unwrap();
+    let full201=pack::bundled().unwrap();
+    let current=disk_registration::literal_registration::snapshot_registration::before_scenarios(&full201).to_vec();
+    assert_eq!((full201.len(),current.len()),(201,199));
+    let full54=course::bundled(&full201).unwrap();
+    let snapshot_raw53=disk_registration::literal_registration::snapshot_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(snapshot_raw53.as_slice(),include_bytes!("fixtures/snapshot-units-before199.json"));
+    let old53=course::load(std::str::from_utf8(&snapshot_raw53).unwrap(),&current).unwrap();
+    assert_eq!((full54.len(),old53.len()),(54,53));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::snapshot_registration::before_typed_units(&full54)).unwrap(),serde_json::to_value(&old53).unwrap());
+    assert_eq!(full201[199..].iter().map(|s|s.id.as_str()).collect::<Vec<_>>(),disk_registration::literal_registration::snapshot_registration::IDS);
+    for source in &full201[199..] {
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot sources require Script Goals")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+
     assert_eq!(
         (
             current.len(),
@@ -129,7 +150,7 @@ fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420
         ),
         (199, 197)
     );
-    let literal_units53 = course::bundled(&current).unwrap();
+    let literal_units53 = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), &current).unwrap();
     let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
         "../scenarios/units-v1.json"
     ))
@@ -236,13 +257,16 @@ fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420
         proposed.iter().map(|s| cases(s).len()).collect::<Vec<_>>(),
         [10, 12]
     );
-    let normal = catalog();
+    let full201_normal=catalog();
+    assert_eq!(value(full201_normal),value(&full201));
+    let previous199=disk_registration::literal_registration::snapshot_registration::before_scenarios(full201_normal).to_vec();
+    let normal=&previous199;
     assert_eq!(
         value(normal),
         value(&current),
         "Full current catalog JSON roundtrip"
     );
-    let current_units = course::bundled(normal).unwrap();
+    let current_units = course::load(std::str::from_utf8(&snapshot_raw53).unwrap(), normal).unwrap();
     let current_roundtrip = course::load(
         &json!({"version":1,"units":current_units}).to_string(),
         normal,

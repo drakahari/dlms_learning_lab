@@ -876,7 +876,7 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
         let (ctx, mut a) = app();
         a.smoke = true;
         a.smoke_stage = [43000, 82000, 75000][route];
-        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        assert_eq!((a.scenarios.len(), a.units.len()), (201, 54));
         // Cold parity witnesses the exact implication used by the callback:
         // literal.old_values is disk.original193 plus its pinned four sources.
         let mut expected = literal::original197();
@@ -886,6 +886,17 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
         .unwrap();
         expected.extend(pack.scenarios);
         assert_eq!(expected.len(), 199);
+        let checked199 = literal::snapshot_registration::before_scenarios(&a.scenarios);
+        assert_eq!(
+            serde_json::to_value(checked199).unwrap(),
+            serde_json::to_value(&expected).unwrap()
+        );
+        let snapshot: dlms_learning_lab::pack::Pack = serde_json::from_str(include_str!(
+            "../../../scenarios/shell-snapshot-rollout-draft.json"
+        ))
+        .unwrap();
+        expected.extend(snapshot.scenarios);
+        assert_eq!(expected.len(), 201);
         assert_eq!(
             serde_json::to_value(&a.scenarios).unwrap(),
             serde_json::to_value(&expected).unwrap()
@@ -907,7 +918,7 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
         let source_pointer = a.scenarios.as_ptr();
         let unit_pointer = a.units.as_ptr();
         assert_eq!(callback(&ctx, &mut a, route).unwrap(), (true, None));
-        for mutation in 0..4 {
+        for mutation in 0..6 {
             match mutation {
                 0 => a.scenarios[0].objective.push('!'),
                 1 => {
@@ -917,7 +928,14 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
                     cases[0].stdout.push('!');
                 }
                 2 => a.units[0].summary.push('!'),
-                _ => a.units[52].labs.push("unreviewed-source".into()),
+                3 => a.units[52].labs.push("unreviewed-source".into()),
+                4 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[199].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                _ => a.units[53].labs.push("unreviewed-source".into()),
             }
             assert_eq!(a.scenarios.as_ptr(), source_pointer);
             assert_eq!(a.units.as_ptr(), unit_pointer);
@@ -928,7 +946,7 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
                 .map(String::as_str)
                 .or_else(|| error.downcast_ref::<&str>().copied())
                 .unwrap_or("");
-            let expected = if mutation < 2 {
+            let expected = if matches!(mutation, 0 | 1 | 4) {
                 "Complete source differs"
             } else {
                 "Complete unit differs"
@@ -951,8 +969,17 @@ fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admi
                 2 => {
                     a.units[0].summary.pop();
                 }
-                _ => {
+                3 => {
                     a.units[52].labs.pop();
+                }
+                4 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[199].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.pop();
+                }
+                _ => {
+                    a.units[53].labs.pop();
                 }
             }
             assert_eq!(callback(&ctx, &mut a, route).unwrap(), (true, None));

@@ -143,16 +143,18 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
     assert_eq!(one_off_boundary::before_len(&all), 176);
-    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
-    assert_eq!((all.len(), previous197.len()), (199, 197));
+    let current199=disk_registration::literal_registration::snapshot_registration::before_scenarios(&all);
+    assert_eq!((all.len(),current199.len()),(201,199));
+    let previous197 = disk_registration::literal_registration::before_scenarios(current199);
+    assert_eq!((current199.len(), previous197.len()), (199, 197));
     assert_eq!(
-        all.iter()
+        current199.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
         62
     );
     assert_eq!(
-        all.iter()
+        current199.iter()
             .filter_map(|s| match &s.goal {
                 Goal::Script { cases } => Some(cases.len()),
                 _ => None,
@@ -161,7 +163,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         501
     );
     assert_eq!(
-        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        current199[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         disk_registration::literal_registration::IDS
     );
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
@@ -369,7 +371,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-handover",
         ])
     ); // Later tasks remain absent and ungraded; no invented contexts.
-    let current_missing: BTreeSet<_> = all
+    let current_missing: BTreeSet<_> = current199
         .iter()
         .filter(|s| !p.attempts.contains_key(&s.id))
         .map(|s| s.id.as_str())
@@ -392,7 +394,30 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(current_missing, expected_current_missing);
     // Keep the original migration loop over full current sources below, excluding
     // exactly the genuinely absent current IDs rather than creating new attempts.
-    let missing = current_missing;
+    let whole201_missing:BTreeSet<_>=all.iter().filter(|s|!p.attempts.contains_key(&s.id)).map(|s|s.id.as_str()).collect();
+    let expected201_missing=expected_current_missing.iter().copied().chain(disk_registration::literal_registration::snapshot_registration::IDS).collect::<BTreeSet<_>>();
+    assert_eq!(whole201_missing,expected201_missing);
+    assert_eq!(all.iter().filter(|s|matches!(s.goal,Goal::Script{..})).count(),64);
+    assert_eq!(all.iter().filter_map(|s|match &s.goal{Goal::Script{cases}=>Some(cases.len()),_=>None}).sum::<usize>(),525);
+    for id in disk_registration::literal_registration::snapshot_registration::IDS {
+        let source=all.iter().find(|s|s.id==id).unwrap();
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!p.attempts.contains_key(id)&&!p.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+    for id in disk_registration::literal_registration::snapshot_registration::IDS {
+        let source=all.iter().find(|s|s.id==id).unwrap();
+        assert!(matches!(source.initial,State::Script{run:None,..}));
+        let Goal::Script{cases}=&source.goal else {panic!("Snapshot source must retain its Script Goal")};
+        assert_eq!(cases.len(),12);
+        assert!(source.teaching.is_some());
+        assert!(!captured8.attempts.contains_key(id)&&!captured8.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source,0),source));
+    }
+    let missing = whole201_missing;
     let office = all
         .iter()
         .find(|s| s.id == "ccna-private-office-plan")

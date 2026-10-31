@@ -227,33 +227,47 @@ impl LabApp {
             .iter()
             .position(|s| s.id == id)
             .expect("Normal safe-automation lab");
+        use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration as literal;
+        // Admit all current sources and units on EVERY callback. Only these
+        // same-callback immutable prefixes supply the older assertions below.
+        let checked199 = literal::snapshot_registration::before_scenarios(&self.scenarios);
+        let checked53 = literal::snapshot_registration::before_typed_units(&self.units);
+        assert_eq!((self.scenarios.len(), self.units.len()), (201, 54));
+        assert_eq!((checked199.len(), checked53.len()), (199, 53));
+        let checked197 = &checked199[..197];
+        let checked52 = &checked53[..52];
+        let checked193 = &checked197[..193];
+        let checked51 = &checked52[..51];
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
+        assert_eq!((checked193.len(), checked51.len()), (193, 51));
         assert_eq!(
             (
-                one_off_boundary::before_len(&self.scenarios),
-                one_off_boundary::before_len(&self.units)
+                one_off_boundary::before_len(checked193),
+                one_off_boundary::before_len(checked51)
             ),
             (176, 46)
         );
+        assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(checked193).iter().filter(|s|s.track=="Bash/Shell").count(),57);
         assert_eq!(
-            one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&self.scenarios)
-                .iter()
-                .filter(|s| s.track == "Bash/Shell")
-                .count(),
-            57
-        );
-        assert_eq!(
-            one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&self.scenarios)
+            checked197
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
             60
         );
         assert_eq!(
-            self.scenarios
+            checked199
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
             62
+        );
+        assert_eq!(
+            self.scenarios
+                .iter()
+                .filter(|s| s.track == "Bash/Shell")
+                .count(),
+            64
         );
         assert!(
             self.units
