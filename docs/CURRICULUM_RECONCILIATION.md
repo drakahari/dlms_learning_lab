@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main197/52, reconciled2026-10-30. Fullinclusive2,935 Rust,487Python,
+Current Main199/53, reconciled2026-10-31. Current scoped scripting/registration and native199 checks pass; full-inclusive199 passes3,041 tests/236targets/0 failures/0 ignored. Verified installed553 remains197/52. Fullinclusive2,935 Rust,487Python,
 Clippy and scoped installed Fedora553 acceptance pass. Narrow104.1/GPT-K1 practice
 is Partial; full curriculum completion remains open. Original154/193/190 evidence
 retains its exact identity. See CATALOG197_MILESTONE.md. This is an implementation
@@ -17,9 +17,9 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | CCNA | 57 | 15 | 64 | 47 | 0 |
 | LPIC-1 | 44 | 11 | 494 | 103 | 1 |
 | LPIC-2 | 36 | 9 | 492 | 39 | 0 |
-| Bash/Shell | 60 | 17 | Separate path below | — | — |
+| Bash/Shell | 62 | 18 | Separate path below | — | — |
 
-The197 source assignments are57CCNA,44LPIC-1,36LPIC-2 and60Bash/Shell, in15/11/9/17units respectively. The shell remains evaluator14 with477 graded sample-input cases and60 separate examples. Installed197 scoped acceptance passes; full-product acceptance remains open.
+The199 source assignments are57CCNA,44LPIC-1,36LPIC-2 and62Bash/Shell, in15/11/9/18units respectively, with501 graded sample-input cases and62 separate examples. Source evaluator15 is accepted for narrow literal edge removal after scoped current/history and32 controlled Bash comparisons. The verified installed197 candidate remains evaluator14; there is no new15 installation candidate. Installed197 scoped acceptance passes; full-product acceptance remains open.
 
 All136 current parent objectives remain incomplete (90 Open,46 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
@@ -201,10 +201,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These49 units, and only their186 registered authored scenarios, count as
-implemented inventory. The presence of a unit does not mean its entire related
-objective or wider course stage is complete. Exact per-lab prerequisites remain
-in the versioned scenario packs; unit prerequisites are in units-v1.json.
+These53 units contain199 registered authored scenarios. A unit is not evidence of full objective coverage. Exact lab prerequisites remain in the versioned packs; unit prerequisites are in units-v1.json.
 
 | Track | Unit | Registered lab IDs |
 | --- | --- | --- |
@@ -247,41 +244,41 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 | LPIC-1 | RPM records, providers, payloads and handover (`rpm-package-investigation`) | `lpic1-rpm-provider`, `lpic1-rpm-epoch`, `lpic1-rpm-payload`, `lpic1-rpm-handover` |
 | Bash/Shell | Build and dispatch safe command requests (`shell-command-construction`) | `shell-command-options`, `shell-command-dispatch`, `shell-command-plan` |
 | LPIC-2 | Shared files: export policy, clients and safe handover (`nfs-network-file-sharing`) | `lpic2-nfs-reference`, `lpic2-nfs-publication`, `lpic2-nfs-handover`, `lpic2-nfs-capstone` |
-
 | CCNA | LACP: form, diagnose and safely migrate a bundle (`ccna-lacp`) | `ccna-lacp-initiation`, `ccna-lacp-member-service`, `ccna-lacp-resilient-handover` |
 | Bash/Shell | Optional inputs and intentional empty values (`shell-optional-inputs`) | `shell-optional-policy`, `shell-optional-report`, `shell-optional-handover` |
 | LPIC-1 | Recurring jobs: reports, access and safe handover (`linux-cron-foundations`) | `lpic1-cron-weekday-report`, `lpic1-cron-environment-output`, `lpic1-cron-access-retirement`, `lpic1-cron-calendar-handover` |
-
 | LPIC-2 | Backups: inspect, recover and preserve history (`backup-and-recovery`) | `lpic2-backup-selective-recovery`, `lpic2-backup-incremental-chain`, `lpic2-backup-snapshot-branch`, `lpic2-backup-recovery-handover` |
-
-| Bash/Shell | Numeric input and safe decisions (`shell-numeric-validation`) | `shell-numeric-retry`, `shell-numeric-intake`, `shell-numeric-publication` |
-
+| Bash/Shell | Numeric input, recovery and safe allocation (`shell-numeric-validation`) | `shell-numeric-retry`, `shell-numeric-intake`, `shell-numeric-publication` |
 | CCNA | Physical uplinks: choose, investigate and hand over (`physical-uplink-diagnosis`) | `ccna-physical-media-span`, `ccna-physical-duplex-diagnosis`, `ccna-physical-counter-baseline`, `ccna-physical-uplink-handover` |
 | CCNA | Private office planning (`private-office-planning`) | `ccna-private-office-plan` |
-
-| LPIC-1 | One-off jobs: capture, inspect and hand over (`linux-one-off-jobs`) | `lpic1-at-report`, `lpic1-at-capture-repair`, `lpic1-at-owner-queue`, `lpic1-at-handover` |
-| Bash/Shell | Loop control and local recovery (`shell-loop-recovery`) | `shell-loop-intake`, `shell-loop-fallback` |
-
-| LPIC-2 | Existing-volume growth and careful handovers (`lvm-volume-growth`) | `lpic2-lvm-free-space`, `lpic2-lvm-add-pv`, `lpic2-lvm-filesystem-gap`, `lpic2-lvm-handover` |
+| LPIC-1 | One-off jobs: capture, investigate and hand over (`linux-one-off-jobs`) | `lpic1-at-report`, `lpic1-at-capture-repair`, `lpic1-at-owner-queue`, `lpic1-at-handover` |
+| Bash/Shell | Loop control and independent recovery (`shell-loop-recovery`) | `shell-loop-intake`, `shell-loop-fallback` |
+| LPIC-2 | Grow existing logical volumes while preserving data (`lvm-volume-growth`) | `lpic2-lvm-free-space`, `lpic2-lvm-add-pv`, `lpic2-lvm-filesystem-gap`, `lpic2-lvm-handover` |
+| CCNA | Configure and verify NTP client/server dependencies (`ntp-client-server`) | `ccna-ntp-client-chain`, `ccna-ntp-cycle-repair`, `ccna-ntp-asymmetric-delivery`, `ccna-ntp-policy-handover` |
+| Bash/Shell | Exact matching and trustworthy evidence (`shell-ere-evidence`) | `shell-ere-event-view`, `shell-ere-inventory-review`, `shell-ere-incident-report` |
+| LPIC-1 | Prepare disks, filesystems and swap safely (`linux-disk-preparation`) | `lpic1-disk-safe-gap`, `lpic1-disk-hints-versus-content`, `lpic1-disk-eligible-media`, `lpic1-disk-delivery` |
+| Bash/Shell | Literal edges and safe interfaces (`shell-literal-normalization`) | `shell-trim-options`, `shell-trim-manifest` |
 
 ## Bash/Shell remaining path
 
-The57 source-integrated scripts span16 units. The new numeric unit has passed
-private full/native and final Main full/static/coverage gates. Available171
-candidate065032d has installed numeric101 and NFS cold/startup acceptance; it
-does not contain the eleven newer assignments. The source-integrated scripting path covers bounded indexed arrays,
-command-output capture, getopts, case dispatch, command-list construction,
+The62 integrated scripts span18 units. The60scripts in the verified installed197/553 candidate
+contain477 graded cases and60 separate examples under evaluator14. Current source
+contains501 graded cases and62 separate examples.
+Source evaluator15 additionally supports the narrow read-only literal #/% forms;
+its two interface projects are normal catalog assignments after scoped content,
+registration and progress checks. Scoped native199 acceptance and the3,041-test inclusive suite pass. The existing scripting path covers bounded indexed
+arrays, command-output capture, getopts, case dispatch, command-list construction,
 read-only literal fallback/alternate expansion and optional-input projects,
-C-locale cut/sort/uniq work, explicit pipefail and bounded case-class numeric
-validation, malformed-record recovery, whole-plan publication and own-scope loop recovery with unread-input handoff and independent first-ready file jobs. Older Stage4 wording calling
-command construction planned is stale; those three authored tasks are delivered.
+C-locale cut/sort/uniq work, explicit pipefail, bounded case-class numeric
+validation, malformed-record recovery, whole-plan publication and own-scope loop
+recovery with unread-input handoff and independent first-ready file jobs.
 The original agreed scope still requires the following distinct capabilities
 and projects, with prerequisite teaching before assessment:
 
 | Required area | Remaining implementation / authored work |
 | --- | --- |
 | Quoting and expansion | Read-only literal fallback/alternate forms and three optional-input policy/report/handover projects are implemented. Broader nested, assignment/error, substring/length/pattern operators remain unsupported; add only capabilities required by a reviewed substantive task with faithful expansion tests. |
-| Arguments and interfaces | Robust long-option/input validation projects beyond the bounded getopts subset; streamed row validation and meaningful handling of malformed inputs. |
+| Arguments and interfaces | Two long-option/manifest projects are registered in199 and pass scoped grading, persistence and native checks; full-inclusive199 passes3,041 tests. Broader streamed validation and independent error handling remain required where not yet authored. |
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Two implemented assignments teach own-scope break/continue, unread-input handoff, first-success selection and independent job failures with22 graded cases. Broader conditional/regex forms and project-specific retry/lock behavior remain required where used; caller-loop and pipeline control escape remain unsupported. |
 | Structured Bash | Associative maps, supported conditional/regex constructs, array operations beyond whole dense-list replacement, with faithful parsing, bounds and new practical assignments. |
@@ -301,26 +298,28 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Preserve accepted normal193: preserve all190 prior definitions/50 raw units,
-   actual9–13 history,60scripts/477cases/60isolatedexamples and accepted workspace.
-   Capability14, full-outcome content/alternatives, fixed24GNU and focused native
-   tests pass. Initial3historical count failures are corrected with23focusedPASS;
-   finalinclusive2,857PASS/0FAIL/0ignored, installed105captures/lifecycle/NFScold/
-   10startsPASS. Available193/baa66bd candidate and earlier190/5233 evidence
-   remain separately identified.
-2. Preserve the5new narrow103.7 Partial rows after actual native/full acceptance;
-   no complete objective or novice/platform credit. Preserve the sealed genuine13
-   baseline; a later15 advance needs actually observed and independently sealed
-   genuine14 evidence, never a source proposal or relabeled history.
-3. Gate reviewed GPT/ext4/swap, HSRP, links and Syslog native/source/persistence
-   layers before their separate authored packs are registered. Address identified
-   input-admission and ordinary guidance-click issues; source proposals earn no
-   implementation credit. Preserve current native/cadence/reference evidence.
-4. Continue remaining network/Linux/scripting capabilities and practical projects
-   in the granular ledger, including substantive debugging and safe automation.
-   Literal-trim15 and its two projects remain conditional source only. The fifth
-   backup directory-selection proposal still needs ArtifactSet/content/progress/
-   normal-native gates. No arbitrary catalog quota or routine approval gate.
+1. Preserve accepted normal199/53/evaluator15, all prior197/52 and193/51
+   definitions and raw units, genuine9–14 histories, and62 scripts/501 cases/
+   62 separate examples. Full-inclusive M743 passes3,041 tests/236targets/0 FAIL/
+   0 ignored;514 Python and Clippy pass. The older installed553 remains197/52.
+   CATALOG199_MILESTONE.md distinguishes current source from installed evidence.
+2. Integrate the two reviewed but unregistered Snapshot projects only after fresh
+   strict199→201 preservation, combined source review and actual content/native
+   gates. Their existing bounded reference tests and conditional source proposals
+   do not award catalog, objective or learner credit.
+
+3. Gate HSRP, links and Syslog source/workspace/persistence layers and authored
+   packs before registration. GPT/ext4/swap is already registered/verified in197;
+   source-only family proposals and pure RPM repository foundation earn no credit.
+4. The prior Snapshot implementation notes remain relevant to step2: strict199→201
+   preservation and native/full gates are required. The reference's quadratic preflight was
+   corrected without changing the eight-job Case or2,000-instruction bound;
+   M66411content groups pass. Source-aware Script save also gains an actual
+   pre-write identity guard, with3new regressions and unchanged legacy behavior.
+   Then continue remaining network/Linux/scripting capabilities and substantive
+   debugging/safe automation projects in the granular ledger. The fifth backup
+   directory-selection proposal still needs its remaining acceptance gates.
+   No arbitrary catalog quota or routine approval gate.
 
 Full curriculum acceptance stays separate from Windows/macOS desktop,
 physical-device/screen-reader and novice acceptance. No release publication.

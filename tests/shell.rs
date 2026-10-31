@@ -25,10 +25,55 @@ fn fixture() -> Case {
 fn all_authored_scripts_grade_behavior_and_break_after_edit() {
     let labs = pack::bundled().unwrap();
     assert_eq!(one_off_boundary::before_len(&labs), 176);
-    let scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
+    let previous197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&labs);
+    assert_eq!((labs.len(), previous197.len()), (199, 197));
+    let scripts: Vec<_> = previous197
+        .iter()
+        .filter(|s| s.track == "Bash/Shell")
+        .collect();
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&labs).iter().filter(|s|s.track == "Bash/Shell").count(),57);
     assert_eq!(scripts.len(), 60);
-    for s in scripts {
+    let count_cases = |sources: &[&dlms_learning_lab::pack::Scenario]| {
+        sources
+            .iter()
+            .map(|s| {
+                let Goal::Script { cases } = &s.goal else {
+                    panic!("Bash assignments require Script Goals")
+                };
+                cases.len()
+            })
+            .sum::<usize>()
+    };
+    assert_eq!(count_cases(&scripts), 477);
+    let current_scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
+    assert_eq!(
+        (current_scripts.len(), count_cases(&current_scripts)),
+        (62, 501)
+    );
+    assert_eq!(
+        current_scripts
+            .iter()
+            .filter(|s| s.teaching.is_some())
+            .count(),
+        62
+    );
+    assert_eq!(
+        labs[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        ["shell-trim-options", "shell-trim-manifest"]
+    );
+    for s in &labs[197..] {
+        assert!(matches!(s.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &s.goal else {
+            panic!("Literal assignments require Script Goals")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(!progress::current_solved(&Attempt::new(s, 1), s));
+    }
+    // The original grade/solution/edit body below exercises EVERY current Script.
+    for s in current_scripts {
         let Goal::Script { cases } = &s.goal else {
             panic!()
         };

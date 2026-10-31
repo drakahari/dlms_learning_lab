@@ -425,7 +425,9 @@ fn fill_is_only_a_draft_and_separate_unfinished_sources_resume_and_reset_locally
 fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loading() {
     let baseline: Vec<Original> =
         serde_json::from_str(include_str!("fixtures/shell-getopts-original-catalog.json")).unwrap();
-    let current = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    let current = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
+    assert_eq!(current199.len(), 199);
     assert_eq!(current.len(), 197);
     assert_eq!(
         current.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
@@ -436,8 +438,38 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     assert_eq!(old.len(), 193);
     let all = catalog();
     assert_eq!(
-        serde_json::to_value(&all).unwrap(),
+        serde_json::to_value(disk_registration::literal_registration::before_scenarios(
+            &all
+        ))
+        .unwrap(),
         serde_json::to_value(&current).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&all).unwrap(),
+        serde_json::to_value(&current199).unwrap()
+    );
+    let units53 = course::bundled(&all).unwrap();
+    let raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let units52 = course::load(std::str::from_utf8(&raw52).unwrap(), &current).unwrap();
+    assert_eq!((units53.len(), units52.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &units53
+        ))
+        .unwrap(),
+        serde_json::to_value(&units52).unwrap()
+    );
+    assert_eq!(units53[52].id, "shell-literal-normalization");
+    assert_eq!(
+        units53[52].labs,
+        disk_registration::literal_registration::IDS
     );
     assert_eq!(
         current[193..]
@@ -555,6 +587,21 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
         assert!(!p.favorites.contains(id));
     }
     assert!(authored().iter().all(|s| !p.attempts.contains_key(&s.id)));
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &all[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal append must retain Script goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!p.attempts.contains_key(&source.id));
+        assert!(!p.favorites.contains(&source.id));
+    }
+
     let loaded = serde_json::to_value(&p).unwrap();
     assert_eq!(loaded["attempts"], frozen["attempts"]);
     let mut main = 0;

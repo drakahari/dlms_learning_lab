@@ -1,0 +1,919 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-snapshot-audit",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-snapshot-rollout",
+      "topic": "Exact snapshots and conditional rollout",
+      "title": "Explain exact snapshot drift",
+      "summary": "Distinguish useful drift from input errors without losing LF or changing a file.",
+      "objective": "Accept exactly LEFT RIGHT. Argument-count errors print Usage: compare LEFT RIGHT on stderr and exit2 first. Then both names must be one-line ASCII ^[a-z][a-z0-9.-]{0,11}$; otherwise Invalid files, exit2. Missing LEFT prints Missing left, exit2 before checking RIGHT; missing RIGHT prints Missing right, exit2. Compare the exact bounded UTF8/nonNUL contents, including every trailing LF. Same contents (including a file compared with itself) print Same, Left:LEFT and Right:RIGHT on three LF-terminated stdout lines and exit0. Different contents print Different and the same two name lines, exit1. Successful comparisons have empty stderr. Never change any file. These are this script's interface/status rules, not a full cmp utility.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the decision",
+        "Investigate with the separate example",
+        "Implement and test the complete assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the decision",
+          "why": "Same filenames or trimmed capture text do not establish equal contents.",
+          "action": "Read Introduction and the whole Assignment. The full script editor is the task.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with the separate example",
+          "why": "The example uses different values and cannot award assignment credit.",
+          "action": "Run the example, make the suggested change, inspect the failed behavior, then repair it.",
+          "commands": []
+        },
+        {
+          "title": "Implement and test the complete assignment",
+          "why": "Every case checks complete stdout, stderr, status and file map.",
+          "action": "Write the script and Run; use the first useful failure and case picker. Equivalent supported solutions pass.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the complete script. Runs use separate sample inputs and reset files.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Equal minimum-name snapshots retain UTF8 whitespace CR and sentinel data",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": " \té\\path.$()\r\n\n",
+              "/work/b": " \té\\path.$()\r\n\n"
+            },
+            "stdout": "Same\nLeft:a\nRight:b\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": " \té\\path.$()\r\n\n",
+              "/work/b": " \té\\path.$()\r\n\n"
+            }
+          },
+          {
+            "name": "Whitespace-only data drift must remain different",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": " old\t\n",
+              "/work/b": "old\n"
+            },
+            "stdout": "Different\nLeft:a\nRight:b\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": " old\t\n",
+              "/work/b": "old\n"
+            }
+          },
+          {
+            "name": "A final LF alone is meaningful drift",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "same",
+              "/work/b": "same\n"
+            },
+            "stdout": "Different\nLeft:a\nRight:b\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "same",
+              "/work/b": "same\n"
+            }
+          },
+          {
+            "name": "Multiple final LFs are not normalized",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "é\n\n",
+              "/work/b": "é\n"
+            },
+            "stdout": "Different\nLeft:a\nRight:b\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "é\n\n",
+              "/work/b": "é\n"
+            }
+          },
+          {
+            "name": "Empty text differs from an empty physical line",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "",
+              "/work/b": "\n"
+            },
+            "stdout": "Different\nLeft:a\nRight:b\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "",
+              "/work/b": "\n"
+            }
+          },
+          {
+            "name": "Thirteen-character filename refused despite existing inputs",
+            "args": [
+              "abcdefghijklm",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/abcdefghijklm": "old\n",
+              "/work/b": "old\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/abcdefghijklm": "old\n",
+              "/work/b": "old\n"
+            }
+          },
+          {
+            "name": "The same supplied file may be compared with itself",
+            "args": [
+              "a",
+              "a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": ".\n.\n"
+            },
+            "stdout": "Same\nLeft:a\nRight:a\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": ".\n.\n"
+            }
+          },
+          {
+            "name": "Missing left takes priority",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/b": "right"
+            },
+            "stdout": "",
+            "stderr": "Missing left\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/b": "right"
+            }
+          },
+          {
+            "name": "Missing right is not reported as ordinary drift",
+            "args": [
+              "a",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left"
+            },
+            "stdout": "",
+            "stderr": "Missing right\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left"
+            }
+          },
+          {
+            "name": "Argument error precedes file validation",
+            "args": [
+              "a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left"
+            },
+            "stdout": "",
+            "stderr": "Usage: compare LEFT RIGHT\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left"
+            }
+          },
+          {
+            "name": "Trailing LF inside a filename is refused",
+            "args": [
+              "a\n",
+              "b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left",
+              "/work/b": "right"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/a": "left",
+              "/work/b": "right"
+            }
+          },
+          {
+            "name": "Maximum mixed-class names and later-line drift",
+            "args": [
+              "ab-12.cd3efg",
+              "xy-98.za7bcd"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/ab-12.cd3efg": "first\nold",
+              "/work/xy-98.za7bcd": "first\nnew"
+            },
+            "stdout": "Different\nLeft:ab-12.cd3efg\nRight:xy-98.za7bcd\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/ab-12.cd3efg": "first\nold",
+              "/work/xy-98.za7bcd": "first\nnew"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'\n}\nsnapshot() {\n  if cat -- \"$1\"; then printf '.'; else return 2; fi\n}\nsame_files() {\n  left_value=$(snapshot \"$1\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  right_value=$(snapshot \"$2\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  test \"$left_value\" = \"$right_value\"\n}\nif test \"$#\" -ne 2; then printf 'Usage: compare LEFT RIGHT\\n' >&2; exit 2; fi\nif valid_name \"$1\" && valid_name \"$2\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$1\"; then :; else printf 'Missing left\\n' >&2; exit 2; fi\nif test -f \"$2\"; then :; else printf 'Missing right\\n' >&2; exit 2; fi\nif same_files \"$1\" \"$2\"; then\n  printf 'Same\\nLeft:%s\\nRight:%s\\n' \"$1\" \"$2\"\n  exit 0\nelse\n  comparison_status=$?\n  if test \"$comparison_status\" -ne 1; then printf 'Cannot compare\\n' >&2; exit 2; fi\n  printf 'Different\\nLeft:%s\\nRight:%s\\n' \"$1\" \"$2\"\n  exit 1\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-trim-options",
+        "shell-trim-manifest"
+      ],
+      "explanation": "Preflight the interface and required files. Capture after a checked read with a fixed nonLF suffix; compare the whole values or remove that exact suffix with the reviewed literal form. Preserve all bytes. For rollout, validate every row and every path before writing, retain changed old-current data independently and leave unchanged rollback data intact. Staged and repeated-read approaches are both valid under disjoint immutable inputs. This is final-state/preflight behavior; operation order, atomic rename, races and Stop rollback are not graded.",
+      "hints": [
+        "A normal capture can erase the only difference: trailing LF. Preserve that boundary before comparing.",
+        "Separate input trouble from useful same/different information; save helper status before another command replaces it.",
+        "Validate both input names and existence first. Compare the complete preserved values, keep both files unchanged, and return1 only for real drift."
+      ],
+      "teaching": {
+        "prerequisite_note": "First finish the earlier quoted capture, IFS read, functions/status, arrays, loop and literal-interface lessons. This unit teaches a lossless sentinel comparison before using it in a rollout. No wc, cmp, diff, trap or host utility is available.",
+        "concepts": [
+          {
+            "title": "Compare contents, not names or first lines",
+            "text": "Two different filenames may hold identical data. A same/different decision uses every byte in this simulator's bounded valid UTF8 text, including blank lines, CR, backslashes and trailing LF. Binary and NUL files are outside this model."
+          },
+          {
+            "title": "Why the same suffix preserves trailing LF",
+            "text": "Command capture removes all final LF bytes. Append one fixed nonLF marker inside each capture, after cat succeeds, so the final character is not LF. Compare the complete marked values. The same suffix is safe even when that marker occurs in the data; it is not written into files."
+          },
+          {
+            "title": "A nonzero result can be useful information",
+            "text": "The comparison helper returns0 for equal,1 for different,2 for input trouble. Save $? immediately if you need to distinguish them. A later successful printf must not conceal a failed read. Use explicit if/else; no errexit or trap is assumed."
+          },
+          {
+            "title": "Read preserves a final fragment differently",
+            "text": "IFS= read -r preserves edge spaces and backslashes, removes one consumed LF, and reports0 only when it found LF. A nonempty last fragment is still assigned with status1; empty EOF assigns empty/status1. A read-based alternative must put LF back only for successful complete-line reads."
+          },
+          {
+            "title": "Decide the whole plan before opening outputs",
+            "text": "Validate the interface, every row, required inputs and all path conflicts before changing a file. A changed job needs an independent old-current rollback. An unchanged job preserves the existing rollback or its absence. Protected input and keep.txt must remain intact."
+          },
+          {
+            "title": "What this preflight promise does not mean",
+            "text": "A predictable validation refusal preserves every file. Ordinary writes are not atomic rename or a lock: Stop or a resource failure during writing is not promised to roll back earlier work. Completion checks current outcomes, not a transcript count or required command spelling."
+          }
+        ],
+        "example": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'\n}\nsnapshot() {\n  if cat -- \"$1\"; then printf '.'; else return 2; fi\n}\nsame_files() {\n  left_value=$(snapshot \"$1\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  right_value=$(snapshot \"$2\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  test \"$left_value\" = \"$right_value\"\n}\nif same_files iris lily; then printf 'Practice same\\n'; else printf 'Practice drift\\n'; fi\n",
+        "inputs": "These practice-only files and values are unrelated to assignment records. Each Run starts with this separate fixture.",
+        "try_change": "Remove only the sentinel printf in snapshot and Run: blue plus LF and blue become falsely equal. Restore the sentinel to repair Practice drift.",
+        "fixture": {
+          "name": "Independent iris and lily snapshot",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/iris": "blue\n",
+            "/work/lily": "blue",
+            "/work/example-note": "Keep this practice note.\n"
+          },
+          "stdout": "Practice drift\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/iris": "blue\n",
+            "/work/lily": "blue",
+            "/work/example-note": "Keep this practice note.\n"
+          }
+        }
+      },
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Only bounded valid UTF8/nonNUL flat virtual text files; no host execution, arbitrary binary cmp conformance, file metadata or modification counters. Same/different is exact text-byte equality, not Unicode normalization. No directories, links, tempfiles, rename, locking, traps, real clock, races or guaranteed Stop/resource rollback. Predictable preflight refusals preserve every file. Examples and drafts are isolated.",
+      "retry_guidance": "Read the selected outcome and complete file differences. Check LF boundaries and error priority before changing publication logic; use a separate example to investigate."
+    },
+    {
+      "id": "shell-conditional-rollout",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-snapshot-rollout",
+      "topic": "Exact snapshots and conditional rollout",
+      "title": "Review and apply a protected rollout",
+      "summary": "Preflight every job, update only changed targets and preserve independent rollback data.",
+      "objective": "Accept exactly MODE PLAN REPORT, MODE preview or apply; wrong interface/mode prints Usage: rollout preview-or-apply PLAN REPORT and exit2 before file checks. PLAN/REPORT use one-line ASCII ^[a-z][a-z0-9.-]{0,11}$, must differ and neither may be keep.txt; otherwise Invalid files, exit2. A missing PLAN prints Missing plan, exit2. PLAN has0–8 physical records; the last need not end with LF. Every row is exactly desired|current|rollback with the same three name grammars. On each row, first reject row9 as too many jobs, then malformed job, then conflicting paths, then missing desired, then missing current. All three paths across ALL rows must be unique and may not equal PLAN, REPORT or protected keep.txt. Errors print Line N: REASON on stderr and exit2, preserving every file. Compare each pair exactly. A same row leaves current AND its existing/absent rollback untouched. A changed apply row sets rollback to the old current bytes and current to desired bytes. Every desired file, PLAN, keep.txt and unrelated file remain unchanged. Build row lines same|current or change|current in original order, followed by Changes:N and Unchanged:M; every line ends LF. Preview prints Preview then those report lines on stdout, writes no files, and exits0. Apply writes those report lines to REPORT and prints Applied:N and Unchanged:M on stdout, exits0. Success stderr is empty. Empty plans are valid. Preflight covers the complete plan before ANY write. Final state and predictable-refusal preservation are graded; atomicity, write chronology and Stop/resource rollback are not.",
+      "difficulty": "Advanced",
+      "minutes": 50,
+      "steps": [
+        "Understand the decision",
+        "Investigate with the separate example",
+        "Implement and test the complete assignment"
+      ],
+      "guide": [
+        {
+          "title": "Understand the decision",
+          "why": "Same filenames or trimmed capture text do not establish equal contents.",
+          "action": "Read Introduction and the whole Assignment. The full script editor is the task.",
+          "commands": []
+        },
+        {
+          "title": "Investigate with the separate example",
+          "why": "The example uses different values and cannot award assignment credit.",
+          "action": "Run the example, make the suggested change, inspect the failed behavior, then repair it.",
+          "commands": []
+        },
+        {
+          "title": "Implement and test the complete assignment",
+          "why": "Every case checks complete stdout, stderr, status and file map.",
+          "action": "Write the script and Run; use the first useful failure and case picker. Equivalent supported solutions pass.",
+          "commands": []
+        }
+      ],
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the complete script. Runs use separate sample inputs and reset files.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Eight mixed jobs retain finalLF drift unchanged empty UTF8 and both rollback states",
+            "args": [
+              "apply",
+              "plan-1.abcde",
+              "sum-12.a3bcd"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan-1.abcde": "ab-12.cd3efg|xy-98.za7bcd|r\nd1|c1|b1\nd2|c2|b2\nd3|c3|b3\nd4|c4|b4\nd5|c5|b5\nd6|c6|b6\nd7|c7|b7\n",
+              "/work/sum-12.a3bcd": "KEEP OLD REPORT\n",
+              "/work/ab-12.cd3efg": "same0.\n",
+              "/work/xy-98.za7bcd": "same0.\n",
+              "/work/r": "KEEP PRIOR ROLLBACK 0\n",
+              "/work/d1": "\té\\new.$()\r\n\n",
+              "/work/c1": "旧 current",
+              "/work/b1": "KEEP PRIOR ROLLBACK 1\n",
+              "/work/d2": "same2.\n",
+              "/work/c2": "same2.\n",
+              "/work/b2": "KEEP PRIOR ROLLBACK 2\n",
+              "/work/d3": "same\n",
+              "/work/c3": "same",
+              "/work/b3": "KEEP PRIOR ROLLBACK 3\n",
+              "/work/d4": "",
+              "/work/c4": "",
+              "/work/d5": " old\t\n",
+              "/work/c5": "old\n",
+              "/work/b5": "KEEP PRIOR ROLLBACK 5\n",
+              "/work/d6": "é\t.\n\n",
+              "/work/c6": "é\t.\n\n",
+              "/work/b6": "KEEP PRIOR ROLLBACK 6\n",
+              "/work/d7": "new7\n",
+              "/work/c7": "old7",
+              "/work/b7": "KEEP PRIOR ROLLBACK 7\n"
+            },
+            "stdout": "Applied:4\nUnchanged:4\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan-1.abcde": "ab-12.cd3efg|xy-98.za7bcd|r\nd1|c1|b1\nd2|c2|b2\nd3|c3|b3\nd4|c4|b4\nd5|c5|b5\nd6|c6|b6\nd7|c7|b7\n",
+              "/work/sum-12.a3bcd": "same|xy-98.za7bcd\nchange|c1\nsame|c2\nchange|c3\nsame|c4\nchange|c5\nsame|c6\nchange|c7\nChanges:4\nUnchanged:4\n",
+              "/work/ab-12.cd3efg": "same0.\n",
+              "/work/xy-98.za7bcd": "same0.\n",
+              "/work/r": "KEEP PRIOR ROLLBACK 0\n",
+              "/work/d1": "\té\\new.$()\r\n\n",
+              "/work/c1": "\té\\new.$()\r\n\n",
+              "/work/b1": "旧 current",
+              "/work/d2": "same2.\n",
+              "/work/c2": "same2.\n",
+              "/work/b2": "KEEP PRIOR ROLLBACK 2\n",
+              "/work/d3": "same\n",
+              "/work/c3": "same\n",
+              "/work/b3": "same",
+              "/work/d4": "",
+              "/work/c4": "",
+              "/work/d5": " old\t\n",
+              "/work/c5": " old\t\n",
+              "/work/b5": "old\n",
+              "/work/d6": "é\t.\n\n",
+              "/work/c6": "é\t.\n\n",
+              "/work/b6": "KEEP PRIOR ROLLBACK 6\n",
+              "/work/d7": "new7\n",
+              "/work/c7": "new7\n",
+              "/work/b7": "old7"
+            }
+          },
+          {
+            "name": "Preview is read-only even with an existing report",
+            "args": [
+              "preview",
+              "p",
+              "q"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/p": "d|c|b\nwant|live|back\n",
+              "/work/q": "KEEP OLD REPORT\n",
+              "/work/d": "new\n",
+              "/work/c": "old",
+              "/work/b": "KEEP",
+              "/work/want": "",
+              "/work/live": "",
+              "/work/back": "OLD BACK"
+            },
+            "stdout": "Preview\nchange|c\nsame|live\nChanges:1\nUnchanged:1\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/p": "d|c|b\nwant|live|back\n",
+              "/work/q": "KEEP OLD REPORT\n",
+              "/work/d": "new\n",
+              "/work/c": "old",
+              "/work/b": "KEEP",
+              "/work/want": "",
+              "/work/live": "",
+              "/work/back": "OLD BACK"
+            }
+          },
+          {
+            "name": "Late fourth field refused before publication even when all inputs exist",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\nwant|live|back|extra\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/want": "SECOND NEW",
+              "/work/live": "SECOND OLD",
+              "/work/back": "SECOND ROLLBACK"
+            },
+            "stdout": "",
+            "stderr": "Line 2: malformed job\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\nwant|live|back|extra\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/want": "SECOND NEW",
+              "/work/live": "SECOND OLD",
+              "/work/back": "SECOND ROLLBACK"
+            }
+          },
+          {
+            "name": "Thirteen-character plan name refused before plan use",
+            "args": [
+              "apply",
+              "abcdefghijklm",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/abcdefghijklm": "",
+              "/work/report": "Prior report\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/abcdefghijklm": "",
+              "/work/report": "Prior report\n"
+            }
+          },
+          {
+            "name": "Empty plan has an explicit apply report",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "",
+              "/work/report": "KEEP OLD REPORT\n"
+            },
+            "stdout": "Applied:0\nUnchanged:0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "",
+              "/work/report": "Changes:0\nUnchanged:0\n"
+            }
+          },
+          {
+            "name": "Late missing desired preserves earlier outputs",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\ngone|live|back\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/live": "SECOND",
+              "/work/back": "KEEP SECOND"
+            },
+            "stdout": "",
+            "stderr": "Line 2: missing desired\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\ngone|live|back\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/live": "SECOND",
+              "/work/back": "KEEP SECOND"
+            }
+          },
+          {
+            "name": "Late duplicate rollback is a preflight conflict",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\nwant|live|b\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/want": "NEXT",
+              "/work/live": "SECOND"
+            },
+            "stdout": "",
+            "stderr": "Line 2: conflicting paths\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "d|c|b\nwant|live|b\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD",
+              "/work/b": "KEEP",
+              "/work/want": "NEXT",
+              "/work/live": "SECOND"
+            }
+          },
+          {
+            "name": "Thirteen-character row field malformed before publication",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "abcdefghijklm|current|rollback\n",
+              "/work/abcdefghijklm": "new\n",
+              "/work/current": "old\n",
+              "/work/rollback": "Prior rollback\n",
+              "/work/report": "Prior report\n"
+            },
+            "stdout": "",
+            "stderr": "Line 1: malformed job\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "abcdefghijklm|current|rollback\n",
+              "/work/abcdefghijklm": "new\n",
+              "/work/current": "old\n",
+              "/work/rollback": "Prior rollback\n",
+              "/work/report": "Prior report\n"
+            }
+          },
+          {
+            "name": "Missing plan preserves all outputs",
+            "args": [
+              "apply",
+              "gone",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/report": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Missing plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/report": "KEEP"
+            }
+          },
+          {
+            "name": "Bad mode precedes malformed filenames",
+            "args": [
+              "other",
+              "bad\n",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/report": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Usage: rollout preview-or-apply PLAN REPORT\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/report": "KEEP"
+            }
+          },
+          {
+            "name": "Report cannot overwrite its input plan",
+            "args": [
+              "apply",
+              "plan",
+              "plan"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "KEEP OLD REPORT\n",
+              "/work/d": "NEW",
+              "/work/c": "OLD"
+            }
+          },
+          {
+            "name": "Ninth job is rejected before any write",
+            "args": [
+              "apply",
+              "plan",
+              "report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "ab-12.cd3efg|xy-98.za7bcd|r\nd1|c1|b1\nd2|c2|b2\nd3|c3|b3\nd4|c4|b4\nd5|c5|b5\nd6|c6|b6\nd7|c7|b7\nlast|lastnow|lastback\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/ab-12.cd3efg": "same0.\n",
+              "/work/xy-98.za7bcd": "same0.\n",
+              "/work/r": "KEEP PRIOR ROLLBACK 0\n",
+              "/work/d1": "\té\\new.$()\r\n\n",
+              "/work/c1": "旧 current",
+              "/work/b1": "KEEP PRIOR ROLLBACK 1\n",
+              "/work/d2": "same2.\n",
+              "/work/c2": "same2.\n",
+              "/work/b2": "KEEP PRIOR ROLLBACK 2\n",
+              "/work/d3": "new3\n",
+              "/work/c3": "old3",
+              "/work/b3": "KEEP PRIOR ROLLBACK 3\n",
+              "/work/d4": "same4.\n",
+              "/work/c4": "same4.\n",
+              "/work/b4": "KEEP PRIOR ROLLBACK 4\n",
+              "/work/d5": "new5\n",
+              "/work/c5": "old5",
+              "/work/b5": "KEEP PRIOR ROLLBACK 5\n",
+              "/work/d6": "same6.\n",
+              "/work/c6": "same6.\n",
+              "/work/b6": "KEEP PRIOR ROLLBACK 6\n",
+              "/work/d7": "new7\n",
+              "/work/c7": "old7",
+              "/work/b7": "KEEP PRIOR ROLLBACK 7\n",
+              "/work/last": "NEW LAST",
+              "/work/lastnow": "OLD LAST"
+            },
+            "stdout": "",
+            "stderr": "Line 9: too many jobs\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated work.\n",
+              "/work/plan": "ab-12.cd3efg|xy-98.za7bcd|r\nd1|c1|b1\nd2|c2|b2\nd3|c3|b3\nd4|c4|b4\nd5|c5|b5\nd6|c6|b6\nd7|c7|b7\nlast|lastnow|lastback\n",
+              "/work/report": "KEEP OLD REPORT\n",
+              "/work/ab-12.cd3efg": "same0.\n",
+              "/work/xy-98.za7bcd": "same0.\n",
+              "/work/r": "KEEP PRIOR ROLLBACK 0\n",
+              "/work/d1": "\té\\new.$()\r\n\n",
+              "/work/c1": "旧 current",
+              "/work/b1": "KEEP PRIOR ROLLBACK 1\n",
+              "/work/d2": "same2.\n",
+              "/work/c2": "same2.\n",
+              "/work/b2": "KEEP PRIOR ROLLBACK 2\n",
+              "/work/d3": "new3\n",
+              "/work/c3": "old3",
+              "/work/b3": "KEEP PRIOR ROLLBACK 3\n",
+              "/work/d4": "same4.\n",
+              "/work/c4": "same4.\n",
+              "/work/b4": "KEEP PRIOR ROLLBACK 4\n",
+              "/work/d5": "new5\n",
+              "/work/c5": "old5",
+              "/work/b5": "KEEP PRIOR ROLLBACK 5\n",
+              "/work/d6": "same6.\n",
+              "/work/c6": "same6.\n",
+              "/work/b6": "KEEP PRIOR ROLLBACK 6\n",
+              "/work/d7": "new7\n",
+              "/work/c7": "old7",
+              "/work/b7": "KEEP PRIOR ROLLBACK 7\n",
+              "/work/last": "NEW LAST",
+              "/work/lastnow": "OLD LAST"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'\n}\nsnapshot() {\n  if cat -- \"$1\"; then printf '.'; else return 2; fi\n}\nsame_files() {\n  left_value=$(snapshot \"$1\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  right_value=$(snapshot \"$2\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  test \"$left_value\" = \"$right_value\"\n}\nusage() { printf 'Usage: rollout preview-or-apply PLAN REPORT\\n' >&2; exit 2; }\nbad_line() { printf 'Line %s: %s\\n' \"$number\" \"$1\" >&2; exit 2; }\nif test \"$#\" -ne 3; then usage; fi\nmode=$1\nplan_file=$2\nreport_file=$3\ncase \"$mode\" in preview|apply) : ;; *) usage ;; esac\nif valid_name \"$plan_file\" && valid_name \"$report_file\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$plan_file\" = \"$report_file\" || test \"$plan_file\" = keep.txt || test \"$report_file\" = keep.txt; then\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test -f \"$plan_file\"; then :; else printf 'Missing plan\\n' >&2; exit 2; fi\nnumber=0\nchanged=0\nunchanged=0\nreport_text=''\nstaged=()\nseen=\"|$plan_file|$report_file|keep.txt|\"\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  if test \"$number\" -gt 8; then bad_line 'too many jobs'; fi\n  if printf '%s\\n' \"$line\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}[|][a-z][a-z0-9.-]{0,11}[|][a-z][a-z0-9.-]{0,11}$'; then :; else bad_line 'malformed job'; fi\n  desired=$(printf '%s\\n' \"$line\" | cut -d '|' -f 1)\n  current=$(printf '%s\\n' \"$line\" | cut -d '|' -f 2)\n  rollback=$(printf '%s\\n' \"$line\" | cut -d '|' -f 3)\n  for name in \"$desired\" \"$current\" \"$rollback\"; do\n    case \"$seen\" in *\"|$name|\"*) bad_line 'conflicting paths' ;; esac\n    seen=$seen$name'|'\n  done\n  if test -f \"$desired\"; then :; else bad_line 'missing desired'; fi\n  if test -f \"$current\"; then :; else bad_line 'missing current'; fi\n  if same_files \"$desired\" \"$current\"; then\n    decision=same\n    unchanged=$((unchanged+1))\n  else\n    comparison_status=$?\n    if test \"$comparison_status\" -ne 1; then bad_line 'cannot compare'; fi\n    decision=change\n    changed=$((changed+1))\n  fi\n  staged=( \"${staged[@]}\" \"$decision|$desired|$current|$rollback\" )\n  report_text=$report_text$decision'|'$current'\n'\ndone < \"$plan_file\"\nreport_text=$report_text'Changes:'$changed'\nUnchanged:'$unchanged'\n'\nif test \"$mode\" = preview; then printf 'Preview\\n%s' \"$report_text\"; exit 0; fi\nfor job in \"${staged[@]}\"; do\n  decision=$(printf '%s\\n' \"$job\" | cut -d '|' -f 1)\n  desired=$(printf '%s\\n' \"$job\" | cut -d '|' -f 2)\n  current=$(printf '%s\\n' \"$job\" | cut -d '|' -f 3)\n  rollback=$(printf '%s\\n' \"$job\" | cut -d '|' -f 4)\n  if test \"$decision\" = change; then\n    cat -- \"$current\" > \"$rollback\"\n    cat -- \"$desired\" > \"$current\"\n  fi\ndone\nprintf '%s' \"$report_text\" > \"$report_file\"\nprintf 'Applied:%s\\nUnchanged:%s\\n' \"$changed\" \"$unchanged\"\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-trim-options",
+        "shell-trim-manifest",
+        "shell-snapshot-audit"
+      ],
+      "explanation": "Preflight the interface and required files. Capture after a checked read with a fixed nonLF suffix; compare the whole values or remove that exact suffix with the reviewed literal form. Preserve all bytes. For rollout, validate every row and every path before writing, retain changed old-current data independently and leave unchanged rollback data intact. Staged and repeated-read approaches are both valid under disjoint immutable inputs. This is final-state/preflight behavior; operation order, atomic rename, races and Stop rollback are not graded.",
+      "hints": [
+        "A normal capture can erase the only difference: trailing LF. Preserve that boundary before comparing.",
+        "Separate input trouble from useful same/different information; save helper status before another command replaces it.",
+        "Validate all paths before output redirects. Preserve old rollback data for unchanged jobs; a late predictable refusal must leave every file intact."
+      ],
+      "teaching": {
+        "prerequisite_note": "First finish the earlier quoted capture, IFS read, functions/status, arrays, loop and literal-interface lessons. This unit teaches a lossless sentinel comparison before using it in a rollout. No wc, cmp, diff, trap or host utility is available.",
+        "concepts": [
+          {
+            "title": "Compare contents, not names or first lines",
+            "text": "Two different filenames may hold identical data. A same/different decision uses every byte in this simulator's bounded valid UTF8 text, including blank lines, CR, backslashes and trailing LF. Binary and NUL files are outside this model."
+          },
+          {
+            "title": "Why the same suffix preserves trailing LF",
+            "text": "Command capture removes all final LF bytes. Append one fixed nonLF marker inside each capture, after cat succeeds, so the final character is not LF. Compare the complete marked values. The same suffix is safe even when that marker occurs in the data; it is not written into files."
+          },
+          {
+            "title": "A nonzero result can be useful information",
+            "text": "The comparison helper returns0 for equal,1 for different,2 for input trouble. Save $? immediately if you need to distinguish them. A later successful printf must not conceal a failed read. Use explicit if/else; no errexit or trap is assumed."
+          },
+          {
+            "title": "Read preserves a final fragment differently",
+            "text": "IFS= read -r preserves edge spaces and backslashes, removes one consumed LF, and reports0 only when it found LF. A nonempty last fragment is still assigned with status1; empty EOF assigns empty/status1. A read-based alternative must put LF back only for successful complete-line reads."
+          },
+          {
+            "title": "Decide the whole plan before opening outputs",
+            "text": "Validate the interface, every row, required inputs and all path conflicts before changing a file. A changed job needs an independent old-current rollback. An unchanged job preserves the existing rollback or its absence. Protected input and keep.txt must remain intact. Validated names cannot contain |. Store seen names with | around each one, then use case with a quoted |name| member between active stars. The delimiters prevent a from matching aa; quoting the expanded member keeps data literal. Append each accepted name before checking the next one."
+          },
+          {
+            "title": "What this preflight promise does not mean",
+            "text": "A predictable validation refusal preserves every file. Ordinary writes are not atomic rename or a lock: Stop or a resource failure during writing is not promised to roll back earlier work. Completion checks current outcomes, not a transcript count or required command spelling."
+          }
+        ],
+        "example": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9.-]{0,11}$'\n}\nsnapshot() {\n  if cat -- \"$1\"; then printf '.'; else return 2; fi\n}\nsame_files() {\n  left_value=$(snapshot \"$1\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  right_value=$(snapshot \"$2\")\n  capture_status=$?\n  if test \"$capture_status\" -ne 0; then return 2; fi\n  test \"$left_value\" = \"$right_value\"\n}\nif test -f plum && test -f dusk; then :; else printf 'Practice input missing\\n' >&2; exit 2; fi\nif same_files plum dusk; then printf 'Practice unchanged\\n'; else\n  cat -- dusk > pearl\n  cat -- plum > dusk\n  printf 'Practice changed\\n'\nfi\n",
+        "inputs": "These practice-only files and values are unrelated to assignment records. Each Run starts with this separate fixture.",
+        "try_change": "Change only same_files plum dusk to same_files plum plum and Run. The desired file is now compared with itself, so the old current is wrongly skipped. Restore dusk to repair.",
+        "fixture": {
+          "name": "Independent plum rollback",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/plum": "violet\n",
+            "/work/dusk": "amber",
+            "/work/pearl": "Keep old practice rollback",
+            "/work/example-note": "Keep this practice note.\n"
+          },
+          "stdout": "Practice changed\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/plum": "violet\n",
+            "/work/dusk": "violet\n",
+            "/work/pearl": "amber",
+            "/work/example-note": "Keep this practice note.\n"
+          }
+        }
+      },
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/"
+      ],
+      "simplifications": "Only bounded valid UTF8/nonNUL flat virtual text files; no host execution, arbitrary binary cmp conformance, file metadata or modification counters. Same/different is exact text-byte equality, not Unicode normalization. No directories, links, tempfiles, rename, locking, traps, real clock, races or guaranteed Stop/resource rollback. Predictable preflight refusals preserve every file. Examples and drafts are isolated.",
+      "retry_guidance": "Read the selected outcome and complete file differences. Check LF boundaries and error priority before changing publication logic; use a separate example to investigate."
+    }
+  ]
+}

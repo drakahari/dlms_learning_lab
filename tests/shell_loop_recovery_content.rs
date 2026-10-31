@@ -57,7 +57,8 @@ fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 15);
-        let all = pack::bundled().unwrap();
+        let current199 = pack::bundled().unwrap();
+        let all = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
         assert_eq!(
             lvm_registration::ntp_registration::before_scenarios(&all).len(),
             186
@@ -69,7 +70,16 @@ fn catalog() -> &'static Vec<Scenario> {
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
         assert_eq!(all.len(), 197);
         assert_eq!(value(&all[180..182]), value(&authored()));
-        bounded(all)
+        let checked197 = bounded(all);
+        assert_eq!(
+            value(disk_registration::literal_registration::before_scenarios(
+                &current199
+            )),
+            value(&checked197)
+        );
+        let checked199 = bounded(current199);
+        assert_eq!(checked199.len(), 199);
+        checked199
     })
 }
 fn run(source: &str, c: &Case, slice: usize) -> Outcome {
@@ -112,6 +122,58 @@ fn full(p: &Progress) -> Value {
 #[test]
 fn two_distinct_unregistered_tasks_preserve_all55_original_script_objects_and420_cases() {
     let current = pack::bundled().unwrap();
+    assert_eq!(
+        (
+            current.len(),
+            disk_registration::literal_registration::before_scenarios(&current).len()
+        ),
+        (199, 197)
+    );
+    let literal_units53 = course::bundled(&current).unwrap();
+    let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        literal_raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let literal_units52 = course::load(
+        std::str::from_utf8(&literal_raw52).unwrap(),
+        disk_registration::literal_registration::before_scenarios(&current),
+    )
+    .unwrap();
+    assert_eq!((literal_units53.len(), literal_units52.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &literal_units53
+        ))
+        .unwrap(),
+        serde_json::to_value(&literal_units52).unwrap()
+    );
+    assert_eq!(
+        current[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &current[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal assignments require Script Goals")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    assert_eq!(
+        current
+            .iter()
+            .filter(|s| matches!(s.initial, State::Script { .. }))
+            .count(),
+        62
+    );
     let prior182 = lvm_registration::before_scenarios(&current);
     let old = prior182[..180].to_vec();
     let r = review();

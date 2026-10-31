@@ -18,6 +18,7 @@ mod file_backup_lessons_native;
 mod file_backup_workspace;
 mod getopts_history;
 mod getopts_lessons;
+mod literal_lessons_native;
 mod loop_recovery;
 mod mac_learning;
 mod nat;
@@ -939,6 +940,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 simulation.reconfigure(configuration).unwrap();
             }
             State::PartitionFs { .. }
+            | State::Hsrp { .. }
             | State::Lvm { .. }
             | State::Ntp { .. }
             | State::OneOff { .. }
@@ -7189,3 +7191,5 @@ mod ntp_client_server;
 mod ntp_lessons_native;
 
 mod partition_fs_workspace;
+
+mod hsrp_workspace;

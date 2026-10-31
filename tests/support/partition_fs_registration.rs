@@ -8,6 +8,8 @@ use dlms_learning_lab::{
 };
 use serde_json::Value;
 use std::sync::OnceLock;
+#[path = "literal_registration.rs"]
+pub mod literal_registration;
 pub const IDS: [&str; 4] = [
     "lpic1-disk-safe-gap",
     "lpic1-disk-hints-versus-content",
@@ -34,6 +36,8 @@ fn recipe() -> &'static Value {
     })
 }
 pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let literal = literal_registration::prefix_units(raw)?;
+    let raw = literal.as_deref().unwrap_or(raw);
     let r = recipe();
     if raw.len() as u64 != r["after_units52_bytes"].as_u64().ok_or("52length")?
         || digest::hash(raw) != r["after_units52_sha256"].as_str().ok_or("52pin")?
@@ -66,6 +70,8 @@ pub fn before_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn prefix_units(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let literal = literal_registration::prefix_units(raw)?;
+    let raw = literal.as_deref().unwrap_or(raw);
     if raw.len() as u64 == recipe()["after_units52_bytes"].as_u64().unwrap()
         && digest::hash(raw) == recipe()["after_units52_sha256"].as_str().unwrap()
     {
@@ -325,6 +331,7 @@ fn original193_values() -> &'static Vec<Value> {
     })
 }
 pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
+    let all = literal_registration::prefix_scenarios(all).unwrap_or(all);
     assert_eq!(all.len(), 197);
     // Cold expected objects are cached. Compare one bounded old Scenario at a
     // time rather than cloning/serializing the complete catalog per call.
@@ -349,6 +356,7 @@ pub fn before_scenarios(all: &[Scenario]) -> &[Scenario] {
     &all[..193]
 }
 pub fn prefix_scenarios(all: &[Scenario]) -> Option<&[Scenario]> {
+    let all = literal_registration::prefix_scenarios(all).unwrap_or(all);
     if all.len() == 197 {
         Some(before_scenarios(all))
     } else {
@@ -384,6 +392,7 @@ fn same_unit(a: &Unit, b: &Unit) {
     );
 }
 pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
+    let all = literal_registration::prefix_typed_units(all).unwrap_or(all);
     assert_eq!(all.len(), 52);
     let e = expected();
     for (a, b) in all[..51].iter().zip(&e.old_units) {
@@ -393,6 +402,7 @@ pub fn before_typed_units(all: &[Unit]) -> &[Unit] {
     &all[..51]
 }
 pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
+    let all = literal_registration::prefix_typed_units(all).unwrap_or(all);
     if all.len() == 52 {
         Some(before_typed_units(all))
     } else {
@@ -400,6 +410,7 @@ pub fn prefix_typed_units(all: &[Unit]) -> Option<&[Unit]> {
     }
 }
 pub fn before_values(all: &[Value]) -> &[Value] {
+    let all = literal_registration::prefix_values(all).unwrap_or(all);
     assert_eq!(all.len(), 52);
     let e = expected();
     assert_eq!(&all[..51], &e.old_values);
@@ -407,6 +418,7 @@ pub fn before_values(all: &[Value]) -> &[Value] {
     &all[..51]
 }
 pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
+    let all = literal_registration::prefix_values(all).unwrap_or(all);
     if all.len() == 52 {
         Some(before_values(all))
     } else {
@@ -418,7 +430,12 @@ pub fn prefix_values(all: &[Value]) -> Option<&[Value]> {
 pub fn before_attempts_len(
     all: &std::collections::BTreeMap<String, dlms_learning_lab::progress::Attempt>,
 ) -> usize {
-    assert_eq!(all.len(), 197);
+    let checked197 = if all.len() == 199 {
+        literal_registration::before_attempts_len(all)
+    } else {
+        all.len()
+    };
+    assert_eq!(checked197, 197);
     let e = expected();
     for (id, v) in &e.ids {
         assert_eq!(all[id].scenario_version, *v);

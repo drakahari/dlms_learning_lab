@@ -394,6 +394,54 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         dlms_learning_lab::engine::State::OneOff { .. }
     )));
 
+    // Retain the complete historical197 matrix, then run the SAME rejection
+    // checks against every current source, including both literal additions.
+    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
+    assert_eq!((all.len(), previous197.len()), (199, 197));
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &all[197..] {
+        assert!(matches!(
+            source.initial,
+            dlms_learning_lab::engine::State::Script { run: None, .. }
+        ));
+        let dlms_learning_lab::engine::Goal::Script { cases } = &source.goal else {
+            panic!("New literal assignments retain their typed Script goals")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!dlms_learning_lab::progress::current_solved(
+            &Attempt::new(source, 1),
+            source
+        ));
+    }
+    let full_current_old_indices = current_old_indices;
+    let current_old_indices = previous197
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| {
+            !matches!(
+                s.initial,
+                dlms_learning_lab::engine::State::PhysicalLink { .. }
+            )
+        })
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        full_current_old_indices.len(),
+        current_old_indices.len() + 2
+    );
+    assert_eq!(
+        &full_current_old_indices[..current_old_indices.len()],
+        current_old_indices.as_slice()
+    );
+    assert_eq!(
+        &full_current_old_indices[current_old_indices.len()..],
+        &[197, 198]
+    );
+
     assert_eq!(
         current_old_indices.len(),
         old_indices.len() + disk_registration::IDS.len()
@@ -430,7 +478,7 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         ));
     }
 
-    for index in current_old_indices {
+    for index in full_current_old_indices {
         let mut foreign = all.clone();
         foreign[index].physical_link_teaching = lesson.clone();
         let error = contexts(&foreign).unwrap_err();

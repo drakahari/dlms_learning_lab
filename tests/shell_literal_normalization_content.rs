@@ -73,7 +73,9 @@ fn catalog() -> &'static Vec<Scenario> {
             15,
             "No fallback to an older evaluator"
         );
-        let mut all = pack::bundled().unwrap();
+        let current = pack::bundled().unwrap();
+        assert_eq!(current.len(), 199);
+        let mut all = disk_registration::literal_registration::before_scenarios(&current).to_vec();
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
         assert_eq!(all.len(), 197, "Unregistered development fixture base only");
         assert!(!all.iter().any(|x| IDS.contains(&x.id.as_str())));
@@ -195,8 +197,11 @@ fn record(s: &Scenario, source: &str) -> Record {
 #[test]
 fn private_fixture_preserves_all193_specs60_scripts477_cases60_examples_and51_unit_objects() {
     let all = catalog();
-    assert_eq!(all.len(), 199, "Unregistered two-task fixture only");
-    let current = pack::bundled().unwrap();
+    assert_eq!(all.len(), 199, "Complete normal two-task registration");
+    let normal = pack::bundled().unwrap();
+    assert_eq!(normal.len(), 199);
+    assert_eq!(value(&normal), value(all));
+    let current = disk_registration::literal_registration::before_scenarios(&normal).to_vec();
     assert_eq!(current.len(), 197);
     let old = disk_registration::before_scenarios(&current).to_vec();
     assert_eq!(value(&all[..193]), value(&old));
@@ -219,14 +224,16 @@ fn private_fixture_preserves_all193_specs60_scripts477_cases60_examples_and51_un
             std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(name)).unwrap();
         assert_eq!(digest::hash(&raw), pin["sha256"].as_str().unwrap());
     }
-    let current_raw = include_str!("../scenarios/units-v1.json");
+    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let current52 = disk_registration::literal_registration::before_units(current53).unwrap();
+    let current_raw = std::str::from_utf8(&current52).unwrap();
     let old_raw = disk_registration::before_units(current_raw.as_bytes()).unwrap();
     let raw = std::str::from_utf8(&old_raw).unwrap();
     assert_eq!(
         digest::hash(raw.as_bytes()),
         r["original_units_sha256"].as_str().unwrap()
     );
-    let current_units = course::bundled(&current).unwrap();
+    let current_units = course::load(current_raw, &current).unwrap();
     assert_eq!(current_units.len(), 52);
     let old_units = course::load(raw, &old).unwrap();
     assert_eq!(
@@ -243,11 +250,7 @@ fn private_fixture_preserves_all193_specs60_scripts477_cases60_examples_and51_un
     assert_eq!(value(&private[..51]), value(&old_units));
     assert_eq!(value(&private[..52]), value(&current_units));
     assert_eq!(value(private.last().unwrap()), r["unit_proposal"]);
-    assert_eq!(
-        private.len(),
-        53,
-        "A private test union, not normal registration"
-    );
+    assert_eq!(private.len(), 53, "Exact normal53 unit registration");
 }
 
 #[test]

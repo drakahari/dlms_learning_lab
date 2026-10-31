@@ -37,7 +37,10 @@ fn catalog() -> Vec<Scenario> {
         .collect::<Vec<_>>();
     let expected =
         pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
-    let current190 = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    let current190 =
+        disk_registration::literal_registration::before_scenarios(&current199).to_vec();
+    assert_eq!(current199.len(), 199);
     assert_eq!(
         registration::ntp_registration::ere_registration::before_scenarios(&current190).len(),
         190
@@ -50,6 +53,48 @@ fn catalog() -> Vec<Scenario> {
             &current190
         ))
     );
+    let current53 = dlms_learning_lab::course::bundled(&current199).unwrap();
+    let raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let previous52 =
+        dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), &current190).unwrap();
+    assert_eq!((current53.len(), previous52.len()), (53, 52));
+    assert_eq!(
+        v(disk_registration::literal_registration::before_typed_units(
+            &current53
+        )),
+        v(&previous52)
+    );
+    assert_eq!(current53[52].id, "shell-literal-normalization");
+    assert_eq!(
+        current53[52].labs,
+        disk_registration::literal_registration::IDS
+    );
+    let mut reconstructed199 = current190.clone();
+    reconstructed199.extend(current199[197..].iter().cloned());
+    assert_eq!(v(&reconstructed199), v(&current199));
+    assert_eq!(
+        current199[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &current199[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal append requires a Script goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
     expected
 }
 fn definition(s: &Scenario) -> &work::Definition {

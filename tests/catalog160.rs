@@ -88,10 +88,58 @@ fn original154_ether_three_and_optional_three_have_exact_normal_order_and_fresh_
         .count()),
         [57, 40, 36, 60]
     );
+    // Preserve the old complete197 premise independently of the current199 append.
+    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
+    assert_eq!((all.len(), previous197.len()), (199, 197));
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
-            .map(|t| all.iter().filter(|s| s.track == t).count()),
+            .map(|t| previous197.iter().filter(|s| s.track == t).count()),
         [57, 44, 36, 60]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [57, 44, 36, 62]
+    );
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for s in &all[197..] {
+        assert!(matches!(
+            s.initial,
+            dlms_learning_lab::engine::State::Script { .. }
+        ));
+        let dlms_learning_lab::engine::Goal::Script { cases } = &s.goal else {
+            panic!("New literal assignment must retain its complete Script goal");
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(s.teaching.is_some());
+        assert_eq!(s.unit, "shell-literal-normalization");
+    }
+    let current_units = course::bundled(&all).unwrap();
+    let previous_raw = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        previous_raw.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let previous_units =
+        course::load(std::str::from_utf8(&previous_raw).unwrap(), previous197).unwrap();
+    assert_eq!((current_units.len(), previous_units.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &current_units
+        ))
+        .unwrap(),
+        serde_json::to_value(&previous_units).unwrap()
+    );
+    assert_eq!(current_units[52].id, "shell-literal-normalization");
+    assert_eq!(
+        current_units[52].labs,
+        disk_registration::literal_registration::IDS
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

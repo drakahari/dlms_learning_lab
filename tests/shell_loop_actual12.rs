@@ -11,6 +11,7 @@ use serde::Deserialize;
 use serde_json::Value;
 #[path = "support/ntp_registration.rs"]
 mod ntp_registration;
+use disk_registration::literal_registration;
 use std::collections::BTreeMap;
 #[path = "support/actual12_evidence.rs"]
 mod evidence;
@@ -227,7 +228,10 @@ fn two_genuine_unfinished_assignment_and_practice_drafts_remain_entirely_unchang
 #[test]
 #[ignore = "Requires genuine12 sealed profile; explicit guarded current14 migration"]
 fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() {
-    let all = pack::bundled().unwrap();
+    let full_current = pack::bundled().unwrap();
+    assert_eq!(full_current.len(), 199);
+    let all = literal_registration::before_scenarios(&full_current).to_vec();
+    assert_eq!(v(&all), v(&literal_registration::original197()));
     assert_eq!(ntp_registration::before_scenarios(&all).len(), 186);
     assert_eq!(
         ntp_registration::ere_registration::before_scenarios(&all).len(),
@@ -235,9 +239,31 @@ fn nine_real_new_non_script_and_two_loop_assignments_have_no_invented_answers() 
     );
     assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
     assert_eq!(all.len(), 197);
+    // The old197 scope above remains exact; decode/read every current199 below.
+    let all = full_current;
+    assert_eq!(all.len(), 199);
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        literal_registration::IDS
+    );
     let raw = evidence::observed("writer12-original.json");
     let old: Progress = serde_json::from_slice(&raw).unwrap();
     let current = progress::decode(&raw, &all).unwrap();
+    for source in &all[197..199] {
+        let Goal::Script { cases } = &source.goal else {
+            panic!()
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(matches!(source.initial, State::Script { .. }));
+        assert!(
+            !old.attempts.contains_key(&source.id) && !current.attempts.contains_key(&source.id)
+        );
+        assert!(!old.favorites.contains(&source.id) && !current.favorites.contains(&source.id));
+        assert!(!progress::current_solved(
+            &progress::Attempt::new(source, 0),
+            source
+        ));
+    }
     for id in disk_registration::IDS {
         let s = all.iter().find(|s| s.id == id).unwrap();
         assert!(

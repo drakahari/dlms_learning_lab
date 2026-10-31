@@ -3,8 +3,11 @@
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are189 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1050 Open rows. Main and scoped verified Fedora553 contain197 assignments/
-52units (57CCNA/44LPIC-1/36LPIC-2/60Bash). Fullinclusive2,935 Rust/228targets,
+row and1050 Open rows. Main contains199 assignments/53units
+(57CCNA/44LPIC-1/36LPIC-2/62Bash); the two new scripting projects pass scoped
+checks and scoped native Fedora acceptance, with current full-inclusive verification passing3,041 tests/236targets/0 failures/0 ignored. Scoped verified Fedora553
+remains197/52 (57CCNA/44LPIC-1/36LPIC-2/60Bash). No issuer row gains credit from
+the new scripting projects. Fullinclusive2,935 Rust/228targets,
 487Python/Clippy, installed disk84/lifecycle/NFS cold/10starts pass. New credit is
 limited to native104.1/GPT-K1; command-specific and broader requirements stay Open.
 See [CATALOG197_MILESTONE.md](CATALOG197_MILESTONE.md). The193 milestone retains

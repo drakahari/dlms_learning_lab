@@ -18,7 +18,9 @@ fn value<T: serde::Serialize + ?Sized>(v: &T) -> serde_json::Value {
 }
 #[test]
 fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_distinct() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original_catalog(&all);
     assert_eq!(old.len(), 176);
     assert_eq!(
@@ -101,11 +103,23 @@ fn full176_prefix_all_old_scripts_examples_cases_and_exact_new_four_remain_disti
 }
 #[test]
 fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original_catalog(&all);
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let previous52 = literal_registration::before_units(current53).unwrap();
+    let raw = previous52.as_slice();
     let before = registration::before_units(raw).unwrap();
-    let current_units = course::bundled(&all).unwrap();
+    let current_units = course::load(
+        std::str::from_utf8(
+            &literal_registration::before_units(include_bytes!("../scenarios/units-v1.json"))
+                .unwrap(),
+        )
+        .unwrap(),
+        &all,
+    )
+    .unwrap();
     assert_eq!(
         disk_registration::before_typed_units(&current_units).len(),
         51
@@ -163,8 +177,12 @@ fn exact47_to46_inverse_keeps_both_network_appends_and_every_old37_byte() {
 }
 #[test]
 fn changed_raw_or_typed_appends_wrong_prerequisites_and_duplicate_units_are_refused() {
-    let all = pack::bundled().unwrap();
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
+    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let previous52 = literal_registration::before_units(current53).unwrap();
+    let raw = previous52.as_slice();
     let before = registration::before_units(raw).unwrap();
     assert!(registration::before_units(&before).is_err());
     let mut extra = raw.to_vec();
@@ -187,7 +205,9 @@ fn changed_raw_or_typed_appends_wrong_prerequisites_and_duplicate_units_are_refu
 }
 #[test]
 fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_selected() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let decoded = progress::decode(original, &all).unwrap();
     for id in registration::IDS {
@@ -321,10 +341,21 @@ fn old_profile_never_invents_one_off_answers_and_fresh_drafts_resume_reset_only_
 
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration as literal_registration;
 #[test]
 fn closed_current_count_boundary_preserves176_and46_only_after_exact_append_checks() {
-    let all = pack::bundled().unwrap();
-    let units = course::bundled(&all).unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
+    let units = course::load(
+        std::str::from_utf8(
+            &literal_registration::before_units(include_bytes!("../scenarios/units-v1.json"))
+                .unwrap(),
+        )
+        .unwrap(),
+        &all,
+    )
+    .unwrap();
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(one_off_boundary::before_len(&units), 46);
     let mut changed = all.clone();

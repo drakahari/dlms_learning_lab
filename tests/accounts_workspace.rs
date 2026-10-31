@@ -645,6 +645,12 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         dlms_learning_lab::partition_fs_workspace::context(&own, source).unwrap();
         assert!(own.workspace.as_ref().unwrap().command.is_empty());
     }
+    // Admit the whole current catalog before recovering the exact historical
+    // scope used by every original context-free count/order assertion below.
+    let full199 = all;
+    let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&full199);
+    assert_eq!((full199.len(), checked197.len()), (199, 197));
+    let all = checked197.to_vec();
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -796,7 +802,26 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                 && matches!(s.goal, Goal::Script { .. })
                 && s.teaching.is_some())
     );
-    for s in old {
+    let literal2 = &full199[197..];
+    assert_eq!(
+        literal2.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        ["shell-trim-options", "shell-trim-manifest"]
+    );
+    assert_eq!(
+        old.len() + literal2.len(),
+        130,
+        "Every historical128 plus both current literal Scripts reaches the same execute comparison"
+    );
+    for source in literal2 {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Current literal assignments require their typed Script Goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    for s in old.into_iter().chain(literal2.iter().cloned()) {
         let mut raw = s.initial.clone();
         let mut contextual = s.initial.clone();
         for command in &s.solution {

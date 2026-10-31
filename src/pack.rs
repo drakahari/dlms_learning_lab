@@ -257,6 +257,13 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             };
             definition.validate()?;
         }
+        if matches!(s.initial, State::Hsrp { .. }) || matches!(s.goal, Goal::Hsrp { .. }) {
+            crate::hsrp_workspace::source(s)?;
+            let Goal::Hsrp { definition } = &s.goal else {
+                return Err("Wrong HSRP Goal".into());
+            };
+            definition.validate()?;
+        }
         if let State::Vlsm { allocations, .. } = &s.initial
             && allocations
                 .iter()
@@ -1022,6 +1029,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
         State::PartitionFs { simulation } => simulation.validate().is_ok(),
+        State::Hsrp { simulation } => simulation.validate().is_ok(),
         State::Ntp { simulation } => simulation.validate().is_ok(),
         State::Lvm { simulation } => simulation.validate().is_ok(),
         State::PhysicalLink { simulation } => simulation.validate().is_ok(),
@@ -1245,5 +1253,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/ntp-client-server-v1.json"),
         include_str!("../scenarios/shell-ere-evidence-v1.json"),
         include_str!("../scenarios/disk-preparation-v1.json"),
+        include_str!("../scenarios/shell-literal-normalization-draft.json"),
     ])
 }

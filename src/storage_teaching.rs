@@ -148,6 +148,7 @@ pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_atte
         crate::engine::State::PartitionFs { .. }
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
+            | crate::engine::State::Hsrp { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

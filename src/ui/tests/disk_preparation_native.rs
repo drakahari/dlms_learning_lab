@@ -289,13 +289,19 @@ fn run_disk_route(private_fixture: bool) {
     let (ctx, mut a) = app();
     assert!(!a.synthetic && !a.developer);
     assert!(a.progress.attempts.is_empty());
-    assert_eq!(a.scenarios.len(), 197);
-    assert_eq!(a.units.len(), 52);
-    // Both modes begin with the genuine normal catalog. Only the private
-    // predecessor exercise peels the independently checked exact append, while
-    // there are no Attempts. The normal route never installs source or work.
-    let old_scenarios = registration::before_scenarios(&a.scenarios);
-    let old_units = registration::before_typed_units(&a.units);
+    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+    let current_catalog = serde_json::to_value(&a.scenarios).unwrap();
+    let current_units = serde_json::to_value(&a.units).unwrap();
+    // Preserve the complete original197/52 scope through the strict current
+    // source and full typed-unit inverse, rather than an unchecked prefix.
+    let checked197 = registration::literal_registration::before_scenarios(&a.scenarios);
+    let checked52 = registration::literal_registration::before_typed_units(&a.units);
+    assert_eq!(checked197.len(), 197);
+    assert_eq!(checked52.len(), 52);
+    // Only the private predecessor exercise peels the checked disk append,
+    // while there are no Attempts. Normal MAIN retains every current199 source.
+    let old_scenarios = registration::before_scenarios(checked197);
+    let old_units = registration::before_typed_units(checked52);
     assert_eq!(old_scenarios.len(), 193);
     assert_eq!(old_units.len(), 51);
     if private_fixture {
@@ -303,7 +309,12 @@ fn run_disk_route(private_fixture: bool) {
         let scenarios = old_scenarios.to_vec();
         a.scenarios = scenarios;
         a.units = units;
+    } else {
+        assert_eq!(serde_json::to_value(&a.scenarios).unwrap(), current_catalog);
+        assert_eq!(serde_json::to_value(&a.units).unwrap(), current_units);
+        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
     }
+    assert!(a.progress.attempts.is_empty());
     let before = serde_json::to_value(&a.scenarios).unwrap();
     let before_units = serde_json::to_value(&a.units).unwrap();
     let old_count = a.scenarios.len();
@@ -425,6 +436,18 @@ fn run_disk_route(private_fixture: bool) {
         old_count + if private_fixture { 4 } else { 0 }
     );
     assert_eq!(a.units.len(), old_units + usize::from(private_fixture));
+    if !private_fixture {
+        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        assert_eq!(serde_json::to_value(&a.scenarios).unwrap(), current_catalog);
+        assert_eq!(serde_json::to_value(&a.units).unwrap(), current_units);
+        for id in registration::literal_registration::IDS {
+            let source = a.scenarios.iter().find(|s| s.id == id).unwrap();
+            assert!(matches!(source.initial, State::Script { .. }));
+            assert!(matches!(source.goal, Goal::Script { .. }));
+            assert!(!a.progress.attempts.contains_key(id));
+            assert!(!a.progress.favorites.contains(id));
+        }
+    }
     for id in IDS {
         let s = a.scenarios.iter().find(|s| s.id == id).unwrap();
         assert!(progress::current_solved(&a.progress.attempts[id], s));

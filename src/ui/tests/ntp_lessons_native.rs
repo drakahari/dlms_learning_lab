@@ -247,7 +247,10 @@ fn ntp_normal190_real_events_complete_all_tasks_and_every_capture_phase_without_
         ),
         (193, 51)
     );
-    assert_eq!((a.scenarios.len(), a.units.len()), (197, 52));
+    let checked197 = disk_registration::literal_registration::before_scenarios(&a.scenarios);
+    let checked52 = disk_registration::literal_registration::before_typed_units(&a.units);
+    assert_eq!((checked197.len(), checked52.len()), (197, 52));
+    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
     assert!(a.progress.attempts.is_empty());
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();

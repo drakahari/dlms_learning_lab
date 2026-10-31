@@ -91,7 +91,9 @@ fn files(dir: &std::path::Path) -> std::collections::BTreeMap<String, Vec<u8>> {
 }
 #[test]
 fn independent_four_task_pack_and_appended_unit_preserve_full_current_catalog_and_prerequisites() {
-    let current = pack::bundled().unwrap();
+    let normal199 = pack::bundled().unwrap();
+    let current = registration::literal_registration::before_scenarios(&normal199).to_vec();
+    assert_eq!(normal199.len(), 199);
     assert_eq!(current.len(), 197);
     let before = registration::before_scenarios(&current).to_vec();
     assert_eq!(before.len(), 193);
@@ -124,13 +126,75 @@ fn independent_four_task_pack_and_appended_unit_preserve_full_current_catalog_an
     let units = course::load(&index.to_string(), &all).unwrap();
     assert_eq!(
         value(&units),
-        value(&course::load(include_str!("../scenarios/units-v1.json"), &current).unwrap())
+        value(
+            &course::load(
+                std::str::from_utf8(
+                    &registration::literal_registration::before_units(include_bytes!(
+                        "../scenarios/units-v1.json"
+                    ))
+                    .unwrap()
+                )
+                .unwrap(),
+                &current
+            )
+            .unwrap()
+        )
     );
     assert_eq!(value(&units[..old_units.len()]), old_unit_values);
     assert_eq!(
         units.last().unwrap().labs,
         extra.iter().map(|s| s.id.clone()).collect::<Vec<_>>()
     );
+    // Keep the complete current catalog after the unchanged193+disk4 proof.
+    let mut full199 = all.clone();
+    full199.extend(normal199[197..].iter().cloned());
+    let current_texts = full199
+        .chunks(16)
+        .map(|sources| json!({"schema_version":1,"scenarios":sources}).to_string())
+        .collect::<Vec<_>>();
+    let full199 =
+        pack::load_catalog(&current_texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+    assert_eq!(full199.len(), 199);
+    assert_eq!(value(&full199), value(&normal199));
+    assert_eq!(
+        value(registration::literal_registration::before_scenarios(
+            &full199
+        )),
+        value(&all)
+    );
+    let current_units = course::bundled(&full199).unwrap();
+    assert_eq!(current_units.len(), 53);
+    assert_eq!(
+        value(registration::literal_registration::before_typed_units(
+            &current_units
+        )),
+        value(&units)
+    );
+    assert_eq!(
+        value(&current_units),
+        value(&course::bundled(&normal199).unwrap())
+    );
+    assert_eq!(current_units[52].id, "shell-literal-normalization");
+    assert_eq!(
+        current_units[52].labs,
+        registration::literal_registration::IDS
+    );
+    assert_eq!(
+        full199[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        registration::literal_registration::IDS
+    );
+    for source in &full199[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal append must be a Script goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
     let expected_worked = [2, 2, 5, 4];
     let expected_rows = [2, 3, 3, 3];
     for (i, s) in extra.iter().enumerate() {

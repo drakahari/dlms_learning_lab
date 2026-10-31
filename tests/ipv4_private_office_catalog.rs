@@ -71,6 +71,8 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
         serde_json::to_value(&authored.scenarios[0]).unwrap()
     );
     assert_eq!(all[175].id, ID);
+    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
+    assert_eq!((all.len(), previous197.len()), (199, 197));
     for (track, count) in [
         ("CCNA", 53),
         ("LPIC-1", 40),
@@ -105,8 +107,52 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
             current193
         );
         let current197 = current193 + if track == "LPIC-1" { 4 } else { 0 };
-        assert_eq!(all.iter().filter(|s| s.track == track).count(), current197);
+        assert_eq!(
+            previous197.iter().filter(|s| s.track == track).count(),
+            current197
+        );
+        let current199 = current197 + if track == "Bash/Shell" { 2 } else { 0 };
+        assert_eq!(all.iter().filter(|s| s.track == track).count(), current199);
     }
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &all[197..] {
+        assert!(matches!(
+            source.initial,
+            dlms_learning_lab::engine::State::Script { run: None, .. }
+        ));
+        let dlms_learning_lab::engine::Goal::Script { cases } = &source.goal else {
+            panic!("Literal append must be a Script goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+    }
+    let current_units = course::bundled(&all).unwrap();
+    let previous_raw = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        previous_raw.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let previous_units =
+        course::load(std::str::from_utf8(&previous_raw).unwrap(), previous197).unwrap();
+    assert_eq!((current_units.len(), previous_units.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &current_units
+        ))
+        .unwrap(),
+        serde_json::to_value(&previous_units).unwrap()
+    );
+    assert_eq!(current_units[52].id, "shell-literal-normalization");
+    assert_eq!(
+        current_units[52].labs,
+        disk_registration::literal_registration::IDS
+    );
 }
 #[test]
 fn normal_unit_index_preserves_45_units_and_appends_real_prerequisite_guided_project() {

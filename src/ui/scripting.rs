@@ -320,7 +320,7 @@ impl LabApp {
             }
         }
         let c = &cases[selected];
-        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{egui::ScrollArea::vertical().id_salt("script-fixture-scroll").max_height(260.).show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});});
+        controls::collapsing_header(ui, "Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{egui::ScrollArea::vertical().id_salt("script-fixture-scroll").max_height(260.).show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});});
     }
     fn script_editor(&mut self, ui: &mut egui::Ui, i: usize) {
         ui.label("Script · simulated shell");
@@ -334,11 +334,13 @@ impl LabApp {
             return;
         };
         let height = (ui.ctx().content_rect().height() * 0.32).clamp(180., 320.);
-        let area = egui::ScrollArea::both()
-            .id_salt(("source-scroll", i))
-            .max_height(height)
-            .min_scrolled_height(height)
-            .show(ui, |ui| {
+        let area = controls::nested_scroll(
+            ui,
+            egui::ScrollArea::both()
+                .id_salt(("source-scroll", i))
+                .max_height(height)
+                .min_scrolled_height(height),
+            |ui| {
                 ui.add_sized(
                     [ui.available_width(), height],
                     egui::TextEdit::multiline(source)
@@ -348,7 +350,8 @@ impl LabApp {
                         .desired_width(f32::INFINITY)
                         .char_limit(shell::MAX_SOURCE),
                 )
-            });
+            },
+        );
         self.metrics.editor_viewport = Some(area.inner_rect);
         let response = area.inner;
         name_control(&response, "Assignment script source");
@@ -541,7 +544,7 @@ impl LabApp {
             ui.label("Run output · selected inputs");
         }
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
-            egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]).show(ui, |ui| {
+            controls::nested_scroll(ui, egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]), |ui| {
                 if let Some(r) = r {
                     let diagnostic = outcome(ui, r);
                     if !earlier { self.metrics.script_diagnostic = diagnostic; }

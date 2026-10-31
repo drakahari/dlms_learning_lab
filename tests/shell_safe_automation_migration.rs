@@ -148,7 +148,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
         assert!(!progress::current_solved(&Attempt::new(source, 0), source));
     }
-    let later = labs
+    let previous197 = disk_registration::literal_registration::before_scenarios(&labs);
+    assert_eq!((labs.len(), previous197.len()), (199, 197));
+    let later = previous197
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
         .map(|s| s.id.as_str())
@@ -221,6 +223,32 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "lpic1-cron-access-retirement",
             "lpic1-cron-calendar-handover",
         ])
+    );
+    let current_later = labs
+        .iter()
+        .filter(|s| !original.attempts.contains_key(&s.id))
+        .map(|s| s.id.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    let mut expected_current_later = later.clone();
+    for id in disk_registration::literal_registration::IDS {
+        assert!(expected_current_later.insert(id));
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal source must retain Script goal")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
+        assert!(!progress::current_solved(&Attempt::new(source, 0), source));
+    }
+    assert_eq!(current_later, expected_current_later);
+    assert_eq!(
+        labs[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
     );
     assert_eq!(original.attempts.len(), 133);
     for (id, scripting) in [

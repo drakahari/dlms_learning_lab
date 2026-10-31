@@ -216,7 +216,10 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     use dlms_learning_lab::backup;
     use std::sync::atomic::{AtomicBool, AtomicUsize};
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
-    let mut all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    let previous197 = disk_registration::literal_registration::before_scenarios(&current199);
+    assert_eq!(current199.len(), 199);
+    let mut all = previous197.to_vec();
     assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
     assert_eq!(all.len(), 197);
     let s = scenario(0);
@@ -351,6 +354,7 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     for (id, value) in expected_old.as_object().unwrap() {
         exact(&restored.attempts[id], value);
     }
+    let restored_before_reset = json!({"portable":restored,"receipts":restored.migration_receipts});
     restored.attempts.insert(s.id.clone(), Attempt::new(&s, 7));
     teach::prepare(restored.attempts.get_mut(&s.id).unwrap(), &s, true).unwrap();
     for (id, value) in expected_old.as_object().unwrap() {
@@ -358,6 +362,99 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     }
     assert!(!progress::current_solved(&restored.attempts[&s.id], &s));
     assert!(restored.favorites.contains(&s.id));
+    // A separate full-current roundtrip preserves the actual decoded/exported
+    // history baseline; the two new Scripts remain absent rather than solved.
+    let current53 = dlms_learning_lab::course::bundled(&current199).unwrap();
+    let raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let previous52 =
+        dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), previous197).unwrap();
+    assert_eq!((current53.len(), previous52.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &current53
+        ))
+        .unwrap(),
+        serde_json::to_value(&previous52).unwrap()
+    );
+    let normal = serde_json::to_value(&current199).unwrap();
+    let mut current200 = current199;
+    current200.push(s.clone());
+    assert_eq!(current200.len(), 200);
+    assert_eq!(serde_json::to_value(&current200[..199]).unwrap(), normal);
+    assert_eq!(
+        serde_json::to_value(&current200[199]).unwrap(),
+        serde_json::to_value(&s).unwrap()
+    );
+    let caller = json!({"portable":loaded,"receipts":loaded.migration_receipts});
+    let current_path = dir.path().join("current-synthetic.json");
+    std::fs::write(&current_path, &saved).unwrap();
+    progress::save_with_catalog(&current_path, &loaded, &current200).unwrap();
+    assert_eq!(
+        json!({"portable":loaded,"receipts":loaded.migration_receipts}),
+        caller
+    );
+    let current_saved = std::fs::read(&current_path).unwrap();
+    let current_loaded = progress::load(&current_path, &current200).unwrap();
+    assert_eq!(std::fs::read(&current_path).unwrap(), current_saved);
+    assert_eq!(
+        json!({"portable":current_loaded,"receipts":current_loaded.migration_receipts}),
+        caller
+    );
+    let current_export = dir.path().join("current-portable.json");
+    backup::export(&current_export, &current_loaded, &current200).unwrap();
+    let current_candidate = backup::inspect(
+        &current_export,
+        &current200,
+        &AtomicBool::new(false),
+        &AtomicUsize::new(0),
+    )
+    .unwrap();
+    assert_eq!(
+        json!({"portable":current_candidate.progress,"receipts":current_candidate.progress.migration_receipts}),
+        json!({"portable":candidate.progress,"receipts":candidate.progress.migration_receipts})
+    );
+    backup::restore(&current_path, &current_candidate, &current200).unwrap();
+    let mut current_restored = progress::load(&current_path, &current200).unwrap();
+    assert_eq!(
+        json!({"portable":current_restored,"receipts":current_restored.migration_receipts}),
+        restored_before_reset
+    );
+    for (id, value) in expected_old.as_object().unwrap() {
+        exact(&current_restored.attempts[id], value);
+    }
+    exact(&current_restored.attempts[&s.id], &selected);
+    assert_eq!(
+        current200[197..199]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &current200[197..199] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        assert!(matches!(source.goal, engine::Goal::Script { .. }));
+        assert!(!current_restored.attempts.contains_key(&source.id));
+        assert!(!current_restored.favorites.contains(&source.id));
+    }
+    current_restored
+        .attempts
+        .insert(s.id.clone(), Attempt::new(&s, 7));
+    teach::prepare(current_restored.attempts.get_mut(&s.id).unwrap(), &s, true).unwrap();
+    for (id, value) in expected_old.as_object().unwrap() {
+        exact(&current_restored.attempts[id], value);
+    }
+    assert!(!progress::current_solved(
+        &current_restored.attempts[&s.id],
+        &s
+    ));
+    assert!(current_restored.favorites.contains(&s.id));
 }
 #[test]
 fn whole_attempt_escaped_capacity_refusal_has_same_action_positive_and_exact_target() {

@@ -107,6 +107,55 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
         assert!(shell::EVALUATOR_REVISION >= 8);
     }
     let all = catalog();
+    assert_eq!(
+        (
+            all.len(),
+            disk_registration::literal_registration::before_scenarios(&all).len()
+        ),
+        (199, 197)
+    );
+    let literal_units53 = course::bundled(&all).unwrap();
+    let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        literal_raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let literal_units52 = course::load(
+        std::str::from_utf8(&literal_raw52).unwrap(),
+        disk_registration::literal_registration::before_scenarios(&all),
+    )
+    .unwrap();
+    assert_eq!((literal_units53.len(), literal_units52.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &literal_units53
+        ))
+        .unwrap(),
+        serde_json::to_value(&literal_units52).unwrap()
+    );
+    assert_eq!(
+        all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &all[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal assignments require Script Goals")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.initial, State::Script { .. }))
+            .count(),
+        62
+    );
+    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
     assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].map(|track| {
@@ -134,8 +183,13 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
-            .map(|track| all.iter().filter(|s| s.track == track).count()),
+            .map(|track| previous197.iter().filter(|s| s.track == track).count()),
         [57, 44, 36, 60]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [57, 44, 36, 62]
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]

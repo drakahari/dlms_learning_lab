@@ -1040,7 +1040,11 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     assert!(lesson.separate_from(&assignment));
     scenario.dhcpv4_teaching = Some(lesson);
     // The catalog is a collection of bounded packs, not one growing artificial pack.
-    let mut catalog = pack::bundled().unwrap();
+    let normal199 = pack::bundled().unwrap();
+    let previous197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&normal199);
+    assert_eq!((normal199.len(), previous197.len()), (199, 197));
+    let normal199_value = serde_json::to_value(&normal199).unwrap();
+    let mut catalog = previous197.to_vec();
     assert_eq!(one_off_boundary::before_len(&catalog), 176);
     let normal = serde_json::to_value(&catalog).unwrap();
     assert!(scenario.prerequisites.is_empty());
@@ -1111,6 +1115,57 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
         serde_json::to_value(&progress::decode(&pretty, &catalog).unwrap().attempts).unwrap(),
         serde_json::to_value(&p.attempts).unwrap()
     );
+    // Reuse the same maximum assignment/practice and actual decoded receipts
+    // with every current normal source; no new Script attempt is fabricated.
+    let units53 = dlms_learning_lab::course::bundled(&normal199).unwrap();
+    let units52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&units53);
+    assert_eq!((units53.len(), units52.len()), (53, 52));
+    let mut current200 = normal199;
+    current200.push(scenario.clone());
+    assert_eq!(current200.len(), 200);
+    assert_eq!(
+        serde_json::to_value(&current200[..199]).unwrap(),
+        normal199_value
+    );
+    assert_eq!(serde_json::to_value(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&current200[..199])).unwrap(), normal);
+    assert_eq!(current200[199].id, scenario.id);
+    assert_eq!(
+        serde_json::to_value(&current200[199]).unwrap(),
+        serde_json::to_value(&scenario).unwrap()
+    );
+    assert_eq!(
+        serde_json::to_value(&progress::decode(old_bytes, &current200).unwrap().attempts).unwrap(),
+        old_attempts
+    );
+    let caller = serde_json::json!({"portable":decoded,"receipts":decoded.migration_receipts});
+    let current_path = dir.path().join("current-progress.json");
+    progress::save_with_catalog(&current_path, &decoded, &current200).unwrap();
+    assert_eq!(
+        serde_json::json!({"portable":decoded,"receipts":decoded.migration_receipts}),
+        caller
+    );
+    let current_saved = progress::read_bounded(&current_path, 16_000_000).unwrap();
+    let current_decoded = progress::decode(&current_saved, &current200).unwrap();
+    assert_eq!(
+        serde_json::json!({"portable":current_decoded,"receipts":current_decoded.migration_receipts}),
+        caller
+    );
+    let mut current_old = serde_json::to_value(&current_decoded.attempts).unwrap();
+    current_old.as_object_mut().unwrap().remove(&scenario.id);
+    assert_eq!(current_old, old_attempts);
+    assert_eq!(
+        current200[197..199]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        ["shell-trim-options", "shell-trim-manifest"]
+    );
+    for source in &current200[197..199] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        assert!(matches!(source.goal, Goal::Script { .. }));
+        assert!(!current_decoded.attempts.contains_key(&source.id));
+        assert!(!current_decoded.favorites.contains(&source.id));
+    }
 }
 #[test]
 fn each_explicit_safety_and_grant_preservation_predicate_checks_its_own_current_row() {

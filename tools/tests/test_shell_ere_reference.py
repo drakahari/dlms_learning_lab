@@ -17,7 +17,7 @@ PROJECT = Path(__file__).resolve().parents[2]
 # Named CURRENT QA extension, not inputs observed by the sealed r1 ELF.
 # r1 COMPILED396/SOURCES409/collector/probe stay immutable. Fresh r1 capture
 # must still refuse these paths until a separately reviewed new collector.
-CURRENT_NATIVE_QA_INPUTS = (('src/ui/smoke/ere_evidence.rs', 81869, 'dfdad4ccab3a8457672d56e66a857e70e55a3cc9e2d629e289f3a346fe1daeff'), ('src/ui/tests/ere_evidence_native.rs', 30841, '1d5dc8f59e89802af17b2fcbb7c137ee5dfa650674e6b7800877412c2fc2bdc6'))
+CURRENT_NATIVE_QA_INPUTS = (('src/ui/smoke/ere_evidence.rs', 82296, 'f5e025036cbab40351e572f40c4b9399a8f258a78f8013f9ff6e7085bd571102'), ('src/ui/tests/ere_evidence_native.rs', 35936, 'f1800da67c9b04160f38e333c59bb7e46c0b7090ffd03ddd9e43124a107bea6a'))
 
 # Named CURRENT product-workspace extension; never sealed r1 compiled evidence.
 CURRENT_STORAGE_WORKSPACE_INPUTS = (('src/partition_fs.rs', 34808, 'a769056e923a5dc932727bafaae52ed81e4d7c2e88f28dc867ab975406022ea9'), ('src/partition_fs_workspace.rs', 43668, '138c38aa3529c05136aa27d4caf8612e3c98a18b120ab30fe158370cddbf2a2e'), ('src/partition_fs_workspace/binding.rs', 16588, '7d4496e9ba9e4ba318bcd8176d8a6ade5d88b451258347ac855e748ce48dfd52'), ('src/ui/partition_fs_workspace.rs', 41812, '0623d6b4840158ef4d3a8f13baad663d7bda49d9d54321be426508fa74268cd5'), ('src/ui/tests/partition_fs_workspace.rs', 62096, 'aac1752f0289b6f99281423216383d4366286e8ae531d26fe7a265b38dd98441'))
@@ -26,12 +26,21 @@ CURRENT_STORAGE_WORKSPACE_INPUTS = (('src/partition_fs.rs', 34808, 'a769056e923a
 CURRENT_AUTHORED_STORAGE_INPUTS = (('scenarios/disk-preparation-v1.json', 118384, '6971f6001d8cd9f3e58d28ef708ffecb6a5f4fdd1ad0f12b3d9606f07bf7dcb1'),)
 
 # Two fixed conditional native QA modules; no sealed r1 observation claim.
-CURRENT_STORAGE_NATIVE_INPUTS = (('src/ui/smoke/disk_preparation.rs', 159702, 'd97c9d25e9b8bd091b7ceccfda7424d6e41e6f6bb04a6d14e2cb3b3b9d0b3e68'), ('src/ui/tests/disk_preparation_native.rs', 15789, '76bf6dfe81b3b9b3a92a881521cb4448c55240576b898cacf9920d52ec45b6f5'))
+CURRENT_STORAGE_NATIVE_INPUTS = (('src/ui/smoke/disk_preparation.rs', 159702, 'd97c9d25e9b8bd091b7ceccfda7424d6e41e6f6bb04a6d14e2cb3b3b9d0b3e68'), ('src/ui/tests/disk_preparation_native.rs', 17177, 'b418193cfe1e190a6123f27c6a4501d405145289c6c06224f28ace30e06a817b'))
 
 CURRENT_LITERAL_PRODUCT_INPUTS = (('src/shell/literal_trim.rs', 9256, '9917307a858e06a7592811b49b466f9a5211a303cf915422a16520b83cea3f69'),)
 
 # Exact unregistered authored Pack for CURRENT QA only; never a frozen r1 input.
-CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 41797, 'bd7149e93384eb8be68aac9cb68486fc1630248b13cab0ff04b78b393c7e1535'),)
+CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 42234, '8dbbed5fa3de2da4e01de5694b4ec0e1b4269f8bdaf42b02ebc32e5ef40ca823'), ('scenarios/shell-snapshot-rollout-draft.json', 46123, '6d8cb5a647b702594bb45a83531ec95d90c351566ba68572a11908c0fde1aa0d'))
+
+# CURRENT HSRP workspace only; never sealed reference evidence.
+CURRENT_HSRP_WORKSPACE_INPUTS = (('src/hsrp_workspace.rs', 24874, 'facb9e364856dad53ca738d5981977e504c63c3d667574cda5225114e727e730'), ('src/hsrp_workspace/binding.rs', 6020, '19d9e120d7ade1e920181b137bea53f57ad87641c78ddee9fc5b0b426db8fbb6'), ('src/hsrp_workspace/goal.rs', 16815, 'f32f2ca00ff1c4590f4c5712885bd0f597ba6fe95b63e6171d82c3af6d3cbe8b'), ('src/ui/hsrp_workspace.rs', 41147, 'd03dcbed9710605a4526d9cfc1a66ca4927223bd0defa4b0a766502420ebb45b'), ('src/ui/tests/hsrp_workspace.rs', 53604, 'a942875857a8fe8be978864b896fdd6613b2cf99238c66a52c4bec9f7115789a'))
+
+# Current authored HSRP only; no sealed-source or integration credit.
+CURRENT_AUTHORED_HSRP_INPUTS = (('scenarios/hsrp-resilient-gateway-v1.json', 103880, 'f8db2ea4a4391fca0dcd8a771404086f484526431ce092832b1e48b67261617e'),)
+
+# Fixed CURRENT native QA only; sealed reference inputs stay immutable.
+CURRENT_LITERAL_NATIVE_INPUTS = (('src/ui/smoke/literal_lessons.rs', 42160, '189581aa5141a01e0565c643df5c4efb2bc3d56261391694c1a2eb4892d8794b'), ('src/ui/tests/literal_lessons_native.rs', 30725, 'f32db2b4108c57248f65ebcf133e57dec7e7be60457c980e8fae29ee81a613b7'))
 
 class ShellEreReferenceGuards(unittest.TestCase):
     def setUp(self):
@@ -346,17 +355,46 @@ class ShellEreReferenceGuards(unittest.TestCase):
         self.assertEqual(len(literal_extension), 1)
         self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension).isdisjoint(literal_extension))
         literal_authored_extension = {name for name, _, _ in CURRENT_LITERAL_AUTHORED_INPUTS}
-        self.assertEqual(len(literal_authored_extension), 1)
+        self.assertEqual(len(literal_authored_extension), 2)
         self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension).isdisjoint(literal_authored_extension))
-        actual_before_literal = actual - literal_extension - literal_authored_extension
+        hsrp_extension = {name for name, _, _ in CURRENT_HSRP_WORKSPACE_INPUTS}
+        self.assertEqual(len(hsrp_extension),5)
+        self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension).isdisjoint(hsrp_extension))
+        hsrp_authored_extension = {name for name, _, _ in CURRENT_AUTHORED_HSRP_INPUTS}
+        self.assertEqual(len(hsrp_authored_extension),1)
+        self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension | hsrp_extension).isdisjoint(hsrp_authored_extension))
+        literal_native_extension = {name for name, _, _ in CURRENT_LITERAL_NATIVE_INPUTS}
+        self.assertEqual(len(literal_native_extension), 2)
+        self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension | hsrp_extension | hsrp_authored_extension).isdisjoint(literal_native_extension))
+        actual_before_hsrp = actual - hsrp_extension - hsrp_authored_extension - literal_native_extension
+        actual_before_literal = actual_before_hsrp - literal_extension - literal_authored_extension
         # Project each complete predecessor by removing ALL fixed later sets.
         # The final equality still rejects every unknown, omitted or extra path.
         self.assertEqual(listed | extension, actual_before_literal - storage_extension - authored_extension - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension, actual_before_literal - authored_extension - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension | authored_extension, actual_before_literal - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension, actual_before_literal)
-        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension, actual - literal_authored_extension)
-        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension, actual)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension, actual_before_hsrp - literal_authored_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension, actual_before_hsrp)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension | hsrp_extension, actual - hsrp_authored_extension - literal_native_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension | hsrp_extension | hsrp_authored_extension, actual - literal_native_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension | hsrp_extension | hsrp_authored_extension | literal_native_extension, actual)
+        for name, size, sha in CURRENT_LITERAL_NATIVE_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
+        for name,size,sha in CURRENT_AUTHORED_HSRP_INPUTS:
+            path=PROJECT/name
+            info=path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+            self.assertEqual((info.st_size,c.digest(path.read_bytes())),(size,sha))
+        for name, size, sha in CURRENT_HSRP_WORKSPACE_INPUTS:
+            path=PROJECT/name
+            info=path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+            self.assertEqual((info.st_size,c.digest(path.read_bytes())),(size,sha))
         for name, size, sha in CURRENT_LITERAL_AUTHORED_INPUTS:
             path = PROJECT / name
             info = path.lstat()
@@ -619,3 +657,68 @@ class ShellEreReferenceGuards(unittest.TestCase):
                 # Only the exact newly-created private mock leaf is removed.
                 added.unlink()
                 self.assertEqual(c.project_roster(self.root), set(names))
+
+
+    def test_frozen_r1_prepare_refuses_each_hsrp_workspace_source_before_child_or_control(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_HSRP_WORKSPACE_INPUTS:
+                path = self.put(name, 'SYNTHETIC unobserved HSRP workspace source')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                path.unlink()  # Only this exact new disposable mock leaf.
+                parent = path.parent
+                while parent != self.root / 'src':
+                    previous = parent
+                    parent = parent.parent
+                    previous.rmdir()
+                self.assertEqual(c.project_roster(self.root), set(names))
+            child.assert_not_called()
+
+
+    def test_frozen_r1_prepare_refuses_unregistered_hsrp_pack_before_child_or_control(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        with patch.object(c, 'COMPILED', names), \
+             patch.object(c.shared, 'root_guard', return_value=()), \
+             patch.object(c.safe, 'capture_command') as child:
+            self.assertEqual(c.project_roster(self.root), set(names))
+            for name, _, _ in CURRENT_AUTHORED_HSRP_INPUTS:
+                path = self.put(name, 'SYNTHETIC unregistered HSRP authored pack')
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'No unreviewed project source directory|No omitted/extra/alias project source')
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                path.unlink()  # Only this exact new disposable leaf; family existed.
+                self.assertEqual(c.project_roster(self.root), set(names))
+            child.assert_not_called()
+
+    def test_frozen_r1_prepare_refuses_both_literal_native_modules_before_subject_or_destination(self):
+        names=('src/lib.rs','scenarios/base.json','assets/theme.txt')
+        for name in names:self.put(name,'SYNTHETIC closed input')
+        for name,size,sha in CURRENT_LITERAL_NATIVE_INPUTS:
+            raw=(PROJECT/name).read_bytes()
+            self.assertEqual(len(raw),size);self.assertEqual(c.digest(raw),sha)
+            added=self.put(name,raw)
+            with patch.object(c,'COMPILED',names), patch.object(c.shared,'root_guard',return_value=()), patch.object(c,'fixed',return_value=self.fixture), patch.object(c,'control') as control, patch.object(c.shared,'owned_directory') as destination, patch.object(c.shared,'pinned_executable') as held, patch.object(c.safe,'capture_command') as child:
+                with self.assertRaises(c.safe.OracleError) as refused:c.run(self.root,'prepare')
+                self.assertRegex(str(refused.exception),'Bounded closed source inventory|No unreviewed project source directory|No omitted/extra/alias project source')
+                control.assert_not_called();destination.assert_not_called();held.assert_not_called();child.assert_not_called()
+                self.assertFalse((self.root/c.BASE).exists())
+                added.unlink()
+                parent=added.parent
+                while parent!=self.root/'src':
+                    previous=parent;parent=parent.parent;previous.rmdir()
+                self.assertEqual(c.project_roster(self.root),set(names))

@@ -172,6 +172,7 @@ pub mod ntp_workspace;
 
 /// Bounded settled gateway-failover model; authored integration is separate.
 pub mod hsrp;
+pub mod hsrp_workspace;
 /// Bounded inode/link VFS; separate from the existing file model.
 pub mod links;
 

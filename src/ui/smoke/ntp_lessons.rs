@@ -936,7 +936,16 @@ impl LabApp {
                     ),
                     (193, 51)
                 );
-                assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
+                assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+                assert_eq!(
+                    (
+                        disk_registration::literal_registration::before_scenarios(&self.scenarios)
+                            .len(),
+                        disk_registration::literal_registration::before_typed_units(&self.units)
+                            .len()
+                    ),
+                    (197, 52)
+                );
                 let prior = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(&self.scenarios);
                 let units = crate::ui::one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(&self.units);
                 assert_eq!((prior.len(), units.len()), (186, 49));

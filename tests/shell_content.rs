@@ -130,6 +130,24 @@ fn reviews() -> Vec<Review> {
         incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
         misconception: r["wrong"][0]["reason"].as_str().unwrap().into(),
     }));
+    let literal: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/shell-literal-normalization-review.json"
+    ))
+    .unwrap();
+    let additions = literal["labs"].as_array().unwrap();
+    assert_eq!(
+        additions
+            .iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        ["shell-trim-options", "shell-trim-manifest"]
+    );
+    rows.extend(additions.iter().map(|r| Review {
+        id: r["id"].as_str().unwrap().into(),
+        alternate: r["alternatives"][0].as_str().unwrap().into(),
+        incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
+        misconception: r["wrong"][0]["label"].as_str().unwrap().into(),
+    }));
     rows
 }
 fn quoted(value: &str) -> String {

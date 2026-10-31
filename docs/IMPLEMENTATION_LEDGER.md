@@ -5223,3 +5223,274 @@ acceptance, full-suite acceptance, new installer or exam-objective completion.
 Next: exact197/52 preservation during normal registration and real native
 editor/Run flows, then remaining reviewed curriculum. Frozen reference captures,
 original9–14 evidence and the installed553 candidate stay unchanged.
+
+
+## Normal199 registration and next batch diagnosis —2026-10-30
+
+M657 exact28-path registration0c02f053, independent9aaa653c, protects all1095 live
+unowned inputs. Normal source199/53=57CCNA/44LPIC-1/36LPIC-2/62Bash, with501
+graded script cases/62 separate examples. Full197 definitions and all52 raw/typed
+units are exact predecessors. Frozen captures/probes/collectors remain unchanged;
+only the current ERE QA driver tuple changes for its deliberate count proof.
+M65836PASS/1FAIL across6targets: catalog1996, disk1978, teaching4, shellcontent5,
+literalcontent9 pass; genuine14 passes4 and fails one old current-count premise.
+M659 preserves the original197/disk193 law via exact full199→197 projection,
+decodes both real historical profiles against full199, and adds new2Script
+absence/no-favorite/fresh-unsolved checks; all5genuine14 PASS10.00s. Independent
+source readback confirms no weakened assertion. M660509Python PASS11.272s;
+M661all-targetClippy-Dwarnings PASS23.19s. Full-inclusive/native199 remain pending.
+
+Separately, Root applies exact unregistered snapshot6-path6670c8e1 after original
+R3 source ACK06793f96. M653 cannot compile the fixture's Progress.clone call;
+source-aware bounded reload plus full-profile equality repairs setup, peer68a203b9.
+M654 all10 fail the catalog solution-reachability guard. M655 moves the same
+catalog assertion after direct reference/alternate checks (no assertion removed);
+M656 adds case/source diagnostic identity and observes referencef3b40149 on
+'Eight mixed jobs...' reaching the existing2,000-instruction limit. This is an
+authored algorithm defect, not permission to raise limits or weaken that Case.
+Efficient validated-name membership and a precise normal199 fixture adapter are
+under review; neither optimized results nor two more catalog labs are claimed.
+The raw failed sources/logs remain preserved. No installer/release is produced.
+
+
+M662 applies reviewed budgetR4(8ca8c11d/peer8eb1f089) then exact normal199
+fixture adapter(13a8bf69/peer80a3343f). Reference+two alternatives pass all24graded
+and25guard Cases at four slices with the unchanged2,000-instruction cap. All
+Cases/outcomes remain exact; original raw sources and failed budget witness are
+retained.8PASS/3FAIL reveal incorrect fixture assumptions and one real writer gap.
+
+M663 corrects only fixture expectations: preserving a current Record is a full
+Attempt no-op, not an invented legacy history. Saving leaves the caller unstamped
+while the actual file gets current/workspace migration receipts; full reload
+equality includes those observed receipts. Full sibling/reset laws remain.
+10PASS/1FAIL exposes that source-aware Script save accepted a foreign state kind.
+Root adds a targeted pre-write Script guard for known source, scenario version
+and State/initial/Goal kinds. It never parses/executes drafts, requires current
+Record revision, changes grading or broadens other-family save policy. Header
+independent source review confirms compatibility with current decode/history.
+Three regressions cover every current unfinished script (including malformed and
+infinite-loop text without execution), every foreign authored state under a
+Script ID, and missing/version/initial/Goal source mismatches. Refusals preserve
+exact existing file bytes and caller data.
+
+M664 ALL28PASS/0FAIL/0ignored across4targets: writer3, genuine14five, literal9,
+snapshot11 (39.16s for snapshot).86memory samples: minimum22,552,973,312 available
+bytes, full PSI0%, swapout/OOM delta0. M665509Python PASS11.337s; M666all-target
+Clippy-Dwarnings PASS20.46s. Snapshot remains unregistered; normal199 native and
+full-inclusive verification remain pending. No current candidate/release claim.
+
+
+## Normal199 native scripting verification and shared clipping —2026-10-30
+
+Normal source remains199assignments/53units,57CCNA/44LPIC-1/36LPIC-2/62Bash,
+501graded script-input cases/62separate examples. Neither unregistered
+snapshot/rollout2 nor HSRP4 is included. Literal15 source ba89557 and its actual
+32 controlled GNU Bash comparisons retain their original evidence. No new
+curriculum or issuer credit is inferred from UI gates.
+
+M668 applies reviewed unregistered HSRP workspace/authored sources. Subsequent
+compile/fixture corrections preserve the model and all authored Goal data:
+JSONValue::Bool(false), shared GAP token, stable existing router index for widget
+IDs, two borrowed arguments and the standalone capacity fixture's prerequisite
+setup. M672/M674/M675 pass18core+18backend+12content+15UI groups (63total).
+Clippy's Box replacement uses inner assignment without changing publication or
+source-bound mutation. Normal registration and actual HSRP learning flows remain
+pending; there is no packet/IOS/physical-conformance claim.
+
+The literal capture route uses ordinary visible native widgets, actual editor
+input/Run/Stop, reference and two supported alternatives, wrong/partial results,
+edit invalidation, separate example drafts, real save/Back/Continue, selected
+reset/cancel and Challenge. A tiling WM ignores arbitrary size hints, so capture
+acknowledges observed fullscreen/windowed flags and distinct actual widths.
+The paired provider uses actual ctx.zoom_factor, and header clicks wait for
+stable real widget geometry; no focus/model/Record injection or relaxed deadline.
+M690all4actual-egui groups PASS. M694GUI/source retained; actual M695 produces54
+PNGs but its final tool handle expires before direct reaping: complete markers
+and absent processes are observed, not an invented direct exit status. Original
+review identifies dense wording and a horizontal bar over large-text task prose.
+
+Reviewed objective wording changes only two objective strings, preserving all
+constraints, Cases, solutions, alternatives, examples and versions. Canonical
+pack/recipe/helper/current-only QA hashes follow those exact bytes. The normal
+script reference heading now uses the existing shared wrapping component.
+M696reproduces width overflow; M698passes60fresh-unsolved width/scale settings.
+M699all51focused checks across8targets PASS. M700--lib matches0tests and is NOT
+acceptance. Correctly targeted M701 passes4/fails1: fixed-direction screenshot
+seeking overshoots the longer task. Recording the existing objective label's
+rectangle and using the unchanged bounded wheel helper repairs acquisition,
+with actual nonelided glyph/endpoint assertions retained. M705all5PASS189.11s.
+
+Actual M706 directly exits0,54PNGs/49unique; all1139inputs stay exact. Independent
+16-original reviewd57b0cee finds the bar persists despite width checks. Main
+scrolling is vertical-only: egui0.33.3 relocates a fully below-fold descendant's
+horizontal scrollbar to its parent clip edge (scroll_area.rs1253–1265).
+This is a paint/isolation issue, not permission to suppress legitimate bars.
+
+Reviewed shared nested_scroll helper clips only from the child's actual origin,
+uses the SAME Ui/IDs/ordinary show call, then restores the exact parent clip.
+All four script/example editor/output areas retain flags, sizes, cursor, content,
+scroll state and actions. Source peere611a8f0. M708newtest initially lacks a
+visible task; M709test setup calls a private method. Both failures remain.
+M710corrected real-wheel fixture reproduces two actual filled bar rectangles
+painting over the task at nativePPP1.15×200%text. M711same assertions PASS2.10s
+in Assignment and separate Example. M712all6PASS188.08s. No existing test body or
+capture assertion is removed. M713–M715expose the controlled visible-pane fixture
+requesting zoom before initializing a real viewport: egui scales its10,000-point
+fallback to5,000. A real first viewport frame fixes setup; overflow, painted-bar,
+real horizontal-wheel, offset/glyph displacement, sibling-paint and exact clip
+restoration checks all remain. M716additional7thtest PASS2.08s in light/dark.
+Original6-test24480-byte prefix remains byte-exact after the appended test.
+M719514Python PASS11.370s; M720all-targetClippy-Dwarnings PASS7.31s.
+
+M717ordinaryGUI build4.03s immediately retains the ELF240,843,176bytes,
+SHA256d1997a09f201d0eba820797048bc1ca8bcfbed9b75203b723cb304536b6f4230,
+and all1139project inputs. Actual Fedora M718 directly reaped exit0:54PNGs,
+49unique,327actions and12representative appearance settings; actual1920×1080
+wide/946×929windowed,100/150/200%text, Light/Dark plus initial Navy. All1139inputs
+stay exact through build/run. Independent16-original review2cc5eee9 includes all
+8Goal200endpoints: the overlay is gone and final constraints are readable;
+legitimate visible editor/practice bars remain. Root inspects2matching original
+endpoints too. Scoped normal199 development acceptance only: not all54manual
+review, every theme, an installed candidate, screen-reader or novice study.
+
+Source review finds three other full197 assumptions in workspace/actual13/actual12
+integration tests. Exact3-path source5f6bb9d0, peer80ab4c22, preserves complete
+original197 proofs through strict199→197 projection. Full199 positives retain
+actual decoded receipts, add only unfinished new assignment/practice drafts and
+explicitly prove genuine historical profiles contain no invented new work.
+Pure24Case/2example VM checks are never attached as saved results or credit.
+M721all32PASS/0FAIL/0ignored across3targets:14actual13,11actual12,7workspaces.
+M722all-targetClippy-Dwarnings PASS0.51s. Full inclusive199 is required next.
+
+All work remains serial through MAIN dev.py,2Cargo jobs/2Rust runtime threads,
+with NVMe-backed artifacts and memory/PSI observations. M699/M701/M702/M704
+observe minimum21.6/22.1/23.12/20.48GiB available, fullPSIavg10=0%, swapoutdelta0
+and OOMdelta0; these finite observations are not a safety guarantee or stress test.
+No unrelated application/settings, old project, frozen evidence, personal progress
+or public release is touched. Installed553/197/evaluator14 remains unchanged.
+
+
+## Owner-requested overnight pause —2026-10-30
+
+M723514Python PASS11.342s after documentation reconciliation; M724coverage
+PASS199registered,6unregistered drafts,189Partial/1Supporting/1050Open. M725
+full-inclusive default-feature all-target run compiles in3m29s, library117PASS/
+1FAIL, then continues into UI. The owner requests pause before the UI target
+or remaining integrations finish. Actual observed failures: NFS actual9stale197,
+disk-preparation paired2stale197/52, command-vector3deadline and getopts1deadline
+(capture_lessons.rs486). Seven observed tests, not an exhaustive total. Expected
+caught-negative panics are separate. No full-inclusive pass is claimed.
+
+Only the owned test invocation is interrupted; all1139inputs remain exact during
+it. No matching owned dev.py/Cargo/UI-test process remains, and the shared lock
+is acquired nonblocking to verify release. The tool interruption leaves its local
+PID2/7 transient marker; exact bytes are archived, not discarded, after process/
+lock verification. Never signal host2/7. No unrelated process is interrupted.
+Private PAUSED.json/log/source baseline remain.1793memory samples have minimum
+23,424,208,896available bytes, maxfullPSIavg10=0%, swapout/OOM delta0.
+
+Reviewed UNAPPLIED/UNRUN union9 d3721503/patchc92633df, independent98eac701,
+composes NFS cfg-test-only repair, three once-per-callback complete source proofs
+plus later-corruption regression, disk paired-test correction and source-predicted
+NTP/one-off bootstrap repairs. All original motors/histories/limits remain. All
+13current QA constants/31tuples match the projected files; frozen original source
+bundles, collector/probe/control/captures remain immutable. Current ordinary source
+files are intentionally different from some old captured files, not relabeled as
+original observations. Getopts timeout diagnosis remains an additional next step.
+
+No proposed remedies,201/205 registrations or new Source refreshes were applied
+after this running-suite boundary. Workers stopped with private checkpoints.
+Links/Syslog refreshes remain unfinished.201R6/nativeR2 are superseded because
+of the known stale HSRP-test tuple and final199 fixes; futureR7/R3 must freshly
+reconcile them. No new commit/push/package/installer/release. Resume from
+CHECKPOINT.md, apply/review corrections, complete available validation and continue
+all four tracks. Latest native199preview remains retainedM717/d1997a09; the scoped
+verified installed candidate remains553/197/evaluator14.
+
+
+## Resumed current199 regression closure —2026-10-31
+
+Owner continues. M726verifies full1139 baseline, permits ONLY the two exact later
+pause-note document deltas and applies the nine d3721503/98eac701 afterimages.
+All1130 unowned files retain their current bytes and all31current QA tuple pins
+match. Independent readback2beaad33 verifies actual application; no new grading,
+content, budget, wait deadline or old-evidence changes. M727all4NFS library groups
+PASS16.72s. M728actual per-callback corruption regression PASS12.71s: complete
+Source/Unit validation remains fresh after prior admission, and malformed later
+callbacks preserve progress/receipts. Other UI flows and getopts diagnosis remain
+required before full-inclusive acceptance. No new lab/candidate/commit claimed.
+
+
+## Getopts deadline regression closure and complete current rerun —2026-10-31
+
+M729focused same failing getopts test FAILS15s wait,98.29s total, even after9other
+fixes. The generic Case/Getopts controller's original full199 before_len operation
+repeats full197 validation. Reviewed2-path89199d3e/peerb20cd1ef replaces only that
+boundary with full199+53 admission on EACHcallback and same-call immutable checked
+prefixes. Original motors,15s wait, tick16, frame bounds, Cases/programs/records
+are byte-exact. New both-flow regression corrupts old/new Source/Goal/Unit fields
+after prior good admission, requires full-field refusal with unchanged progress/
+receipts, and checks clean restoration. No pointer/hash/first-call cache.
+
+M732ALL6Getopts groups PASS94.32s, including original M729red full editor/run/
+retry/alternate flow. M733ALL9command-vector groups PASS160.79s, closing the3old
+15s failures without changing the wait. Focused NFS4 and proof-corruption1 passed
+M727/M728 earlier. Final M734all-targetClippy-Dwarnings PASS3.22s; M735all514Python
+PASS11.321s; M736coverage PASS199registered/6unregistered draft IDs. Full-inclusive
+M737 is next; no full-suite pass, candidate,201/205 count or commit is inferred.
+
+
+## M737–M741: close current199 regression premises before new curriculum
+
+2026-10-31. M737 completes all236 inclusive result targets:2,993 PASS/48 FAIL,
+0 ignored; actual wrapper exit1/Cargo101. All1139 inputs remain exact. Retain the
+failed log and summary; focused acceptance never retroactively turns it green.
+4998 memory samples: minimum23,400,308,736 available bytes, maximum full PSI avg10
+0%, swap-out/OOM deltas0. No unrelated workloads or system settings changed.
+
+The exact30-file union567462c8, independently checked162cca75, preserves every
+historical source/count/history assertion and adds current199/53 and genuinely
+absent new-script controls. Same execute, grading, example and migration loops
+continue over the intended current source. STP's historical profile constructor
+continues using strict197 so it cannot invent two new Script records. No content,
+production grading, limits, deadlines, original captures or QA allowances change.
+Actual readback0dad51ee confirms30 owned/1109 protected inputs and31 current pins.
+
+M738 all29 corrected integration targets PASS254/0/0; M739 real NAT selector/Start
+PASS1/0/0 (8.49s); M740 Python514 PASS11.280s; M741 all-target Clippy-Dwarnings
+PASS4.65s. All1139 inputs stay exact through these gates. Learner-facing src,
+scenarios and guide contain none of Read-the-contract/fresh-virtual-workspace/
+local-scalar phrasing. No new curriculum is counted; a fresh full-inclusive run
+is required before accepting or committing this source milestone.
+
+Current curriculum summaries now distinguish source199/53/evaluator15/501 cases/
+62 examples from installed197/52/evaluator14. Bounded ERE/getopts/one-off practice
+is no longer described as wholly absent. Official version boundaries were checked
+2026-10-31; original2026-10-22 source fingerprints and all coverage statuses remain
+unchanged. Snapshot2/HSRP4 remain unregistered; private source ACKs for further
+capabilities are not implementation, runtime or curriculum acceptance.
+
+
+## M743: current199 full-inclusive acceptance
+
+2026-10-31. The fresh command completes and is directly reaped exit0:
+`env CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 python3 tools/dev.py test --locked --offline --all-targets --no-fail-fast -- --include-ignored --nocapture`.
+3,041 PASS/0 FAIL/0 ignored,236 result targets; library119/0 and UI675/0 included.
+All1139 before-map inputs stay byte-exact. Failed M7372993/48 remains retained;
+no result was relabeled and no assertion/deadline/limit was relaxed.
+
+5047 ordinary-run memory samples: minimum24,326,414,336 available bytes, maximum
+full PSI avg10=0%, swap-out/OOM deltas0. Cargo2 jobs/Rust2 threads and private
+NVMe artifact paths remain enforced. No stress run or unrelated application change.
+
+M740514Python/M741Clippy and M742coverage also pass; current source remains199/53,
+evaluator15,501 graded cases/62 examples. CATALOG199_MILESTONE.md records scope,
+retained native evidence and limits. Installed553197/evaluator14 is unchanged;
+new candidate lifecycle/native/NFS cold/startup gates remain required.
+
+Two Snapshot projects have a combined CONDITIONAL source ACKd45584ae and a clean
+teaching review1e05f56f. They remain unregistered; final Main/doc rebase and actual
+201 gates precede acceptance. Four HSRP assignments and all other private
+capability proposals also remain uncounted. No curriculum parent is complete;
+Windows/macOS desktop, screen-reader, physical-device and novice acceptance stay
+pending. Continue the authorized batches after scoped source commit/push.

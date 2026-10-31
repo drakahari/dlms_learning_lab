@@ -1,0 +1,1564 @@
+{
+  "version": 1,
+  "status": "SOURCE-ONLY; mathematical predictions; all simulator/content/native executions UNRUN",
+  "actual": null,
+  "dependencies": {
+    "ntp_pack_sha256": "f024f11706a53096f6922e147c9a50f3d8dfbab00c42cedf85c7cc341dea6206",
+    "units_sha256": "ab6eabd2375c7f442e3181f5dd4b0e1658c80b33234d23b74c3f36b51cb4752c"
+  },
+  "unit_proposal": {
+    "id": "hsrp-resilient-gateway",
+    "track": "CCNA",
+    "title": "Keep a virtual gateway usable through failure and return",
+    "summary": "Configure, diagnose and hand over a supplied first-hop gateway using current and settled failure/return evidence. No real router, timers or packets.",
+    "prerequisites": [
+      "ipv4-foundations"
+    ],
+    "labs": [
+      "ccna-hsrp-virtual-gateway",
+      "ccna-hsrp-incumbent-return",
+      "ccna-hsrp-wan-tracking",
+      "ccna-hsrp-resilient-handover"
+    ]
+  },
+  "labs": [
+    {
+      "id": "ccna-hsrp-virtual-gateway",
+      "reference": [
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}",
+        "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.254\"}}"
+      ],
+      "alternatives": [
+        [
+          "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.254\"}}",
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":null}}}",
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}"
+        ],
+        [
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":90,\"preempt\":false,\"track_wan_decrement\":null}}}",
+          "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.254\"}}",
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}"
+        ]
+      ],
+      "initial_expected": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "partial": {
+        "label": "Incomplete configuration",
+        "actions": [
+          {
+            "Router": {
+              "router": "B",
+              "config": {
+                "participating": true,
+                "priority": 100,
+                "preempt": false,
+                "track_wan_decrement": null
+              }
+            }
+          },
+          {
+            "Gateway": {
+              "client": 1,
+              "gateway": "10.91.1.254"
+            }
+          }
+        ],
+        "commands": [
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}"
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "wrong": [
+        {
+          "label": "Plausible wrong configuration",
+          "actions": [
+            {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.91.1.254"
+              }
+            },
+            {
+              "Gateway": {
+                "client": 2,
+                "gateway": "10.91.1.254"
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}",
+            "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.254\"}}"
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "label": "Real-router gateways can forward now but do not survive both identities",
+          "actions": [
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                }
+              }
+            },
+            {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.91.1.2"
+              }
+            },
+            {
+              "Gateway": {
+                "client": 2,
+                "gateway": "10.91.1.2"
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+            "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.2\"}}",
+            "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.2\"}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage": {
+        "action": {
+          "Router": {
+            "router": "B",
+            "config": {
+              "participating": false,
+              "priority": 100,
+              "preempt": false,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "command": "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":false,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "expected": [
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": {
+          "Router": {
+            "router": "B",
+            "config": {
+              "participating": true,
+              "priority": 100,
+              "preempt": false,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "repair_command": "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "practice": {
+        "initial_expected": [
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false,
+          true,
+          false
+        ],
+        "worked_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_expected": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "actual": null
+    },
+    {
+      "id": "ccna-hsrp-incumbent-return",
+      "reference": [
+        "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":110,\"preempt\":true,\"track_wan_decrement\":null}}}"
+      ],
+      "alternatives": [
+        [
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":130,\"preempt\":true,\"track_wan_decrement\":null}}}"
+        ],
+        [
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":90,\"preempt\":true,\"track_wan_decrement\":null}}}",
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":null}}}"
+        ]
+      ],
+      "initial_expected": [
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "partial": {
+        "label": "Incomplete configuration",
+        "actions": [
+          {
+            "Router": {
+              "router": "A",
+              "config": {
+                "participating": true,
+                "priority": 150,
+                "preempt": false,
+                "track_wan_decrement": null
+              }
+            }
+          }
+        ],
+        "commands": [
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":false,\"track_wan_decrement\":null}}}"
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "wrong": [
+        {
+          "label": "Plausible wrong configuration",
+          "actions": [
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":true,\"track_wan_decrement\":null}}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "label": "Disabling and re-enabling the incumbent fixes only the present role",
+          "actions": [
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": false,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                }
+              }
+            },
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":false,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "damage": {
+        "action": {
+          "Router": {
+            "router": "A",
+            "config": {
+              "participating": true,
+              "priority": 110,
+              "preempt": false,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "command": "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":110,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": {
+          "Router": {
+            "router": "A",
+            "config": {
+              "participating": true,
+              "priority": 110,
+              "preempt": true,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "repair_command": "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":110,\"preempt\":true,\"track_wan_decrement\":null}}}",
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "practice": {
+        "initial_expected": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "worked_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "actual": null
+    },
+    {
+      "id": "ccna-hsrp-wan-tracking",
+      "reference": [
+        "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":30}}}",
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}"
+      ],
+      "alternatives": [
+        [
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}",
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":160,\"preempt\":true,\"track_wan_decrement\":30}}}"
+        ],
+        [
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":40}}}",
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":130,\"preempt\":true,\"track_wan_decrement\":null}}}"
+        ]
+      ],
+      "initial_expected": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "partial": {
+        "label": "Incomplete configuration",
+        "actions": [
+          {
+            "Router": {
+              "router": "A",
+              "config": {
+                "participating": true,
+                "priority": 150,
+                "preempt": true,
+                "track_wan_decrement": 30
+              }
+            }
+          }
+        ],
+        "commands": [
+          "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":30}}}"
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "wrong": [
+        {
+          "label": "Plausible wrong configuration",
+          "actions": [
+            {
+              "Router": {
+                "router": "A",
+                "config": {
+                  "participating": true,
+                  "priority": 150,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            },
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 140,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":null}}}",
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "label": "Tracking to an equal priority cannot preempt",
+          "actions": [
+            {
+              "Router": {
+                "router": "A",
+                "config": {
+                  "participating": true,
+                  "priority": 150,
+                  "preempt": true,
+                  "track_wan_decrement": 10
+                }
+              }
+            },
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 140,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":10}}}",
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        }
+      ],
+      "damage": {
+        "action": {
+          "Router": {
+            "router": "B",
+            "config": {
+              "participating": true,
+              "priority": 140,
+              "preempt": false,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "command": "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "repair": {
+          "Router": {
+            "router": "B",
+            "config": {
+              "participating": true,
+              "priority": 140,
+              "preempt": true,
+              "track_wan_decrement": null
+            }
+          }
+        },
+        "repair_command": "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}",
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "practice": {
+        "initial_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "worked_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "actual": null
+    },
+    {
+      "id": "ccna-hsrp-resilient-handover",
+      "reference": [
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":120,\"preempt\":true,\"track_wan_decrement\":20}}}",
+        "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}",
+        "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.254\"}}"
+      ],
+      "alternatives": [
+        [
+          "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.254\"}}",
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":130,\"preempt\":true,\"track_wan_decrement\":30}}}",
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}"
+        ],
+        [
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}",
+          "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.254\"}}",
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":40}}}"
+        ]
+      ],
+      "initial_expected": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "partial": {
+        "label": "Incomplete configuration",
+        "actions": [
+          {
+            "Router": {
+              "router": "B",
+              "config": {
+                "participating": true,
+                "priority": 120,
+                "preempt": true,
+                "track_wan_decrement": 20
+              }
+            }
+          },
+          {
+            "Gateway": {
+              "client": 1,
+              "gateway": "10.94.4.254"
+            }
+          }
+        ],
+        "commands": [
+          "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":120,\"preempt\":true,\"track_wan_decrement\":20}}}",
+          "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}"
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "actual": null
+      },
+      "wrong": [
+        {
+          "label": "Plausible wrong configuration",
+          "actions": [
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": true,
+                  "track_wan_decrement": 20
+                }
+              }
+            },
+            {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.94.4.254"
+              }
+            },
+            {
+              "Gateway": {
+                "client": 3,
+                "gateway": "10.94.4.254"
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":110,\"preempt\":true,\"track_wan_decrement\":20}}}",
+            "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}",
+            "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.254\"}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ],
+          "actual": null
+        },
+        {
+          "label": "Real B gateways bypass the VIP even while B is healthy",
+          "actions": [
+            {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 120,
+                  "preempt": true,
+                  "track_wan_decrement": 20
+                }
+              }
+            },
+            {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.94.4.2"
+              }
+            },
+            {
+              "Gateway": {
+                "client": 3,
+                "gateway": "10.94.4.2"
+              }
+            }
+          ],
+          "commands": [
+            "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":120,\"preempt\":true,\"track_wan_decrement\":20}}}",
+            "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.2\"}}",
+            "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.2\"}}"
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false
+          ],
+          "actual": null
+        }
+      ],
+      "damage": {
+        "action": {
+          "Gateway": {
+            "client": 1,
+            "gateway": "10.94.4.2"
+          }
+        },
+        "command": "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.2\"}}",
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "repair": {
+          "Gateway": {
+            "client": 1,
+            "gateway": "10.94.4.254"
+          }
+        },
+        "repair_command": "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}",
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "practice": {
+        "initial_expected": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          true
+        ],
+        "worked_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "experiment_expected": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        "repair_expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "actual": null
+      },
+      "actual": null
+    }
+  ]
+}

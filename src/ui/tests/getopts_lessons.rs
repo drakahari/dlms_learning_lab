@@ -221,3 +221,107 @@ fn getopts_native_and_original_case_finish_hold_until_backend_closes() {
         }
     }
 }
+
+#[test]
+fn case_and_getopts_recheck_full_sources_and_units_on_later_geometry_callbacks() {
+    fn callback(
+        ctx: &egui::Context,
+        a: &mut LabApp,
+        kind: ScriptLessonFlow,
+    ) -> std::thread::Result<(bool, Option<String>)> {
+        let mut result = None;
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1200., 850.),
+                )),
+                ..Default::default()
+            },
+            |ctx| {
+                // Catch inside the pass so a refused source still ends the
+                // actual egui frame cleanly. No learner input or job is run.
+                result = Some(std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+                    || a.case_lessons_native(ctx, 7241, kind),
+                )));
+            },
+        );
+        result.unwrap()
+    }
+    fn full(p: &progress::Progress) -> serde_json::Value {
+        serde_json::json!({"portable":p,"receipts":p.migration_receipts})
+    }
+    for kind in [ScriptLessonFlow::Case, ScriptLessonFlow::Getopts] {
+        let (ctx, mut a) = proposed_app();
+        a.smoke = true;
+        a.smoke_stage = 7241;
+        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        let before = full(&a.progress);
+        let sources = a.scenarios.as_ptr();
+        let units = a.units.as_ptr();
+        let mut settled = false;
+        for _ in 0..4 {
+            let (advance, shot) = callback(&ctx, &mut a, kind).unwrap();
+            settled |= advance;
+            assert!(shot.is_none());
+            assert_eq!(full(&a.progress), before);
+        }
+        assert!(settled, "The ordinary geometry phase must actually settle");
+        for mutation in 0..4 {
+            match mutation {
+                0 => a.scenarios[0].objective.push('!'),
+                1 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[197].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                2 => a.units[0].summary.push('!'),
+                _ => a.units[52].labs.push("unreviewed-source".into()),
+            }
+            assert_eq!(a.scenarios.as_ptr(), sources);
+            assert_eq!(a.units.as_ptr(), units);
+            let error = callback(&ctx, &mut a, kind)
+                .expect_err("Every later callback must reject same-ID/version field corruption");
+            let message = error
+                .downcast_ref::<String>()
+                .map(String::as_str)
+                .or_else(|| error.downcast_ref::<&str>().copied())
+                .unwrap_or("");
+            let expected = if mutation < 2 {
+                "Complete source differs"
+            } else {
+                "Complete unit differs"
+            };
+            assert!(
+                message.contains(expected),
+                "Real full-field guard required for {kind:?}/{mutation}: {message}"
+            );
+            assert_eq!(full(&a.progress), before);
+            match mutation {
+                0 => {
+                    a.scenarios[0].objective.pop();
+                }
+                1 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[197].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.pop();
+                }
+                2 => {
+                    a.units[0].summary.pop();
+                }
+                _ => {
+                    a.units[52].labs.pop();
+                }
+            }
+            assert_eq!(callback(&ctx, &mut a, kind).unwrap(), (true, None));
+            assert_eq!(full(&a.progress), before);
+            assert!(
+                a.progress.attempts.is_empty()
+                    && a.pending_events.is_empty()
+                    && a.script_job.is_none()
+            );
+        }
+    }
+}

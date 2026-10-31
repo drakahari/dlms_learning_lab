@@ -10,7 +10,9 @@ use dlms_learning_lab::{
 #[test]
 fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.iter().filter(|s| s.teaching.is_some()).count(), 60);
+    assert_eq!(current.iter().filter(|s| s.teaching.is_some()).count(), 62);
+    let old197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&current);
+    assert_eq!(old197.iter().filter(|s| s.teaching.is_some()).count(), 60);
     let labs = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&current);
     let edits = [
         ("Mina", "Rowan"),

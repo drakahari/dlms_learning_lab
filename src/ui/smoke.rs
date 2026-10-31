@@ -21,6 +21,7 @@ pub(in crate::ui) mod etherchannel_lessons;
 pub(in crate::ui) mod file_backup_lessons;
 mod find_lessons;
 mod legacy_terminal;
+pub(in crate::ui) mod literal_lessons;
 pub(in crate::ui) mod loop_recovery;
 pub(in crate::ui) mod lvm_lessons;
 mod mac_layout;
@@ -372,6 +373,7 @@ impl LabApp {
         let immediate_stop = immediate_stop || numeric_validation::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || loop_recovery::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || ere_evidence::immediate_stop(self.smoke_stage);
+        let immediate_stop = immediate_stop || literal_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop =
             immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
@@ -710,6 +712,13 @@ impl LabApp {
             }
             n @ 72000..=72499 => {
                 let (advance, capture) = self.private_office_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n if (literal_lessons::BASE..=literal_lessons::last_stage()).contains(&n) => {
+                let (advance, capture) = self.literal_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

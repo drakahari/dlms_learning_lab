@@ -1684,7 +1684,58 @@ mod attempt_projection_tests {
     // Library-unit scope cannot import the UI-owned historical boundary. Keep
     // its complete new-source equality here; external catalog190 guards retain
     // the independent recipe/pack hashes and raw/full-typed unit inverse.
+    // Library-unit scope uses its own immutable compiled Pack and recipe,
+    // never a UI test module. A fresh canonical constructor is independent of
+    // the caller's mutable Vec, so every old197 field is checked too.
+    fn literal_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../tests/fixtures/catalog199-registration.json"
+        ))
+        .unwrap();
+        let raw = include_bytes!("../scenarios/shell-literal-normalization-draft.json");
+        let new: pack::Pack = serde_json::from_slice(raw).unwrap();
+        assert_eq!(
+            (
+                recipe["before_count"].as_u64(),
+                recipe["after_count"].as_u64()
+            ),
+            (Some(197), Some(199))
+        );
+        assert_eq!(
+            raw.len() as u64,
+            recipe["canonical_literal_pack_bytes"].as_u64().unwrap()
+        );
+        assert_eq!(all.len(), 199);
+        assert_eq!(new.scenarios.len(), 2);
+        assert_eq!(
+            new.scenarios
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            ["shell-trim-options", "shell-trim-manifest"]
+        );
+        assert_eq!(
+            serde_json::to_value(new.scenarios.iter().map(|s| &s.id).collect::<Vec<_>>()).unwrap(),
+            recipe["new_ids"]
+        );
+        let canonical = pack::bundled().unwrap();
+        assert_eq!(canonical.len(), 199);
+        assert_eq!(
+            serde_json::to_value(&all[..197]).unwrap(),
+            serde_json::to_value(&canonical[..197]).unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&all[197..]).unwrap(),
+            serde_json::to_value(&new.scenarios).unwrap()
+        );
+        &all[..197]
+    }
     fn disk_predecessor(all: &[Scenario]) -> &[Scenario] {
+        let all = if all.len() == 199 {
+            literal_predecessor(all)
+        } else {
+            all
+        };
         let recipe: serde_json::Value = serde_json::from_slice(include_bytes!(
             "../tests/fixtures/catalog197-registration.json"
         ))
@@ -1854,7 +1905,9 @@ mod attempt_projection_tests {
     #[ignore = "Requires the retained accepted private actual9 capture; never fabricates a run"]
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
-        let mut all = pack::bundled().unwrap();
+        let current_catalog = pack::bundled().unwrap();
+        assert_eq!(current_catalog.len(), 199);
+        let mut all = literal_predecessor(&current_catalog).to_vec();
         assert_eq!(ntp_predecessor(&all).len(), 186);
         assert_eq!(ere_predecessor(&all).len(), 190);
         assert_eq!(disk_predecessor(&all).len(), 193);
@@ -1918,6 +1971,131 @@ mod attempt_projection_tests {
             serde_json::to_value(&loaded.attempts[&s.id]).unwrap()
                 == serde_json::to_value(&p.attempts[&s.id]).unwrap()
         );
+        // Entire current199 plus the same private NFS fixture (200 total).
+        // Real current decode/save/read must not invent either new Script task.
+        let mut full_current = current_catalog;
+        full_current.push(s.clone());
+        assert_eq!(full_current.len(), 200);
+        let mut expanded = progress::decode(&raw, &full_current).unwrap();
+        assert_eq!(serde_json::to_value(&expanded.attempts).unwrap(), old);
+        for id in ["shell-trim-options", "shell-trim-manifest"] {
+            let source = full_current.iter().find(|source| source.id == id).unwrap();
+            let crate::engine::Goal::Script { cases } = &source.goal else {
+                panic!()
+            };
+            assert_eq!(cases.len(), 12);
+            assert!(matches!(source.initial, State::Script { .. }));
+            assert!(!expanded.attempts.contains_key(id) && !expanded.favorites.contains(id));
+            let mut fresh = Attempt::new(source, 0);
+            crate::workspace::prepare(&mut fresh);
+            crate::script_teaching::prepare(&mut fresh, source.teaching.as_ref().unwrap(), true);
+            assert!(matches!(fresh.state, State::Script { run: None, .. }));
+            assert!(
+                fresh
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .script_learning
+                    .as_ref()
+                    .unwrap()
+                    .example_result
+                    .is_none()
+            );
+            assert!(!progress::current_solved(&fresh, source));
+        }
+        let mut current_nfs = Attempt::new(&s, 17);
+        teach::prepare(&mut current_nfs, &s, true).unwrap();
+        expanded.attempts.insert(s.id.clone(), current_nfs);
+        let caller = serde_json::to_value(&expanded).unwrap();
+        let caller_receipts = serde_json::to_value(&expanded.migration_receipts).unwrap();
+        let current_path = dir.path().join("current199-with-nfs.json");
+        std::fs::write(&current_path, &raw).unwrap();
+        progress::save_with_catalog(&current_path, &expanded, &full_current).unwrap();
+        assert_eq!(serde_json::to_value(&expanded).unwrap(), caller);
+        assert_eq!(
+            serde_json::to_value(&expanded.migration_receipts).unwrap(),
+            caller_receipts
+        );
+        assert_eq!(
+            std::fs::read(current_path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
+            raw
+        );
+        let current_raw = std::fs::read(&current_path).unwrap();
+        let current_loaded = progress::load(&current_path, &full_current).unwrap();
+        assert_eq!(serde_json::to_value(&current_loaded).unwrap(), caller);
+        let stored: serde_json::Value = serde_json::from_slice(&current_raw).unwrap();
+        assert_eq!(
+            serde_json::to_value(&current_loaded.migration_receipts).unwrap(),
+            stored["migration_receipts"]
+        );
+        assert!(
+            current_loaded
+                .migration_receipts
+                .as_ref()
+                .unwrap()
+                .shell
+                .contains(&crate::shell::EVALUATOR_REVISION)
+        );
+        let mut prior = serde_json::to_value(&current_loaded.attempts).unwrap();
+        prior.as_object_mut().unwrap().remove(&s.id);
+        assert_eq!(
+            prior, old,
+            "Every original Attempt/Record occurrence remains exact"
+        );
+        for id in ["shell-trim-options", "shell-trim-manifest"] {
+            assert!(!current_loaded.attempts.contains_key(id));
+            assert!(!current_loaded.favorites.contains(id));
+        }
+        let decoded = serde_json::to_value(&current_loaded).unwrap();
+        let decoded_receipts = serde_json::to_value(&current_loaded.migration_receipts).unwrap();
+        progress::save_with_catalog(&current_path, &current_loaded, &full_current).unwrap();
+        let resumed = progress::load(&current_path, &full_current).unwrap();
+        assert_eq!(serde_json::to_value(&resumed).unwrap(), decoded);
+        assert_eq!(
+            serde_json::to_value(&resumed.migration_receipts).unwrap(),
+            decoded_receipts
+        );
+        let mut replayed = serde_json::to_value(&resumed.attempts).unwrap();
+        replayed.as_object_mut().unwrap().remove(&s.id);
+        assert_eq!(replayed, old);
+    }
+    #[test]
+    fn literal199_local_predecessor_checks_every_old_and_new_source_field() {
+        let all = pack::bundled().unwrap();
+        assert_eq!(literal_predecessor(&all).len(), 197);
+        assert_eq!(disk_predecessor(&all).len(), 193);
+        for mode in 0..7 {
+            let mut bad = all.clone();
+            match mode {
+                0 => {
+                    bad.pop();
+                }
+                1 => bad.push(all[197].clone()),
+                2 => bad[0].objective.push('!'),
+                3 => {
+                    let crate::engine::Goal::Script { cases } = &mut bad[197].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                4 => bad[198]
+                    .teaching
+                    .as_mut()
+                    .unwrap()
+                    .example
+                    .push_str("\n# changed"),
+                5 => bad[197].version += 1,
+                _ => bad[197].id = "unreviewed-id".into(),
+            }
+            assert!(
+                std::panic::catch_unwind(|| literal_predecessor(&bad)).is_err(),
+                "Local source mutation {mode}"
+            );
+        }
     }
     #[test]
     fn borrowed_session_edit_whole_attempt_refusal_precedes_actual_copy_site() {

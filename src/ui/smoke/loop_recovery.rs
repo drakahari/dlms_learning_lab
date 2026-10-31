@@ -587,8 +587,13 @@ impl LabApp {
         assert_eq!(shell::EVALUATOR_REVISION, 15);
         // Admit the complete current source on EVERY callback, then reuse only
         // these immutable checked predecessors for the older authority proofs.
-        let checked193 = disk_registration::before_scenarios(&self.scenarios);
-        let checked51 = disk_registration::before_typed_units(&self.units);
+        let checked197 = disk_registration::literal_registration::before_scenarios(&self.scenarios);
+        let checked52 = disk_registration::literal_registration::before_typed_units(&self.units);
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
+        // Literal's full equality includes exact disk original193+canonical4.
+        // These are same-callback immutable prefixes, never a cached admission.
+        let checked193 = &checked197[..193];
+        let checked51 = &checked52[..51];
         assert_eq!(
             (
                 one_off_boundary::loop_registration::lvm_registration::before_scenarios(checked193)
@@ -603,7 +608,8 @@ impl LabApp {
         assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_scenarios(checked193).len(),one_off_boundary::loop_registration::lvm_registration::ntp_registration::before_typed_units(checked51).len()),(186,49));
         assert_eq!((one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(checked193).len(), one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_typed_units(checked51).len()), (190, 50));
         assert_eq!((checked193.len(), checked51.len()), (193, 51));
-        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
+        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
         assert_eq!(
             self.scenarios[180..182]
                 .iter()

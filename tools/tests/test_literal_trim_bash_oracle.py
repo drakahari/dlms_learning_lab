@@ -16,7 +16,14 @@ PROJECT=Path(__file__).resolve().parents[2]
 MIRROR=Path(__file__).parent/'fixtures/literal-trim-reference.json'
 
 # CURRENT QA allowance only; frozen literal32 COMPILED/SOURCES are unchanged.
-CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 41797, 'bd7149e93384eb8be68aac9cb68486fc1630248b13cab0ff04b78b393c7e1535'),)
+CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 42234, '8dbbed5fa3de2da4e01de5694b4ec0e1b4269f8bdaf42b02ebc32e5ef40ca823'), ('scenarios/shell-snapshot-rollout-draft.json', 46123, '6d8cb5a647b702594bb45a83531ec95d90c351566ba68572a11908c0fde1aa0d'))
+
+# CURRENT HSRP seam: exact accepted source tuples; frozen literal32 stays closed.
+CURRENT_HSRP_WORKSPACE_INPUTS = (('src/hsrp_workspace.rs', 24874, 'facb9e364856dad53ca738d5981977e504c63c3d667574cda5225114e727e730'), ('src/hsrp_workspace/binding.rs', 6020, '19d9e120d7ade1e920181b137bea53f57ad87641c78ddee9fc5b0b426db8fbb6'), ('src/hsrp_workspace/goal.rs', 16815, 'f32f2ca00ff1c4590f4c5712885bd0f597ba6fe95b63e6171d82c3af6d3cbe8b'), ('src/ui/hsrp_workspace.rs', 41147, 'd03dcbed9710605a4526d9cfc1a66ca4927223bd0defa4b0a766502420ebb45b'), ('src/ui/tests/hsrp_workspace.rs', 53604, 'a942875857a8fe8be978864b896fdd6613b2cf99238c66a52c4bec9f7115789a'))
+CURRENT_AUTHORED_HSRP_INPUTS = (('scenarios/hsrp-resilient-gateway-v1.json', 103880, 'f8db2ea4a4391fca0dcd8a771404086f484526431ce092832b1e48b67261617e'),)
+
+# Fixed CURRENT native QA only; sealed reference inputs stay immutable.
+CURRENT_LITERAL_NATIVE_INPUTS = (('src/ui/smoke/literal_lessons.rs', 42160, '189581aa5141a01e0565c643df5c4efb2bc3d56261391694c1a2eb4892d8794b'), ('src/ui/tests/literal_lessons_native.rs', 30725, 'f32db2b4108c57248f65ebcf133e57dec7e7be60457c980e8fae29ee81a613b7'))
 
 class LiteralTrimGuards(unittest.TestCase):
     def setUp(self):
@@ -120,8 +127,17 @@ class LiteralTrimGuards(unittest.TestCase):
         self.assertEqual(len(c.COMPILED),len(set(c.COMPILED)))
         actual={p.relative_to(PROJECT).as_posix() for fam in c.SOURCE_FAMILIES for p in (PROJECT/fam).rglob('*') if p.is_file()}
         listed={n for n in c.COMPILED if Path(n).parts[0] in c.SOURCE_FAMILIES}
+        hsrp_extension={name for name,_,_ in CURRENT_HSRP_WORKSPACE_INPUTS}
+        hsrp_authored_extension={name for name,_,_ in CURRENT_AUTHORED_HSRP_INPUTS}
+        self.assertEqual((len(hsrp_extension),len(hsrp_authored_extension)),(5,1))
+        self.assertTrue(hsrp_extension.isdisjoint(hsrp_authored_extension))
+        native_extension={name for name,_,_ in CURRENT_LITERAL_NATIVE_INPUTS}
+        self.assertEqual(len(native_extension),2)
+        actual_with_native=actual
+        actual_with_hsrp=actual-native_extension
+        actual=actual_with_hsrp-hsrp_extension-hsrp_authored_extension
         authored_extension = {name for name, _, _ in CURRENT_LITERAL_AUTHORED_INPUTS}
-        self.assertEqual(len(authored_extension), 1)
+        self.assertEqual(len(authored_extension), 2)
         self.assertTrue(listed.isdisjoint(authored_extension))
         # Retain the entire fixed predecessor and reject every unknown path.
         self.assertEqual(actual-authored_extension,listed)
@@ -131,6 +147,18 @@ class LiteralTrimGuards(unittest.TestCase):
             self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
             self.assertEqual(info.st_size,size)
             self.assertEqual(c.digest(path.read_bytes()),sha)
+        self.assertTrue((listed|authored_extension).isdisjoint(hsrp_extension|hsrp_authored_extension))
+        self.assertEqual(actual_with_hsrp,listed|authored_extension|hsrp_extension|hsrp_authored_extension)
+        self.assertTrue((listed|authored_extension|hsrp_extension|hsrp_authored_extension).isdisjoint(native_extension))
+        self.assertEqual(actual_with_native,listed|authored_extension|hsrp_extension|hsrp_authored_extension|native_extension)
+        for name,size,sha in CURRENT_LITERAL_NATIVE_INPUTS:
+            path=PROJECT/name;info=path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+            self.assertEqual((info.st_size,c.digest(path.read_bytes())),(size,sha))
+        for name,size,sha in CURRENT_HSRP_WORKSPACE_INPUTS+CURRENT_AUTHORED_HSRP_INPUTS:
+            path=PROJECT/name;info=path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+            self.assertEqual((info.st_size,c.digest(path.read_bytes())),(size,sha))
         self.assertTrue({'src/shell/literal_trim.rs','src/ere/cooperative.rs','docs/SHELL_SUBSET.md',c.PROBE_SOURCE,c.FIXTURE}<=set(c.COMPILED))
         self.assertEqual(c.digest((PROJECT/c.PROBE_SOURCE).read_bytes()),c.PROBE_SOURCE_SHA)
     def test_source_roster_refuses_omission_extra_alias_and_empty_directory(self):
@@ -186,5 +214,41 @@ class LiteralTrimGuards(unittest.TestCase):
                 # Only the exact newly-created private mock leaf is removed.
                 added.unlink()
                 self.assertEqual(c.project_roster(self.root), set(names))
+
+
+    def test_frozen_literal32_prepare_refuses_each_current_hsrp_source_before_subject_or_destination(self):
+        names=('src/lib.rs','scenarios/base.json','assets/theme.txt')
+        for name in names:self.put(name,'SYNTHETIC closed input')
+        for name,size,sha in CURRENT_HSRP_WORKSPACE_INPUTS+CURRENT_AUTHORED_HSRP_INPUTS:
+            raw=(PROJECT/name).read_bytes();self.assertEqual((len(raw),c.digest(raw)),(size,sha))
+            added=self.put(name,raw)
+            with patch.object(c,'COMPILED',names), patch.object(c.shared,'root_guard',return_value=()), patch.object(c,'fixed',return_value=self.fixture), patch.object(c,'control') as control, patch.object(c.shared,'owned_directory') as destination, patch.object(c.shared,'pinned_executable') as held, patch.object(c.safe,'capture_command') as child:
+                with self.assertRaises(c.safe.OracleError) as refused:c.run(self.root,'prepare')
+                self.assertRegex(str(refused.exception),'Bounded closed source inventory|No unreviewed project source directory|No omitted/extra/alias project source')
+                control.assert_not_called();destination.assert_not_called();held.assert_not_called();child.assert_not_called()
+                self.assertFalse((self.root/c.BASE).exists());added.unlink()
+                parent=added.parent;family=self.root/Path(name).parts[0]
+                while parent!=family:
+                    previous=parent;parent=parent.parent;previous.rmdir()
+                self.assertEqual(c.project_roster(self.root),set(names))
+
+
+    def test_frozen_r1_prepare_refuses_both_literal_native_modules_before_subject_or_destination(self):
+        names=('src/lib.rs','scenarios/base.json','assets/theme.txt')
+        for name in names:self.put(name,'SYNTHETIC closed input')
+        for name,size,sha in CURRENT_LITERAL_NATIVE_INPUTS:
+            raw=(PROJECT/name).read_bytes()
+            self.assertEqual(len(raw),size);self.assertEqual(c.digest(raw),sha)
+            added=self.put(name,raw)
+            with patch.object(c,'COMPILED',names), patch.object(c.shared,'root_guard',return_value=()), patch.object(c,'fixed',return_value=self.fixture), patch.object(c,'control') as control, patch.object(c.shared,'owned_directory') as destination, patch.object(c.shared,'pinned_executable') as held, patch.object(c.safe,'capture_command') as child:
+                with self.assertRaises(c.safe.OracleError) as refused:c.run(self.root,'prepare')
+                self.assertRegex(str(refused.exception),'Bounded closed source inventory|No unreviewed project source directory|No omitted/extra/alias project source')
+                control.assert_not_called();destination.assert_not_called();held.assert_not_called();child.assert_not_called()
+                self.assertFalse((self.root/c.BASE).exists())
+                added.unlink()
+                parent=added.parent
+                while parent!=self.root/'src':
+                    previous=parent;parent=parent.parent;previous.rmdir()
+                self.assertEqual(c.project_roster(self.root),set(names))
 
 if __name__=='__main__':unittest.main()

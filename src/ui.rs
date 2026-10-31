@@ -22,6 +22,7 @@ mod discovery_workspace;
 mod dns_workspace;
 mod etherchannel_workspace;
 mod file_backup_workspace;
+mod hsrp_workspace;
 mod legacy_learning;
 mod lvm_workspace;
 mod nat_workspace;
@@ -63,6 +64,7 @@ struct Metrics {
     lvm: lvm_workspace::Metrics,
     ntp: ntp_workspace::Metrics,
     partition_fs: partition_fs_workspace::Metrics,
+    hsrp: hsrp_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -281,6 +283,7 @@ struct Metrics {
     script_completion: Option<egui::Rect>,
     script_feedback: Option<egui::Rect>,
     script_case_rows: Vec<(usize, egui::Rect)>,
+    script_goal: Option<egui::Rect>,
     script_case_status: Option<(usize, bool, egui::Rect)>,
     reopen_scale: Option<egui::Rect>,
     reopen_scale_items: Vec<(f32, egui::Rect)>,
@@ -353,6 +356,7 @@ pub struct LabApp {
     lvm_presentation: lvm_workspace::Presentation,
     ntp_presentation: ntp_workspace::Presentation,
     partition_fs_presentation: partition_fs_workspace::Presentation,
+    hsrp_presentation: hsrp_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     one_off_presentation: one_off_workspace::Presentation,
@@ -499,6 +503,7 @@ impl LabApp {
             lvm_presentation: Default::default(),
             ntp_presentation: Default::default(),
             partition_fs_presentation: Default::default(),
+            hsrp_presentation: Default::default(),
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
@@ -674,6 +679,10 @@ impl LabApp {
             {
                 stage
             } else if let Some(stage) =
+                Self::literal_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::ere_evidence_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -844,6 +853,22 @@ impl LabApp {
             self.notice = Some(e);
             return;
         }
+        let hsrp_source = &self.scenarios[i];
+        let previous = self.progress.attempts.get(&hsrp_source.id);
+        if matches!(hsrp_source.initial, engine::State::Hsrp { .. })
+            || matches!(hsrp_source.goal, engine::Goal::Hsrp { .. })
+            || previous.is_some_and(|a| matches!(a.state, engine::State::Hsrp { .. }))
+        {
+            let admission = dlms_learning_lab::hsrp_workspace::binding::admit_launch(
+                previous,
+                hsrp_source,
+                self.progress.clock.saturating_add(1),
+            );
+            if let Err(e) = admission {
+                self.notice = Some(e);
+                return;
+            }
+        }
         let ntp_source = &self.scenarios[i];
         let previous = self.progress.attempts.get(&ntp_source.id);
         if matches!(ntp_source.initial, engine::State::Ntp { .. })
@@ -899,6 +924,12 @@ impl LabApp {
         model::prepare(a);
         if matches!(a.state, engine::State::PartitionFs { .. })
             && let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
+        if matches!(a.state, engine::State::Hsrp { .. })
+            && let Err(e) = dlms_learning_lab::hsrp_workspace::binding::prepare(a, s)
         {
             self.notice = Some(e);
             return;
@@ -1116,6 +1147,18 @@ impl LabApp {
             }
             self.partition_fs_presentation.reset_all();
         }
+        if matches!(self.scenarios[i].initial, engine::State::Hsrp { .. }) {
+            let source = &self.scenarios[i];
+            if let Err(e) = dlms_learning_lab::hsrp_workspace::binding::admit_launch(
+                None,
+                source,
+                self.progress.attempts[&source.id].visited,
+            ) {
+                self.notice = Some(e);
+                return;
+            }
+            self.hsrp_presentation.reset_all();
+        }
         if matches!(self.scenarios[i].initial, engine::State::Ntp { .. }) {
             self.ntp_presentation.reset_all();
         }
@@ -1157,6 +1200,12 @@ impl LabApp {
         model::prepare(a);
         if matches!(a.state, engine::State::PartitionFs { .. })
             && let Err(e) = dlms_learning_lab::partition_fs_workspace::binding::prepare(a, s)
+        {
+            self.notice = Some(e);
+            return;
+        }
+        if matches!(a.state, engine::State::Hsrp { .. })
+            && let Err(e) = dlms_learning_lab::hsrp_workspace::binding::prepare(a, s)
         {
             self.notice = Some(e);
             return;
@@ -1312,7 +1361,8 @@ impl LabApp {
             || self.one_off_capture_active()
             || self.lvm_capture_active()
             || self.ntp_capture_active()
-            || self.disk_capture_active();
+            || self.disk_capture_active()
+            || self.literal_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1361,7 +1411,8 @@ impl LabApp {
             || self.one_off_capture_active()
             || self.lvm_capture_active()
             || self.ntp_capture_active()
-            || self.disk_capture_active();
+            || self.disk_capture_active()
+            || self.literal_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)

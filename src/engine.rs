@@ -29,6 +29,9 @@ pub enum State {
     PartitionFs {
         simulation: Box<crate::partition_fs_workspace::Session>,
     },
+    Hsrp {
+        simulation: Box<crate::hsrp_workspace::Session>,
+    },
     Ntp {
         simulation: Box<crate::ntp_workspace::Session>,
     },
@@ -174,6 +177,9 @@ pub enum State {
 pub enum Goal {
     PartitionFs {
         definition: Box<crate::partition_fs_workspace::Definition>,
+    },
+    Hsrp {
+        definition: Box<crate::hsrp_workspace::Definition>,
     },
     Ntp {
         definition: Box<crate::ntp_workspace::Definition>,
@@ -370,6 +376,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
         (State::PartitionFs { simulation }, Goal::PartitionFs { definition }) => {
             definition.checks(simulation)
         }
+        (State::Hsrp { simulation }, Goal::Hsrp { definition }) => definition.checks(simulation),
         (State::Ntp { simulation }, Goal::Ntp { definition }) => definition.checks(simulation),
         (State::Lvm { simulation }, Goal::Lvm { definition }) => definition.checks(simulation),
         (State::PhysicalLink { simulation }, Goal::PhysicalLink { definition }) => {
@@ -710,6 +717,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 pub fn help(s: &State) -> &'static str {
     match s {
         State::PartitionFs { .. } => crate::partition_fs_workspace::HELP,
+        State::Hsrp { .. } => crate::hsrp::HELP,
         State::Ntp { .. } => crate::ntp::HELP,
         State::Lvm { .. } => crate::lvm::HELP,
         State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
@@ -786,6 +794,12 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
         };
         definition.bound(simulation)?;
         return execute(s, input);
+    }
+    if let State::Hsrp { simulation } = s {
+        let Goal::Hsrp { definition } = goal else {
+            return Err("HSRP changes require the authored task".into());
+        };
+        return simulation.execute(definition, input, false);
     }
     if let State::Ntp { simulation } = s {
         let Goal::Ntp { definition } = goal else {
@@ -1022,6 +1036,15 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     if matches!(s, State::PartitionFs { .. }) {
         return match input { "help" => Ok(crate::partition_fs_workspace::HELP.into()), "show" => Ok(describe(s)), _ => Err("Use the virtual disk table and explicit configuration actions; this workspace does not run parted, mkfs, mount or host disk commands".into()) };
+    }
+    if matches!(s, State::Hsrp { .. }) {
+        return match input {
+            "help" => Ok(crate::hsrp::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Use native HSRP configuration controls; changes require the authored Goal".into(),
+            ),
+        };
     }
     if matches!(s, State::Ntp { .. }) {
         return match input {
@@ -1275,6 +1298,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     }
     match s {
         State::PartitionFs { .. }
+        | State::Hsrp { .. }
         | State::Ntp { .. }
         | State::Lvm { .. }
         | State::PhysicalLink { .. }
@@ -1733,6 +1757,12 @@ pub fn describe(s: &State) -> String {
         State::PartitionFs { simulation } => format!(
             "Virtual GPT/ext4/swap preparation · {} supplied disks · applied state and separate unapplied drafts; no real devices",
             simulation.current.disks.len()
+        ),
+        State::Hsrp { simulation } => format!(
+            "Settled HSRP simulator: Active {:?}, Standby {:?}; virtual gateway {}. No packets or measured convergence.",
+            simulation.current.active(),
+            simulation.current.standby(),
+            simulation.current.virtual_ip()
         ),
         State::Ntp { simulation } => format!(
             "Virtual single-upstream NTP · {} supplied nodes · read-only reference/delivery facts; no host clock or packets",

@@ -95,11 +95,34 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
         }),
         [57, 40, 36, 60]
     );
+    let previous197 = disk_registration::literal_registration::before_scenarios(&all);
+    assert_eq!((all.len(), previous197.len()), (199, 197));
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| previous197.iter().filter(|s| s.track == track).count()),
+        [57, 44, 36, 60]
+    );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [57, 44, 36, 60]
+        [57, 44, 36, 62]
     );
+    assert_eq!(all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), disk_registration::literal_registration::IDS);
+    for source in &all[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let dlms_learning_lab::engine::Goal::Script { cases } = &source.goal else { panic!("Literal append requires a Script Goal") };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    let current53 = dlms_learning_lab::course::bundled(&all).unwrap();
+    let raw52 = disk_registration::literal_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(raw52.as_slice(), include_bytes!("fixtures/literal-units-before197.json"));
+    let previous52 = dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), previous197).unwrap();
+    assert_eq!((current53.len(), previous52.len()), (53, 52));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::before_typed_units(&current53)).unwrap(), serde_json::to_value(&previous52).unwrap());
+    assert_eq!(current53[52].id, "shell-literal-normalization");
+    assert_eq!(current53[52].labs, disk_registration::literal_registration::IDS);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all[..176].iter().filter(|s| s.track == track).count()),

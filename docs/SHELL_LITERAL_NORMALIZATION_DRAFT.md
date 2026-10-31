@@ -1,4 +1,25 @@
-# Literal edges and safe interfaces — conditional authoring draft
+# Literal edges and safe interfaces
+
+Current status,2026-10-31: the two projects are registered in normal source199/53:
+`shell-trim-options` and `shell-trim-manifest`. They teach lossless long-option
+parsing and complete manifest preflight before publication. Each has an
+introduction, separate runnable example/change/repair, full independent assignment,
+progressive help and two supported alternatives. Grading checks12 deterministic
+cases per task;34 extra guards exercise authoring boundaries. M649/M658/M664
+content/current-progress checks and the normal registration tests pass.
+Current full-inclusive M743 passes3,041 tests/236targets/0 failures/0 ignored;
+514 Python and Clippy pass. Scoped Fedora native M718 passes54 captures, with
+16 originals reviewed after the scrollbar correction. Installed553 remains197/52;
+no evaluator15 installation candidate is claimed. See CATALOG199_MILESTONE.md.
+The retained `-draft` filenames are internal source paths, not catalog status.
+No full Bash/POSIX, atomic filesystem or exam-objective claim follows.
+
+## Retained authoring history
+
+The following sections preserve earlier proposals and corrected assumptions.
+Their unregistered/unrun status describes those earlier boundaries, superseded
+only by the actual scoped results above and in CHECKPOINT.md.
+
 
 This is unregistered source, not a language advance or accepted curriculum.
 Current Main is normal197/evaluator14; its final full/candidate acceptance and

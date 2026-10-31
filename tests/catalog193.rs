@@ -11,6 +11,7 @@ use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere
 use serde_json::{Value, json};
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration as literal_registration;
 use ntp_registration::ere_registration as registration;
 use one_off_boundary::loop_registration::lvm_registration::ntp_registration;
 fn value<T: serde::Serialize + ?Sized>(v: &T) -> Value {
@@ -24,7 +25,9 @@ fn fresh(s: &Scenario) -> Attempt {
 }
 #[test]
 fn complete190_sources_and57_case_objects_remain_before_three_real_normal_projects() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::original190::load();
     assert_eq!(
         (disk_registration::before_scenarios(&all).len(), old.len()),
@@ -88,11 +91,15 @@ fn complete190_sources_and57_case_objects_remain_before_three_real_normal_projec
 }
 #[test]
 fn closed51_to50_raw_and_full_typed_inverse_keeps_all_predecessors_and_rejects_mutations() {
-    let current197 = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let current197 = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(current197.len(), 197);
     let all = disk_registration::before_scenarios(&current197).to_vec();
     let old = registration::original190::load();
-    let raw52 = include_bytes!("../scenarios/units-v1.json");
+    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let previous52 = literal_registration::before_units(current53).unwrap();
+    let raw52 = previous52.as_slice();
     let raw51 = disk_registration::before_units(raw52).unwrap();
     let raw = raw51.as_slice();
     let before = registration::before_units(raw).unwrap();
@@ -101,7 +108,15 @@ fn closed51_to50_raw_and_full_typed_inverse_keeps_all_predecessors_and_rejects_m
         serde_json::from_str(include_str!("fixtures/catalog193-registration.json")).unwrap();
     assert_eq!(digest::hash(raw), recipe["after_units51_sha256"]);
     assert_eq!(digest::hash(&before), recipe["before_units50_sha256"]);
-    let current52 = course::bundled(&current197).unwrap();
+    let current52 = course::load(
+        std::str::from_utf8(
+            &literal_registration::before_units(include_bytes!("../scenarios/units-v1.json"))
+                .unwrap(),
+        )
+        .unwrap(),
+        &current197,
+    )
+    .unwrap();
     assert_eq!(current52.len(), 52);
     let units = disk_registration::before_typed_units(&current52).to_vec();
     let previous = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
@@ -164,7 +179,9 @@ fn closed51_to50_raw_and_full_typed_inverse_keeps_all_predecessors_and_rejects_m
 }
 #[test]
 fn exact_source_inverse_refuses_partial_extra_old_version_and_changed_teaching_or_case_objects() {
-    let current = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let current = literal_registration::before_scenarios(&current199).to_vec();
     assert_eq!(current.len(), 197);
     let all = disk_registration::before_scenarios(&current).to_vec();
     assert_eq!(all.len(), 193);
@@ -208,7 +225,9 @@ fn exact_source_inverse_refuses_partial_extra_old_version_and_changed_teaching_o
 }
 #[test]
 fn count_only_predecessor_validates_every_current_key_new_state_and_version_without_credit() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let mut p = Progress {
         schema_version: 1,
         ..Default::default()
@@ -255,7 +274,9 @@ fn count_only_predecessor_validates_every_current_key_new_state_and_version_with
 }
 #[test]
 fn retained_profile_never_invents_new_project_answers_favorites_or_completion() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let old: Progress = serde_json::from_slice(raw).unwrap();
     let current = progress::decode(raw, &all).unwrap();
@@ -269,7 +290,9 @@ fn retained_profile_never_invents_new_project_answers_favorites_or_completion() 
 }
 #[test]
 fn all_three_normal_introduction_example_and_assignment_drafts_roundtrip_separately() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let mut p = Progress {
         schema_version: 1,
         clock: 41,

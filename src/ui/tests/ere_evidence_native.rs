@@ -843,3 +843,121 @@ fn ere_native_current_case_hardcode_control_exercises_selected_success_under_ove
         );
     }
 }
+
+#[test]
+fn every_scripting_callback_rechecks_complete_sources_and_units_after_prior_admission() {
+    use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::{self as disk, literal_registration as literal};
+    fn invoke(ctx: &egui::Context, a: &mut LabApp, route: usize) -> (bool, Option<String>) {
+        match route {
+            0 => a.command_vectors_lessons_native(ctx, 43000),
+            1 => a.ere_evidence_lessons_native(ctx, 82000),
+            2 => a.loop_recovery_lessons_native(ctx, 75000),
+            _ => unreachable!(),
+        }
+    }
+    fn callback(
+        ctx: &egui::Context,
+        a: &mut LabApp,
+        route: usize,
+    ) -> std::thread::Result<(bool, Option<String>)> {
+        let mut result = None;
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            // Catch inside the real pass so egui still ends this frame normally.
+            result = Some(std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+                || invoke(ctx, a, route),
+            )));
+        });
+        result.unwrap()
+    }
+    fn full(p: &progress::Progress) -> serde_json::Value {
+        serde_json::json!({"portable":p,"receipts":p.migration_receipts})
+    }
+    for route in 0..3 {
+        let (ctx, mut a) = app();
+        a.smoke = true;
+        a.smoke_stage = [43000, 82000, 75000][route];
+        assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
+        // Cold parity witnesses the exact implication used by the callback:
+        // literal.old_values is disk.original193 plus its pinned four sources.
+        let mut expected = literal::original197();
+        let pack: dlms_learning_lab::pack::Pack = serde_json::from_str(include_str!(
+            "../../../scenarios/shell-literal-normalization-draft.json"
+        ))
+        .unwrap();
+        expected.extend(pack.scenarios);
+        assert_eq!(expected.len(), 199);
+        assert_eq!(
+            serde_json::to_value(&a.scenarios).unwrap(),
+            serde_json::to_value(&expected).unwrap()
+        );
+        let checked197 = literal::before_scenarios(&a.scenarios);
+        assert_eq!(
+            serde_json::to_value(&checked197[..193]).unwrap(),
+            serde_json::to_value(disk::before_scenarios(checked197)).unwrap()
+        );
+        let checked52 = literal::before_typed_units(&a.units);
+        assert_eq!(
+            serde_json::to_value(&checked52[..51]).unwrap(),
+            serde_json::to_value(disk::before_typed_units(checked52)).unwrap()
+        );
+        let raw: serde_json::Value =
+            serde_json::from_slice(include_bytes!("../../../scenarios/units-v1.json")).unwrap();
+        assert_eq!(serde_json::to_value(&a.units).unwrap(), raw["units"]);
+        let before = full(&a.progress);
+        let source_pointer = a.scenarios.as_ptr();
+        let unit_pointer = a.units.as_ptr();
+        assert_eq!(callback(&ctx, &mut a, route).unwrap(), (true, None));
+        for mutation in 0..4 {
+            match mutation {
+                0 => a.scenarios[0].objective.push('!'),
+                1 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[197].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.push('!');
+                }
+                2 => a.units[0].summary.push('!'),
+                _ => a.units[52].labs.push("unreviewed-source".into()),
+            }
+            assert_eq!(a.scenarios.as_ptr(), source_pointer);
+            assert_eq!(a.units.as_ptr(), unit_pointer);
+            let error = callback(&ctx, &mut a, route)
+                .expect_err("A later callback must reject same-ID/version field corruption");
+            let message = error
+                .downcast_ref::<String>()
+                .map(String::as_str)
+                .or_else(|| error.downcast_ref::<&str>().copied())
+                .unwrap_or("");
+            let expected = if mutation < 2 {
+                "Complete source differs"
+            } else {
+                "Complete unit differs"
+            };
+            assert!(
+                message.contains(expected),
+                "Actual full-field guard must reject route{route}/mutation{mutation}: {message}"
+            );
+            assert_eq!(full(&a.progress), before);
+            match mutation {
+                0 => {
+                    a.scenarios[0].objective.pop();
+                }
+                1 => {
+                    let engine::Goal::Script { cases } = &mut a.scenarios[197].goal else {
+                        panic!()
+                    };
+                    cases[0].stdout.pop();
+                }
+                2 => {
+                    a.units[0].summary.pop();
+                }
+                _ => {
+                    a.units[52].labs.pop();
+                }
+            }
+            assert_eq!(callback(&ctx, &mut a, route).unwrap(), (true, None));
+            assert_eq!(full(&a.progress), before);
+            assert!(a.progress.attempts.is_empty() && a.script_job.is_none());
+        }
+    }
+}

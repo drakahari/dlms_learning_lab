@@ -49,7 +49,7 @@ impl LabApp {
             ui.add_space(4.);
         }
         let Some(lesson) = &s.teaching else {
-            ui.label(&s.objective);
+            self.metrics.script_goal = Some(ui.label(&s.objective).rect);
             self.scripting(ui, i);
             return;
         };
@@ -80,7 +80,7 @@ impl LabApp {
             }
             teaching::View::Example => self.script_example(ui, i, lesson),
             teaching::View::Assignment => {
-                ui.label(&s.objective);
+                self.metrics.script_goal = Some(ui.label(&s.objective).rect);
                 self.scripting(ui, i);
             }
         }
@@ -172,11 +172,13 @@ impl LabApp {
             .as_mut()
             .unwrap();
         let height = (ui.ctx().content_rect().height() * 0.30).clamp(180., 300.);
-        let area = egui::ScrollArea::both()
-            .id_salt(("example-scroll", i))
-            .max_height(height)
-            .min_scrolled_height(height)
-            .show(ui, |ui| {
+        let area = controls::nested_scroll(
+            ui,
+            egui::ScrollArea::both()
+                .id_salt(("example-scroll", i))
+                .max_height(height)
+                .min_scrolled_height(height),
+            |ui| {
                 ui.add_sized(
                     [ui.available_width(), height],
                     egui::TextEdit::multiline(&mut l.example_source)
@@ -185,7 +187,8 @@ impl LabApp {
                         .desired_width(f32::INFINITY)
                         .char_limit(shell::MAX_SOURCE),
                 )
-            });
+            },
+        );
         name_control(&area.inner, "Practice example script source — ungraded");
         self.metrics.editor_viewport = Some(area.inner_rect);
         let r = area.inner;
@@ -245,7 +248,7 @@ impl LabApp {
             ui.label("Earlier saved example output · Run the example again to check it with this simulator.");
         }
         let output = egui::Frame::new().fill(palette(ui).input).inner_margin(10.).show(ui, |ui| {
-            egui::ScrollArea::both().id_salt(("example-output", i)).max_height(300.).min_scrolled_height(if l.example_result.is_some() { 180. } else { 60. }).auto_shrink([false, l.example_result.is_none()]).show(ui, |ui| {
+            controls::nested_scroll(ui, egui::ScrollArea::both().id_salt(("example-output", i)).max_height(300.).min_scrolled_height(if l.example_result.is_some() { 180. } else { 60. }).auto_shrink([false, l.example_result.is_none()]), |ui| {
                 if let Some(r) = &l.example_result {
                     let _ = scripting::outcome(ui, r);
                     for (path, content) in &r.files { ui.label(RichText::new(format!("Virtual file {path}\n{content}")).monospace()); }

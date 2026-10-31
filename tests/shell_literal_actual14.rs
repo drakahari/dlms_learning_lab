@@ -153,14 +153,16 @@ fn all_prior_records_multiplicity_two_unfinished_contexts_and_90_nonscript_attem
 #[test]
 #[ignore = "Requires genuine sealed14 original/draft profiles; no replay"]
 fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
-    let all = pack::bundled().unwrap();
-    assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
+    let current_all = pack::bundled().unwrap();
+    assert_eq!(current_all.len(), 199);
+    let all = disk_registration::literal_registration::before_scenarios(&current_all);
+    assert_eq!(disk_registration::before_scenarios(all).len(), 193);
     assert_eq!(all.len(), 197);
     for role in ["original", "drafts"] {
         let raw = evidence::observed(&format!("writer14-{role}.json"));
         let old: Progress = serde_json::from_slice(&raw).unwrap();
         assert_eq!(old.attempts.len(), 150);
-        let current = progress::decode(&raw, &all).unwrap();
+        let current = progress::decode(&raw, &current_all).unwrap();
         assert_eq!(value(&current.attempts), value(&old.attempts));
         assert_eq!(current.favorites, old.favorites);
         for id in disk_registration::IDS {
@@ -169,6 +171,17 @@ fn four_new_normal_disk_sources_do_not_invent_work_in_the_genuine14_profiles() {
                 matches!(s.initial, State::PartitionFs { .. })
                     && matches!(s.goal, Goal::PartitionFs { .. })
             );
+            assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
+            assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
+            assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));
+        }
+        for id in disk_registration::literal_registration::IDS {
+            let s = current_all.iter().find(|s| s.id == id).unwrap();
+            assert!(matches!(s.initial, State::Script { .. }));
+            let Goal::Script { cases } = &s.goal else {
+                panic!()
+            };
+            assert_eq!(cases.len(), 12);
             assert!(!old.attempts.contains_key(id) && !current.attempts.contains_key(id));
             assert!(!old.favorites.contains(id) && !current.favorites.contains(id));
             assert!(!progress::current_solved(&progress::Attempt::new(s, 1), s));

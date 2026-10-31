@@ -776,6 +776,10 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
         return crate::partition_fs_workspace::binding::context(a, s).is_ok()
             && crate::engine::solved(&a.state, &s.goal);
     }
+    if matches!(a.state, State::Hsrp { .. }) || matches!(s.initial, State::Hsrp { .. }) {
+        return crate::hsrp_workspace::context(a, s).is_ok()
+            && crate::engine::solved(&a.state, &s.goal);
+    }
     if matches!(a.state, State::Ntp { .. }) || matches!(s.initial, State::Ntp { .. }) {
         return crate::ntp_workspace::context(a, s).is_ok()
             && crate::engine::solved(&a.state, &s.goal);
@@ -1172,6 +1176,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             crate::partition_fs_workspace::binding::context(a, s)?;
         }
+        crate::hsrp_workspace::metadata(a)?;
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
@@ -1210,6 +1215,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if matches!(a.state, State::Hsrp { .. }) {
+            crate::hsrp_workspace::context(a, s)?;
         }
         if matches!(a.state, State::Ntp { .. }) {
             crate::ntp_workspace::context(a, s)?;
@@ -2237,6 +2245,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     validate_provenance(p)?;
     for a in p.attempts.values() {
         crate::partition_fs_workspace::binding::metadata(a)?;
+        crate::hsrp_workspace::metadata(a)?;
         crate::ntp_workspace::metadata(a)?;
         crate::lvm_workspace::metadata(a)?;
         crate::physical_link_workspace::metadata(a)?;
@@ -2307,18 +2316,20 @@ pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     {
         return Err("Disk preparation progress needs its held authored catalog; use save_with_catalog. Original retained".into());
     }
-    if p.attempts
-        .values()
-        .any(|a| matches!(a.state, State::Lvm { .. } | State::Ntp { .. }))
-    {
+    if p.attempts.values().any(|a| {
+        matches!(
+            a.state,
+            State::Lvm { .. } | State::Ntp { .. } | State::Hsrp { .. }
+        )
+    }) {
         return Err(
-            "LVM/NTP progress needs its authored catalog; use save_with_catalog. Original retained"
+            "LVM/NTP/HSRP progress needs its authored catalog; use save_with_catalog. Original retained"
                 .into(),
         );
     }
     save_with_writer(path, p, WriteMode::Normal, |_| Ok(()), write_atomic)
 }
-/// Source-aware normal saves for new typed LVM and NTP work. All older writer,
+/// Source-aware normal saves for scripts, storage, time and HSRP work. The writer,
 /// provenance and family behavior stays in the same existing transaction.
 pub fn save_with_catalog(
     path: &Path,
@@ -2327,6 +2338,25 @@ pub fn save_with_catalog(
 ) -> Result<Saved, String> {
     for (id, a) in &p.attempts {
         let source = scenarios.iter().find(|s| &s.id == id);
+        let script_source = source.is_some_and(|s| {
+            matches!(s.initial, State::Script { .. })
+                || matches!(s.goal, crate::engine::Goal::Script { .. })
+        });
+        if matches!(a.state, State::Script { .. }) || script_source {
+            let source = source.ok_or("Unknown authored script source; original retained")?;
+            if a.scenario_version != source.version
+                || !matches!(
+                    (&a.state, &source.initial, &source.goal),
+                    (
+                        State::Script { .. },
+                        State::Script { .. },
+                        crate::engine::Goal::Script { .. }
+                    )
+                )
+            {
+                return Err("Script work does not match this activity; original retained".into());
+            }
+        }
         let disk_source = source.is_some_and(|s| {
             matches!(s.initial, State::PartitionFs { .. })
                 || matches!(s.goal, crate::engine::Goal::PartitionFs { .. })
@@ -2336,6 +2366,14 @@ pub fn save_with_catalog(
                 a,
                 source.ok_or("Unknown authored disk source; original retained")?,
             )?;
+        }
+        let hsrp_source = source.is_some_and(|s| {
+            matches!(s.initial, State::Hsrp { .. })
+                || matches!(s.goal, crate::engine::Goal::Hsrp { .. })
+        });
+        if matches!(a.state, State::Hsrp { .. }) || hsrp_source {
+            let source = source.ok_or("Unknown authored HSRP source; original retained")?;
+            crate::hsrp_workspace::context(a, source)?;
         }
         let lvm_source = source.is_some_and(|s| {
             matches!(s.initial, State::Lvm { .. })

@@ -601,11 +601,21 @@ impl LabApp {
         let phase = (stage - 7200) % 100;
         let ids = kind.ids();
         let id = ids[ordinal];
+        // Admit every current source/unit field once on EACH callback. The
+        // exact literal predecessor contains disk original193+canonical4;
+        // reuse only same-callback immutable prefixes for the older proof.
+        let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&self.scenarios);
+        let checked52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&self.units);
+        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
+        let checked193 = &checked197[..193];
+        let checked51 = &checked52[..51];
         assert_eq!(
-            one_off_boundary::before_len(&self.scenarios),
+            one_off_boundary::before_len(checked193),
             176,
             "normal registered catalogue"
         );
+        assert_eq!(one_off_boundary::before_len(checked51), 46);
         assert!(
             GETOPTS_LESSON_IDS
                 .iter()

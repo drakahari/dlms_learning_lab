@@ -236,7 +236,10 @@ fn one_off_normal_four_tasks_real_events_finish_all_capture_phases_and_preserve_
         ),
         (193, 51)
     );
-    assert_eq!((a.scenarios.len(), a.units.len()), (197, 52));
+    let checked197 = disk_registration::literal_registration::before_scenarios(&a.scenarios);
+    let checked52 = disk_registration::literal_registration::before_typed_units(&a.units);
+    assert_eq!((checked197.len(), checked52.len()), (197, 52));
+    assert_eq!((a.scenarios.len(), a.units.len()), (199, 53));
     let catalog = serde_json::to_vec(&a.scenarios).unwrap();
     let units = serde_json::to_vec(&a.units).unwrap();
     let mut physical = egui::vec2(1920., 1080.);

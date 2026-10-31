@@ -207,27 +207,59 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
     assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
     assert!(a.progress.attempts.is_empty());
     until(&ctx, &mut a, FIRST + 2, &mut w);
+    let normal199 = pack::bundled().unwrap();
+    assert_eq!(normal199.len(), 199);
+    assert_eq!(a.scenarios.len(), normal199.len() + 1);
+    let current199 = &a.scenarios[..normal199.len()];
+    let checked197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(current199);
+    let checked52 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_typed_units(&a.units);
+    assert_eq!((checked197.len(), checked52.len()), (197, 52));
     assert_eq!(
         (
-            one_off_boundary::loop_registration::lvm_registration::before_scenarios(
-                &a.scenarios[..197]
-            )
-            .len()
+            one_off_boundary::loop_registration::lvm_registration::before_scenarios(checked197)
+                .len()
                 + 1,
             one_off_boundary::before_len(&a.units)
         ),
         (183, 46)
     );
     assert_eq!(
-        (a.scenarios.len(), one_off_boundary::before_len(&a.units)),
+        (checked197.len() + 1, one_off_boundary::before_len(&a.units)),
         (198, 46)
     );
     assert_eq!(
-        serde_json::to_value(&a.scenarios[..197]).unwrap(),
-        serde_json::to_value(pack::bundled().unwrap()).unwrap(),
+        serde_json::to_value(checked197).unwrap(),
+        serde_json::to_value(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&normal199)).unwrap(),
+        "The single private NAT fixture must preserve every original197 assignment"
+    );
+    assert_eq!(
+        serde_json::to_value(current199).unwrap(),
+        serde_json::to_value(&normal199).unwrap(),
         "The single private NAT fixture must preserve every normal assignment"
     );
-    assert_eq!(a.scenarios[197].id, ID);
+    assert_eq!(
+        serde_json::to_value(&a.units).unwrap(),
+        serde_json::to_value(course::bundled(&normal199).unwrap()).unwrap(),
+        "The private fixture must not change any current typed unit field"
+    );
+    assert_eq!((a.scenarios.len(), a.units.len()), (200, 53));
+    assert_eq!(a.scenarios[199].id, ID);
+    assert_eq!(
+        current199[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        ["shell-trim-options", "shell-trim-manifest"]
+    );
+    for source in &current199[197..] {
+        assert!(matches!(source.initial, State::Script { .. }));
+        assert!(matches!(source.goal, engine::Goal::Script { .. }));
+        assert!(
+            !a.progress.attempts.contains_key(&source.id)
+                && !a.progress.favorites.contains(&source.id)
+        );
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
     assert!(
         w.fullscreen_requests.contains(&true),
         "Initial wide view must issue a real fullscreen request; this fake renderer does not claim WM acceptance"

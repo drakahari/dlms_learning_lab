@@ -1,0 +1,2773 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-hsrp-virtual-gateway",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "First-hop redundancy with HSRP",
+      "unit": "hsrp-resilient-gateway",
+      "title": "Replace fragile real-router gateways with a resilient virtual gateway",
+      "summary": "Alder serves two clients through a single virtual gateway. Both routers must participate. Move both clients from their real-router gateway to the supplied VIP and retain modeled forwarding at every power-failure and return checkpoint for either router. Either healthy router may be Active; do not disable a peer to hide a failure.",
+      "objective": "Alder serves two clients through a single virtual gateway. Both routers must participate. Move both clients from their real-router gateway to the supplied VIP and retain modeled forwarding at every power-failure and return checkpoint for either router. Either healthy router may be Active; do not disable a peer to hide a failure.",
+      "retry_guidance": "Read the first failing current or failure/return row. Check both participating candidates, every client’s VIP, the required Active identity, and strict effective-priority inequalities. Current success alone cannot replace a failed intermediate checkpoint. Repair applied settings or the pending draft; keep protected settings unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Read the task and supplied fixed facts",
+        "Configure permitted settings and inspect settled roles",
+        "Check every client at current and failure/return checkpoints"
+      ],
+      "guide": [],
+      "explanation": "The worked approach is one accepted configuration, not a required string match. Other priorities and preemption choices pass when all current and checkpoint outcomes and protected settings pass. Use the native controls; the typed action records used by automated checks are not IOS commands.",
+      "hints": [
+        "Both candidates must participate and each client must use the supplied VIP.",
+        "A real-router gateway can forward now but stays tied to that router.",
+        "Check the gateway of each client and inspect both independent power-failure/return sequences."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9281-3.html"
+      ],
+      "simplifications": "Offline settled HSRPv1 configuration model: two routers, one fixed connected IPv4 LAN and healthy supplied routes. Temporary power/LAN/WAN probes use clones. No IOS parser, HSRP packets, ARP, timers, measured convergence, ping, route tracking, IP SLA, real router or host-network execution.",
+      "initial": {
+        "kind": "Hsrp",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "group": 11,
+            "prefix": 24,
+            "virtual_ip": "10.91.1.254",
+            "routers": [
+              {
+                "label": "Alder-A",
+                "address": "10.91.1.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Alder-B",
+                "address": "10.91.1.2",
+                "config": {
+                  "participating": false,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Alder-client-1",
+                "address": "10.91.1.20",
+                "gateway": "10.91.1.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Alder-client-2",
+                "address": "10.91.1.21",
+                "gateway": "10.91.1.1",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": null,
+            "revision": 0
+          },
+          "current": {
+            "version": 1,
+            "group": 11,
+            "prefix": 24,
+            "virtual_ip": "10.91.1.254",
+            "routers": [
+              {
+                "label": "Alder-A",
+                "address": "10.91.1.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Alder-B",
+                "address": "10.91.1.2",
+                "config": {
+                  "participating": false,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Alder-client-1",
+                "address": "10.91.1.20",
+                "gateway": "10.91.1.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Alder-client-2",
+                "address": "10.91.1.21",
+                "gateway": "10.91.1.1",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": null,
+            "revision": 0
+          },
+          "history": [],
+          "example_initial": {
+            "version": 1,
+            "group": 111,
+            "prefix": 24,
+            "virtual_ip": "10.191.1.254",
+            "routers": [
+              {
+                "label": "Aspen-A",
+                "address": "10.191.1.1",
+                "config": {
+                  "participating": true,
+                  "priority": 120,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Aspen-B",
+                "address": "10.191.1.2",
+                "config": {
+                  "participating": false,
+                  "priority": 90,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Aspen-client-1",
+                "address": "10.191.1.20",
+                "gateway": "10.191.1.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Aspen-client-2",
+                "address": "10.191.1.21",
+                "gateway": "10.191.1.254",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Aspen-client-3",
+                "address": "10.191.1.22",
+                "gateway": "10.191.1.2",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": null,
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "group": 111,
+            "prefix": 24,
+            "virtual_ip": "10.191.1.254",
+            "routers": [
+              {
+                "label": "Aspen-A",
+                "address": "10.191.1.1",
+                "config": {
+                  "participating": true,
+                  "priority": 120,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Aspen-B",
+                "address": "10.191.1.2",
+                "config": {
+                  "participating": false,
+                  "priority": 90,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Aspen-client-1",
+                "address": "10.191.1.20",
+                "gateway": "10.191.1.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Aspen-client-2",
+                "address": "10.191.1.21",
+                "gateway": "10.191.1.254",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Aspen-client-3",
+                "address": "10.191.1.22",
+                "gateway": "10.191.1.2",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": null,
+            "revision": 0
+          },
+          "example_history": [],
+          "draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "110",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": false,
+                "priority": "100",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.91.1.1"
+              },
+              {
+                "id": 2,
+                "gateway": "10.91.1.1"
+              }
+            ]
+          },
+          "example_draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "120",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": false,
+                "priority": "90",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.191.1.1"
+              },
+              {
+                "id": 2,
+                "gateway": "10.191.1.254"
+              },
+              {
+                "id": 3,
+                "gateway": "10.191.1.2"
+              }
+            ]
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Hsrp",
+        "definition": {
+          "policy": {
+            "initial": {
+              "version": 1,
+              "group": 11,
+              "prefix": 24,
+              "virtual_ip": "10.91.1.254",
+              "routers": [
+                {
+                  "label": "Alder-A",
+                  "address": "10.91.1.1",
+                  "config": {
+                    "participating": true,
+                    "priority": 110,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                },
+                {
+                  "label": "Alder-B",
+                  "address": "10.91.1.2",
+                  "config": {
+                    "participating": false,
+                    "priority": 100,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                }
+              ],
+              "clients": [
+                {
+                  "id": 1,
+                  "label": "Alder-client-1",
+                  "address": "10.91.1.20",
+                  "gateway": "10.91.1.1",
+                  "link_up": true
+                },
+                {
+                  "id": 2,
+                  "label": "Alder-client-2",
+                  "address": "10.91.1.21",
+                  "gateway": "10.91.1.1",
+                  "link_up": true
+                }
+              ],
+              "active": "A",
+              "standby": null,
+              "revision": 0
+            },
+            "editable_routers": [
+              "A",
+              "B"
+            ],
+            "editable_clients": [
+              1,
+              2
+            ],
+            "normal_active": null,
+            "probes": [
+              {
+                "title": "A power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  null,
+                  null
+                ]
+              },
+              {
+                "title": "B power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  null,
+                  null
+                ]
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Know usable IPv4 addresses on one connected subnet and the default gateway used for off-LAN traffic. Both supplied routers already have working upstream routes. Read the virtual-address, settled-role and tracking concepts below before configuring. No IOS command knowledge is needed for these native controls.",
+            "concepts": [
+              {
+                "title": "One virtual next hop",
+                "text": "A client sends off-LAN traffic to its default gateway. A real router address belongs to one box. The supplied virtual IP (VIP) is a shared gateway identity served by the current Active router; clients keep the VIP when that router changes. Real router addresses and the VIP must be distinct usable addresses on this connected LAN."
+              },
+              {
+                "title": "Candidates and settled roles",
+                "text": "Participation makes a healthy powered-on, LAN-connected router eligible. Active serves the VIP and Standby is the other eligible candidate. An unavailable Active is replaced by the eligible peer even without preemption. Both candidates and every client matter; a healthy current path alone does not prove resilience."
+              },
+              {
+                "title": "Initial election and an incumbent",
+                "text": "At a simultaneous initial election, effective priority wins, then the higher real IPv4 address breaks a tie. Later, an eligible incumbent stays Active unless a strictly higher-priority peer has its own preempt setting enabled. A restored preferred router therefore needs preemption on itself; enabling it only on the other router does not cause the intended return."
+              },
+              {
+                "title": "WAN tracking is a separate decision",
+                "text": "A WAN outage does not make a router ineligible on the LAN. Optional WAN-link tracking subtracts its configured decrement from effective priority during that link outage. The healthy peer must then have strictly higher effective priority and its own preempt enabled. A tie cannot preempt; the returning preferred router also needs preempt to reclaim Active. Route tracking and IP SLA are outside this model."
+              },
+              {
+                "title": "Inspect without changing the assignment",
+                "text": "The current table and each supplied failure/return checkpoint are already settled observations. Temporary inspection runs on a clone; it does not switch off real devices or change saved assignment facts/history. Check requires the VIP and usable modeled forwarding for every client at every checkpoint, including intermediate failures. Reset of the assignment and Reset example are separate actions."
+              },
+              {
+                "title": "Configure, check and preserve",
+                "text": "Use the aligned native router/client controls. Inserting a worked setting fills the separate practice draft; Apply publishes settings and Check evaluates current work. Pending drafts do not earn completion. Protected controls must retain their supplied values. Optional hints are progressive and a worked approach is a separate request. This model has no IOS parser, ping, HSRP packets, timers, ARP, measured convergence or host networking."
+              }
+            ],
+            "description": "Aspen is a separate three-client site. Client 2 already uses the VIP and is protected. Enable the other candidate and move only clients 1 and 3 to the VIP, then check both power-failure/return paths. Its addresses, client scope and settings differ from Alder.",
+            "policy": {
+              "initial": {
+                "version": 1,
+                "group": 111,
+                "prefix": 24,
+                "virtual_ip": "10.191.1.254",
+                "routers": [
+                  {
+                    "label": "Aspen-A",
+                    "address": "10.191.1.1",
+                    "config": {
+                      "participating": true,
+                      "priority": 120,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  },
+                  {
+                    "label": "Aspen-B",
+                    "address": "10.191.1.2",
+                    "config": {
+                      "participating": false,
+                      "priority": 90,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  }
+                ],
+                "clients": [
+                  {
+                    "id": 1,
+                    "label": "Aspen-client-1",
+                    "address": "10.191.1.20",
+                    "gateway": "10.191.1.1",
+                    "link_up": true
+                  },
+                  {
+                    "id": 2,
+                    "label": "Aspen-client-2",
+                    "address": "10.191.1.21",
+                    "gateway": "10.191.1.254",
+                    "link_up": true
+                  },
+                  {
+                    "id": 3,
+                    "label": "Aspen-client-3",
+                    "address": "10.191.1.22",
+                    "gateway": "10.191.1.2",
+                    "link_up": true
+                  }
+                ],
+                "active": "A",
+                "standby": null,
+                "revision": 0
+              },
+              "editable_routers": [
+                "A",
+                "B"
+              ],
+              "editable_clients": [
+                1,
+                3
+              ],
+              "normal_active": null,
+              "probes": [
+                {
+                  "title": "A power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    null,
+                    null
+                  ]
+                },
+                {
+                  "title": "B power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    null,
+                    null
+                  ]
+                }
+              ]
+            },
+            "worked": [
+              {
+                "title": "Apply practice router B settings",
+                "why": "Keep this router participating with priority 100. Preemption is not needed to replace an unavailable peer. No WAN tracking is configured on this router.",
+                "action": {
+                  "Router": {
+                    "router": "B",
+                    "config": {
+                      "participating": true,
+                      "priority": 100,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    }
+                  }
+                }
+              },
+              {
+                "title": "Use the practice VIP on client 1",
+                "why": "A shared virtual next hop follows the elected Active. This edit affects only the permitted practice client.",
+                "action": {
+                  "Gateway": {
+                    "client": 1,
+                    "gateway": "10.191.1.254"
+                  }
+                }
+              },
+              {
+                "title": "Use the practice VIP on client 3",
+                "why": "A shared virtual next hop follows the elected Active. This edit affects only the permitted practice client.",
+                "action": {
+                  "Gateway": {
+                    "client": 3,
+                    "gateway": "10.191.1.254"
+                  }
+                }
+              }
+            ],
+            "try_change": "After practice passes, point Aspen client 1 at router A’s real address. Current forwarding may still work, but the virtual-gateway requirement and A-failure path should fail. Restore that client’s VIP and check again.",
+            "experiment": {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.191.1.1"
+              }
+            },
+            "repair": {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.191.1.254"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":100,\"preempt\":false,\"track_wan_decrement\":null}}}",
+        "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.91.1.254\"}}",
+        "SIM HSRP {\"Gateway\":{\"client\":2,\"gateway\":\"10.91.1.254\"}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-gateway"
+      ]
+    },
+    {
+      "id": "ccna-hsrp-incumbent-return",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "First-hop redundancy with HSRP",
+      "unit": "hsrp-resilient-gateway",
+      "title": "Recover the preferred router after an incumbent takes over",
+      "summary": "Birch-B legitimately remains Active after Birch-A returned earlier. Restore Birch-A as preferred Active now and after its next failure/return, while both VIP clients retain forwarding through either router’s power failure and return. Both candidates and the supplied fixed facts must remain intact. Raising a number without arranging takeover is incomplete.",
+      "objective": "Birch-B legitimately remains Active after Birch-A returned earlier. Restore Birch-A as preferred Active now and after its next failure/return, while both VIP clients retain forwarding through either router’s power failure and return. Both candidates and the supplied fixed facts must remain intact. Raising a number without arranging takeover is incomplete.",
+      "retry_guidance": "Read the first failing current or failure/return row. Check both participating candidates, every client’s VIP, the required Active identity, and strict effective-priority inequalities. Current success alone cannot replace a failed intermediate checkpoint. Repair applied settings or the pending draft; keep protected settings unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Read the task and supplied fixed facts",
+        "Configure permitted settings and inspect settled roles",
+        "Check every client at current and failure/return checkpoints"
+      ],
+      "guide": [],
+      "explanation": "The worked approach is one accepted configuration, not a required string match. Other priorities and preemption choices pass when all current and checkpoint outcomes and protected settings pass. Use the native controls; the typed action records used by automated checks are not IOS commands.",
+      "hints": [
+        "A healthy incumbent is not replaced just because a higher-priority router returned.",
+        "The router that should regain Active needs its own preempt enabled and strictly higher effective priority.",
+        "A present role achieved by toggling participation still needs to survive the preferred router’s next return."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9281-3.html"
+      ],
+      "simplifications": "Offline settled HSRPv1 configuration model: two routers, one fixed connected IPv4 LAN and healthy supplied routes. Temporary power/LAN/WAN probes use clones. No IOS parser, HSRP packets, ARP, timers, measured convergence, ping, route tracking, IP SLA, real router or host-network execution.",
+      "initial": {
+        "kind": "Hsrp",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "group": 22,
+            "prefix": 24,
+            "virtual_ip": "10.92.2.254",
+            "routers": [
+              {
+                "label": "Birch-A",
+                "address": "10.92.2.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Birch-B",
+                "address": "10.92.2.2",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Birch-client-1",
+                "address": "10.92.2.20",
+                "gateway": "10.92.2.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Birch-client-2",
+                "address": "10.92.2.21",
+                "gateway": "10.92.2.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 2
+          },
+          "current": {
+            "version": 1,
+            "group": 22,
+            "prefix": 24,
+            "virtual_ip": "10.92.2.254",
+            "routers": [
+              {
+                "label": "Birch-A",
+                "address": "10.92.2.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Birch-B",
+                "address": "10.92.2.2",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Birch-client-1",
+                "address": "10.92.2.20",
+                "gateway": "10.92.2.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Birch-client-2",
+                "address": "10.92.2.21",
+                "gateway": "10.92.2.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 2
+          },
+          "history": [],
+          "example_initial": {
+            "version": 1,
+            "group": 122,
+            "prefix": 24,
+            "virtual_ip": "10.192.2.254",
+            "routers": [
+              {
+                "label": "Willow-A",
+                "address": "10.192.2.1",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Willow-B",
+                "address": "10.192.2.2",
+                "config": {
+                  "participating": true,
+                  "priority": 135,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Willow-client-1",
+                "address": "10.192.2.20",
+                "gateway": "10.192.2.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Willow-client-2",
+                "address": "10.192.2.21",
+                "gateway": "10.192.2.254",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 2
+          },
+          "example": {
+            "version": 1,
+            "group": 122,
+            "prefix": 24,
+            "virtual_ip": "10.192.2.254",
+            "routers": [
+              {
+                "label": "Willow-A",
+                "address": "10.192.2.1",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Willow-B",
+                "address": "10.192.2.2",
+                "config": {
+                  "participating": true,
+                  "priority": 135,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Willow-client-1",
+                "address": "10.192.2.20",
+                "gateway": "10.192.2.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Willow-client-2",
+                "address": "10.192.2.21",
+                "gateway": "10.192.2.254",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 2
+          },
+          "example_history": [],
+          "draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "110",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "100",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.92.2.254"
+              },
+              {
+                "id": 2,
+                "gateway": "10.92.2.254"
+              }
+            ]
+          },
+          "example_draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "100",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "135",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.192.2.254"
+              },
+              {
+                "id": 2,
+                "gateway": "10.192.2.254"
+              }
+            ]
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Hsrp",
+        "definition": {
+          "policy": {
+            "initial": {
+              "version": 1,
+              "group": 22,
+              "prefix": 24,
+              "virtual_ip": "10.92.2.254",
+              "routers": [
+                {
+                  "label": "Birch-A",
+                  "address": "10.92.2.1",
+                  "config": {
+                    "participating": true,
+                    "priority": 110,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                },
+                {
+                  "label": "Birch-B",
+                  "address": "10.92.2.2",
+                  "config": {
+                    "participating": true,
+                    "priority": 100,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                }
+              ],
+              "clients": [
+                {
+                  "id": 1,
+                  "label": "Birch-client-1",
+                  "address": "10.92.2.20",
+                  "gateway": "10.92.2.254",
+                  "link_up": true
+                },
+                {
+                  "id": 2,
+                  "label": "Birch-client-2",
+                  "address": "10.92.2.21",
+                  "gateway": "10.92.2.254",
+                  "link_up": true
+                }
+              ],
+              "active": "B",
+              "standby": "A",
+              "revision": 2
+            },
+            "editable_routers": [
+              "A",
+              "B"
+            ],
+            "editable_clients": [],
+            "normal_active": "A",
+            "probes": [
+              {
+                "title": "A power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "B",
+                  "A"
+                ]
+              },
+              {
+                "title": "B power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "A",
+                  "A"
+                ]
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Know usable IPv4 addresses on one connected subnet and the default gateway used for off-LAN traffic. Both supplied routers already have working upstream routes. Read the virtual-address, settled-role and tracking concepts below before configuring. No IOS command knowledge is needed for these native controls.",
+            "concepts": [
+              {
+                "title": "One virtual next hop",
+                "text": "A client sends off-LAN traffic to its default gateway. A real router address belongs to one box. The supplied virtual IP (VIP) is a shared gateway identity served by the current Active router; clients keep the VIP when that router changes. Real router addresses and the VIP must be distinct usable addresses on this connected LAN."
+              },
+              {
+                "title": "Candidates and settled roles",
+                "text": "Participation makes a healthy powered-on, LAN-connected router eligible. Active serves the VIP and Standby is the other eligible candidate. An unavailable Active is replaced by the eligible peer even without preemption. Both candidates and every client matter; a healthy current path alone does not prove resilience."
+              },
+              {
+                "title": "Initial election and an incumbent",
+                "text": "At a simultaneous initial election, effective priority wins, then the higher real IPv4 address breaks a tie. Later, an eligible incumbent stays Active unless a strictly higher-priority peer has its own preempt setting enabled. A restored preferred router therefore needs preemption on itself; enabling it only on the other router does not cause the intended return."
+              },
+              {
+                "title": "WAN tracking is a separate decision",
+                "text": "A WAN outage does not make a router ineligible on the LAN. Optional WAN-link tracking subtracts its configured decrement from effective priority during that link outage. The healthy peer must then have strictly higher effective priority and its own preempt enabled. A tie cannot preempt; the returning preferred router also needs preempt to reclaim Active. Route tracking and IP SLA are outside this model."
+              },
+              {
+                "title": "Inspect without changing the assignment",
+                "text": "The current table and each supplied failure/return checkpoint are already settled observations. Temporary inspection runs on a clone; it does not switch off real devices or change saved assignment facts/history. Check requires the VIP and usable modeled forwarding for every client at every checkpoint, including intermediate failures. Reset of the assignment and Reset example are separate actions."
+              },
+              {
+                "title": "Configure, check and preserve",
+                "text": "Use the aligned native router/client controls. Inserting a worked setting fills the separate practice draft; Apply publishes settings and Check evaluates current work. Pending drafts do not earn completion. Protected controls must retain their supplied values. Optional hints are progressive and a worked approach is a separate request. This model has no IOS parser, ping, HSRP packets, timers, ARP, measured convergence or host networking."
+              }
+            ],
+            "description": "Willow reverses the preferred identity. B has higher priority, but A is the legitimate incumbent after B failed and returned. Make B preferred now and after B’s next return, retaining both VIP clients. This saved initial checkpoint includes the settled failure/return history; reopening never repeats an initial election.",
+            "policy": {
+              "initial": {
+                "version": 1,
+                "group": 122,
+                "prefix": 24,
+                "virtual_ip": "10.192.2.254",
+                "routers": [
+                  {
+                    "label": "Willow-A",
+                    "address": "10.192.2.1",
+                    "config": {
+                      "participating": true,
+                      "priority": 100,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  },
+                  {
+                    "label": "Willow-B",
+                    "address": "10.192.2.2",
+                    "config": {
+                      "participating": true,
+                      "priority": 135,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  }
+                ],
+                "clients": [
+                  {
+                    "id": 1,
+                    "label": "Willow-client-1",
+                    "address": "10.192.2.20",
+                    "gateway": "10.192.2.254",
+                    "link_up": true
+                  },
+                  {
+                    "id": 2,
+                    "label": "Willow-client-2",
+                    "address": "10.192.2.21",
+                    "gateway": "10.192.2.254",
+                    "link_up": true
+                  }
+                ],
+                "active": "A",
+                "standby": "B",
+                "revision": 2
+              },
+              "editable_routers": [
+                "A",
+                "B"
+              ],
+              "editable_clients": [],
+              "normal_active": "B",
+              "probes": [
+                {
+                  "title": "A power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "B",
+                    "B"
+                  ]
+                },
+                {
+                  "title": "B power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "A",
+                    "B"
+                  ]
+                }
+              ]
+            },
+            "worked": [
+              {
+                "title": "Apply practice router B settings",
+                "why": "Keep this router participating with priority 135. Its own preempt permits takeover only when its effective priority is strictly greater. No WAN tracking is configured on this router.",
+                "action": {
+                  "Router": {
+                    "router": "B",
+                    "config": {
+                      "participating": true,
+                      "priority": 135,
+                      "preempt": true,
+                      "track_wan_decrement": null
+                    }
+                  }
+                }
+              }
+            ],
+            "try_change": "After practice passes, turn preempt off on Willow-B without changing priority. B can remain Active now, yet its own failure/return checkpoint should fail to reclaim Active. Turn B preempt back on and check every row.",
+            "experiment": {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 135,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                }
+              }
+            },
+            "repair": {
+              "Router": {
+                "router": "B",
+                "config": {
+                  "participating": true,
+                  "priority": 135,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":110,\"preempt\":true,\"track_wan_decrement\":null}}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-gateway",
+        "ccna-hsrp-virtual-gateway"
+      ]
+    },
+    {
+      "id": "ccna-hsrp-wan-tracking",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "First-hop redundancy with HSRP",
+      "unit": "hsrp-resilient-gateway",
+      "title": "Make an upstream-link failure trigger a usable takeover",
+      "summary": "Cedar-A must be Active with healthy links. Keep both VIP clients forwarding when A’s WAN fails by moving Active to B, and return Active to A when that WAN returns. Also preserve service at every power-failure/return checkpoint of either router. Configure only the supplied router settings; WAN health and routes are read-only facts.",
+      "objective": "Cedar-A must be Active with healthy links. Keep both VIP clients forwarding when A’s WAN fails by moving Active to B, and return Active to A when that WAN returns. Also preserve service at every power-failure/return checkpoint of either router. Configure only the supplied router settings; WAN health and routes are read-only facts.",
+      "retry_guidance": "Read the first failing current or failure/return row. Check both participating candidates, every client’s VIP, the required Active identity, and strict effective-priority inequalities. Current success alone cannot replace a failed intermediate checkpoint. Repair applied settings or the pending draft; keep protected settings unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Read the task and supplied fixed facts",
+        "Configure permitted settings and inspect settled roles",
+        "Check every client at current and failure/return checkpoints"
+      ],
+      "guide": [],
+      "explanation": "The worked approach is one accepted configuration, not a required string match. Other priorities and preemption choices pass when all current and checkpoint outcomes and protected settings pass. Use the native controls; the typed action records used by automated checks are not IOS commands.",
+      "hints": [
+        "WAN loss does not remove a router from LAN eligibility. Compare its tracked effective priority with the peer.",
+        "The healthy peer must have strictly higher effective priority and its own preempt enabled. Equal priority is insufficient.",
+        "Arrange the return as well: the preferred router needs preempt to regain Active after WAN or power recovery."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9281-3.html"
+      ],
+      "simplifications": "Offline settled HSRPv1 configuration model: two routers, one fixed connected IPv4 LAN and healthy supplied routes. Temporary power/LAN/WAN probes use clones. No IOS parser, HSRP packets, ARP, timers, measured convergence, ping, route tracking, IP SLA, real router or host-network execution.",
+      "initial": {
+        "kind": "Hsrp",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "group": 33,
+            "prefix": 24,
+            "virtual_ip": "10.93.3.254",
+            "routers": [
+              {
+                "label": "Cedar-A",
+                "address": "10.93.3.1",
+                "config": {
+                  "participating": true,
+                  "priority": 150,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Cedar-B",
+                "address": "10.93.3.2",
+                "config": {
+                  "participating": true,
+                  "priority": 140,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Cedar-client-1",
+                "address": "10.93.3.20",
+                "gateway": "10.93.3.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Cedar-client-2",
+                "address": "10.93.3.21",
+                "gateway": "10.93.3.254",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 0
+          },
+          "current": {
+            "version": 1,
+            "group": 33,
+            "prefix": 24,
+            "virtual_ip": "10.93.3.254",
+            "routers": [
+              {
+                "label": "Cedar-A",
+                "address": "10.93.3.1",
+                "config": {
+                  "participating": true,
+                  "priority": 150,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Cedar-B",
+                "address": "10.93.3.2",
+                "config": {
+                  "participating": true,
+                  "priority": 140,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Cedar-client-1",
+                "address": "10.93.3.20",
+                "gateway": "10.93.3.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Cedar-client-2",
+                "address": "10.93.3.21",
+                "gateway": "10.93.3.254",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 0
+          },
+          "history": [],
+          "example_initial": {
+            "version": 1,
+            "group": 133,
+            "prefix": 24,
+            "virtual_ip": "10.193.3.254",
+            "routers": [
+              {
+                "label": "Hazel-A",
+                "address": "10.193.3.1",
+                "config": {
+                  "participating": true,
+                  "priority": 105,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Hazel-B",
+                "address": "10.193.3.2",
+                "config": {
+                  "participating": true,
+                  "priority": 125,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Hazel-client-1",
+                "address": "10.193.3.20",
+                "gateway": "10.193.3.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Hazel-client-2",
+                "address": "10.193.3.21",
+                "gateway": "10.193.3.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "group": 133,
+            "prefix": 24,
+            "virtual_ip": "10.193.3.254",
+            "routers": [
+              {
+                "label": "Hazel-A",
+                "address": "10.193.3.1",
+                "config": {
+                  "participating": true,
+                  "priority": 105,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Hazel-B",
+                "address": "10.193.3.2",
+                "config": {
+                  "participating": true,
+                  "priority": 125,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Hazel-client-1",
+                "address": "10.193.3.20",
+                "gateway": "10.193.3.254",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Hazel-client-2",
+                "address": "10.193.3.21",
+                "gateway": "10.193.3.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 0
+          },
+          "example_history": [],
+          "draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "150",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "140",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.93.3.254"
+              },
+              {
+                "id": 2,
+                "gateway": "10.93.3.254"
+              }
+            ]
+          },
+          "example_draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "105",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "125",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.193.3.254"
+              },
+              {
+                "id": 2,
+                "gateway": "10.193.3.254"
+              }
+            ]
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Hsrp",
+        "definition": {
+          "policy": {
+            "initial": {
+              "version": 1,
+              "group": 33,
+              "prefix": 24,
+              "virtual_ip": "10.93.3.254",
+              "routers": [
+                {
+                  "label": "Cedar-A",
+                  "address": "10.93.3.1",
+                  "config": {
+                    "participating": true,
+                    "priority": 150,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                },
+                {
+                  "label": "Cedar-B",
+                  "address": "10.93.3.2",
+                  "config": {
+                    "participating": true,
+                    "priority": 140,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                }
+              ],
+              "clients": [
+                {
+                  "id": 1,
+                  "label": "Cedar-client-1",
+                  "address": "10.93.3.20",
+                  "gateway": "10.93.3.254",
+                  "link_up": true
+                },
+                {
+                  "id": 2,
+                  "label": "Cedar-client-2",
+                  "address": "10.93.3.21",
+                  "gateway": "10.93.3.254",
+                  "link_up": true
+                }
+              ],
+              "active": "A",
+              "standby": "B",
+              "revision": 0
+            },
+            "editable_routers": [
+              "A",
+              "B"
+            ],
+            "editable_clients": [],
+            "normal_active": "A",
+            "probes": [
+              {
+                "title": "A power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "B",
+                  "A"
+                ]
+              },
+              {
+                "title": "B power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "A",
+                  "A"
+                ]
+              },
+              {
+                "title": "A wan failure and return",
+                "events": [
+                  {
+                    "Wan": {
+                      "router": "A",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Wan": {
+                      "router": "A",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "B",
+                  "A"
+                ]
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Know usable IPv4 addresses on one connected subnet and the default gateway used for off-LAN traffic. Both supplied routers already have working upstream routes. Read the virtual-address, settled-role and tracking concepts below before configuring. No IOS command knowledge is needed for these native controls.",
+            "concepts": [
+              {
+                "title": "One virtual next hop",
+                "text": "A client sends off-LAN traffic to its default gateway. A real router address belongs to one box. The supplied virtual IP (VIP) is a shared gateway identity served by the current Active router; clients keep the VIP when that router changes. Real router addresses and the VIP must be distinct usable addresses on this connected LAN."
+              },
+              {
+                "title": "Candidates and settled roles",
+                "text": "Participation makes a healthy powered-on, LAN-connected router eligible. Active serves the VIP and Standby is the other eligible candidate. An unavailable Active is replaced by the eligible peer even without preemption. Both candidates and every client matter; a healthy current path alone does not prove resilience."
+              },
+              {
+                "title": "Initial election and an incumbent",
+                "text": "At a simultaneous initial election, effective priority wins, then the higher real IPv4 address breaks a tie. Later, an eligible incumbent stays Active unless a strictly higher-priority peer has its own preempt setting enabled. A restored preferred router therefore needs preemption on itself; enabling it only on the other router does not cause the intended return."
+              },
+              {
+                "title": "WAN tracking is a separate decision",
+                "text": "A WAN outage does not make a router ineligible on the LAN. Optional WAN-link tracking subtracts its configured decrement from effective priority during that link outage. The healthy peer must then have strictly higher effective priority and its own preempt enabled. A tie cannot preempt; the returning preferred router also needs preempt to reclaim Active. Route tracking and IP SLA are outside this model."
+              },
+              {
+                "title": "Inspect without changing the assignment",
+                "text": "The current table and each supplied failure/return checkpoint are already settled observations. Temporary inspection runs on a clone; it does not switch off real devices or change saved assignment facts/history. Check requires the VIP and usable modeled forwarding for every client at every checkpoint, including intermediate failures. Reset of the assignment and Reset example are separate actions."
+              },
+              {
+                "title": "Configure, check and preserve",
+                "text": "Use the aligned native router/client controls. Inserting a worked setting fills the separate practice draft; Apply publishes settings and Check evaluates current work. Pending drafts do not earn completion. Protected controls must retain their supplied values. Optional hints are progressive and a worked approach is a separate request. This model has no IOS parser, ping, HSRP packets, timers, ARP, measured convergence or host networking."
+              }
+            ],
+            "description": "Hazel prefers B, reversing Cedar’s role. B has priority 125 and A 105. Make both preempt as needed and lower B’s WAN-down effective priority below A, while B stays preferred on healthy links. Check both power paths and B WAN loss/return for both VIP clients.",
+            "policy": {
+              "initial": {
+                "version": 1,
+                "group": 133,
+                "prefix": 24,
+                "virtual_ip": "10.193.3.254",
+                "routers": [
+                  {
+                    "label": "Hazel-A",
+                    "address": "10.193.3.1",
+                    "config": {
+                      "participating": true,
+                      "priority": 105,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  },
+                  {
+                    "label": "Hazel-B",
+                    "address": "10.193.3.2",
+                    "config": {
+                      "participating": true,
+                      "priority": 125,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  }
+                ],
+                "clients": [
+                  {
+                    "id": 1,
+                    "label": "Hazel-client-1",
+                    "address": "10.193.3.20",
+                    "gateway": "10.193.3.254",
+                    "link_up": true
+                  },
+                  {
+                    "id": 2,
+                    "label": "Hazel-client-2",
+                    "address": "10.193.3.21",
+                    "gateway": "10.193.3.254",
+                    "link_up": true
+                  }
+                ],
+                "active": "B",
+                "standby": "A",
+                "revision": 0
+              },
+              "editable_routers": [
+                "A",
+                "B"
+              ],
+              "editable_clients": [],
+              "normal_active": "B",
+              "probes": [
+                {
+                  "title": "A power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "B",
+                    "B"
+                  ]
+                },
+                {
+                  "title": "B power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "A",
+                    "B"
+                  ]
+                },
+                {
+                  "title": "B wan failure and return",
+                  "events": [
+                    {
+                      "Wan": {
+                        "router": "B",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Wan": {
+                        "router": "B",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "A",
+                    "B"
+                  ]
+                }
+              ]
+            },
+            "worked": [
+              {
+                "title": "Apply practice router A settings",
+                "why": "Keep this router participating with priority 105. Its own preempt permits takeover only when its effective priority is strictly greater. No WAN tracking is configured on this router.",
+                "action": {
+                  "Router": {
+                    "router": "A",
+                    "config": {
+                      "participating": true,
+                      "priority": 105,
+                      "preempt": true,
+                      "track_wan_decrement": null
+                    }
+                  }
+                }
+              },
+              {
+                "title": "Apply practice router B settings",
+                "why": "Keep this router participating with priority 125. Its own preempt permits takeover only when its effective priority is strictly greater. WAN tracking subtracts 30 during its own WAN loss.",
+                "action": {
+                  "Router": {
+                    "router": "B",
+                    "config": {
+                      "participating": true,
+                      "priority": 125,
+                      "preempt": true,
+                      "track_wan_decrement": 30
+                    }
+                  }
+                }
+              }
+            ],
+            "try_change": "After practice passes, turn preempt off on Hazel-A. A can still replace a powered-off B, but cannot take over from a LAN-eligible B with a failed WAN. Restore A preempt and compare those two distinct failure paths.",
+            "experiment": {
+              "Router": {
+                "router": "A",
+                "config": {
+                  "participating": true,
+                  "priority": 105,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                }
+              }
+            },
+            "repair": {
+              "Router": {
+                "router": "A",
+                "config": {
+                  "participating": true,
+                  "priority": 105,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "SIM HSRP {\"Router\":{\"router\":\"A\",\"config\":{\"participating\":true,\"priority\":150,\"preempt\":true,\"track_wan_decrement\":30}}}",
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":140,\"preempt\":true,\"track_wan_decrement\":null}}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-gateway",
+        "ccna-hsrp-incumbent-return"
+      ]
+    },
+    {
+      "id": "ccna-hsrp-resilient-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "First-hop redundancy with HSRP",
+      "unit": "hsrp-resilient-gateway",
+      "title": "Hand over a gateway while preserving protected client settings",
+      "summary": "Move Dogwood’s normal Active role from A to B and move editable clients 1 and 3 to the VIP. Preserve A’s entire supplied configuration and client 2’s supplied gateway. Retain all three clients’ forwarding through either router’s power failure/return and B’s WAN failure/return. B must regain Active after its return; A must take over during B’s WAN loss.",
+      "objective": "Move Dogwood’s normal Active role from A to B and move editable clients 1 and 3 to the VIP. Preserve A’s entire supplied configuration and client 2’s supplied gateway. Retain all three clients’ forwarding through either router’s power failure/return and B’s WAN failure/return. B must regain Active after its return; A must take over during B’s WAN loss.",
+      "retry_guidance": "Read the first failing current or failure/return row. Check both participating candidates, every client’s VIP, the required Active identity, and strict effective-priority inequalities. Current success alone cannot replace a failed intermediate checkpoint. Repair applied settings or the pending draft; keep protected settings unchanged.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Read the task and supplied fixed facts",
+        "Configure permitted settings and inspect settled roles",
+        "Check every client at current and failure/return checkpoints"
+      ],
+      "guide": [],
+      "explanation": "The worked approach is one accepted configuration, not a required string match. Other priorities and preemption choices pass when all current and checkpoint outcomes and protected settings pass. Use the native controls; the typed action records used by automated checks are not IOS commands.",
+      "hints": [
+        "Preserve A’s complete configuration and client 2’s gateway; edit only B and clients 1 and 3.",
+        "For B to take over healthy A, B needs its own preempt and a higher healthy priority.",
+        "During B WAN loss its tracked effective priority must fall strictly below protected A’s; all clients must follow the VIP."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ntw-servs/b-network-services/m_fhp-hsrp-0.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/hot-standby-router-protocol-hsrp/9281-3.html"
+      ],
+      "simplifications": "Offline settled HSRPv1 configuration model: two routers, one fixed connected IPv4 LAN and healthy supplied routes. Temporary power/LAN/WAN probes use clones. No IOS parser, HSRP packets, ARP, timers, measured convergence, ping, route tracking, IP SLA, real router or host-network execution.",
+      "initial": {
+        "kind": "Hsrp",
+        "simulation": {
+          "version": 1,
+          "initial": {
+            "version": 1,
+            "group": 44,
+            "prefix": 24,
+            "virtual_ip": "10.94.4.254",
+            "routers": [
+              {
+                "label": "Dogwood-A",
+                "address": "10.94.4.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Dogwood-B",
+                "address": "10.94.4.2",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Dogwood-client-1",
+                "address": "10.94.4.20",
+                "gateway": "10.94.4.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Dogwood-client-2",
+                "address": "10.94.4.21",
+                "gateway": "10.94.4.254",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Dogwood-client-3",
+                "address": "10.94.4.22",
+                "gateway": "10.94.4.2",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 0
+          },
+          "current": {
+            "version": 1,
+            "group": 44,
+            "prefix": 24,
+            "virtual_ip": "10.94.4.254",
+            "routers": [
+              {
+                "label": "Dogwood-A",
+                "address": "10.94.4.1",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Dogwood-B",
+                "address": "10.94.4.2",
+                "config": {
+                  "participating": true,
+                  "priority": 100,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Dogwood-client-1",
+                "address": "10.94.4.20",
+                "gateway": "10.94.4.1",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Dogwood-client-2",
+                "address": "10.94.4.21",
+                "gateway": "10.94.4.254",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Dogwood-client-3",
+                "address": "10.94.4.22",
+                "gateway": "10.94.4.2",
+                "link_up": true
+              }
+            ],
+            "active": "A",
+            "standby": "B",
+            "revision": 0
+          },
+          "history": [],
+          "example_initial": {
+            "version": 1,
+            "group": 144,
+            "prefix": 24,
+            "virtual_ip": "10.194.4.254",
+            "routers": [
+              {
+                "label": "Maple-A",
+                "address": "10.194.4.1",
+                "config": {
+                  "participating": true,
+                  "priority": 90,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Maple-B",
+                "address": "10.194.4.2",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Maple-client-1",
+                "address": "10.194.4.20",
+                "gateway": "10.194.4.2",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Maple-client-2",
+                "address": "10.194.4.21",
+                "gateway": "10.194.4.1",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Maple-client-3",
+                "address": "10.194.4.22",
+                "gateway": "10.194.4.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 0
+          },
+          "example": {
+            "version": 1,
+            "group": 144,
+            "prefix": 24,
+            "virtual_ip": "10.194.4.254",
+            "routers": [
+              {
+                "label": "Maple-A",
+                "address": "10.194.4.1",
+                "config": {
+                  "participating": true,
+                  "priority": 90,
+                  "preempt": false,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              },
+              {
+                "label": "Maple-B",
+                "address": "10.194.4.2",
+                "config": {
+                  "participating": true,
+                  "priority": 110,
+                  "preempt": true,
+                  "track_wan_decrement": null
+                },
+                "facts": {
+                  "power_on": true,
+                  "lan_link_up": true,
+                  "wan_link_up": true,
+                  "route_available": true
+                }
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "label": "Maple-client-1",
+                "address": "10.194.4.20",
+                "gateway": "10.194.4.2",
+                "link_up": true
+              },
+              {
+                "id": 2,
+                "label": "Maple-client-2",
+                "address": "10.194.4.21",
+                "gateway": "10.194.4.1",
+                "link_up": true
+              },
+              {
+                "id": 3,
+                "label": "Maple-client-3",
+                "address": "10.194.4.22",
+                "gateway": "10.194.4.254",
+                "link_up": true
+              }
+            ],
+            "active": "B",
+            "standby": "A",
+            "revision": 0
+          },
+          "example_history": [],
+          "draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "110",
+                "preempt": true,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "100",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.94.4.1"
+              },
+              {
+                "id": 2,
+                "gateway": "10.94.4.254"
+              },
+              {
+                "id": 3,
+                "gateway": "10.94.4.2"
+              }
+            ]
+          },
+          "example_draft": {
+            "routers": [
+              {
+                "participating": true,
+                "priority": "90",
+                "preempt": false,
+                "track": false,
+                "decrement": ""
+              },
+              {
+                "participating": true,
+                "priority": "110",
+                "preempt": true,
+                "track": false,
+                "decrement": ""
+              }
+            ],
+            "clients": [
+              {
+                "id": 1,
+                "gateway": "10.194.4.2"
+              },
+              {
+                "id": 2,
+                "gateway": "10.194.4.1"
+              },
+              {
+                "id": 3,
+                "gateway": "10.194.4.254"
+              }
+            ]
+          },
+          "view": "introduction",
+          "checked": false,
+          "example_checked": false,
+          "selected_example": 0
+        }
+      },
+      "goal": {
+        "kind": "Hsrp",
+        "definition": {
+          "policy": {
+            "initial": {
+              "version": 1,
+              "group": 44,
+              "prefix": 24,
+              "virtual_ip": "10.94.4.254",
+              "routers": [
+                {
+                  "label": "Dogwood-A",
+                  "address": "10.94.4.1",
+                  "config": {
+                    "participating": true,
+                    "priority": 110,
+                    "preempt": true,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                },
+                {
+                  "label": "Dogwood-B",
+                  "address": "10.94.4.2",
+                  "config": {
+                    "participating": true,
+                    "priority": 100,
+                    "preempt": false,
+                    "track_wan_decrement": null
+                  },
+                  "facts": {
+                    "power_on": true,
+                    "lan_link_up": true,
+                    "wan_link_up": true,
+                    "route_available": true
+                  }
+                }
+              ],
+              "clients": [
+                {
+                  "id": 1,
+                  "label": "Dogwood-client-1",
+                  "address": "10.94.4.20",
+                  "gateway": "10.94.4.1",
+                  "link_up": true
+                },
+                {
+                  "id": 2,
+                  "label": "Dogwood-client-2",
+                  "address": "10.94.4.21",
+                  "gateway": "10.94.4.254",
+                  "link_up": true
+                },
+                {
+                  "id": 3,
+                  "label": "Dogwood-client-3",
+                  "address": "10.94.4.22",
+                  "gateway": "10.94.4.2",
+                  "link_up": true
+                }
+              ],
+              "active": "A",
+              "standby": "B",
+              "revision": 0
+            },
+            "editable_routers": [
+              "B"
+            ],
+            "editable_clients": [
+              1,
+              3
+            ],
+            "normal_active": "B",
+            "probes": [
+              {
+                "title": "A power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "A",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "B",
+                  "B"
+                ]
+              },
+              {
+                "title": "B power failure and return",
+                "events": [
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Power": {
+                      "router": "B",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "A",
+                  "B"
+                ]
+              },
+              {
+                "title": "B wan failure and return",
+                "events": [
+                  {
+                    "Wan": {
+                      "router": "B",
+                      "up": false
+                    }
+                  },
+                  {
+                    "Wan": {
+                      "router": "B",
+                      "up": true
+                    }
+                  }
+                ],
+                "expected_active": [
+                  "A",
+                  "B"
+                ]
+              }
+            ]
+          },
+          "lesson": {
+            "prerequisite_note": "Know usable IPv4 addresses on one connected subnet and the default gateway used for off-LAN traffic. Both supplied routers already have working upstream routes. Read the virtual-address, settled-role and tracking concepts below before configuring. No IOS command knowledge is needed for these native controls.",
+            "concepts": [
+              {
+                "title": "One virtual next hop",
+                "text": "A client sends off-LAN traffic to its default gateway. A real router address belongs to one box. The supplied virtual IP (VIP) is a shared gateway identity served by the current Active router; clients keep the VIP when that router changes. Real router addresses and the VIP must be distinct usable addresses on this connected LAN."
+              },
+              {
+                "title": "Candidates and settled roles",
+                "text": "Participation makes a healthy powered-on, LAN-connected router eligible. Active serves the VIP and Standby is the other eligible candidate. An unavailable Active is replaced by the eligible peer even without preemption. Both candidates and every client matter; a healthy current path alone does not prove resilience."
+              },
+              {
+                "title": "Initial election and an incumbent",
+                "text": "At a simultaneous initial election, effective priority wins, then the higher real IPv4 address breaks a tie. Later, an eligible incumbent stays Active unless a strictly higher-priority peer has its own preempt setting enabled. A restored preferred router therefore needs preemption on itself; enabling it only on the other router does not cause the intended return."
+              },
+              {
+                "title": "WAN tracking is a separate decision",
+                "text": "A WAN outage does not make a router ineligible on the LAN. Optional WAN-link tracking subtracts its configured decrement from effective priority during that link outage. The healthy peer must then have strictly higher effective priority and its own preempt enabled. A tie cannot preempt; the returning preferred router also needs preempt to reclaim Active. Route tracking and IP SLA are outside this model."
+              },
+              {
+                "title": "Inspect without changing the assignment",
+                "text": "The current table and each supplied failure/return checkpoint are already settled observations. Temporary inspection runs on a clone; it does not switch off real devices or change saved assignment facts/history. Check requires the VIP and usable modeled forwarding for every client at every checkpoint, including intermediate failures. Reset of the assignment and Reset example are separate actions."
+              },
+              {
+                "title": "Configure, check and preserve",
+                "text": "Use the aligned native router/client controls. Inserting a worked setting fills the separate practice draft; Apply publishes settings and Check evaluates current work. Pending drafts do not earn completion. Protected controls must retain their supplied values. Optional hints are progressive and a worked approach is a separate request. This model has no IOS parser, ping, HSRP packets, timers, ARP, measured convergence or host networking."
+              }
+            ],
+            "description": "Maple reverses the handover: configure only A and clients 1 and 2. Preserve B’s supplied priority/preempt settings and client 3’s VIP. Prefer A normally, fail over to B during A’s WAN loss, and return to A afterward. Check every supplied failure/return checkpoint for all three clients.",
+            "policy": {
+              "initial": {
+                "version": 1,
+                "group": 144,
+                "prefix": 24,
+                "virtual_ip": "10.194.4.254",
+                "routers": [
+                  {
+                    "label": "Maple-A",
+                    "address": "10.194.4.1",
+                    "config": {
+                      "participating": true,
+                      "priority": 90,
+                      "preempt": false,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  },
+                  {
+                    "label": "Maple-B",
+                    "address": "10.194.4.2",
+                    "config": {
+                      "participating": true,
+                      "priority": 110,
+                      "preempt": true,
+                      "track_wan_decrement": null
+                    },
+                    "facts": {
+                      "power_on": true,
+                      "lan_link_up": true,
+                      "wan_link_up": true,
+                      "route_available": true
+                    }
+                  }
+                ],
+                "clients": [
+                  {
+                    "id": 1,
+                    "label": "Maple-client-1",
+                    "address": "10.194.4.20",
+                    "gateway": "10.194.4.2",
+                    "link_up": true
+                  },
+                  {
+                    "id": 2,
+                    "label": "Maple-client-2",
+                    "address": "10.194.4.21",
+                    "gateway": "10.194.4.1",
+                    "link_up": true
+                  },
+                  {
+                    "id": 3,
+                    "label": "Maple-client-3",
+                    "address": "10.194.4.22",
+                    "gateway": "10.194.4.254",
+                    "link_up": true
+                  }
+                ],
+                "active": "B",
+                "standby": "A",
+                "revision": 0
+              },
+              "editable_routers": [
+                "A"
+              ],
+              "editable_clients": [
+                1,
+                2
+              ],
+              "normal_active": "A",
+              "probes": [
+                {
+                  "title": "A power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "A",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "B",
+                    "A"
+                  ]
+                },
+                {
+                  "title": "B power failure and return",
+                  "events": [
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Power": {
+                        "router": "B",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "A",
+                    "A"
+                  ]
+                },
+                {
+                  "title": "A wan failure and return",
+                  "events": [
+                    {
+                      "Wan": {
+                        "router": "A",
+                        "up": false
+                      }
+                    },
+                    {
+                      "Wan": {
+                        "router": "A",
+                        "up": true
+                      }
+                    }
+                  ],
+                  "expected_active": [
+                    "B",
+                    "A"
+                  ]
+                }
+              ]
+            },
+            "worked": [
+              {
+                "title": "Apply practice router A settings",
+                "why": "Keep this router participating with priority 120. Its own preempt permits takeover only when its effective priority is strictly greater. WAN tracking subtracts 20 during its own WAN loss.",
+                "action": {
+                  "Router": {
+                    "router": "A",
+                    "config": {
+                      "participating": true,
+                      "priority": 120,
+                      "preempt": true,
+                      "track_wan_decrement": 20
+                    }
+                  }
+                }
+              },
+              {
+                "title": "Use the practice VIP on client 1",
+                "why": "A shared virtual next hop follows the elected Active. This edit affects only the permitted practice client.",
+                "action": {
+                  "Gateway": {
+                    "client": 1,
+                    "gateway": "10.194.4.254"
+                  }
+                }
+              },
+              {
+                "title": "Use the practice VIP on client 2",
+                "why": "A shared virtual next hop follows the elected Active. This edit affects only the permitted practice client.",
+                "action": {
+                  "Gateway": {
+                    "client": 2,
+                    "gateway": "10.194.4.254"
+                  }
+                }
+              }
+            ],
+            "try_change": "After practice passes, point Maple client 1 at A’s real address. It can appear healthy while A is Active but cannot follow the VIP through A failure. Restore the VIP and verify that protected B and client 3 stayed unchanged.",
+            "experiment": {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.194.4.1"
+              }
+            },
+            "repair": {
+              "Gateway": {
+                "client": 1,
+                "gateway": "10.194.4.254"
+              }
+            }
+          }
+        }
+      },
+      "solution": [
+        "SIM HSRP {\"Router\":{\"router\":\"B\",\"config\":{\"participating\":true,\"priority\":120,\"preempt\":true,\"track_wan_decrement\":20}}}",
+        "SIM HSRP {\"Gateway\":{\"client\":1,\"gateway\":\"10.94.4.254\"}}",
+        "SIM HSRP {\"Gateway\":{\"client\":3,\"gateway\":\"10.94.4.254\"}}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-gateway",
+        "ccna-hsrp-wan-tracking"
+      ]
+    }
+  ]
+}

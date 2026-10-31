@@ -1,12 +1,17 @@
 # DLMS Learning Lab
 
 A native, offline Rust desktop application for networking, Linux administration
-and scripting. The current source and verified Fedora candidate contain **197 authored
-assignments in 52 units**: 57 CCNA, 44 LPIC-1, 36 LPIC-2 and 60 Bash/Shell. The full
-inclusive Rust suite passes 2,935 tests; 487 Python checks and all-target Clippy pass.
-The installed candidate passes the four new disk-preparation flows, NFS cold
-reopening, install/upgrade/progress checks and ten Wayland launches. See the
-[197 milestone](docs/CATALOG197_MILESTONE.md) for exact scope and checksums.
+and scripting. Current source contains **199 authored assignments in53units**:
+57CCNA,44LPIC-1,36LPIC-2 and62Bash/Shell. The two new scripting projects pass
+scoped grading, progress and native Fedora checks, including corrected editor
+clipping at large text sizes. Current full-inclusive verification passes3,041 Rust tests across236targets,
+with zero failures or ignored tests.
+514Python checks and all-targetClippy pass. The verified installed Fedora
+candidate remains197/52/evaluator14; its2,935-test full-inclusive result and
+installation/upgrade, NFS cold reopening and ten Wayland launches retain that
+identity. See the [checkpoint](docs/CHECKPOINT.md) for current implementation and
+the [199 source milestone](docs/CATALOG199_MILESTONE.md) and
+[197 installed milestone](docs/CATALOG197_MILESTONE.md) for their separate scopes.
 
 All 28 themes and approved native workspaces remain. **This is not full exam
 coverage.** Windows/macOS runtime, screen-reader, physical-device and novice
@@ -47,7 +52,7 @@ Use stable Rust (tested with 1.99.1 on Fedora 44):
 
 ```sh
 python3 tools/dev.py build --locked --offline
-python3 tools/dev.py test --locked --offline --all-targets
+python3 tools/dev.py test --locked --offline --all-targets --no-fail-fast -- --include-ignored
 python3 tools/dev.py clippy --locked --offline --all-targets -- -D warnings
 cargo fmt --all -- --check
 python3 tools/dev.py native ./target/debug/dlms-learning-lab --validate-pack "$PWD/scenarios/starter-v1.json"

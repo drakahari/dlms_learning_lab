@@ -88,7 +88,7 @@ fn choice(name: &str) -> Step {
 fn sources() -> &'static Vec<Scenario> {
     static SOURCES: std::sync::OnceLock<Vec<Scenario>> = std::sync::OnceLock::new();
     SOURCES.get_or_init(|| {
-        let all = pack::bundled().unwrap();
+        let normal = pack::bundled().unwrap(); let all = disk_registration::literal_registration::before_scenarios(&normal).to_vec();
         assert_eq!(
             one_off_boundary::loop_registration::lvm_registration::before_scenarios(&all).len(),
             182
@@ -965,7 +965,14 @@ impl LabApp {
             ),
             (193, 51)
         );
-        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
+        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!(
+            (
+                disk_registration::literal_registration::before_scenarios(&self.scenarios).len(),
+                disk_registration::literal_registration::before_typed_units(&self.units).len()
+            ),
+            (197, 52)
+        );
         assert_eq!(
             self.scenarios[176..180]
                 .iter()

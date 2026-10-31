@@ -11,6 +11,7 @@ use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere
 mod digest;
 #[path = "../src/ui/one_off_boundary.rs"]
 mod one_off_boundary;
+use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration as literal_registration;
 use one_off_boundary::loop_registration as registration;
 #[path = "support/combined_catalog.rs"]
 mod combined;
@@ -24,7 +25,9 @@ fn recipe() -> Value {
 #[test]
 fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immutable() {
     assert_eq!(shell::EVALUATOR_REVISION, 15);
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::before_scenarios(&all);
     assert_eq!(old.len(), 180);
     let r = recipe();
@@ -135,9 +138,13 @@ fn old180_fullspecs_all55scripts420cases55examples_and_original45packs_are_immut
 }
 #[test]
 fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrecipes() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     let old = registration::before_scenarios(&all);
-    let current_raw = include_bytes!("../scenarios/units-v1.json");
+    let current53 = include_bytes!("../scenarios/units-v1.json");
+    let previous52 = literal_registration::before_units(current53).unwrap();
+    let current_raw = previous52.as_slice();
     let checked49 =
         registration::lvm_registration::ntp_registration::before_units(current_raw).unwrap();
     let checked48 = registration::lvm_registration::before_units(&checked49).unwrap();
@@ -146,7 +153,15 @@ fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrec
     let r = recipe();
     assert_eq!(digest::hash(raw), r["after_units48_sha256"]);
     assert_eq!(digest::hash(&before), r["before_units47_sha256"]);
-    let current50 = course::bundled(&all).unwrap();
+    let current50 = course::load(
+        std::str::from_utf8(
+            &literal_registration::before_units(include_bytes!("../scenarios/units-v1.json"))
+                .unwrap(),
+        )
+        .unwrap(),
+        &all,
+    )
+    .unwrap();
     assert_eq!(
         (
             registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(
@@ -218,7 +233,9 @@ fn exact48_to47_raw_and_typed_inverse_preserves_all_priorunits_and_historicalrec
 }
 #[test]
 fn exact_newappend_checks_do_not_ignore_changedtasks_or_edited_predecessor_identities() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     for (which, index) in [("new", 180), ("old", 0)] {
         let mut changed = all.clone();
         if which == "new" {
@@ -253,7 +270,9 @@ fn exact_newappend_checks_do_not_ignore_changedtasks_or_edited_predecessor_ident
 
 #[test]
 fn nonempty_authored_guides_are_preserved_and_modified_guidance_is_refused() {
-    let all = pack::bundled().unwrap();
+    let current199 = pack::bundled().unwrap();
+    assert_eq!(current199.len(), 199);
+    let all = literal_registration::before_scenarios(&current199).to_vec();
     for index in [180, 181] {
         assert_eq!(all[index].guide.len(), 3);
         for field in ["title", "why", "action", "commands"] {

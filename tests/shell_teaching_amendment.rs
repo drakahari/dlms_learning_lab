@@ -92,6 +92,11 @@ fn exact_closed_manifest_raw_bytes_and_typed_lessons_reject_unlisted_changes() {
 fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_fixtures() {
     let all = pack::bundled().unwrap();
     assert_eq!(one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::before_scenarios(&all).iter().filter(|s|matches!(s.goal,Goal::Script{..})).count(),57);
+    let previous197 = one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration::literal_registration::before_scenarios(&all);
+    assert_eq!((all.len(), previous197.len()), (199, 197));
+    assert_eq!(previous197.iter().filter(|s| matches!(s.goal, Goal::Script { .. })).map(|s| cases(s).len()).sum::<usize>(), 477);
+    assert_eq!(all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })).map(|s| cases(s).len()).sum::<usize>(), 501);
+    let mut original_count = 0;
     let mut count = 0;
     let mut changed_defaults = Vec::new();
     for s in all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })) {
@@ -119,9 +124,13 @@ fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_f
                 s.id
             );
         }
+        if previous197.iter().any(|old| old.id == s.id) {
+            original_count += 1;
+        }
         count += 1;
     }
-    assert_eq!(count, 60);
+    assert_eq!(original_count, 60);
+    assert_eq!(count, 62);
     assert_eq!(changed_defaults, ["shell-bundle", "shell-text-capstone"]);
 }
 

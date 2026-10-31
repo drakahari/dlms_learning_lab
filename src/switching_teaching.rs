@@ -120,6 +120,7 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
         crate::engine::State::PartitionFs { .. }
             | crate::engine::State::Lvm { .. }
             | crate::engine::State::Ntp { .. }
+            | crate::engine::State::Hsrp { .. }
     ) || crate::workspace::is_physical_workspace(attempt)
     {
         return;

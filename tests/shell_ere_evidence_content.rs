@@ -63,12 +63,26 @@ fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         assert_eq!(shell::EVALUATOR_REVISION, 15);
-        let all = pack::bundled().unwrap();
+        let current199 = pack::bundled().unwrap();
+        let all = disk_registration::literal_registration::before_scenarios(&current199).to_vec();
         assert_eq!(disk_registration::before_scenarios(&all).len(), 193);
         assert_eq!(all.len(), 197);
         let t = texts(&all);
         assert!(t.iter().all(|s| s.len() <= pack::MAX_PACK_BYTES));
-        pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap()
+        let checked197 =
+            pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+        assert_eq!(
+            value(disk_registration::literal_registration::before_scenarios(
+                &current199
+            )),
+            value(&checked197)
+        );
+        let t = texts(&current199);
+        assert!(t.iter().all(|s| s.len() <= pack::MAX_PACK_BYTES));
+        let checked199 =
+            pack::load_catalog(&t.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+        assert_eq!(value(&checked199), value(&current199));
+        checked199
     })
 }
 fn run(p: &str, c: &Case, n: usize) -> Outcome {
@@ -104,6 +118,58 @@ fn programs(s: &Scenario) -> Vec<String> {
 fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dependency_closure() {
     let r = review();
     let current = pack::bundled().unwrap();
+    assert_eq!(
+        (
+            current.len(),
+            disk_registration::literal_registration::before_scenarios(&current).len()
+        ),
+        (199, 197)
+    );
+    let literal_units53 = course::bundled(&current).unwrap();
+    let literal_raw52 = disk_registration::literal_registration::before_units(include_bytes!(
+        "../scenarios/units-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        literal_raw52.as_slice(),
+        include_bytes!("fixtures/literal-units-before197.json")
+    );
+    let literal_units52 = course::load(
+        std::str::from_utf8(&literal_raw52).unwrap(),
+        disk_registration::literal_registration::before_scenarios(&current),
+    )
+    .unwrap();
+    assert_eq!((literal_units53.len(), literal_units52.len()), (53, 52));
+    assert_eq!(
+        serde_json::to_value(disk_registration::literal_registration::before_typed_units(
+            &literal_units53
+        ))
+        .unwrap(),
+        serde_json::to_value(&literal_units52).unwrap()
+    );
+    assert_eq!(
+        current[197..]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        disk_registration::literal_registration::IDS
+    );
+    for source in &current[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else {
+            panic!("Literal assignments require Script Goals")
+        };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!progress::current_solved(&Attempt::new(source, 1), source));
+    }
+    assert_eq!(
+        current
+            .iter()
+            .filter(|s| matches!(s.initial, State::Script { .. }))
+            .count(),
+        62
+    );
     let old = ntp_registration::ere_registration::before_scenarios(&current);
     let scripts = old
         .iter()
@@ -141,7 +207,9 @@ fn original57_scripts442_cases57_examples_and_unit_bytes_stay_exact_with_new_dep
         digest::hash(&predecessor),
         r["original_units_sha256"].as_str().unwrap()
     );
-    let full_units = course::bundled(&current).unwrap();
+    let current_units53 = course::bundled(&current).unwrap();
+    let full_units =
+        disk_registration::literal_registration::before_typed_units(&current_units53).to_vec();
     assert_eq!(disk_registration::before_typed_units(&full_units).len(), 51);
     assert_eq!(full_units.len(), 52);
     let typed_current = ntp_registration::ere_registration::before_typed_units(&full_units);
@@ -377,7 +445,9 @@ fn actual_run_edit_invalidation_retry_save_resume_and_selected_reset_preserve_ot
 }
 #[test]
 fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectations_fail() {
-    let current = catalog();
+    let full199 = catalog();
+    let previous197 = disk_registration::literal_registration::before_scenarios(full199).to_vec();
+    let current = &previous197;
     assert_eq!(current.len(), 197);
     let original193 = disk_registration::before_scenarios(current);
     assert_eq!(original193.len(), 193);
@@ -403,7 +473,12 @@ fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectati
     assert_eq!(value(&current194[..190]), value(&original190));
     assert_eq!(value(&current194[190..]), value(&current[193..]));
 
-    for (base, expected_count) in [(&original190, 193), (&current194, 197)] {
+    let mut current196 = full199.clone();
+    current196.retain(|s| !IDS.contains(&s.id.as_str()));
+    assert_eq!(current196.len(), 196);
+    assert_eq!(value(&current196[..194]), value(&current194));
+    assert_eq!(value(&current196[194..]), value(&full199[197..]));
+    for (base, expected_count) in [(&original190, 193), (&current194, 197), (&current196, 199)] {
         // A valid control reaches the real validator with both the complete
         // historical base and the current base including all four native labs.
         let mut valid = base.clone();
@@ -426,7 +501,11 @@ fn invalid_pack_missing_teaching_prerequisite_solution_and_unreachable_expectati
                     .map(|s| (s.id.clone(), value(s)))
                     .collect::<BTreeMap<_, _>>()
             };
-            assert_eq!(by_id(&checked), by_id(current));
+            if expected_count == 199 {
+                assert_eq!(by_id(&checked), by_id(full199));
+            } else {
+                assert_eq!(by_id(&checked), by_id(current));
+            }
         }
         for failure in ["prerequisite", "teaching", "solution", "expected"] {
             let mut p: Value = serde_json::from_str(PACK).unwrap();

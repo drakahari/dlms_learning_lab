@@ -48,7 +48,12 @@ impl LabApp {
                 self.metrics.manager_learn = Some(learn.rect);
                 self.metrics.manager_challenge = Some(independent.rect);
             }
-            if before != challenge {
+            if before != challenge && matches!(self.scenarios[i].initial, State::Hsrp { .. }) {
+                // HSRP must collect the later help/input intents before changing
+                // saved mode. Keep rendering the actual prior scope this frame.
+                self.hsrp_presentation.pending_mode = Some(challenge);
+                challenge = before;
+            } else if before != challenge {
                 if matches!(self.scenarios[i].initial, State::PartitionFs { .. }) {
                     if let Err(e) =
                         dlms_learning_lab::partition_fs_workspace::binding::set_challenge(
@@ -160,6 +165,10 @@ impl LabApp {
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
         if matches!(self.scenarios[i].initial, State::PartitionFs { .. }) {
             self.partition_fs_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Hsrp { .. }) {
+            self.hsrp_page(ui, i);
             return;
         }
         if matches!(self.scenarios[i].initial, State::Ntp { .. }) {

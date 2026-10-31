@@ -83,6 +83,23 @@ pub fn fit_popup_contents(ui: &mut egui::Ui) {
     ui.set_width(width);
     ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
 }
+/// Keep a nested scroll area's paint/hit clip below its actual layout origin.
+/// egui may pin a child scrollbar to the parent clip edge; a fully below-fold
+/// child must not paint that bar over unrelated content above it. Preserve the
+/// same Ui/IDs/layout and restore its exact clip after the ordinary show call.
+pub fn nested_scroll<R>(
+    ui: &mut egui::Ui,
+    area: egui::ScrollArea,
+    add_contents: impl FnOnce(&mut egui::Ui) -> R,
+) -> egui::scroll_area::ScrollAreaOutput<R> {
+    let previous = ui.clip_rect();
+    let mut clip = previous;
+    clip.min.y = clip.min.y.max(ui.next_widget_position().y);
+    ui.set_clip_rect(clip);
+    let output = area.show(ui, add_contents);
+    ui.set_clip_rect(previous);
+    output
+}
 pub fn cell<R>(
     ui: &mut egui::Ui,
     width: f32,

@@ -248,10 +248,16 @@ impl LabApp {
             .expect("Normal command-vectors lab");
         // Admit the complete current source on EVERY callback, then reuse only
         // these immutable checked predecessors for the older authority proofs.
-        let checked193 = disk_registration::before_scenarios(&self.scenarios);
-        let checked51 = disk_registration::before_typed_units(&self.units);
+        let checked197 = disk_registration::literal_registration::before_scenarios(&self.scenarios);
+        let checked52 = disk_registration::literal_registration::before_typed_units(&self.units);
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
+        // Literal's full equality includes exact disk original193+canonical4.
+        // These are same-callback immutable prefixes, never a cached admission.
+        let checked193 = &checked197[..193];
+        let checked51 = &checked52[..51];
         assert_eq!((checked193.len(), checked51.len()), (193, 51));
-        assert_eq!((self.scenarios.len(), self.units.len()), (197, 52));
+        assert_eq!((self.scenarios.len(), self.units.len()), (199, 53));
+        assert_eq!((checked197.len(), checked52.len()), (197, 52));
         assert_eq!(
             (
                 one_off_boundary::before_len(checked193),
@@ -267,11 +273,18 @@ impl LabApp {
             57
         );
         assert_eq!(
-            self.scenarios
+            checked197
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
             60
+        );
+        assert_eq!(
+            self.scenarios
+                .iter()
+                .filter(|s| s.track == "Bash/Shell")
+                .count(),
+            62
         );
         assert!(
             self.units

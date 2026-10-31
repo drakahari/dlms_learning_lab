@@ -47,8 +47,8 @@ Check configuration or Check work evaluates the current result. In scripting,
 the whole run can fail even when the selected individual case passes. Inspect
 the named failing cases and expected versus actual output. Syntax errors,
 unsupported features and incorrect results need different repairs; the feedback
-helps you choose what to change. Each behavior test uses its own sample inputs
-and reset simulated files where relevant.
+helps you choose what to change. Each test starts with its own sample inputs. Where relevant, simulated files
+reset before each test.
 
 You can retry. A valid alternative can pass without reproducing the worked
 answer. Breaking a successful configuration or editing a script can invalidate

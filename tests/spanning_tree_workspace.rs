@@ -834,10 +834,18 @@ fn prior(p: &Progress, all: &[Scenario]) -> BTreeMap<String, serde_json::Value> 
 #[test]
 fn real_current_records_genuine678_history_both_drafts_export_restore_and_selected_reset_preserve125()
  {
+    use one_off_boundary::loop_registration::lvm_registration::ntp_registration::ere_registration::partition_fs_registration as disk_registration;
     let mut all = catalog();
-    let original = all.clone();
+    let original = disk_registration::literal_registration::before_scenarios(&all).to_vec();
+    assert_eq!((all.len(), original.len()), (199, 197));
+    let current53 = dlms_learning_lab::course::bundled(&all).unwrap();
+    let raw52 = disk_registration::literal_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(raw52.as_slice(), include_bytes!("fixtures/literal-units-before197.json"));
+    let previous52 = dlms_learning_lab::course::load(std::str::from_utf8(&raw52).unwrap(), &original).unwrap();
+    assert_eq!((current53.len(), previous52.len()), (53, 52));
+    assert_eq!(serde_json::to_value(disk_registration::literal_registration::before_typed_units(&current53)).unwrap(), serde_json::to_value(&previous52).unwrap());
     let s = scenario();
-    let mut p = retained_profile(&all);
+    let mut p = retained_profile(&original);
     assert_eq!(one_off_boundary::before_len(&p.attempts), 176);
     let histories = p
         .attempts
@@ -938,7 +946,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         "shell-ere-incident-report",
     ];
     assert_eq!(
-        all.iter()
+        original.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }) && !ere_ids.contains(&s.id.as_str()))
             .map(|s| s.id.as_str())
             .collect::<BTreeSet<_>>(),
@@ -950,12 +958,25 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         .chain(ere_ids)
         .collect::<BTreeSet<_>>();
     assert_eq!(
-        all.iter()
+        original.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .map(|s| s.id.as_str())
             .collect::<BTreeSet<_>>(),
         current_expected
     );
+    let literal_ids = disk_registration::literal_registration::IDS;
+    let full_expected = current_expected.iter().copied().chain(literal_ids).collect::<BTreeSet<_>>();
+    assert_eq!(full_expected.len(), 62);
+    assert_eq!(all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })).map(|s| s.id.as_str()).collect::<BTreeSet<_>>(), full_expected);
+    assert_eq!(all[197..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), literal_ids);
+    for source in &all[197..] {
+        assert!(matches!(source.initial, State::Script { run: None, .. }));
+        let Goal::Script { cases } = &source.goal else { panic!("Literal source must retain its Script Goal") };
+        assert_eq!(cases.len(), 12);
+        assert!(source.teaching.is_some());
+        assert!(!p.attempts.contains_key(&source.id));
+        assert!(!p.favorites.contains(&source.id));
+    }
     for id in new_ids
         .into_iter()
         .chain(numeric_ids)
@@ -1032,6 +1053,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     p.attempts.insert(s.id.clone(), a);
     p.favorites.insert(s.id.clone());
     all.push(s.clone());
+    assert_eq!((all.len(), p.attempts.len()), (200, 198));
     let favorites = p.favorites.clone();
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
@@ -1103,6 +1125,13 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     }
     assert_eq!(restored.favorites, favorites);
     assert_eq!(restored.attempts[&s.id].state, s.initial);
+    for profile in [&p, &loaded, &candidate.progress, &restored] {
+        for id in literal_ids {
+            assert!(!profile.attempts.contains_key(id));
+            assert!(!profile.favorites.contains(id));
+        }
+    }
+
 }
 #[test]
 fn import_and_save_reject_wrong_kind_fixed_identity_and_foreign_practice_without_overwrite() {
