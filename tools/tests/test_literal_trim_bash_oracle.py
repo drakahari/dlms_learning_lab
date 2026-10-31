@@ -4,6 +4,7 @@ import copy
 import io
 import json
 import os
+import stat
 from pathlib import Path
 import sys
 import tempfile
@@ -13,6 +14,9 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import literal_trim_bash_oracle as c
 PROJECT=Path(__file__).resolve().parents[2]
 MIRROR=Path(__file__).parent/'fixtures/literal-trim-reference.json'
+
+# CURRENT QA allowance only; frozen literal32 COMPILED/SOURCES are unchanged.
+CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 41797, 'bd7149e93384eb8be68aac9cb68486fc1630248b13cab0ff04b78b393c7e1535'),)
 
 class LiteralTrimGuards(unittest.TestCase):
     def setUp(self):
@@ -116,7 +120,17 @@ class LiteralTrimGuards(unittest.TestCase):
         self.assertEqual(len(c.COMPILED),len(set(c.COMPILED)))
         actual={p.relative_to(PROJECT).as_posix() for fam in c.SOURCE_FAMILIES for p in (PROJECT/fam).rglob('*') if p.is_file()}
         listed={n for n in c.COMPILED if Path(n).parts[0] in c.SOURCE_FAMILIES}
-        self.assertEqual(actual,listed)
+        authored_extension = {name for name, _, _ in CURRENT_LITERAL_AUTHORED_INPUTS}
+        self.assertEqual(len(authored_extension), 1)
+        self.assertTrue(listed.isdisjoint(authored_extension))
+        # Retain the entire fixed predecessor and reject every unknown path.
+        self.assertEqual(actual-authored_extension,listed)
+        self.assertEqual(actual,listed|authored_extension)
+        for name, size, sha in CURRENT_LITERAL_AUTHORED_INPUTS:
+            path=PROJECT/name;info=path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+            self.assertEqual(info.st_size,size)
+            self.assertEqual(c.digest(path.read_bytes()),sha)
         self.assertTrue({'src/shell/literal_trim.rs','src/ere/cooperative.rs','docs/SHELL_SUBSET.md',c.PROBE_SOURCE,c.FIXTURE}<=set(c.COMPILED))
         self.assertEqual(c.digest((PROJECT/c.PROBE_SOURCE).read_bytes()),c.PROBE_SOURCE_SHA)
     def test_source_roster_refuses_omission_extra_alias_and_empty_directory(self):
@@ -142,5 +156,35 @@ class LiteralTrimGuards(unittest.TestCase):
         self.assertEqual(len(c.PARENT14_SEALS),3)
         self.assertTrue(set(c.PARENT14_SEALS)<=set(c.SOURCES))
         for name,sha in c.PARENT14_SEALS.items():self.assertEqual(c.digest((PROJECT/name).read_bytes()),sha)
+
+
+    def test_frozen_r1_prepare_refuses_literal_content_pack_before_control_destination_or_subject(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        for name, size, sha in CURRENT_LITERAL_AUTHORED_INPUTS:
+            raw = (PROJECT / name).read_bytes()
+            self.assertEqual(len(raw), size)
+            self.assertEqual(c.digest(raw), sha)
+            added = self.put(name, raw)
+            with patch.object(c, 'COMPILED', names), \
+                 patch.object(c.shared, 'root_guard', return_value=()), \
+                 patch.object(c, 'fixed', return_value=self.fixture), \
+                 patch.object(c, 'control') as control, \
+                 patch.object(c.shared, 'owned_directory') as destination, \
+                 patch.object(c.shared, 'pinned_executable') as held, \
+                 patch.object(c.safe, 'capture_command') as child:
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'Bounded closed source inventory|No unreviewed project source directory|No omitted/extra/alias project source')
+                control.assert_not_called()
+                destination.assert_not_called()
+                held.assert_not_called()
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                # Only the exact newly-created private mock leaf is removed.
+                added.unlink()
+                self.assertEqual(c.project_roster(self.root), set(names))
 
 if __name__=='__main__':unittest.main()

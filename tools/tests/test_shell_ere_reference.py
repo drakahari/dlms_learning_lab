@@ -30,6 +30,9 @@ CURRENT_STORAGE_NATIVE_INPUTS = (('src/ui/smoke/disk_preparation.rs', 159702, 'd
 
 CURRENT_LITERAL_PRODUCT_INPUTS = (('src/shell/literal_trim.rs', 9256, '9917307a858e06a7592811b49b466f9a5211a303cf915422a16520b83cea3f69'),)
 
+# Exact unregistered authored Pack for CURRENT QA only; never a frozen r1 input.
+CURRENT_LITERAL_AUTHORED_INPUTS = (('scenarios/shell-literal-normalization-draft.json', 41797, 'bd7149e93384eb8be68aac9cb68486fc1630248b13cab0ff04b78b393c7e1535'),)
+
 class ShellEreReferenceGuards(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix='dlms-ere24-guards-')
@@ -342,14 +345,24 @@ class ShellEreReferenceGuards(unittest.TestCase):
         literal_extension = {name for name, _, _ in CURRENT_LITERAL_PRODUCT_INPUTS}
         self.assertEqual(len(literal_extension), 1)
         self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension).isdisjoint(literal_extension))
-        actual_before_literal = actual - literal_extension
+        literal_authored_extension = {name for name, _, _ in CURRENT_LITERAL_AUTHORED_INPUTS}
+        self.assertEqual(len(literal_authored_extension), 1)
+        self.assertTrue((listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension).isdisjoint(literal_authored_extension))
+        actual_before_literal = actual - literal_extension - literal_authored_extension
         # Project each complete predecessor by removing ALL fixed later sets.
         # The final equality still rejects every unknown, omitted or extra path.
         self.assertEqual(listed | extension, actual_before_literal - storage_extension - authored_extension - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension, actual_before_literal - authored_extension - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension | authored_extension, actual_before_literal - storage_native_extension)
         self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension, actual_before_literal)
-        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension, actual)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension, actual - literal_authored_extension)
+        self.assertEqual(listed | extension | storage_extension | authored_extension | storage_native_extension | literal_extension | literal_authored_extension, actual)
+        for name, size, sha in CURRENT_LITERAL_AUTHORED_INPUTS:
+            path = PROJECT / name
+            info = path.lstat()
+            self.assertTrue(stat.S_ISREG(info.st_mode) and info.st_nlink == 1)
+            self.assertEqual(info.st_size, size)
+            self.assertEqual(c.digest(path.read_bytes()), sha)
         for name, size, sha in CURRENT_LITERAL_PRODUCT_INPUTS:
             path = PROJECT / name
             info = path.lstat()
@@ -577,3 +590,32 @@ class ShellEreReferenceGuards(unittest.TestCase):
                     previous.rmdir()
                 self.assertEqual(c.project_roster(self.root), set(names))
             child.assert_not_called()
+
+    def test_frozen_r1_prepare_refuses_literal_content_pack_before_control_destination_or_subject(self):
+        names = ('src/lib.rs', 'scenarios/base.json', 'assets/theme.txt')
+        for name in names:
+            self.put(name, 'SYNTHETIC original reviewed input')
+        for name, size, sha in CURRENT_LITERAL_AUTHORED_INPUTS:
+            raw = (PROJECT / name).read_bytes()
+            self.assertEqual(len(raw), size)
+            self.assertEqual(c.digest(raw), sha)
+            added = self.put(name, raw)
+            with patch.object(c, 'COMPILED', names), \
+                 patch.object(c.shared, 'root_guard', return_value=()), \
+                 patch.object(c, 'fixed', return_value=self.fixture), \
+                 patch.object(c, 'control') as control, \
+                 patch.object(c.shared, 'owned_directory') as destination, \
+                 patch.object(c.shared, 'pinned_executable') as held, \
+                 patch.object(c.safe, 'capture_command') as child:
+                with self.assertRaises(c.safe.OracleError) as refused:
+                    c.run(self.root, 'prepare')
+                self.assertRegex(str(refused.exception),
+                                 'Bounded closed source inventory|No unreviewed project source directory|No omitted/extra/alias project source')
+                control.assert_not_called()
+                destination.assert_not_called()
+                held.assert_not_called()
+                child.assert_not_called()
+                self.assertFalse((self.root / c.BASE).exists())
+                # Only the exact newly-created private mock leaf is removed.
+                added.unlink()
+                self.assertEqual(c.project_roster(self.root), set(names))

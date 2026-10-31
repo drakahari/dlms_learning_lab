@@ -1,0 +1,3289 @@
+{
+  "status": "UNREGISTERED CONDITIONAL SOURCE; no VM15/capture/runtime/credit",
+  "required_evaluator": 15,
+  "capability_manifest": "905630f60192b15faa8983e86d6206ee828fa5234a171b80274121f0e44a32c9",
+  "actual_observations": null,
+  "unit_proposal": {
+    "id": "shell-literal-normalization",
+    "track": "Bash/Shell",
+    "title": "Literal edges and safe interfaces",
+    "summary": "Preserve option values and normalize a complete batch plan before publication.",
+    "prerequisites": [
+      "shell-option-interfaces",
+      "shell-command-construction",
+      "shell-optional-inputs",
+      "shell-ere-evidence",
+      "shell-arrays"
+    ],
+    "labs": [
+      "shell-trim-options",
+      "shell-trim-manifest"
+    ]
+  },
+  "labs": [
+    {
+      "id": "shell-trim-options",
+      "reference": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+      "alternatives": [
+        "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*)\n      case \"$1\" in\n        *'\n'*)\n        take_source \"$1\"\n        ;;\n        *)\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac\n      shift\n      ;;\n    --output=*)\n      case \"$1\" in\n        *'\n'*)\n        take_output \"$1\"\n        ;;\n        *)\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac\n      shift\n      ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+        "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  local chosen=$1\n  source=$chosen\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  local chosen=$1\n  output=$chosen\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  printf 'Source:%s\\nMode:full\\n' \"$source\" > \"$output\"\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n"
+      ],
+      "one_alternative_avoids_new_trim": 0,
+      "guards": [
+        {
+          "name": "No arguments",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n"
+          }
+        },
+        {
+          "name": "Explicit empty separate value",
+          "args": [
+            "--source",
+            "",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "No output supplied",
+          "args": [
+            "--source=a"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A"
+          }
+        },
+        {
+          "name": "No source supplied",
+          "args": [
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "Absolute and traversal paths are task-policy errors",
+          "args": [
+            "--source=../a",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "One character over the name bound is refused",
+          "args": [
+            "--source=abcdefghijklmnopq",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/abcdefghijklmnopq": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/abcdefghijklmnopq": "A",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "A digit, hyphen and equals are valid filename data",
+          "args": [
+            "--source=a-1=2",
+            "--output=out",
+            "--count"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a-1=2": "\nlast\n"
+          },
+          "stdout": "Published:out\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a-1=2": "\nlast\n",
+            "/work/out": "Source:a-1=2\nMode:count\nLines:2\n"
+          }
+        },
+        {
+          "name": "Empty full data remains empty after its two header lines",
+          "args": [
+            "--source=a",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "",
+            "/work/out": "KEEP"
+          },
+          "stdout": "Published:out\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "",
+            "/work/out": "Source:a\nMode:full\n"
+          }
+        },
+        {
+          "name": "Mixed separate form preserves multiline equals and final text",
+          "args": [
+            "--source",
+            "abcdefghijklmnop",
+            "--output",
+            "a"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/abcdefghijklmnop": "first\n\nsecond=keep",
+            "/work/a": "OLD\n"
+          },
+          "stdout": "Published:a\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/abcdefghijklmnop": "first\n\nsecond=keep",
+            "/work/a": "Source:abcdefghijklmnop\nMode:full\nfirst\n\nsecond=keep"
+          }
+        },
+        {
+          "name": "Inline values retain spaces and every equals sign",
+          "args": [
+            "--output=report=x",
+            "--count",
+            "--source=a=b x"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a=b x": "first\n\nlast",
+            "/work/report=x": "OLD"
+          },
+          "stdout": "Published:report=x\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a=b x": "first\n\nlast",
+            "/work/report=x": "Source:a=b x\nMode:count\nLines:3\n"
+          }
+        },
+        {
+          "name": "Empty count, length boundaries, repeated flag and final delimiter",
+          "args": [
+            "--count",
+            "--source=a",
+            "--output=abcdefghijklmnop",
+            "--count",
+            "--"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "",
+            "/work/abcdefghijklmnop": "OLD"
+          },
+          "stdout": "Published:abcdefghijklmnop\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "",
+            "/work/abcdefghijklmnop": "Source:a\nMode:count\nLines:0\n"
+          }
+        },
+        {
+          "name": "Unknown option wins over a missing source",
+          "args": [
+            "--source=absent",
+            "--output=out",
+            "--mystery"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "A newline cannot turn one filename into two valid lines",
+          "args": [
+            "--source=a\nb",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a\nb": "HIDDEN",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a\nb": "HIDDEN",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "Multiple inline source trailing LFs are invalid",
+          "args": [
+            "--source=a\n\n",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "Multiple inline output trailing LFs are invalid",
+          "args": [
+            "--source=a",
+            "--output=out\n\n"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "Later unknown option also wins over output trailing LFs",
+          "args": [
+            "--source=a",
+            "--output=out\n\n",
+            "--unknown"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "Duplicate option wins over earlier newline filename",
+          "args": [
+            "--source=a\n",
+            "--output=out",
+            "--source=b"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/b": "B",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid options\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/b": "B",
+            "/work/out": "KEEP"
+          }
+        },
+        {
+          "name": "LF-only inline source value is nonempty but invalid filename data",
+          "args": [
+            "--source=\n",
+            "--output=out"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Invalid files\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a": "A",
+            "/work/out": "KEEP"
+          }
+        }
+      ],
+      "wrong": [
+        {
+          "label": "Drop text after the second equals",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2)\"; shift ;;\n    --output=*) take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2)\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Inline values retain spaces and every equals sign"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Accept duplicate source",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  \n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Source cannot be repeated"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Accept duplicate output",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  \n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Output cannot be repeated"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Open the output before source existence is checked",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nprintf '%s' '' > \"$output\"\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Missing named source is status one"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Partial: always publish full mode",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif false; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Inline values retain spaces and every equals sign",
+            "Empty count, length boundaries, repeated flag and final delimiter"
+          ],
+          "must_pass_case_names": [
+            "Mixed separate form preserves multiline equals and final text"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Hardcoded first case",
+          "source": "printf '%s' 'Published:a\n'\nprintf '%s' '' >&2\nprintf '%s' 'Source:abcdefghijklmnop\nMode:full\nfirst\n\nsecond=keep' > 'a'\nexit 0\n",
+          "must_fail_case_names": [
+            "Inline values retain spaces and every equals sign"
+          ],
+          "must_pass_case_names": [
+            "Mixed separate form preserves multiline equals and final text"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Unrepaired cut normalizes invalid trailing LF filenames",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"; shift ;;\n    --output=*) take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Inline output trailing LF cannot be removed before validation",
+            "Inline source trailing LF cannot become a different valid name"
+          ],
+          "must_pass_case_names": [
+            "Later unknown option wins over an inline filename trailing LF",
+            "Mixed separate form preserves multiline equals and final text",
+            "Inline values retain spaces and every equals sign"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Validate newline filenames before finishing later options",
+          "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*)\n      case \"$1\" in\n        *'\n'*)\n        printf 'Invalid files\\n' >&2; exit 2\n        ;;\n        *)\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac\n      shift\n      ;;\n    --output=*)\n      case \"$1\" in\n        *'\n'*)\n        printf 'Invalid files\\n' >&2; exit 2\n        ;;\n        *)\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac\n      shift\n      ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "must_fail_case_names": [
+            "Later unknown option wins over an inline filename trailing LF"
+          ],
+          "must_pass_case_names": [
+            "Inline source trailing LF cannot become a different valid name"
+          ],
+          "actual": null
+        }
+      ],
+      "try_change": {
+        "source": "tag='note=blue=green'\nfilename='practice-note.log'\nvalue=${tag#color=}\nbase=${filename%.log}\nprintf 'Value:%s\\nBase:%s\\n' \"$value\" \"$base\"\n",
+        "case": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Value:note=blue=green\nBase:practice-note\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "repair": {
+        "source": "tag='note=blue=green'\nfilename='practice-note.log'\nvalue=${tag#note=}\nbase=${filename%.log}\nprintf 'Value:%s\\nBase:%s\\n' \"$value\" \"$base\"\n",
+        "case": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Value:blue=green\nBase:practice-note\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "actual": null,
+      "retained_r1": {
+        "cases": [
+          {
+            "name": "Mixed separate form preserves multiline equals and final text",
+            "args": [
+              "--source",
+              "abcdefghijklmnop",
+              "--output",
+              "a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/abcdefghijklmnop": "first\n\nsecond=keep",
+              "/work/a": "OLD\n"
+            },
+            "stdout": "Published:a\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/abcdefghijklmnop": "first\n\nsecond=keep",
+              "/work/a": "Source:abcdefghijklmnop\nMode:full\nfirst\n\nsecond=keep"
+            }
+          },
+          {
+            "name": "Inline values retain spaces and every equals sign",
+            "args": [
+              "--output=report=x",
+              "--count",
+              "--source=a=b x"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a=b x": "first\n\nlast",
+              "/work/report=x": "OLD"
+            },
+            "stdout": "Published:report=x\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a=b x": "first\n\nlast",
+              "/work/report=x": "Source:a=b x\nMode:count\nLines:3\n"
+            }
+          },
+          {
+            "name": "Empty count, length boundaries, repeated flag and final delimiter",
+            "args": [
+              "--count",
+              "--source=a",
+              "--output=abcdefghijklmnop",
+              "--count",
+              "--"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "",
+              "/work/abcdefghijklmnop": "OLD"
+            },
+            "stdout": "Published:abcdefghijklmnop\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "",
+              "/work/abcdefghijklmnop": "Source:a\nMode:count\nLines:0\n"
+            }
+          },
+          {
+            "name": "Source cannot be repeated",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--source=b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/b": "B",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/b": "B",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Output cannot be repeated",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--output=other"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP",
+              "/work/other": "KEEP2"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP",
+              "/work/other": "KEEP2"
+            }
+          },
+          {
+            "name": "Unknown option wins over a missing source",
+            "args": [
+              "--source=absent",
+              "--output=out",
+              "--mystery"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "A separate option needs its value",
+            "args": [
+              "--output=out",
+              "--source"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Empty inline value wins over file lookup",
+            "args": [
+              "--source=absent",
+              "--output="
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Output must differ from source",
+            "args": [
+              "--source=a",
+              "--output=a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "DO NOT TRUNCATE\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "DO NOT TRUNCATE\n"
+            }
+          },
+          {
+            "name": "A newline cannot turn one filename into two valid lines",
+            "args": [
+              "--source=a\nb",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a\nb": "HIDDEN",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a\nb": "HIDDEN",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Missing named source is status one",
+            "args": [
+              "--source=absent",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Delimiter does not admit stray operands",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--",
+              "stray"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          }
+        ],
+        "guards": [
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n"
+            }
+          },
+          {
+            "name": "Explicit empty separate value",
+            "args": [
+              "--source",
+              "",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "No output supplied",
+            "args": [
+              "--source=a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A"
+            }
+          },
+          {
+            "name": "No source supplied",
+            "args": [
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Absolute and traversal paths are task-policy errors",
+            "args": [
+              "--source=../a",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "One character over the name bound is refused",
+            "args": [
+              "--source=abcdefghijklmnopq",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/abcdefghijklmnopq": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/abcdefghijklmnopq": "A",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "A digit, hyphen and equals are valid filename data",
+            "args": [
+              "--source=a-1=2",
+              "--output=out",
+              "--count"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a-1=2": "\nlast\n"
+            },
+            "stdout": "Published:out\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a-1=2": "\nlast\n",
+              "/work/out": "Source:a-1=2\nMode:count\nLines:2\n"
+            }
+          },
+          {
+            "name": "Empty full data remains empty after its two header lines",
+            "args": [
+              "--source=a",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "",
+              "/work/out": "KEEP"
+            },
+            "stdout": "Published:out\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "",
+              "/work/out": "Source:a\nMode:full\n"
+            }
+          }
+        ],
+        "programs": [
+          "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"; shift ;;\n    --output=*) take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+          "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  local chosen=$1\n  source=$chosen\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  local chosen=$1\n  output=$chosen\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  printf 'Source:%s\\nMode:full\\n' \"$source\" > \"$output\"\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n"
+        ],
+        "wrong": [
+          {
+            "label": "Drop text after the second equals",
+            "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2)\"; shift ;;\n    --output=*) take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2)\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Inline values retain spaces and every equals sign"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Accept duplicate source",
+            "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  \n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Source cannot be repeated"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Accept duplicate output",
+            "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  \n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Output cannot be repeated"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Open the output before source existence is checked",
+            "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nprintf '%s' '' > \"$output\"\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Missing named source is status one"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Partial: always publish full mode",
+            "source": "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif false; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n",
+            "must_fail_case_names": [
+              "Inline values retain spaces and every equals sign",
+              "Empty count, length boundaries, repeated flag and final delimiter"
+            ],
+            "must_pass_case_names": [
+              "Mixed separate form preserves multiline equals and final text"
+            ],
+            "actual": null
+          },
+          {
+            "label": "Hardcoded first case",
+            "source": "printf '%s' 'Published:a\n'\nprintf '%s' '' >&2\nprintf '%s' 'Source:abcdefghijklmnop\nMode:full\nfirst\n\nsecond=keep' > 'a'\nexit 0\n",
+            "must_fail_case_names": [
+              "Inline values retain spaces and every equals sign"
+            ],
+            "must_pass_case_names": [
+              "Mixed separate form preserves multiline equals and final text"
+            ],
+            "actual": null
+          }
+        ],
+        "actual": null
+      }
+    },
+    {
+      "id": "shell-trim-manifest",
+      "reference": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$destination\" = \"$manifest\"; then printf 'Line %s: manifest collision\\n' \"$number\" >&2; exit 2; fi\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+      "alternatives": [
+        "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=$(printf '%s\\n' \"$line\" | cut -d '=' -f 2-)\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n  case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$destination\" = \"$manifest\"; then printf 'Line %s: manifest collision\\n' \"$number\" >&2; exit 2; fi\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n    case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+        "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  base=${item#incoming-}\n  base=${base%.log}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${plan[@]}\"; do\n    previous=$(printf '%s\\n' \"$previous\" | cut -d '=' -f 1)\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$destination\" = \"$manifest\"; then printf 'Line %s: manifest collision\\n' \"$number\" >&2; exit 2; fi\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    base=${item#incoming-}\n    base=${base%.log}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n"
+      ],
+      "one_alternative_avoids_new_trim": 0,
+      "guards": [
+        {
+          "name": "Report cannot overwrite a source",
+          "args": [
+            "apply",
+            "plan",
+            "a.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log\n",
+            "/work/a.log": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: report collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log\n",
+            "/work/a.log": "KEEP"
+          }
+        },
+        {
+          "name": "Preview leaves a new report absent",
+          "args": [
+            "preview",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log",
+            "/work/a.log": "A"
+          },
+          "stdout": "a.copy=a.log\nCount:1\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log",
+            "/work/a.log": "A"
+          }
+        },
+        {
+          "name": "Failed later source leaves new destinations absent",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log\nitem=b.log",
+            "/work/a.log": "A"
+          },
+          "stdout": "",
+          "stderr": "Line 2: missing source\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=a.log\nitem=b.log",
+            "/work/a.log": "A"
+          }
+        },
+        {
+          "name": "First malformed row wins over later missing data",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "bad=a.log\nitem=absent.log",
+            "/work/a.log": "A",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "bad=a.log\nitem=absent.log",
+            "/work/a.log": "A",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "First missing row wins over later malformed text",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=absent.log\nbad=a.log",
+            "/work/a.log": "A",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: missing source\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=absent.log\nbad=a.log",
+            "/work/a.log": "A",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "NonASCII source policy is not silently normalized",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=é.log\n",
+            "/work/é.log": "A",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=é.log\n",
+            "/work/é.log": "A",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "One character above the stem boundary is invalid",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=abcdefghi.log\n",
+            "/work/abcdefghi.log": "A",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=abcdefghi.log\n",
+            "/work/abcdefghi.log": "A",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "An empty item is not a blank row",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=\n",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=\n",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Only one optional incoming prefix is removed",
+          "args": [
+            "apply",
+            "plan",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=incoming-incoming-a.log",
+            "/work/incoming-incoming-a.log": "A",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/plan": "item=incoming-incoming-a.log",
+            "/work/incoming-incoming-a.log": "A",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Missing manifest has its own status",
+          "args": [
+            "apply",
+            "absent",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Missing manifest\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Preview also rejects a manifest destination collision",
+          "args": [
+            "preview",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Single apply collision cannot overwrite the input manifest",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Late collision leaves an earlier absent destination absent",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 2: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Missing source precedes manifest collision at the same row",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: missing source\n",
+          "status": 1,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/summary": "KEEP"
+          }
+        },
+        {
+          "name": "Manifest collision precedes report collision at the same row",
+          "args": [
+            "apply",
+            "a.copy",
+            "a.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "KEEP SOURCE"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "KEEP SOURCE"
+          }
+        },
+        {
+          "name": "Earlier malformed record precedes later manifest collision",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "bad=b.log\nitem=a.log\n",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: invalid item\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "bad=b.log\nitem=a.log\n",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          }
+        }
+      ],
+      "wrong": [
+        {
+          "label": "Discard extra equals text",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=$(printf '%s\\n' \"$line\" | cut -d '=' -f 2)\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n  case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n    case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "Extra equals text is invalid, not a second field to discard"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Ignore normalized duplicate destinations",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if false; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "Distinct source names can collide after normalization",
+            "Repeated source rows are not silently deduplicated"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Mutate before the later source is validated",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  cat -- \"$item\" > \"$destination\"\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "A later missing source preserves earlier destinations"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Partial: preview even in apply mode",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif true; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "Apply preserves complete data, empty files and final nonLF"
+          ],
+          "must_pass_case_names": [
+            "Preview admits normalization and exact positive boundaries"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Lose trailing source newlines while copying",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    data=$(cat -- \"$item\")\n    printf '%s' \"$data\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "Apply preserves complete data, empty files and final nonLF"
+          ],
+          "must_pass_case_names": [],
+          "actual": null
+        },
+        {
+          "label": "Hardcoded first case",
+          "source": "printf '%s' 'a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\nCount:3\n'\nprintf '%s' '' >&2\nexit 0\n",
+          "must_fail_case_names": [
+            "Apply preserves complete data, empty files and final nonLF"
+          ],
+          "must_pass_case_names": [
+            "Preview admits normalization and exact positive boundaries"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Collision checked during copying instead of complete preflight",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    if test \"$destination\" = \"$manifest\"; then printf 'Line %s: manifest collision\\n' \"$number\" >&2; exit 2; fi\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "A late manifest destination collision preserves every earlier output"
+          ],
+          "must_pass_case_names": [
+            "Preview admits normalization and exact positive boundaries",
+            "Apply preserves complete data, empty files and final nonLF"
+          ],
+          "actual": null
+        },
+        {
+          "label": "Manifest destination collision check is omitted",
+          "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "must_fail_case_names": [
+            "A late manifest destination collision preserves every earlier output"
+          ],
+          "must_pass_case_names": [
+            "Preview admits normalization and exact positive boundaries",
+            "Apply preserves complete data, empty files and final nonLF"
+          ],
+          "actual": null
+        }
+      ],
+      "try_change": {
+        "source": "filename='incoming-card.log'\nstem=${filename%.txt}\nbase=${stem#incoming-}\nprintf 'Plan:%s.copy=%s\\n' \"$base\" \"$filename\"\n",
+        "case": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Plan:card.log.copy=incoming-card.log\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "repair": {
+        "source": "filename='incoming-card.log'\nstem=${filename%.log}\nbase=${stem#incoming-}\nprintf 'Plan:%s.copy=%s\\n' \"$base\" \"$filename\"\n",
+        "case": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Plan:card.copy=incoming-card.log\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "actual": null,
+      "retained_r1": {
+        "cases": [
+          {
+            "name": "Preview admits normalization and exact positive boundaries",
+            "args": [
+              "preview",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# approved\nitem=incoming-a.log\n\nitem=abcd1234.log\nitem=x-1.log",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/summary": "KEEP",
+              "/work/a.copy": "OLD"
+            },
+            "stdout": "a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\nCount:3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# approved\nitem=incoming-a.log\n\nitem=abcd1234.log\nitem=x-1.log",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/summary": "KEEP",
+              "/work/a.copy": "OLD"
+            }
+          },
+          {
+            "name": "Apply preserves complete data, empty files and final nonLF",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-a.log\nitem=abcd1234.log\nitem=x-1.log\n",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/a.copy": "OLD",
+              "/work/summary": "OLD"
+            },
+            "stdout": "Published:3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-a.log\nitem=abcd1234.log\nitem=x-1.log\n",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/a.copy": "",
+              "/work/summary": "a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\n",
+              "/work/abcd1234.copy": "A=B\n\nEND",
+              "/work/x-1.copy": "x\n"
+            }
+          },
+          {
+            "name": "An empty accepted plan publishes an empty report",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# no jobs\n\n",
+              "/work/summary": "OLD",
+              "/work/a.copy": "KEEP"
+            },
+            "stdout": "Published:0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# no jobs\n\n",
+              "/work/summary": "",
+              "/work/a.copy": "KEEP"
+            }
+          },
+          {
+            "name": "Distinct source names can collide after normalization",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=incoming-a.log\n",
+              "/work/a.log": "A",
+              "/work/incoming-a.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: duplicate destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=incoming-a.log\n",
+              "/work/a.log": "A",
+              "/work/incoming-a.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Repeated source rows are not silently deduplicated",
+            "args": [
+              "preview",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: duplicate destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "A later missing source preserves earlier destinations",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Extra equals text is invalid, not a second field to discard",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log=extra\nitem=missing.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log=extra\nitem=missing.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Malformed keys cannot be skipped after an earlier valid row",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nother=b.log\n",
+              "/work/a.log": "A",
+              "/work/b.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nother=b.log\n",
+              "/work/a.log": "A",
+              "/work/b.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Manifest and report equality is rejected before reading",
+            "args": [
+              "apply",
+              "plan",
+              "plan"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A"
+            }
+          },
+          {
+            "name": "Report cannot be a normalized destination",
+            "args": [
+              "apply",
+              "plan",
+              "a.copy"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: report collision\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP"
+            }
+          },
+          {
+            "name": "Invalid mode takes priority over missing manifest",
+            "args": [
+              "later",
+              "absent",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Usage: batch MODE MANIFEST REPORT\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Missing manifest has its own status",
+            "args": [
+              "apply",
+              "absent",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Missing manifest\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            }
+          }
+        ],
+        "guards": [
+          {
+            "name": "Report cannot overwrite a source",
+            "args": [
+              "apply",
+              "plan",
+              "a.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: report collision\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "KEEP"
+            }
+          },
+          {
+            "name": "Preview leaves a new report absent",
+            "args": [
+              "preview",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log",
+              "/work/a.log": "A"
+            },
+            "stdout": "a.copy=a.log\nCount:1\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log",
+              "/work/a.log": "A"
+            }
+          },
+          {
+            "name": "Failed later source leaves new destinations absent",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log",
+              "/work/a.log": "A"
+            },
+            "stdout": "",
+            "stderr": "Line 2: missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log",
+              "/work/a.log": "A"
+            }
+          },
+          {
+            "name": "First malformed row wins over later missing data",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "bad=a.log\nitem=absent.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "bad=a.log\nitem=absent.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "First missing row wins over later malformed text",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=absent.log\nbad=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=absent.log\nbad=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "NonASCII source policy is not silently normalized",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=é.log\n",
+              "/work/é.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=é.log\n",
+              "/work/é.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "One character above the stem boundary is invalid",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=abcdefghi.log\n",
+              "/work/abcdefghi.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=abcdefghi.log\n",
+              "/work/abcdefghi.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "An empty item is not a blank row",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=\n",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=\n",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Only one optional incoming prefix is removed",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-incoming-a.log",
+              "/work/incoming-incoming-a.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-incoming-a.log",
+              "/work/incoming-incoming-a.log": "A",
+              "/work/summary": "KEEP"
+            }
+          }
+        ],
+        "programs": [
+          "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=$(printf '%s\\n' \"$line\" | cut -d '=' -f 2-)\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n  case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n    case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+          "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  base=${item#incoming-}\n  base=${base%.log}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${plan[@]}\"; do\n    previous=$(printf '%s\\n' \"$previous\" | cut -d '=' -f 1)\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    base=${item#incoming-}\n    base=${base%.log}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n"
+        ],
+        "wrong": [
+          {
+            "label": "Discard extra equals text",
+            "source": "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=$(printf '%s\\n' \"$line\" | cut -d '=' -f 2)\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n  case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=$(printf '%s\\n' \"$item\" | cut -d '.' -f 1)\n    case \"$stem\" in incoming-*) base=$(printf '%s\\n' \"$stem\" | cut -d '-' -f 2-) ;; *) base=$stem ;; esac\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+            "must_fail_case_names": [
+              "Extra equals text is invalid, not a second field to discard"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Ignore normalized duplicate destinations",
+            "source": "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if false; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+            "must_fail_case_names": [
+              "Distinct source names can collide after normalization",
+              "Repeated source rows are not silently deduplicated"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Mutate before the later source is validated",
+            "source": "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  cat -- \"$item\" > \"$destination\"\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+            "must_fail_case_names": [
+              "A later missing source preserves earlier destinations"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Partial: preview even in apply mode",
+            "source": "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif true; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+            "must_fail_case_names": [
+              "Apply preserves complete data, empty files and final nonLF"
+            ],
+            "must_pass_case_names": [
+              "Preview admits normalization and exact positive boundaries"
+            ],
+            "actual": null
+          },
+          {
+            "label": "Lose trailing source newlines while copying",
+            "source": "valid_name() {\n  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    data=$(cat -- \"$item\")\n    printf '%s' \"$data\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+            "must_fail_case_names": [
+              "Apply preserves complete data, empty files and final nonLF"
+            ],
+            "must_pass_case_names": [],
+            "actual": null
+          },
+          {
+            "label": "Hardcoded first case",
+            "source": "printf '%s' 'a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\nCount:3\n'\nprintf '%s' '' >&2\nexit 0\n",
+            "must_fail_case_names": [
+              "Apply preserves complete data, empty files and final nonLF"
+            ],
+            "must_pass_case_names": [
+              "Preview admits normalization and exact positive boundaries"
+            ],
+            "actual": null
+          }
+        ],
+        "actual": null
+      }
+    }
+  ],
+  "original_pack_pins": [
+    {
+      "path": "scenarios/starter-v1.json",
+      "bytes": 82094,
+      "sha256": "3ead700a694ad83aed05e93b0461863523d54297c38cc605963279e83be81a57"
+    },
+    {
+      "path": "scenarios/shell-unit-v1.json",
+      "bytes": 46290,
+      "sha256": "a211d4717fd091f571f11cbecfdeb4c5a5a24f378afdd8de4ef95e613bee8d75"
+    },
+    {
+      "path": "scenarios/shell-composition-v1.json",
+      "bytes": 33572,
+      "sha256": "f452a4c0d4a17a7b4e17f13d1740922ea0ffedc29f111f00b756e6de5e9dfb98"
+    },
+    {
+      "path": "scenarios/shell-reusable-v1.json",
+      "bytes": 36112,
+      "sha256": "cbb8df4b6b83bfbb83d29af01fac55942a9a97e0ce101b5cc58cf1ac49aa4caf"
+    },
+    {
+      "path": "scenarios/linux-files-v1.json",
+      "bytes": 59671,
+      "sha256": "a2ef56ebeb13289d601ad82389941062d939bee2fa6d69c4d7f48be53338a5bc"
+    },
+    {
+      "path": "scenarios/ipv6-static-v1.json",
+      "bytes": 92130,
+      "sha256": "d196b91afa9c48bcace2b3e68223de51d1bf8e16227ce68413e0b68e9f736bd4"
+    },
+    {
+      "path": "scenarios/shell-scope-v1.json",
+      "bytes": 33253,
+      "sha256": "c5804a45bc660089f67448bb043c998c9ff72d216aaaada7d06fe7bed5fb9d1d"
+    },
+    {
+      "path": "scenarios/shell-text-v1.json",
+      "bytes": 41724,
+      "sha256": "b1e9e087124102161bd6ae53552afb850c0b39bac4893c75eb2ba94251679bfb"
+    },
+    {
+      "path": "scenarios/shell-counts-v1.json",
+      "bytes": 46139,
+      "sha256": "f87220e67cfa547135befd9952716174cbd7aee652cbed4bd2a20ab5fe3e36b9"
+    },
+    {
+      "path": "scenarios/linux-access-v1.json",
+      "bytes": 46994,
+      "sha256": "296cd1242966b6a0a37604dfc39a2c2f9020195e3080398ecea5fe61e0b74b0b"
+    },
+    {
+      "path": "scenarios/vlan-data-v1.json",
+      "bytes": 69235,
+      "sha256": "4a7a739d4ca1454a762418f90be68761f9dc5bd3429f8a4d0a20adadc84b676b"
+    },
+    {
+      "path": "scenarios/shell-file-batches-v1.json",
+      "bytes": 38010,
+      "sha256": "782886fbc19e32323d666f801c467e59d53cbde6e3eaf984f531f828cc460a9b"
+    },
+    {
+      "path": "scenarios/ipv4-static-v1.json",
+      "bytes": 132393,
+      "sha256": "aec07081d948bd9ad0c6be902763f9c09fe48abde3def6d3bc81a153f9aaeb78"
+    },
+    {
+      "path": "scenarios/dns-forward-v1.json",
+      "bytes": 139574,
+      "sha256": "dea61c30e4c96b17a669356a1d9d7518119d270b8837588ff2d2ce97fbaba22f"
+    },
+    {
+      "path": "scenarios/shell-arrays-v1.json",
+      "bytes": 43401,
+      "sha256": "43bae8b5651f8b63de711396034fe74b763485e4baf95d9b13e75ec989a66ff6"
+    },
+    {
+      "path": "scenarios/linux-processes-v1.json",
+      "bytes": 68293,
+      "sha256": "b491ced2e5179a467f653aaeea000634bbc90a7cb3e98d633df8241308e3c7b6"
+    },
+    {
+      "path": "scenarios/discovery-v1.json",
+      "bytes": 119033,
+      "sha256": "df01f002921216a7db0cabf44b8d53a60bdb0b34ea0b26806106fdd9c779ff2c"
+    },
+    {
+      "path": "scenarios/storage-v1.json",
+      "bytes": 65685,
+      "sha256": "373e4862a107a4411d3ed1218b6af535c6fa6e6320b05212f3e0f7a7ceaa115e"
+    },
+    {
+      "path": "scenarios/shell-capture-v1.json",
+      "bytes": 67211,
+      "sha256": "cd22ad53457785ef648b5423c0400502d6b09bb2f265d75ca8813ad589d6da25"
+    },
+    {
+      "path": "scenarios/acl-policy-v1.json",
+      "bytes": 158469,
+      "sha256": "bc61f73814e868a65c0fe3765a37bbbbf67a606f002c343d91dfb939c4d54816"
+    },
+    {
+      "path": "scenarios/accounts-lifecycle-v1.json",
+      "bytes": 227263,
+      "sha256": "0c9e00d1e1f55cc91339a5e967e41a3b189ac11d519f36502fc805590b908d38"
+    },
+    {
+      "path": "scenarios/ospf-p2p-v1.json",
+      "bytes": 152455,
+      "sha256": "301a5590e65a0aeff83e91a70d4210a6d009235ce72e3f51edc5ccdfca06f65a"
+    },
+    {
+      "path": "scenarios/unit-manager-v1.json",
+      "bytes": 139344,
+      "sha256": "14a034d1970d77e4bbbe8ec26266ce958af64e84f89ba7518504d8c9a472d94d"
+    },
+    {
+      "path": "scenarios/shell-case-v1.json",
+      "bytes": 59145,
+      "sha256": "ecbe8e382b00cf0e02e650d3f819715f66b6838fa61b115f071777ffd29f9184"
+    },
+    {
+      "path": "scenarios/mac-learning-v1.json",
+      "bytes": 119995,
+      "sha256": "000be0776d9be13f471c8809845058cfd885afb326503ff1665cd322b2496308"
+    },
+    {
+      "path": "scenarios/linux-find-v1.json",
+      "bytes": 68383,
+      "sha256": "cd56f97c9664e352474c7fad2133f8021042a9ea666906ad0713b7854939131f"
+    },
+    {
+      "path": "scenarios/dns-reverse-v1.json",
+      "bytes": 65982,
+      "sha256": "8dfa7123e0ab8b5ff63cba992c0232078e8efb8956fac541244818765e64fd94"
+    },
+    {
+      "path": "scenarios/shell-getopts-v1.json",
+      "bytes": 68751,
+      "sha256": "62e46d2f1a2f4b81e53b97998b4b121eae2e808484099dfa21210f8ed4e342b5"
+    },
+    {
+      "path": "scenarios/dhcpv4-client-v1.json",
+      "bytes": 105726,
+      "sha256": "ac28cb1c226c7a3ebe0178c49949840e12023e36dd87ca72682303d0b2fa4e17"
+    },
+    {
+      "path": "scenarios/debian-packages-v1.json",
+      "bytes": 130317,
+      "sha256": "d33e565a9aec51f0370573c2754763132708a4f9b77094083c44b4a44d0d7a55"
+    },
+    {
+      "path": "scenarios/spanning-tree-v1.json",
+      "bytes": 79391,
+      "sha256": "3d572b8f6ac6c53d7ebaf9c85b2b80c0466a65361c4411818df9905db5da6dc7"
+    },
+    {
+      "path": "scenarios/shell-safe-automation-v1.json",
+      "bytes": 48326,
+      "sha256": "675a81721bdf3225e31c1074c799292236ee7012e73e3e1b133d28f95848c147"
+    },
+    {
+      "path": "scenarios/apache-static-v1.json",
+      "bytes": 108996,
+      "sha256": "3d5e8a02ea4b00bce659d3351bbad9db7f255d573ba863b09bc46f1f2aa15dd8"
+    },
+    {
+      "path": "scenarios/nat-basic-v1.json",
+      "bytes": 68067,
+      "sha256": "3010efd859e41b0dff5047611c0d261e83c1ccc2f20ed1b17d63d345d006b53d"
+    },
+    {
+      "path": "scenarios/rpm-packages-v1.json",
+      "bytes": 128075,
+      "sha256": "44471854302dc6b384cd35129c2447fb3e4fb59a446c13a434e8062b3af1d6f5"
+    },
+    {
+      "path": "scenarios/shell-command-vectors-v1.json",
+      "bytes": 62589,
+      "sha256": "8852a3609ce90da2b1607a698edc86db9112d7168a79f6f6cd9eac3f4773c4cc"
+    },
+    {
+      "path": "scenarios/nfs-v1.json",
+      "bytes": 211595,
+      "sha256": "5d200ae8fb0596b29a1830abdbad5f0b26f8483a23a47b1db77fe91d6a11a38c"
+    },
+    {
+      "path": "scenarios/etherchannel-v1.json",
+      "bytes": 230039,
+      "sha256": "8085a3b6e91a1c0b7a62bb8faeefb7e2f7fdebcf9e96ecebac77b786727ef717"
+    },
+    {
+      "path": "scenarios/shell-optional-inputs-v1.json",
+      "bytes": 54461,
+      "sha256": "30d72ae7cb0bbeabcc9c4a1e0268103c50ce58355198f69afe7cd6e5a61d5678"
+    },
+    {
+      "path": "scenarios/linux-cron-v1.json",
+      "bytes": 160700,
+      "sha256": "e2212f904ce2361d1cf9d7249732daae090ac7598d478645919964c834f68b5c"
+    },
+    {
+      "path": "scenarios/file-backup-v1.json",
+      "bytes": 151048,
+      "sha256": "73e2f6a395457c0b78355a54592a6749f2c166c6fef2cd1df553bf5bd4d3b729"
+    },
+    {
+      "path": "scenarios/shell-numeric-validation-v1.json",
+      "bytes": 56375,
+      "sha256": "f27c3ba1cb8a03297f294522377b0e341bf921a13d9bf41bc39057a91e7939cb"
+    },
+    {
+      "path": "scenarios/physical-links-v1.json",
+      "bytes": 210171,
+      "sha256": "eb70b100d0e66e094f28d3b80dc69db6e87997c4cf1a09383cbef8228b4ee3be"
+    },
+    {
+      "path": "scenarios/ipv4-private-planning-v1.json",
+      "bytes": 11814,
+      "sha256": "88b2785da389b1b3c16d9f2cd1487f457815ea07ddeb8f0bc0e16fbd4681e20f"
+    },
+    {
+      "path": "scenarios/linux-one-off-v1.json",
+      "bytes": 121771,
+      "sha256": "d469ba09a96c9f7ccb49463d8b6757d688e5bbe080a8f63a5d9105e65af6a6a8"
+    },
+    {
+      "path": "scenarios/shell-loop-recovery-v1.json",
+      "bytes": 38654,
+      "sha256": "3ff10a2e55b6263c29a92ec82e83aab5953ea3301b20c2631991832e100aa02b"
+    },
+    {
+      "path": "scenarios/lvm-growth-v1.json",
+      "bytes": 91847,
+      "sha256": "78c2f32cf4f694bf8afab2a256982ecce9b8af25e5a46f5788f7c3c0c7fceec5"
+    },
+    {
+      "path": "scenarios/ntp-client-server-v1.json",
+      "bytes": 398918,
+      "sha256": "f024f11706a53096f6922e147c9a50f3d8dfbab00c42cedf85c7cc341dea6206"
+    },
+    {
+      "path": "scenarios/shell-ere-evidence-v1.json",
+      "bytes": 54608,
+      "sha256": "bb71198d4cc18478921d310e76e32906a3df37e419ab011ce9c643c49e254917"
+    }
+  ],
+  "original_units_sha256": "76ac0e94c90597149b6f2fc4cd1d801082f28a86fa0629a947ec9e103b911495",
+  "original_script_ids": [
+    "shell-handover",
+    "shell-arguments",
+    "shell-input",
+    "shell-validation",
+    "shell-report",
+    "shell-loop",
+    "shell-capstone",
+    "shell-streams",
+    "shell-pipelines",
+    "shell-eof",
+    "shell-batch-audit",
+    "shell-functions",
+    "shell-return",
+    "shell-shift",
+    "shell-bundle",
+    "shell-local-heading",
+    "shell-scope-review",
+    "shell-scope-capstone",
+    "shell-cut-inventory",
+    "shell-sort-manifest",
+    "shell-uniq-counts",
+    "shell-text-capstone",
+    "shell-number-records",
+    "shell-order-total",
+    "shell-pack-items",
+    "shell-count-capstone",
+    "shell-file-manifest",
+    "shell-collect-errors",
+    "shell-file-batch-capstone",
+    "shell-array-intake",
+    "shell-array-priority",
+    "shell-array-package",
+    "shell-array-handover",
+    "shell-capture-preview",
+    "shell-capture-evidence",
+    "shell-capture-decision",
+    "shell-capture-handover",
+    "shell-case-interface",
+    "shell-case-routing",
+    "shell-case-publication",
+    "shell-options-report",
+    "shell-options-jobs",
+    "shell-options-publication",
+    "shell-preserve-lines",
+    "shell-pipeline-status",
+    "shell-safe-handover",
+    "shell-command-options",
+    "shell-command-dispatch",
+    "shell-command-plan",
+    "shell-optional-policy",
+    "shell-optional-report",
+    "shell-optional-handover",
+    "shell-numeric-retry",
+    "shell-numeric-intake",
+    "shell-numeric-publication",
+    "shell-loop-intake",
+    "shell-loop-fallback",
+    "shell-ere-event-view",
+    "shell-ere-inventory-review",
+    "shell-ere-incident-report"
+  ],
+  "remedy_r2": {
+    "status": "source predictions only; all actual observations null",
+    "retained_r1_manifest": "17219c8d4d02dd3fe9b62c31c76e2e2c6392def13190fa5f9d30b6cfe8c4c319",
+    "policy": "shape→source existence→duplicate destination→manifest destination collision→report collision; complete preflight in both modes",
+    "graded_counts": [
+      12,
+      12
+    ],
+    "original_24_plus17_outcomes": "all exact original Case objects retained; changed graded cases explicitly moved to local guards/development replay, no existing learner progress because unregistered",
+    "old_positive_to_current_graded": {
+      "four option forms": "new Full case: inline source/separate output; new Count case: separate source/inline output",
+      "ASCII min/max names and spaces/equals": "Both new positives use16-character a1-b_c.d=e f=ghi (digit/hyphen/underscore/dot/equals/space) and opposite one-character a",
+      "full multiline equals/nonLF data": "new Full positive unchanged source data bytes",
+      "nonempty count including blank/nonLF rows": "new Count positive Lines3",
+      "idempotent count and final delimiter": "new Count positive repeats--count and final--",
+      "empty count0 exact edge": "retained unchanged local guard/development replay; not claimed equivalent graded coverage"
+    },
+    "explicit_moved_graded_case_names": {
+      "shell-trim-options": [
+        "Mixed separate form preserves multiline equals and final text",
+        "Inline values retain spaces and every equals sign",
+        "Empty count, length boundaries, repeated flag and final delimiter",
+        "Unknown option wins over a missing source",
+        "A newline cannot turn one filename into two valid lines"
+      ],
+      "shell-trim-manifest": [
+        "Missing manifest has its own status"
+      ]
+    },
+    "check_date": "2026-10-30",
+    "new_runtime": null
+  },
+  "source_recheck": {
+    "date": "2026-10-30",
+    "method": "Official GNU indexed web retrieval, no local Bash/coreutils execution",
+    "urls": [
+      "https://www.gnu.org/s/bash/manual/html_node/Command-Substitution.html",
+      "https://www.gnu.org/s/coreutils/manual/html_node/cut-invocation.html"
+    ],
+    "paraphrase": "Command substitution deletes trailing LF; open-ended cut field ranges retain fields through the end. Therefore check original raw tokens for LF before capturing cut output."
+  },
+  "current197_binding": {
+    "registration_recipe_sha256": "ddc64d8b6c5dce8d4066f0531700de253063c943bb347b1543ed4d4a106390ee",
+    "units52_sha256": "3e61db90314703bcd4fcde174c98c1983dfacc809c09ebbdb3093ecbe9c0fb17",
+    "canonical_disk_pack_sha256": "6971f6001d8cd9f3e58d28ef708ffecb6a5f4fdd1ad0f12b3d9606f07bf7dcb1",
+    "current_scripts": 60,
+    "current_cases": 477,
+    "current_examples": 60,
+    "current_source_only": true
+  },
+  "genuine14_accepted_parent": {
+    "manifest": "6046f5fb00aed71e341cf16c5a09f76d29f74a54b5f590f2740da7f24fa8ab57",
+    "attestation": "9089741a7451c4557c3988d20d27e72cd124e8dca2b92dfc984f0f9099825a3a",
+    "source": "f461f2760b9474a8b667605a34562756934eb0fc32a4d49f40cf4380ff1ca6fc",
+    "scope": [
+      193,
+      737,
+      150,
+      426,
+      416
+    ],
+    "rewritten": false
+  },
+  "guard_replacements_r4": [
+    {
+      "before": "  lines=$(printf '%s' \"$1\" | wc -l)\n  if test \"$lines\" -ne 0; then return 1; fi\n",
+      "after": "  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n"
+    },
+    {
+      "before": "      raw_lines=$(printf '%s' \"$1\" | wc -l)\n      if test \"$raw_lines\" -ne 0; then\n        take_source \"$1\"\n      else\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n      fi",
+      "after": "      case \"$1\" in\n        *'\n'*)\n        take_source \"$1\"\n        ;;\n        *)\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac"
+    },
+    {
+      "before": "      raw_lines=$(printf '%s' \"$1\" | wc -l)\n      if test \"$raw_lines\" -ne 0; then\n        take_output \"$1\"\n      else\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n      fi",
+      "after": "      case \"$1\" in\n        *'\n'*)\n        take_output \"$1\"\n        ;;\n        *)\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac"
+    },
+    {
+      "before": "      raw_lines=$(printf '%s' \"$1\" | wc -l)\n      if test \"$raw_lines\" -ne 0; then\n        printf 'Invalid files\\n' >&2; exit 2\n      else\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n      fi",
+      "after": "      case \"$1\" in\n        *'\n'*)\n        printf 'Invalid files\\n' >&2; exit 2\n        ;;\n        *)\n        take_source \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac"
+    },
+    {
+      "before": "      raw_lines=$(printf '%s' \"$1\" | wc -l)\n      if test \"$raw_lines\" -ne 0; then\n        printf 'Invalid files\\n' >&2; exit 2\n      else\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n      fi",
+      "after": "      case \"$1\" in\n        *'\n'*)\n        printf 'Invalid files\\n' >&2; exit 2\n        ;;\n        *)\n        take_output \"$(printf '%s\\n' \"$1\" | cut -d '=' -f 2-)\"\n        ;;\n      esac"
+    }
+  ],
+  "guard_programs_r4": [
+    {
+      "before_sha256": "96de2997cfb11625e25610dc31ea525a4a2755217286d8d4981c7c0d13ae7b94",
+      "after_sha256": "a1512c73572ed94514602b9ead883c964db76f40a5661d3c0e13c29302ab6fec",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "pack/scenarios/0/solution/0",
+        "review/labs/0/reference",
+        "review/labs/0/retained_r1/programs/0",
+        "pack/scenarios/0/solution/0",
+        "review/labs/0/reference"
+      ]
+    },
+    {
+      "before_sha256": "6efe399d713513f9cc23d34497db5219c127c2977b06c6983b553fefe4f1849f",
+      "after_sha256": "57af1d6f545f0f630ca33d977657dd619425e906b59724f3bd2e552ab188751b",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "pack/scenarios/1/solution/0",
+        "review/labs/1/reference",
+        "pack/scenarios/1/solution/0",
+        "review/labs/1/reference"
+      ]
+    },
+    {
+      "before_sha256": "e7058577845d0cc1e10ddd9ae70fde9d82dfb28a27362eaf09cd07335f65e0be",
+      "after_sha256": "aca9f8e02be307de26c6cce8078d7de381f15fa960bac83016cdda48a7878215",
+      "replacement_counts": [
+        1,
+        1,
+        1,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/alternatives/0",
+        "review/labs/0/alternatives/0"
+      ]
+    },
+    {
+      "before_sha256": "5b5452a09703a29d043b641c5baf55a8762e44c26dbec48152c29cd173588c76",
+      "after_sha256": "107a75cd3a4d558207ea3a81794e25da307aa4cb0d80361411547c1f0c55b48f",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/alternatives/1",
+        "review/labs/0/retained_r1/programs/2",
+        "review/labs/0/alternatives/1"
+      ]
+    },
+    {
+      "before_sha256": "f4f578aade99582a737e5d1916dd920878ad4fbfac5e15c3f40c5d2513396c51",
+      "after_sha256": "7d67d6f5a372a30fce068a6afe0d2fe70e20e93f180d5fa86990777c7a19592d",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/0/source",
+        "review/labs/0/retained_r1/wrong/0/source",
+        "review/labs/0/wrong/0/source"
+      ]
+    },
+    {
+      "before_sha256": "0e602b7479c43e3191e1a4065a3dbe868236e250732236c3499a6f73114b3021",
+      "after_sha256": "aef05ed4a0136c5b7568516dba14ae651a70517d803e8e6ea693a559e0dce19a",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/1/source",
+        "review/labs/0/retained_r1/wrong/1/source",
+        "review/labs/0/wrong/1/source"
+      ]
+    },
+    {
+      "before_sha256": "014c374f90ec1f53bd38b29bcbbb47293774885d2ffebeef96fe9331f99044f1",
+      "after_sha256": "d0385c4bc42bfde6374382d8042e460f4ca35bac7f9d4cd26997a34b597f7db9",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/2/source",
+        "review/labs/0/retained_r1/wrong/2/source",
+        "review/labs/0/wrong/2/source"
+      ]
+    },
+    {
+      "before_sha256": "fd20b2e67dffd48b497cff39a009d238ba8b4b35e3bb7dd7fd4893a4f96ec901",
+      "after_sha256": "d6204b758f15b51b6c9059f0aedb5ba86866e27d231326ec119371abd9f37d42",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/3/source",
+        "review/labs/0/retained_r1/wrong/3/source",
+        "review/labs/0/wrong/3/source"
+      ]
+    },
+    {
+      "before_sha256": "fce4fb827d20fe46ed784aff5ef109984b0d5355a21319b4c7e5ac3ed0100f9a",
+      "after_sha256": "90c02817beeea443b426f56c74d266a25dfab420eda7ee82709a0ca967aff1fa",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/4/source",
+        "review/labs/0/retained_r1/wrong/4/source",
+        "review/labs/0/wrong/4/source"
+      ]
+    },
+    {
+      "before_sha256": "93ea82cc5891ad95213f4a1cfbe2054e12bc753a23619fe36c75fc204409cadf",
+      "after_sha256": "45a83a197ee1c5fa220d3d0e9d1acee26b77d5a8da86a75663a3d899b165e87e",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/0/wrong/6/source",
+        "review/labs/0/retained_r1/programs/1",
+        "review/labs/0/wrong/6/source"
+      ]
+    },
+    {
+      "before_sha256": "e0277a38f8458be223a80372e3ce3274b0f4f46f726896982542ab6a9790898e",
+      "after_sha256": "8ad59133b303e392e55c5a094015f920d6ea1fd80edccff8ace2401e37f3e88e",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        1,
+        1
+      ],
+      "paths": [
+        "review/labs/0/wrong/7/source",
+        "review/labs/0/wrong/7/source"
+      ]
+    },
+    {
+      "before_sha256": "fe9d4fb387a9fc333c4d1039ca150a9eb61f9370650b9403d567566cdc702c96",
+      "after_sha256": "b610d54e8656d9c6733b9bec74a179c98b5ba29d0f2dda7f446ea4e86baaccd0",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/alternatives/0",
+        "review/labs/1/alternatives/0"
+      ]
+    },
+    {
+      "before_sha256": "62dc3daf2719e3f8df9ca9474b105ec6b6ef32ca17fd689418e6c736bd4eaaee",
+      "after_sha256": "2682536b7c1e2589a9fc5eb980529d24f0e1a2009c13486348afcf05bc4dd0c2",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/alternatives/1",
+        "review/labs/1/alternatives/1"
+      ]
+    },
+    {
+      "before_sha256": "c9e0ff5637730d07a20370897782da5788f71994f9d1ccea756a4ab34def21cb",
+      "after_sha256": "a4804a12d30491edf65e41816a89491b875d6144f261eb00aa25ec6f55e1fa82",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/0/source",
+        "review/labs/1/retained_r1/wrong/0/source",
+        "review/labs/1/wrong/0/source"
+      ]
+    },
+    {
+      "before_sha256": "da7fa282f28586aa63858750f1922523f1cc3fb2c4bfc01f4f12254a139234d7",
+      "after_sha256": "835cbdc945c707a6af22043c644976ccabfd5393a109ab2d78ba5a17fbdf8e6e",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/1/source",
+        "review/labs/1/retained_r1/wrong/1/source",
+        "review/labs/1/wrong/1/source"
+      ]
+    },
+    {
+      "before_sha256": "df1227370517e9b2a2ec394f7aa66dd6c9a960826fa073d5d7a893237a7a0bf8",
+      "after_sha256": "5bfb95df1c794b944295cab0f48cfff78737330add658d0abf0fa4fd25c64d03",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/2/source",
+        "review/labs/1/retained_r1/wrong/2/source",
+        "review/labs/1/wrong/2/source"
+      ]
+    },
+    {
+      "before_sha256": "b096d02d193bf90bd39f3141f6d97d5f56f1612dffc6e606230bb20158ae9fe9",
+      "after_sha256": "ac3970c06f1413edcc424cde45aacd8b674ac50f7d01b7f71aa42c83048234f2",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/3/source",
+        "review/labs/1/retained_r1/wrong/3/source",
+        "review/labs/1/wrong/3/source"
+      ]
+    },
+    {
+      "before_sha256": "2b4b1d78d9fd095d4be6a72681f70cb9816ba33a7275de49176e770506943953",
+      "after_sha256": "792921d79f7fbee0d80ebd445bd12d7713866e7ae8d1d87312cb5fdbd137d9ee",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/4/source",
+        "review/labs/1/retained_r1/wrong/4/source",
+        "review/labs/1/wrong/4/source"
+      ]
+    },
+    {
+      "before_sha256": "06d36721e6786ed22bb66824bba9f8d8447e6453d027b73e83499db124c740ca",
+      "after_sha256": "06ea16978ee29cc1ee7013d91b16bc37cbe19335c3c76609d12bcb2c3a0febbb",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/6/source",
+        "review/labs/1/wrong/6/source"
+      ]
+    },
+    {
+      "before_sha256": "8e530ed78d4a3f15f24d28ca7419dbe9f09be7fda2b4db3d6ec950fa28dadfc8",
+      "after_sha256": "96299c50466648df839d31b186b61527566bbf6b6bed1b45c85abd5e9c83c8a1",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/wrong/7/source",
+        "review/labs/1/retained_r1/programs/0",
+        "review/labs/1/wrong/7/source"
+      ]
+    },
+    {
+      "before_sha256": "a857c930944dc3d82d60dfeae73d2052ab7a0de9071a839f80f483bf42f1768e",
+      "after_sha256": "f5f7678a47d913c1502b905a4340e0586f6c3dda73a8dfa808bafe88852ce6b8",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/retained_r1/programs/1"
+      ]
+    },
+    {
+      "before_sha256": "f1f2bc4bbd042c1cb92bda7e86bdf1b2d67160aeb19cff02477997584d3d81a8",
+      "after_sha256": "0ecc08463a9e4d9b32e2e04e2c01273995a6df486eec65d80699c71788b4334d",
+      "replacement_counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "paths": [
+        "review/labs/1/retained_r1/programs/2"
+      ]
+    }
+  ],
+  "guard_amendment_r4": {
+    "status": "SOURCE ONLY; unsupported wc guards replaced with supported quoted literal-LF case matching; retained_R1 sources untouched",
+    "original_teaching_text": "grep validates lines. First use printf with a fixed format and wc -l to refuse a newline in a filename; then an anchored ASCII expression can enforce this task-specific bounded name policy. This is not a general filesystem security model.",
+    "legacy_originals": "Named original positive controls must be Unsupported when wc is reached; predictions are not prior actual results",
+    "supported_replay": "Exact reversible guard-only derivation, unchanged old Cases/fulloutcomes/masks; every behavioral run requires Outcome.error None",
+    "groups": 7,
+    "no_utility_added": true,
+    "actual": null
+  },
+  "active_input_boundary_r6": {
+    "status": "SOURCE PREDICTIONS; exact known boundary only, not a general error allowance",
+    "source_sha256": "5bfb95df1c794b944295cab0f48cfff78737330add658d0abf0fa4fd25c64d03",
+    "source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  cat -- \"$item\" > \"$destination\"\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+    "diagnostic": "Unsupported write to an active loop input; finish reading the source before changing it",
+    "pairs": [
+      {
+        "case": {
+          "name": "A late manifest destination collision preserves every earlier output",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log\n",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "KEEP EARLIER",
+            "/work/summary": "KEEP REPORT"
+          },
+          "stdout": "",
+          "stderr": "Line 2: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log\n",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "KEEP EARLIER",
+            "/work/summary": "KEEP REPORT"
+          }
+        },
+        "predicted": {
+          "stdout": "",
+          "stderr": "",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log\n",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "B\n",
+            "/work/summary": "KEEP REPORT"
+          },
+          "error": "Unsupported write to an active loop input; finish reading the source before changing it"
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Preview also rejects a manifest destination collision",
+          "args": [
+            "preview",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "",
+          "stderr": "",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "error": "Unsupported write to an active loop input; finish reading the source before changing it"
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Single apply collision cannot overwrite the input manifest",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "",
+          "stderr": "",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "error": "Unsupported write to an active loop input; finish reading the source before changing it"
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Late collision leaves an earlier absent destination absent",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 2: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "",
+          "stderr": "",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP",
+            "/work/b.copy": "B"
+          },
+          "error": "Unsupported write to an active loop input; finish reading the source before changing it"
+        },
+        "actual": null
+      }
+    ],
+    "supported_omission_source_sha256": "96299c50466648df839d31b186b61527566bbf6b6bed1b45c85abd5e9c83c8a1",
+    "supported_omission_source": "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n",
+    "supported_omission_cases": [
+      {
+        "case": {
+          "name": "A late manifest destination collision preserves every earlier output",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log\n",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "KEEP EARLIER",
+            "/work/summary": "KEEP REPORT"
+          },
+          "stdout": "",
+          "stderr": "Line 2: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log\n",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "KEEP EARLIER",
+            "/work/summary": "KEEP REPORT"
+          }
+        },
+        "predicted": {
+          "stdout": "Published:2\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "DATA",
+            "/work/b.log": "B\n",
+            "/work/a.log": "DATA",
+            "/work/b.copy": "B\n",
+            "/work/summary": "b.copy=b.log\na.copy=a.log\n"
+          },
+          "error": null
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Preview also rejects a manifest destination collision",
+          "args": [
+            "preview",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "a.copy=a.log\nCount:1\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "error": null
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Single apply collision cannot overwrite the input manifest",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 1: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=a.log\n",
+            "/work/a.log": "DATA",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "Published:1\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "DATA",
+            "/work/a.log": "DATA",
+            "/work/summary": "a.copy=a.log\n"
+          },
+          "error": null
+        },
+        "actual": null
+      },
+      {
+        "case": {
+          "name": "Late collision leaves an earlier absent destination absent",
+          "args": [
+            "apply",
+            "a.copy",
+            "summary"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          },
+          "stdout": "",
+          "stderr": "Line 2: manifest collision\n",
+          "status": 2,
+          "after": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "item=b.log\nitem=a.log",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "KEEP"
+          }
+        },
+        "predicted": {
+          "stdout": "Published:2\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "Protected unrelated notes.\n",
+            "/work/a.copy": "A",
+            "/work/a.log": "A",
+            "/work/b.log": "B",
+            "/work/summary": "b.copy=b.log\na.copy=a.log\n",
+            "/work/b.copy": "B"
+          },
+          "error": null
+        },
+        "actual": null
+      }
+    ],
+    "R5_review_sha256": "dffb316ab47e3bf423d580d2fce1f88347c4b95895afe633e6203bcfa31d4ea9",
+    "R5_pack_sha256": "bd7149e93384eb8be68aac9cb68486fc1630248b13cab0ff04b78b393c7e1535",
+    "prediction_correction": "R5 errorNone claim was too broad for the early-publication mutant on exact collision inputs. The VM intentionally rejects active-input overwrite; retain and assert its exact error/full partial world. All other wrong behaviors remain errorNone. Existing after-loop omission source is independently checked to fail collision grading with errorNone and complete publication outcome.",
+    "actual": null
+  }
+}

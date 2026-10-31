@@ -5191,3 +5191,35 @@ M644 coverage confirms unchanged197registered/189Partial/1Supporting/1050Open.
 No new authored scenario/normalcatalog or issuer credit from this language change.
 The capability commit follows these scoped checks; a full inclusive rerun remains
 a later integrated-content gate, not falsely reported as current15UI acceptance.
+
+
+## Literal interfaces content gates —2026-10-30
+
+M646 applies the independently reviewed unregistered two-project Pack and its
+content/regression data, plus current-only source-roster refusal guards. Catalog
+remains197/52. M647 passes7groups but fails one wrong-source fixture: deliberate
+early publication reaches the existing active-input write protection. It is not
+a legitimate reference failure or authorization to relax the interpreter.
+
+Reviewed R6 da31bc08/peer2e9352a1 changes only guide, review metadata and negative
+fixture handling. Legitimate supported-run/Record helpers, Pack, all Cases,
+programs, expected masks and historical replay remain exact. Only four exact
+source+whole-Case pairs admit the exact Unsupported full Outcome (including
+partial files and unmodified active manifest). An existing supported omission
+program additionally demonstrates the collision mistake after finishing input;
+it must execute without VM error and fail the unchanged behavior requirement.
+
+M649 actual9PASS/0FAIL/0ignored (8content+digest),18.08s. Reference and two alternate
+solutions match24graded+34guard inputs at four execution slices. Independent
+practice/change/repair, Challenge separation, wrong/partial/hardcoded programs,
+edit invalidation, save/resume/selected reset, invalid packs and archived replay
+pass. Independent readback81e884d6 confirms applied pins and all9result lines.
+M650508Python PASS11.295s; M651all-targetClippy-Dwarnings PASS. The ordinary Rust
+run records20memory samples, minimum24,498,720,768 available bytes, full PSI0%,
+swapout delta0/OOM delta0. Two jobs/runtime threads and the shared lock remain.
+
+These are scoped unregistered-content gates, not normal199 integration, native
+acceptance, full-suite acceptance, new installer or exam-objective completion.
+Next: exact197/52 preservation during normal registration and real native
+editor/Run flows, then remaining reviewed curriculum. Frozen reference captures,
+original9–14 evidence and the installed553 candidate stay unchanged.

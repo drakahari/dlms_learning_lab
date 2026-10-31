@@ -30,8 +30,14 @@ No extra Source/Pack/new content was staged before that capture. Current catalog
 remains197/52. Installed553 stays VERIFIED197/evaluator14; no new15 candidate.
 Documentation status now changes one included SHELL_SUBSET input AFTER capture;
 retained source/ELF/observations stay immutable, interpreter/fixtures unchanged.
-Next: document/check/commit this capability milestone, then apply corrected
-literal-contentR5/7groups before normal199 registration and native verification.
+Capability15 is committed and pushed as ba89557. M646 applied the unregistered
+two-project content; M647 found a negative fixture hitting the protected active
+input boundary. Independently reviewed R6 preserves that refusal and all original
+Case/program/mask data, with exact four-pair full-outcome checks and a supported
+collision-failure witness. M649 all9 groups PASS (8content+digest), M650508Python
+PASS and M651all-targetClippy-Dwarnings PASS. The two assignments remain
+unregistered until strict197→199/52→53 catalog preservation and native gates.
+No new installer, issuer credit or full-current inclusive result is claimed.
 Private application: m631-literal15-accepted197-main-application/APPLIED.json.
 
 Catalog remains197 authored assignments/52 units; current source evaluator15,
@@ -120,10 +126,11 @@ M616 all-target Clippy-Dwarnings and M618 coverage pass.
 
 1. M627 all487Python and M629coverage189/1/1050 pass after doc-only updates.
    Commit/push evidence separately from candidate553; never silently repack it.
-2. Literal15 capability/reference are already applied/accepted: do NOT reapply.
-   Apply corrected two-project contentR5 with a fresh current-source receipt, run
-   all7 content groups and isolated examples/alternatives/wrong-case tests, then
-   integrate normal199 only with strict197/52 preservation and native acceptance.
+2. Literal15 capability/reference are applied/accepted/pushed: do NOT reapply.
+   M649 validates corrected two-project contentR6 in the unregistered fixture.
+   Prepare strict197→199/52→53 normal registration and actual native acceptance;
+   preserve all old history/current-QA checks and separately verify full current.
+   Source-only snapshot/rollout R3 follows; neither proposal earns normal credit.
 3. Continue HSRP, links, syslog, RPM and remaining curriculum in reviewed tested
    batches. A delivered197 candidate is not a reason to stop implementation.
 

@@ -1,0 +1,827 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-trim-options",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-literal-normalization",
+      "topic": "Literal edges and safe interfaces",
+      "title": "Keep long-option values intact",
+      "summary": "Parse a real long-option interface before publishing a lossless or counted report.",
+      "objective": "Accept required --source VALUE or --source=VALUE and --output VALUE or --output=VALUE, each exactly once in any order. Optional --count may repeat and selects physical line counting; otherwise preserve source bytes after the report header. A final -- is accepted only with no following operands. Unknown/extra arguments, missing values, empty values and repeated source/output print Invalid options on stderr with newline and exit2 before other checks. Then require distinct single-line names matching ASCII ^[a-z][a-z0-9._= -]{0,15}$: first lowercase letter, at most16 characters, then lowercase letters/digits/dot/underscore/equals/space/hyphen. Invalid names or equality print Invalid files, exit2. Missing source prints Missing source, exit1. Those failures preserve every file. After complete preflight replace OUTPUT with Source:NAME and Mode:full or Mode:count, each newline. Full mode appends source data exactly, including blank lines and missing final LF. Count mode adds Lines:N newline, counting each physical record including retained final non-LF text; empty data has0. Print Published:OUTPUT newline on stdout, empty stderr, exit0. Preserve all sources and unrelated files. Do not treat equals signs/spaces inside values as extra arguments or drop text after a second equals.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Build and investigate",
+        "Review the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Keep the full assignment visible. Open the introduction or separate runnable example whenever useful.",
+          "commands": []
+        },
+        {
+          "title": "Build and investigate",
+          "why": "Parsing a plausible first sample does not prove empty, repeated or malformed values are handled. Source data, preflight preservation and exact output all matter.",
+          "action": "Write the whole script and Run. Read the selected failing case, then edit and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the result",
+          "why": "Cases include misleading fragments and valid boundary records, not only the first sample.",
+          "action": "Use optional progressive hints or the worked explanation when requested. Challenge keeps the same independent task.",
+          "commands": []
+        }
+      ],
+      "explanation": "First validate the whole interface and every known preflight condition. Literal #/% removal returns a value; it does not change the original. Then perform the requested output with quoted values. Inspect case-specific output/status/files after each change. Equivalent supported solutions, including field selection under the stated single-line filename grammar, are valid. Before a cut-based inline extraction, inspect the original token for newline characters. Finish all option parsing before filename failure, so later option errors keep precedence.",
+      "hints": [
+        "Separate option/record parsing from file writes; preserve the complete value after the known literal prefix.",
+        "Use quoted values. A newline inside a proposed filename is not two valid filenames; validate before opening outputs.",
+        "Plan every predictable check first. Compare stdout, stderr, status and every file; preserve existing outputs on preflight failure."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/s/bash/manual/html_node/Command-Substitution.html"
+      ],
+      "simplifications": "Offline simulator-supported shell only. Only literal single #/% edge removal is taught; general Bash patterns, longest removal, replacement, custom IFS, trap, locks, real clocks/files/commands and atomic rename are not modeled. Predictable preflight errors preserve files; runtime errors or Stop may leave earlier simulated writes. Bounded sample inputs and complete-file-map outcomes; examples are separate ungraded drafts.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the complete script here. Each Run uses separate sample inputs and reset files.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Full mode retains inline source spaces and equals at both name bounds",
+            "args": [
+              "--source=a1-b_c.d=e f=ghi",
+              "--output",
+              "a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a1-b_c.d=e f=ghi": "first\n\nsecond=keep",
+              "/work/a": "OLD\n"
+            },
+            "stdout": "Published:a\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a1-b_c.d=e f=ghi": "first\n\nsecond=keep",
+              "/work/a": "Source:a1-b_c.d=e f=ghi\nMode:full\nfirst\n\nsecond=keep"
+            }
+          },
+          {
+            "name": "Inline output trailing LF cannot be removed before validation",
+            "args": [
+              "--source=a",
+              "--output=out\n"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Count handles blank and final nonLF rows with separate source and repeated flag",
+            "args": [
+              "--count",
+              "--source",
+              "a",
+              "--output=a1-b_c.d=e f=ghi",
+              "--count",
+              "--"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "first\n\nlast",
+              "/work/a1-b_c.d=e f=ghi": "OLD"
+            },
+            "stdout": "Published:a1-b_c.d=e f=ghi\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "first\n\nlast",
+              "/work/a1-b_c.d=e f=ghi": "Source:a\nMode:count\nLines:3\n"
+            }
+          },
+          {
+            "name": "Source cannot be repeated",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--source=b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/b": "B",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/b": "B",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Output cannot be repeated",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--output=other"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP",
+              "/work/other": "KEEP2"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP",
+              "/work/other": "KEEP2"
+            }
+          },
+          {
+            "name": "Later unknown option wins over an inline filename trailing LF",
+            "args": [
+              "--source=a\n",
+              "--output=out",
+              "--mystery"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "A separate option needs its value",
+            "args": [
+              "--output=out",
+              "--source"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Empty inline value wins over file lookup",
+            "args": [
+              "--source=absent",
+              "--output="
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Output must differ from source",
+            "args": [
+              "--source=a",
+              "--output=a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "DO NOT TRUNCATE\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "DO NOT TRUNCATE\n"
+            }
+          },
+          {
+            "name": "Inline source trailing LF cannot become a different valid name",
+            "args": [
+              "--source=a\n",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Missing named source is status one",
+            "args": [
+              "--source=absent",
+              "--output=out"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/out": "KEEP"
+            }
+          },
+          {
+            "name": "Delimiter does not admit stray operands",
+            "args": [
+              "--source=a",
+              "--output=out",
+              "--",
+              "stray"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Invalid options\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a": "A",
+              "/work/out": "KEEP"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "bad_options() { printf 'Invalid options\\n' >&2; exit 2; }\ntake_source() {\n  if test \"$seen_source\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  source=$1\n  seen_source=yes\n}\ntake_output() {\n  if test \"$seen_output\" = yes; then bad_options; fi\n  if test -z \"$1\"; then bad_options; fi\n  output=$1\n  seen_output=yes\n}\nvalid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nseen_source=no\nseen_output=no\nsource=''\noutput=''\ncount=no\nwhile test \"$#\" -gt 0; do\n  case \"$1\" in\n    --source=*) take_source \"${1#--source=}\"; shift ;;\n    --output=*) take_output \"${1#--output=}\"; shift ;;\n    --source)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_source \"$2\"\n      shift 2\n      ;;\n    --output)\n      if test \"$#\" -lt 2; then bad_options; fi\n      take_output \"$2\"\n      shift 2\n      ;;\n    --count) count=yes; shift ;;\n    --)\n      shift\n      if test \"$#\" -ne 0; then bad_options; fi\n      ;;\n    *) bad_options ;;\n  esac\ndone\nif test \"$seen_source\" != yes || test \"$seen_output\" != yes; then bad_options; fi\nif valid_name \"$source\" && valid_name \"$output\"; then :; else\n  printf 'Invalid files\\n' >&2\n  exit 2\nfi\nif test \"$source\" = \"$output\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$source\"; then :; else printf 'Missing source\\n' >&2; exit 1; fi\nprintf 'Source:%s\\nMode:%s\\n' \"$source\" full > \"$output\"\nif test \"$count\" = yes; then\n  total=0\n  while IFS= read -r line || test -n \"$line\"; do total=$((total+1)); done < \"$source\"\n  printf 'Source:%s\\nMode:count\\nLines:%s\\n' \"$source\" \"$total\" > \"$output\"\nelse\n  cat -- \"$source\" >> \"$output\"\nfi\nprintf 'Published:%s\\n' \"$output\"\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-options-publication",
+        "shell-command-options",
+        "shell-optional-report",
+        "shell-ere-inventory-review"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the earlier lessons on getopts, quoted arguments, functions and status, line-by-line loops, arrays, and checking a complete plan before writing files. This unit introduces literal #/% removal in the simulator. It does not teach general Bash patterns.",
+        "concepts": [
+          {
+            "title": "One known prefix, once",
+            "text": "${tag#note=} removes one literal note= prefix when it matches. ${filename%.log} removes one literal .log suffix. A nonmatch leaves the whole value; neither form assigns back. #/% here do not mean general patterns, ##/%% or regular expressions."
+          },
+          {
+            "title": "Keep the rest as data",
+            "text": "Removing --source= must preserve every following equals sign or space. Quote the result when assigning or calling a helper. A variable value is data and is not parsed as code again."
+          },
+          {
+            "title": "Consume one complete option",
+            "text": "Loop while $# is greater than zero and inspect $1 with case. An inline --source=VALUE consumes one argument: remove the known prefix, then shift once. A separate --source VALUE needs at least two arguments before reading $2, then shift 2. Inspect the complete list before opening a file; a final -- has no operands in this interface."
+          },
+          {
+            "title": "Interface errors come first",
+            "text": "Parse the complete argument list before reading or writing files. Track required options separately so duplicate and empty options cannot silently replace earlier values. --count is deliberately idempotent here."
+          },
+          {
+            "title": "Single line is not two valid lines",
+            "text": "grep validates one line at a time. First reject LF anywhere in the whole filename: an active star on each side of a single-quoted literal line break makes a case pattern that also finds trailing LF. Do this before any cut command capture; then an anchored ASCII expression can enforce this task-specific name policy. This is not a general filesystem security model."
+          },
+          {
+            "title": "A supported alternative has its own premise",
+            "text": "Command substitution removes trailing newline characters. Before using cut -d = -f 2- to capture an inline value, reject any newline in the original complete token. Only a single-line token reaches cut. Keep an invalid token as data for the later filename check, and finish parsing all options first so a later unknown or duplicate option still wins. With that premise enforced, -f 2- preserves every remaining equals field; -f 2 would discard later text. Never capture arbitrary file contents this way."
+          }
+        ],
+        "example": "tag='note=blue=green'\nfilename='practice-note.log'\nvalue=${tag#note=}\nbase=${filename%.log}\nprintf 'Value:%s\\nBase:%s\\n' \"$value\" \"$base\"\n",
+        "inputs": "The separate example uses practice-only names and values, not assignment inputs. Its original variables remain unchanged.",
+        "try_change": "Change only note= in the prefix expression to color= and Run: the nonmatching prefix leaves note=blue=green intact. Restore note= to repair the original result.",
+        "fixture": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Value:blue=green\nBase:practice-note\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "retry_guidance": "Compare the selected case output, status and complete file map. Keep all characters in option values and validate the full plan before writing. Change one assumption and retry; do not alter the supplied inputs."
+    },
+    {
+      "id": "shell-trim-manifest",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-literal-normalization",
+      "topic": "Literal edges and safe interfaces",
+      "title": "Publish a collision-free normalized manifest",
+      "summary": "Plan a complete batch before copying exact file data or publishing its report.",
+      "objective": "Accept exactly MODE MANIFEST REPORT. MODE is preview or apply; wrong count/mode prints Usage: batch MODE MANIFEST REPORT newline on stderr and exits2 before file checks. MANIFEST/REPORT use the previous task’s single-line1–16-character ASCII name policy and must differ; failure prints Invalid files, exit2. Missing manifest prints Missing manifest, exit1. Read every physical line, including final non-LF text; count blank/comment lines in diagnostic line numbers. Skip empty lines and lines starting #. Every other line must be item=SOURCE, with SOURCE matching ^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$ exactly. Remove one .log suffix and one optional incoming- prefix to form BASE.copy. At each row, in this order: invalid key/value/shape prints Line N: invalid item (exit2); missing source prints Line N: missing source (exit1); any prior identical normalized destination prints Line N: duplicate destination (exit2); a destination equal to MANIFEST prints Line N: manifest collision (exit2); REPORT equal to that source or destination prints Line N: report collision (exit2). These checks run in both preview and apply, before any copying or report writes. Stop at the first row error and preserve ALL files, including earlier destinations and absent outputs. No whole-batch writing before this preflight. Preview prints each DEST=SOURCE newline then Count:N newline and changes no file, even REPORT. Apply copies exact source data to each planned destination, replaces REPORT with the same plan lines (empty for an empty plan), prints Published:N newline, empty stderr and exit0. Preserve the manifest, sources and unrelated files. This grades final contents and predictable preflight preservation, not atomic rename, concurrency or rollback after runtime/Stop.",
+      "difficulty": "Advanced",
+      "minutes": 45,
+      "steps": [
+        "Understand the task",
+        "Build and investigate",
+        "Review the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test.",
+          "action": "Keep the full assignment visible. Open the introduction or separate runnable example whenever useful.",
+          "commands": []
+        },
+        {
+          "title": "Build and investigate",
+          "why": "Parsing a plausible first sample does not prove empty, repeated or malformed values are handled. Source data, preflight preservation and exact output all matter.",
+          "action": "Write the whole script and Run. Read the selected failing case, then edit and retry.",
+          "commands": []
+        },
+        {
+          "title": "Review the result",
+          "why": "Cases include misleading fragments and valid boundary records, not only the first sample.",
+          "action": "Use optional progressive hints or the worked explanation when requested. Challenge keeps the same independent task.",
+          "commands": []
+        }
+      ],
+      "explanation": "First validate the whole interface and every known preflight condition. Literal #/% removal returns a value; it does not change the original. Then perform the requested output with quoted values. Inspect case-specific output/status/files after each change. Equivalent supported solutions, including field selection under the stated single-line filename grammar, are valid. A planned destination must also differ from the manifest input. Check it after source existence and normalized duplicates, before report collision, and finish every row before any output is opened.",
+      "hints": [
+        "Separate option/record parsing from file writes; preserve the complete value after the known literal prefix.",
+        "Use quoted values. A newline inside a proposed filename is not two valid filenames; validate before opening outputs.",
+        "Plan every predictable check first, including each destination against the manifest. Preserve the complete manifest, source files, existing outputs and absent outputs on preflight failure."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/s/bash/manual/html_node/Command-Substitution.html"
+      ],
+      "simplifications": "Offline simulator-supported shell only. Only literal single #/% edge removal is taught; general Bash patterns, longest removal, replacement, custom IFS, trap, locks, real clocks/files/commands and atomic rename are not modeled. Predictable preflight errors preserve files; runtime errors or Stop may leave earlier simulated writes. Bounded sample inputs and complete-file-map outcomes; examples are separate ungraded drafts.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the complete script here. Each Run uses separate sample inputs and reset files.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview admits normalization and exact positive boundaries",
+            "args": [
+              "preview",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# approved\nitem=incoming-a.log\n\nitem=abcd1234.log\nitem=x-1.log",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/summary": "KEEP",
+              "/work/a.copy": "OLD"
+            },
+            "stdout": "a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\nCount:3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# approved\nitem=incoming-a.log\n\nitem=abcd1234.log\nitem=x-1.log",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/summary": "KEEP",
+              "/work/a.copy": "OLD"
+            }
+          },
+          {
+            "name": "Apply preserves complete data, empty files and final nonLF",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-a.log\nitem=abcd1234.log\nitem=x-1.log\n",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/a.copy": "OLD",
+              "/work/summary": "OLD"
+            },
+            "stdout": "Published:3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=incoming-a.log\nitem=abcd1234.log\nitem=x-1.log\n",
+              "/work/incoming-a.log": "",
+              "/work/abcd1234.log": "A=B\n\nEND",
+              "/work/x-1.log": "x\n",
+              "/work/a.copy": "",
+              "/work/summary": "a.copy=incoming-a.log\nabcd1234.copy=abcd1234.log\nx-1.copy=x-1.log\n",
+              "/work/abcd1234.copy": "A=B\n\nEND",
+              "/work/x-1.copy": "x\n"
+            }
+          },
+          {
+            "name": "An empty accepted plan publishes an empty report",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# no jobs\n\n",
+              "/work/summary": "OLD",
+              "/work/a.copy": "KEEP"
+            },
+            "stdout": "Published:0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "# no jobs\n\n",
+              "/work/summary": "",
+              "/work/a.copy": "KEEP"
+            }
+          },
+          {
+            "name": "Distinct source names can collide after normalization",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=incoming-a.log\n",
+              "/work/a.log": "A",
+              "/work/incoming-a.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: duplicate destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=incoming-a.log\n",
+              "/work/a.log": "A",
+              "/work/incoming-a.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Repeated source rows are not silently deduplicated",
+            "args": [
+              "preview",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: duplicate destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=a.log",
+              "/work/a.log": "A",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "A later missing source preserves earlier destinations",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: missing source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nitem=b.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Extra equals text is invalid, not a second field to discard",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log=extra\nitem=missing.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log=extra\nitem=missing.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Malformed keys cannot be skipped after an earlier valid row",
+            "args": [
+              "apply",
+              "plan",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nother=b.log\n",
+              "/work/a.log": "A",
+              "/work/b.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 2: invalid item\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\nother=b.log\n",
+              "/work/a.log": "A",
+              "/work/b.log": "B",
+              "/work/a.copy": "KEEP",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "Manifest and report equality is rejected before reading",
+            "args": [
+              "apply",
+              "plan",
+              "plan"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A"
+            },
+            "stdout": "",
+            "stderr": "Invalid files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A"
+            }
+          },
+          {
+            "name": "Report cannot be a normalized destination",
+            "args": [
+              "apply",
+              "plan",
+              "a.copy"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Line 1: report collision\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/plan": "item=a.log\n",
+              "/work/a.log": "A",
+              "/work/a.copy": "KEEP"
+            }
+          },
+          {
+            "name": "Invalid mode takes priority over missing manifest",
+            "args": [
+              "later",
+              "absent",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            },
+            "stdout": "",
+            "stderr": "Usage: batch MODE MANIFEST REPORT\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/summary": "KEEP"
+            }
+          },
+          {
+            "name": "A late manifest destination collision preserves every earlier output",
+            "args": [
+              "apply",
+              "a.copy",
+              "summary"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a.copy": "item=b.log\nitem=a.log\n",
+              "/work/b.log": "B\n",
+              "/work/a.log": "DATA",
+              "/work/b.copy": "KEEP EARLIER",
+              "/work/summary": "KEEP REPORT"
+            },
+            "stdout": "",
+            "stderr": "Line 2: manifest collision\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Protected unrelated notes.\n",
+              "/work/a.copy": "item=b.log\nitem=a.log\n",
+              "/work/b.log": "B\n",
+              "/work/a.log": "DATA",
+              "/work/b.copy": "KEEP EARLIER",
+              "/work/summary": "KEEP REPORT"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "valid_name() {\n  case \"$1\" in\n    *'\n'*) return 1 ;;\n  esac\n  printf '%s\\n' \"$1\" | grep -Eq -- '^[a-z][a-z0-9._= -]{0,15}$'\n}\nif test \"$#\" -ne 3; then printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2; fi\nmode=$1\nmanifest=$2\nreport=$3\ncase \"$mode\" in preview|apply) : ;; *) printf 'Usage: batch MODE MANIFEST REPORT\\n' >&2; exit 2 ;; esac\nif valid_name \"$manifest\" && valid_name \"$report\"; then :; else printf 'Invalid files\\n' >&2; exit 2; fi\nif test \"$manifest\" = \"$report\"; then printf 'Invalid files\\n' >&2; exit 2; fi\nif test -f \"$manifest\"; then :; else printf 'Missing manifest\\n' >&2; exit 1; fi\nitems=()\ndestinations=()\nplan=()\nnumber=0\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n  number=$((number+1))\n  case \"$line\" in ''|'#'*) continue ;; item=*) : ;; *) printf 'Line %s: invalid item\\n' \"$number\" >&2; exit 2 ;; esac\n  item=${line#item=}\n  if printf '%s\\n' \"$item\" | grep -Eq -- '^(incoming-)?[a-z][a-z0-9-]{0,7}\\.log$'; then :; else\n    printf 'Line %s: invalid item\\n' \"$number\" >&2\n    exit 2\n  fi\n  stem=${item%.log}\n  base=${stem#incoming-}\n  destination=$base.copy\n  if test -f \"$item\"; then :; else printf 'Line %s: missing source\\n' \"$number\" >&2; exit 1; fi\n  for previous in \"${destinations[@]}\"; do\n    if test \"$previous\" = \"$destination\"; then printf 'Line %s: duplicate destination\\n' \"$number\" >&2; exit 2; fi\n  done\n  if test \"$destination\" = \"$manifest\"; then printf 'Line %s: manifest collision\\n' \"$number\" >&2; exit 2; fi\n  if test \"$report\" = \"$item\" || test \"$report\" = \"$destination\"; then printf 'Line %s: report collision\\n' \"$number\" >&2; exit 2; fi\n  items=(\"${items[@]}\" \"$item\")\n  destinations=(\"${destinations[@]}\" \"$destination\")\n  plan=(\"${plan[@]}\" \"$destination=$item\")\n  count=$((count+1))\ndone < \"$manifest\"\nif test \"$mode\" = preview; then\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\"; done\n  printf 'Count:%s\\n' \"$count\"\nelse\n  for item in \"${items[@]}\"; do\n    stem=${item%.log}\n    base=${stem#incoming-}\n    destination=$base.copy\n    cat -- \"$item\" > \"$destination\"\n  done\n  printf '%s' '' > \"$report\"\n  for entry in \"${plan[@]}\"; do printf '%s\\n' \"$entry\" >> \"$report\"; done\n  printf 'Published:%s\\n' \"$count\"\nfi\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-trim-options",
+        "shell-array-handover",
+        "shell-loop-intake",
+        "shell-command-plan"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the earlier lessons on getopts, quoted arguments, functions and status, line-by-line loops, arrays, and checking a complete plan before writing files. This unit introduces literal #/% removal in the simulator. It does not teach general Bash patterns.",
+        "concepts": [
+          {
+            "title": "A protocol value starts after its key",
+            "text": "Check item= first, then ${line#item=} returns the entire remaining value. An extra equals sign remains and fails this filename policy; it must not be silently discarded."
+          },
+          {
+            "title": "Normalize exact edges",
+            "text": "${item%.log} removes just .log. ${stem#incoming-} removes just the optional prefix. incoming-a.log and a.log both normalize to a.copy, so source-name inequality does not prove destination uniqueness."
+          },
+          {
+            "title": "Plan before publishing",
+            "text": "Validate every row, source existence, normalized duplicate, destination-versus-manifest collision and report collision before creating or truncating anything. A manifest can itself be named a.copy, so a normalized destination must be compared with the input manifest, not just other outputs. Apply the same preflight in preview and apply. Retain a bounded array plan with whole-array replacement: items=(\"${items[@]}\" \"$item\"). += and computed indices are outside this simulator’s supported shell."
+          },
+          {
+            "title": "Copy file bytes, not captured output",
+            "text": "Use cat with quoted source names for file data. $(cat ...) drops trailing newline characters, and echo can add one. Empty and non-LF files are real data cases."
+          },
+          {
+            "title": "State the limit honestly",
+            "text": "Preflight protects against the stated predictable failures. This simulator does not provide atomic rename or a trap-based rollback transaction. Stop or a runtime resource failure can leave earlier simulated writes."
+          }
+        ],
+        "example": "filename='incoming-card.log'\nstem=${filename%.log}\nbase=${stem#incoming-}\nprintf 'Plan:%s.copy=%s\\n' \"$base\" \"$filename\"\n",
+        "inputs": "The separate example uses practice-only names and values, not assignment inputs. Its original variables remain unchanged.",
+        "try_change": "Change the suffix literal from .log to .txt and Run. It no longer matches, so the base retains .log and the plan changes. Restore .log to repair the example.",
+        "fixture": {
+          "name": "Independent literal-edge practice",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          },
+          "stdout": "Plan:card.copy=incoming-card.log\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/practice-notes.txt": "Keep this example-only note.\n"
+          }
+        }
+      },
+      "retry_guidance": "Compare the selected case output, status and complete file map. Keep all characters in option values and validate the full plan before writing. Change one assumption and retry; do not alter the supplied inputs."
+    }
+  ]
+}
